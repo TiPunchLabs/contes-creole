@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="b5e2eea7-4fa7-4abd-ace2-27ef95d61317"></script>
+
+
+
+
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<style></style>
+<style>
+  html, body { margin:0; padding:0; background:#050c12; height:100%; overflow:hidden; }
+  a { color:#7af0dc; } a:hover { color:#f2c46d; }
+  @keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  @keyframes bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(6px); } }
+  @keyframes glowpulse { 0%,100% { box-shadow:0 0 0 0 rgba(122,240,220,.0); } 50% { box-shadow:0 0 28px 4px rgba(122,240,220,.25); } }
+</style>
+</helmet>
+<div ref="{{ root }}" style="position:fixed;inset:0;overflow:hidden;background:#050c12;touch-action:none;color:#eef3ee;font-family:'Quicksand',sans-serif;user-select:none;-webkit-user-select:none">
+  <canvas ref="{{ canvas }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
+  <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(2,6,10,.55) 100%)"></div>
+  <div ref="{{ grain }}" style="position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.35;background-size:256px 256px"></div>
+
+  <!-- éclair de plongée quand on entre / sort d'un conte -->
+  <div ref="{{ flash }}" style="position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%,#dffcf6 0%,#2fa89a 45%,#0a1e33 100%)"></div>
+
+  <!-- ===== HUB : le Pyébwa a Sav ===== -->
+  <sc-if value="{{ showHub }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;left:28px;top:24px;display:flex;flex-direction:column;gap:2px;pointer-events:none">
+      <div style="font:italic 600 26px/1 'Cormorant Garamond',serif;color:#f6ead0;letter-spacing:.01em">Pyébwa a Sav</div>
+      <div style="font:500 11px/1 'Quicksand',sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#7af0dc">Kont Gwadloup</div>
+    </div>
+    <div ref="{{ intro }}" style="position:absolute;left:50%;right:clamp(24px,6vw,96px);bottom:14vh;pointer-events:none">
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:14px;text-align:right;animation:rise 1.4s ease-out both">
+      <div style="font:italic 500 clamp(30px,5vw,58px)/1.05 'Cormorant Garamond',serif;color:#f6ead0;text-wrap:balance;max-width:16ch;text-shadow:0 2px 24px rgba(0,0,0,.5)">Chak fèy sé on kont.</div>
+      <div style="font:400 15px/1.4 'Quicksand',sans-serif;color:rgba(238,243,238,.75);max-width:34ch">Chaque feuille est un conte. Grimpez dans l'arbre pour trouver le vôtre.</div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:12px;font:500 11px/1 'Quicksand',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#7af0dc">
+        <span>Défilez · Glisez</span>
+        <svg width="18" height="26" sc-camel-view-box="0 0 18 26" fill="none" stroke="#7af0dc" stroke-width="1.5" style="animation:bob 1.8s ease-in-out infinite"><rect x="1" y="1" width="16" height="24" rx="8"></rect><circle cx="9" cy="8" r="1.6" fill="#7af0dc"></circle></svg>
+      </div>
+    </div>
+    </div>
+    <div ref="{{ cardLabel }}" style="position:absolute;left:0;top:0;transform:translate(-50%,0);display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;opacity:0;transition:opacity .3s">
+      <div style="font:italic 600 22px/1.1 'Cormorant Garamond',serif;color:#f6ead0;text-align:center;white-space:nowrap">{{ nearTitle }}</div>
+      <sc-if value="{{ nearReady }}" hint-placeholder-val="{{ true }}">
+        <button type="button" sc-camel-on-click="{{ enterNear }}" style="pointer-events:auto;border:1px solid rgba(122,240,220,.6);background:rgba(10,30,40,.55);backdrop-filter:blur(8px);color:#dffcf6;font:600 12px/1 'Quicksand',sans-serif;letter-spacing:.2em;text-transform:uppercase;padding:13px 22px;border-radius:999px;cursor:pointer;white-space:nowrap;animation:glowpulse 2.4s ease-in-out infinite" style-hover="background:#7af0dc;color:#0a1e33">Antré adan kont-la</button>
+      </sc-if>
+      <sc-if value="{{ nearLocked }}" hint-placeholder-val="{{ false }}">
+        <div style="font:500 11px/1 'Quicksand',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(238,243,238,.5)">Talè · bientôt</div>
+      </sc-if>
+    </div>
+    <div style="position:absolute;right:26px;top:50%;transform:translateY(-50%);width:2px;height:180px;background:rgba(238,243,238,.14);border-radius:2px;pointer-events:none">
+      <div ref="{{ climb }}" style="position:absolute;left:-2px;top:0;width:6px;height:22px;border-radius:3px;background:#7af0dc;box-shadow:0 0 12px #7af0dc"></div>
+    </div>
+  </sc-if>
+
+  <!-- ===== MONDE : Larivyè Klè ===== -->
+  <sc-if value="{{ showTale }}" hint-placeholder-val="{{ false }}">
+    <button type="button" sc-camel-on-click="{{ leaveTale }}" style="position:absolute;left:22px;top:20px;display:flex;align-items:center;gap:10px;border:0;background:transparent;color:#f6ead0;font:italic 600 18px/1 'Cormorant Garamond',serif;cursor:pointer;padding:10px 12px" style-hover="color:#7af0dc">
+      <svg width="20" height="12" sc-camel-view-box="0 0 20 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1 2 6l5 5M2 6h17"></path></svg>
+      <span>Pyébwa a Sav</span>
+    </button>
+    <div style="position:absolute;right:22px;top:22px;display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(5,12,18,.5);backdrop-filter:blur(8px);border:1px solid rgba(238,243,238,.12)">
+      <sc-for list="{{ langs }}" as="l" hint-placeholder-count="3">
+        <button type="button" sc-camel-on-click="{{ l.pick }}" style="border:0;cursor:pointer;padding:8px 14px;border-radius:999px;font:600 11px/1 'Quicksand',sans-serif;letter-spacing:.14em;text-transform:uppercase;background:{{ l.bg }};color:{{ l.fg }};transition:background .25s,color .25s">{{ l.name }}</button>
+      </sc-for>
+    </div>
+
+    <div ref="{{ textCard }}" style="position:absolute;left:clamp(16px,4vw,56px);bottom:clamp(16px,5vh,56px);width:min(460px,calc(100vw - 32px));max-height:52vh;display:flex;flex-direction:column;gap:10px;padding:26px 28px 24px;border-radius:18px;background:rgba(5,14,20,.58);backdrop-filter:blur(14px);border:1px solid rgba(122,240,220,.18);box-shadow:0 24px 60px rgba(0,0,0,.35);transition:opacity .35s,transform .35s;overflow:auto">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+        <div style="font:600 11px/1 'Quicksand',sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#7af0dc">{{ pageLabel }}</div>
+        <div style="font:italic 500 14px/1 'Cormorant Garamond',serif;color:rgba(238,243,238,.55)">{{ pageNum }}</div>
+      </div>
+      <div style="font:italic 600 clamp(22px,2.4vw,30px)/1.15 'Cormorant Garamond',serif;color:#f6ead0;text-wrap:balance">{{ pageTitle }}</div>
+      <div style="font:400 16px/1.55 'Quicksand',sans-serif;color:rgba(238,243,238,.92);text-wrap:pretty;white-space:pre-line">{{ pageBody }}</div>
+      <sc-if value="{{ hasGloss }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:4px;padding-top:12px;border-top:1px dashed rgba(122,240,220,.25);font:italic 500 15px/1.5 'Cormorant Garamond',serif;color:rgba(238,243,238,.7);text-wrap:pretty;white-space:pre-line">{{ pageGloss }}</div>
+      </sc-if>
+    </div>
+
+    <div style="position:absolute;right:26px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:10px">
+      <sc-for list="{{ dots }}" as="d" hint-placeholder-count="12">
+        <button type="button" sc-camel-on-click="{{ d.go }}" title="{{ d.label }}" style="border:0;cursor:pointer;padding:0;width:6px;height:{{ d.h }};border-radius:3px;background:{{ d.bg }};box-shadow:{{ d.sh }};transition:height .35s,background .35s"></button>
+      </sc-for>
+    </div>
+
+    <div style="position:absolute;right:22px;bottom:22px;display:flex;gap:8px">
+      <button type="button" sc-camel-on-click="{{ prevPage }}" style="width:46px;height:46px;border-radius:50%;border:1px solid rgba(238,243,238,.2);background:rgba(5,12,18,.5);backdrop-filter:blur(8px);color:#f6ead0;cursor:pointer;display:grid;place-items:center" style-hover="border-color:#7af0dc;color:#7af0dc"><svg width="16" height="16" sc-camel-view-box="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M3 9l5 5 5-5"></path></svg></button>
+      <button type="button" sc-camel-on-click="{{ nextPage }}" style="width:46px;height:46px;border-radius:50%;border:1px solid rgba(238,243,238,.2);background:rgba(5,12,18,.5);backdrop-filter:blur(8px);color:#f6ead0;cursor:pointer;display:grid;place-items:center;transform:rotate(180deg)" style-hover="border-color:#7af0dc;color:#7af0dc"><svg width="16" height="16" sc-camel-view-box="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M3 9l5 5 5-5"></path></svg></button>
+    </div>
+    <sc-if value="{{ showScrollHint }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;left:50%;bottom:22px;transform:translateX(-50%);font:500 11px/1 'Quicksand',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(122,240,220,.8);pointer-events:none;display:flex;align-items:center;gap:10px">
+        <span>Défilez pou kontinyé</span>
+        <svg width="14" height="14" sc-camel-view-box="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="animation:bob 1.8s ease-in-out infinite"><path d="M8 2v12M3 9l5 5 5-5"></path></svg>
+      </div>
+    </sc-if>
+  </sc-if>
+  <div ref="{{ bubble }}" style="position:absolute;left:0;top:0;transform:translate(-50%,-100%);max-width:260px;padding:12px 16px;border-radius:16px 16px 16px 4px;background:rgba(246,234,208,.96);color:#0a1e33;font:italic 600 17px/1.3 'Cormorant Garamond',serif;text-wrap:pretty;white-space:pre-line;pointer-events:none;opacity:0;transition:opacity .25s;box-shadow:0 10px 30px rgba(0,0,0,.35)">{{ bubbleText }}</div>
+
+  <sc-if value="{{ glFail }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:2em;color:#f6ead0">
+      <div style="font:italic 600 34px/1 'Cormorant Garamond',serif">Pyébwa-la pa ka limé…</div>
+      <div style="max-width:32ch;font:400 15px/1.5 'Quicksand',sans-serif;color:rgba(238,243,238,.75);text-wrap:pretty">Le navigateur a suspendu l'affichage 3D (WebGL). Recharge l'onglet ; si rien ne change, ferme puis rouvre le navigateur.</div>
+      <button type="button" sc-camel-on-click="{{ reload }}" style="border:1px solid #7af0dc;background:transparent;color:#7af0dc;font:600 12px/1 'Quicksand',sans-serif;letter-spacing:.2em;text-transform:uppercase;padding:13px 22px;border-radius:999px;cursor:pointer" style-hover="background:#7af0dc;color:#0a1e33">Rechaje</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;language&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Kréyòl&quot;,&quot;Bileng&quot;,&quot;Français&quot;],&quot;default&quot;:&quot;Kréyòl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Lecture&quot;},&quot;hints&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Lecture&quot;}}">
+class Component extends DCLogic {
+  state = { mode: "hub", page: 0, near: -1, lang: null, bubble: null, glFail: false, scrolled: false };
+  root = React.createRef(); canvas = React.createRef(); grain = React.createRef(); flash = React.createRef(); intro = React.createRef(); cardLabel = React.createRef(); climb = React.createRef(); textCard = React.createRef(); bubble = React.createRef();
+  t = 0; tT = 0; pageF = 0; dive = 0; card = 0; hover = null; pointer = { x: 0, y: 0 }; lockUntil = 0; acc = 0; data = null;
+
+  componentDidMount() {
+    const g = document.createElement("canvas"); g.width = g.height = 256; const x = g.getContext("2d"), im = x.createImageData(256, 256);
+    for (let i = 0; i < im.data.length; i += 4) { const v = 110 + Math.random() * 60; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+    x.putImageData(im, 0, 0); if (this.grain.current) this.grain.current.style.backgroundImage = `url(${g.toDataURL()})`;
+    (async () => { const R = window.__resources || {}; const txt = async (u) => (await fetch(u)).text();
+      const threeUrl = R.three || "https://unpkg.com/three@0.160.0/build/three.module.js";
+      const sceneSrc = (await txt(R.sceneJs || "./scene13.standalone.js")).replace("'__THREE__'", JSON.stringify(threeUrl));
+      const mod = (src) => import(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
+      return Promise.all([mod(sceneSrc), mod(await txt(R.dataJs || "../kont-data.js"))]); })()
+      .then(([m, d]) => {
+        this.data = d;
+        const tryMount = (n) => {
+          if (!this.canvas.current || this.scene) return;
+          try { this.scene = m.createScene(this.canvas.current, d); this.forceUpdate(); }
+          catch (err) { console.warn("WebGL indisponible, essai", n, err); if (n < 5) this.glT = setTimeout(() => tryMount(n + 1), 1200); else this.setState({ glFail: true }); }
+        };
+        tryMount(1);
+      }).catch((err) => console.error("scene load failed", err));
+    const el = this.root.current; window.__pyebwa = this;
+    el.addEventListener("wheel", this.onWheel, { passive: false });
+    el.addEventListener("pointerdown", this.onDown); el.addEventListener("pointermove", this.onMove); el.addEventListener("pointerup", this.onUp);
+    window.addEventListener("keydown", this.onKey);
+    this.raf = requestAnimationFrame(this.loop);
+  }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); clearTimeout(this.glT); clearTimeout(this.bubbleT); clearTimeout(this.bubbleT2); window.removeEventListener("keydown", this.onKey); if (this.scene) this.scene.dispose(); }
+
+  // --- défilement : continu dans l'arbre, page par page dans le conte ---
+  onWheel = (e) => { e.preventDefault(); this.scrollBy(e.deltaY); };
+  scrollBy(dy) {
+    const { mode } = this.state;
+    if (mode === "hub") { this.tT = Math.max(0, Math.min(1, this.tT + dy * 0.00055)); if (!this.state.scrolled && this.tT > 0.02) this.setState({ scrolled: true }); }
+    else if (mode === "tale") {
+      const now = performance.now(); if (now < this.lockUntil) return;
+      this.acc += dy; if (Math.abs(this.acc) > 60) { this.goPage(this.state.page + (this.acc > 0 ? 1 : -1)); this.acc = 0; this.lockUntil = now + 750; }
+    }
+  }
+  goPage(i) { const n = this.data ? this.data.PAGES.length : 12; i = Math.max(0, Math.min(n - 1, i)); if (i !== this.state.page) { this.setState({ page: i, bubble: null, scrolled: true }); if (this.textCard.current) { this.textCard.current.style.opacity = 0; this.textCard.current.style.transform = "translateY(10px)"; setTimeout(() => { if (this.textCard.current) { this.textCard.current.style.opacity = 1; this.textCard.current.style.transform = "none"; } }, 320); } } }
+  onKey = (e) => {
+    if (this.state.mode === "tale") { if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " " || e.key === "PageDown") { e.preventDefault(); this.goPage(this.state.page + 1); } else if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); this.goPage(this.state.page - 1); } else if (e.key === "Escape") this.leaveTale(); }
+    else if (this.state.mode === "hub") { if (e.key === "ArrowDown" || e.key === " ") { e.preventDefault(); this.scrollBy(140); } else if (e.key === "ArrowUp") { e.preventDefault(); this.scrollBy(-140); } else if (e.key === "Enter" && this.state.near >= 0) this.enterNear(); }
+  };
+  onDown = (e) => { this.down = { x: e.clientX, y: e.clientY, t: performance.now(), moved: 0 }; };
+  onMove = (e) => {
+    const r = this.root.current.getBoundingClientRect();
+    this.pointer.x = (e.clientX - r.left) / r.width * 2 - 1; this.pointer.y = -((e.clientY - r.top) / r.height * 2 - 1);
+    if (this.down && e.pointerType !== "mouse") { const dy = this.down.y - e.clientY; this.down.y = e.clientY; this.down.moved += Math.abs(dy); this.scrollBy(dy * 2.2); }
+    else if (this.scene && this.state.mode === "hub") { const p = this.scene.pick(this.pointer.x, this.pointer.y); const h = p && p.type === "card" ? p.i : null; if (h !== this.hover) { this.hover = h; } this.root.current.style.cursor = p ? "pointer" : "default";
+      const onTeller = !!(p && p.type === "teller"), tb = this.state.bubble && this.state.bubble.name === "teller"; this.tellerHover = onTeller;
+      if (onTeller && !tb) this.setState({ bubble: { name: "teller", text: "« Yé krik ! …… Yé mistikrik ! »\nChwazi on liv adan pyébwa a kont-la.\nChoisis un livre dans l'arbre des contes." } });
+      else if (!onTeller && tb) this.setState({ bubble: null }); }
+  };
+  onUp = (e) => {
+    if (!this.down) return; const d = this.down; this.down = null;
+    if (d.moved > 8 || performance.now() - d.t > 600 || e.target.closest("button")) return;
+    if (!this.scene) return;
+    const p = this.scene.pick(this.pointer.x, this.pointer.y);
+    if (this.state.mode === "hub" && p && p.type === "card") this.enter(p.i);
+
+    else if (this.state.mode === "tale" && p && p.type === "char") this.speak(p.name);
+  };
+  speak(name) {
+    const pg = this.data.PAGES[this.state.page], lang = this.lang();
+    const src = lang === "fr" ? pg.fr.b : pg.kr.b, lines = src.split(/(?=–)/).map((s) => s.trim()).filter((s) => s.startsWith("–"));
+    // Gwo Rako parle en premier quand il est là ; Ti Kannot répond
+    const idx = name === "crab" ? 0 : 1, line = lines[idx] || lines[0] || (name === "crab" ? "Grrr…" : "Tchip tchip !");
+    this.setState({ bubble: { name, text: line.replace(/^–\s*/, "") } }); clearTimeout(this.bubbleT); this.bubbleT = setTimeout(() => this.setState({ bubble: null }), 4200);
+  }
+  // --- entrer / sortir d'un conte ---
+  enter(i) { if (!this.data || !this.data.TALES[i].ready || this.state.mode !== "hub") return; this.card = i; this.dive = 0; clearTimeout(this.bubbleT); clearTimeout(this.bubbleT2); this.setState({ mode: "dive", page: 0, bubble: null }); if (this.scene) this.scene.resetWorld(0); this.pageF = 0; }
+  enterNear = () => { if (this.state.near >= 0) this.enter(this.state.near); };
+  leaveTale = () => { if (this.state.mode !== "tale") return; this.setState({ mode: "rise" }); this.riseT = 0; };
+
+  loop = (now) => {
+    this.raf = requestAnimationFrame(this.loop);
+    const dt = Math.min(0.05, (now - (this.last || now)) / 1000); this.last = now;
+    const k = 1 - Math.exp(-dt * 4.5);
+    this.t += (this.tT - this.t) * k;
+    this.pageF += (this.state.page - this.pageF) * (1 - Math.exp(-dt * 3.2));
+    const { mode } = this.state, fl = this.flash.current;
+    if (mode === "dive") { this.dive = Math.min(1, this.dive + dt / 1.7); if (fl) fl.style.opacity = Math.max(0, (this.dive - 0.55) / 0.45); if (this.dive >= 1) { this.setState({ mode: "tale", scrolled: false }); this.flashFade = 1; } }
+    else if (mode === "rise") { this.riseT = Math.min(1, (this.riseT || 0) + dt / 1.1); if (fl) fl.style.opacity = this.riseT; if (this.riseT >= 1) { this.tT = this.t = this.scene ? this.scene.cardT(this.card) : this.tT; this.dive = 0; this.setState({ mode: "hub", near: -1, bubble: null }); this.flashFade = 1; } }
+    else if (this.flashFade > 0) { this.flashFade = Math.max(0, this.flashFade - dt / 1.2); if (fl) fl.style.opacity = this.flashFade; }
+    if (!this.scene) return;
+    const out = this.scene.frame(now, { mode: mode === "rise" ? "tale" : mode, t: this.t, dive: this.dive, card: this.card, pageF: this.pageF, pointer: this.pointer, hover: this.hover, tellerHover: !!this.tellerHover && mode === "hub" });
+    if (mode === "hub" || mode === "dive") {
+      if (this.intro.current) this.intro.current.style.opacity = Math.max(0, 1 - this.t * 9);
+      if (this.climb.current) this.climb.current.style.top = `${this.t * (180 - 22)}px`;
+      let best = null; for (const c of out.cards) if (c.vis && c.near > 0.35 && (!best || c.near > best.near)) best = c;
+      const lbl = this.cardLabel.current;
+      if (lbl) { if (best && mode === "hub") { lbl.style.left = best.x + "px"; lbl.style.top = best.y + "px"; lbl.style.opacity = Math.min(1, (best.near - 0.35) * 3); } else lbl.style.opacity = 0; }
+      const near = best ? best.i : -1; if (near !== this.state.near) this.setState({ near });
+    }
+    if (this.bubble.current) {
+      const b = this.state.bubble, c = b && out.chars[b.name];
+      if (c && c.vis) { this.bubble.current.style.left = c.x + "px"; this.bubble.current.style.top = c.y - 12 + "px"; this.bubble.current.style.opacity = 1; } else this.bubble.current.style.opacity = 0;
+    }
+  };
+
+  lang() { const l = this.state.lang || this.props.language || "Kréyòl"; return l === "Français" ? "fr" : l === "Bileng" ? "bi" : "kr"; }
+  renderVals() {
+    const { mode, page, near, bubble, glFail } = this.state, lang = this.lang();
+    const pages = this.data ? this.data.PAGES : [], tales = this.data ? this.data.TALES : [], pg = pages[page];
+    const nearTale = near >= 0 ? tales[near] : null;
+    const showTale = mode === "tale" || mode === "rise";
+    const body = (s) => s.replace(/\s–\s/g, "\n– ");
+    return {
+      root: this.root, canvas: this.canvas, grain: this.grain, flash: this.flash, intro: this.intro, cardLabel: this.cardLabel, climb: this.climb, textCard: this.textCard, bubble: this.bubble,
+      showHub: mode === "hub" || mode === "dive", showTale, glFail, reload: () => location.reload(),
+      nearTitle: nearTale ? nearTale.title : "", nearReady: !!(nearTale && nearTale.ready), nearLocked: !!(nearTale && !nearTale.ready), enterNear: this.enterNear, leaveTale: this.leaveTale,
+      pageLabel: pg ? pg.label : "", pageNum: pg ? `${page + 1} / ${pages.length}` : "",
+      pageTitle: pg ? (lang === "fr" ? pg.fr.t : pg.kr.t) : "", pageBody: pg ? body(lang === "fr" ? pg.fr.b : pg.kr.b) : "",
+      hasGloss: lang === "bi" && !!pg, pageGloss: pg && lang === "bi" ? body(pg.fr.b) : "",
+      langs: ["Kréyòl", "Bileng", "Français"].map((name) => { const on = (this.state.lang || this.props.language || "Kréyòl") === name; return { name, bg: on ? "#7af0dc" : "transparent", fg: on ? "#0a1e33" : "rgba(238,243,238,.75)", pick: () => this.setState({ lang: name }) }; }),
+      dots: pages.map((p, i) => ({ label: p.label, h: i === page ? "26px" : "8px", bg: i === page ? "#7af0dc" : i < page ? "rgba(122,240,220,.55)" : "rgba(238,243,238,.25)", sh: i === page ? "0 0 12px #7af0dc" : "none", go: () => this.goPage(i) })),
+      prevPage: () => this.goPage(page - 1), nextPage: () => this.goPage(page + 1),
+      showScrollHint: showTale && page === 0 && !this.state.scrolled && (this.props.hints ?? true),
+      bubbleText: bubble ? bubble.text : "",
+    };
+  }
+}
+</script>
+
+
+</body></html>

@@ -1,0 +1,49 @@
+:root {
+  --ink: #050c12;
+  --sea: #07131a;
+  --cream: #f6ead0;
+  --text: #eef3ee;
+  --glow: #7af0dc;
+  --gold: #f2c46d;
+  --font-display: "Cormorant Garamond", serif;
+  --font-body: "Quicksand", sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.brand {
+  position: absolute;
+  left: 28px;
+  top: 24px;
+  pointer-events: none;
+}
+
+.brand h1 {
+  margin: 0;
+  font: italic 600 26px/1 var(--font-display);
+  color: var(--cream);
+}
+
+.brand p {
+  margin: 4px 0 0;
+  font: 500 11px/1 var(--font-body);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--glow);
+}
