@@ -195,6 +195,28 @@ export function createLandscape(rng: Rng): { group: THREE.Group; update(time: nu
   grass.material.uniforms.uOpacity.value = 0.7;
   const pool = softSprite("#2fa89a", 16, 0.35);
   pool.position.set(0, -0.4, 0);
+  group.add(grass, pool);
+
+  return {
+    group,
+    update(time) {
+      grass.material.uniforms.uTime.value = time;
+      canopyLight.intensity = 36 + Math.sin(time * 0.9) * 6;
+      pool.material.opacity = 0.28 + Math.sin(time * 1.3) * 0.06;
+      crowns.forEach((crown, i) => {
+        crown.rotation.z = Math.sin(time * 0.7 + i) * 0.04;
+        crown.rotation.x = Math.cos(time * 0.5 + i * 1.3) * 0.03;
+      });
+    },
+  };
+}
+
+/**
+ * Fireflies, stars, moon and mist. Must be called after `createLightTree` to keep the v13 random
+ * order (the tree is drawn before the sky).
+ */
+export function createSky(rng: Rng): { group: THREE.Group; update(time: number): void } {
+  const group = new THREE.Group();
   const fireflies = glowPoints(
     rng,
     900,
@@ -227,20 +249,13 @@ export function createLandscape(rng: Rng): { group: THREE.Group; update(time: nu
     sprite.position.set((rng() - 0.5) * 40, -0.2 + rng() * 1.5, (rng() - 0.5) * 40);
     return { sprite, phase: rng() * 6.28 };
   });
-  group.add(grass, pool, fireflies, stars, moon, ...mists.map((m) => m.sprite));
+  group.add(fireflies, stars, moon, ...mists.map((m) => m.sprite));
 
   return {
     group,
     update(time) {
       fireflies.material.uniforms.uTime.value = time;
       stars.material.uniforms.uTime.value = time;
-      grass.material.uniforms.uTime.value = time;
-      canopyLight.intensity = 36 + Math.sin(time * 0.9) * 6;
-      pool.material.opacity = 0.28 + Math.sin(time * 1.3) * 0.06;
-      crowns.forEach((crown, i) => {
-        crown.rotation.z = Math.sin(time * 0.7 + i) * 0.04;
-        crown.rotation.x = Math.cos(time * 0.5 + i * 1.3) * 0.03;
-      });
       for (const { sprite, phase } of mists) {
         sprite.position.x += Math.sin(time * 0.1 + phase) * 0.004;
         sprite.material.opacity = 0.12 + Math.sin(time * 0.3 + phase) * 0.05;

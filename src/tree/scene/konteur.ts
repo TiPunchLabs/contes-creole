@@ -9,7 +9,7 @@ export function createKonteur(): {
   group: THREE.Group;
   plane: THREE.Mesh;
   anchor(out: THREE.Vector3): THREE.Vector3;
-  update(time: number, cameraPosition: THREE.Vector3, lit: boolean): void;
+  update(time: number, cameraPosition: THREE.Vector3, hovered: boolean): void;
 } {
   const group = new THREE.Group();
   group.position.set(5.2, groundHeight(5.2, -12.5) + 0.02, -12.5);
