@@ -222,6 +222,10 @@
   color: rgba(122, 240, 220, 0.8);
 }
 
+.reading-hint[hidden] {
+  display: none;
+}
+
 .reading-hint svg {
   width: 14px;
   height: 14px;
