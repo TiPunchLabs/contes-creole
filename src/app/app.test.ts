@@ -194,4 +194,52 @@ describe("app", () => {
     expect(mountTree).toHaveBeenCalledTimes(5);
     expect($(".app-fallback")?.textContent).toContain("Pyébwa-la pa ka limé…");
   });
+
+  it("recovers when loadStories throws synchronously", async () => {
+    start({
+      loadStories: () => {
+        throw new Error("sync");
+      },
+    });
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect(tree.resume).toHaveBeenCalledWith("liv");
+    expect($(".app-notice")?.textContent).toBe(LOAD_ERROR);
+    expect($(".app-flash")?.style.opacity).toBe("0");
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect(tree.dive).toHaveBeenCalledTimes(2);
+  });
+
+  it("recovers when the tree dive rejects", async () => {
+    tree.dive.mockRejectedValueOnce(new Error("dive"));
+    start();
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect(tree.resume).toHaveBeenCalledWith("liv");
+    expect($(".app-notice")?.textContent).toBe(LOAD_ERROR);
+    expect($(".app-flash")?.style.opacity).toBe("0");
+    expect($(".app-tree")?.hidden).toBe(false);
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect(root.dataset.book).toBe("liv");
+  });
+
+  it("finishes leaving when the book dispose throws", async () => {
+    handle.dispose.mockImplementationOnce(() => {
+      throw new Error("dispose");
+    });
+    start();
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    key("Escape");
+    await vi.advanceTimersByTimeAsync(CLOSE_MS);
+    expect(tree.resume).toHaveBeenCalledWith("liv");
+    expect(root.dataset.book).toBeUndefined();
+    expect($(".app-tree")?.hidden).toBe(false);
+    expect($(".app-flash")?.style.opacity).toBe("0");
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect(root.dataset.book).toBe("liv");
+  });
 });

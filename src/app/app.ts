@@ -91,7 +91,11 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
 
   /** Removes the open book (if any) and gives the screen back to the tree layer. */
   function closeBook(): void {
-    book?.handle.dispose();
+    try {
+      book?.handle.dispose();
+    } catch (err) {
+      console.error("Book dispose failed", err);
+    }
     book = null;
     bubble.hide();
     reading.close();
@@ -107,16 +111,19 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     const activeTree = tree;
     mode = "dive";
     bubble.hide();
-    const loading = Promise.all([manifest.world(), deps.loadStories(bookId)]);
+    const loading = Promise.resolve().then(() =>
+      Promise.all([manifest.world?.(), deps.loadStories(bookId)]),
+    );
     loading.catch(() => undefined);
-    await Promise.all([
-      activeTree.dive(bookId),
-      flash.to(1, TIMING.dive * 0.45, TIMING.dive * 0.55),
-    ]);
-    activeTree.pause();
-    treeLayer.hidden = true;
     try {
+      await Promise.all([
+        activeTree.dive(bookId),
+        flash.to(1, TIMING.dive * 0.45, TIMING.dive * 0.55),
+      ]);
+      activeTree.pause();
+      treeLayer.hidden = true;
       const [world, stories] = await loading;
+      if (!world) throw new Error(`Book "${bookId}" has no world`);
       if (!readingLangs(stories).includes(lang)) lang = "gcf";
       page = 0;
       scrolled = false;
