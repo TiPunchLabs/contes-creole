@@ -1,6 +1,6 @@
 import "./style.css";
 import * as THREE from "three";
-import { TALES } from "./content/tales";
+import { registry } from "@app/registry";
 
 /** Temporary bootstrap: a lit scene proving the Three.js pipeline until the v13 scene is ported. */
 function bootstrap(canvas: HTMLCanvasElement): void {
@@ -37,4 +37,5 @@ const canvas = document.querySelector<HTMLCanvasElement>("#scene");
 if (canvas) bootstrap(canvas);
 
 const count = document.querySelector("#tale-count");
-if (count) count.textContent = `${TALES.filter((t) => t.ready).length} / ${TALES.length} kont`;
+if (count)
+  count.textContent = `${registry.books.filter((b) => b.ready).length} / ${registry.books.length} kont`;
