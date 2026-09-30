@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import type { Bubble, Story } from "@app/contract";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { STAGING } from "../staging";
 
 const stage = vi.hoisted(() => ({ dispose: vi.fn(), start: vi.fn() }));
@@ -24,6 +24,10 @@ const story: Story = {
 const bubble: Bubble = { show: vi.fn(), hide: vi.fn() };
 
 describe("Ti Kannot world mount", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("releases the stage and its listeners when the mount fails half-way", async () => {
     const { default: world } = await import("./index");
     const container = document.createElement("div");
@@ -40,8 +44,7 @@ describe("Ti Kannot world mount", () => {
     ]);
   });
 
-  it("fails on a page without staging, releasing the stage before any scene is built", async () => {
-    stage.dispose.mockClear();
+  it("fails on a page without staging, before any stage is created", async () => {
     const { default: world } = await import("./index");
     const broken: Story = { ...story, pages: [{ id: "nope", label: "", title: "", blocks: [] }] };
     expect(() =>

@@ -37,7 +37,6 @@ src/
   books/
     ti-kannot/                 # book.ts, cover.ts, staging.ts, theme.css, story/{gcf,fr}.md, world/
     zanba/, konpe-lapen/       # manifest only (book.ts), ready: false
-public/                        # static assets
 doc/                           # architecture.md, development.md
 ```
 

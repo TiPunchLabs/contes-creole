@@ -63,16 +63,16 @@ Isolation is enforced by ESLint `no-restricted-imports`: universes import only t
 
 ## 4. Issues to fix during the port
 
-| #   | Issue                                                                   | Fix                                                        |
-| --- | ----------------------------------------------------------------------- | ---------------------------------------------------------- |
-| 1   | Bileng mode shows full `fr.b`; the `kr.g` gloss is never used           | Show `kr.g` under the Kréyòl text                          |
-| 2   | Ti Kannot's world is hard-coded in the scene                            | Done — `src/books/<id>/world/`, discovered by the registry |
-| 3   | `speak()` parses dialogue by splitting on "–" and assumes speaker order | Structured dialogue lines with explicit speaker            |
-| 4   | Mouse-only card selection; canvas has no text alternative               | Focusable DOM buttons for cards, `aria-live` text card     |
-| 5   | `preserveDrawingBuffer: true`                                           | Remove                                                     |
-| 6   | 936 KB PNG; unused Cyrillic/Vietnamese font subsets                     | WebP (~100 KB); latin + latin-ext only                     |
-| 7   | Global PRNG seed → layout changes on remount                            | Done — one `createRng` per universe                        |
-| 8   | Copy: "Glisez"; "Yé mistrikrik" (data) vs "Yé mistikrik" (bubble)       | Confirm spelling with the author                           |
+| #   | Issue                                                                   | Fix                                                         |
+| --- | ----------------------------------------------------------------------- | ----------------------------------------------------------- |
+| 1   | Bileng mode shows full `fr.b`; the `kr.g` gloss is never used           | Done — `kr.g` is gone; `story/fr.md` shows under the Kréyòl |
+| 2   | Ti Kannot's world is hard-coded in the scene                            | Done — `src/books/<id>/world/`, discovered by the registry  |
+| 3   | `speak()` parses dialogue by splitting on "–" and assumes speaker order | Structured dialogue lines with explicit speaker             |
+| 4   | Mouse-only card selection; canvas has no text alternative               | Focusable DOM buttons for cards, `aria-live` text card      |
+| 5   | `preserveDrawingBuffer: true`                                           | Remove                                                      |
+| 6   | 936 KB PNG; unused Cyrillic/Vietnamese font subsets                     | WebP (~100 KB); latin + latin-ext only                      |
+| 7   | Global PRNG seed → layout changes on remount                            | Done — one `createRng` per universe                         |
+| 8   | Copy: "Glisez"; "Yé mistrikrik" (data) vs "Yé mistikrik" (bubble)       | Confirm spelling with the author                            |
 
 ## 5. Design decisions
 

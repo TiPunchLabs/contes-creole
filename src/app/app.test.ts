@@ -23,6 +23,7 @@ const OPEN_MS = TIMING.dive + TIMING.fade + 100;
 const CLOSE_MS = TIMING.rise + TIMING.fade + 100;
 
 let root: HTMLElement;
+let apps: { dispose(): void }[] = [];
 let tree: { [K in keyof TreeHandle]: ReturnType<typeof vi.fn> };
 let treeCtx: TreeContext;
 let handle: { [K in keyof BookHandle]: ReturnType<typeof vi.fn> };
@@ -38,15 +39,17 @@ const manifest = (id: string, order: number, ready: boolean): BookManifest => ({
 
 /** Starts the app with fakes; `overrides` replaces any dependency. */
 function start(overrides: Partial<AppDeps> = {}): void {
-  startApp(root, {
-    mountTree: (_container, ctx) => {
-      treeCtx = ctx;
-      return tree as unknown as TreeHandle;
-    },
-    books: [manifest("liv", 1, true), manifest("lock", 2, false)],
-    loadStories: vi.fn(async () => STORIES),
-    ...overrides,
-  });
+  apps.push(
+    startApp(root, {
+      mountTree: (_container, ctx) => {
+        treeCtx = ctx;
+        return tree as unknown as TreeHandle;
+      },
+      books: [manifest("liv", 1, true), manifest("lock", 2, false)],
+      loadStories: vi.fn(async () => STORIES),
+      ...overrides,
+    }),
+  );
 }
 
 const $ = (sel: string): HTMLElement | null => root.querySelector<HTMLElement>(sel);
@@ -66,6 +69,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  apps.forEach((app) => app.dispose());
+  apps = [];
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
