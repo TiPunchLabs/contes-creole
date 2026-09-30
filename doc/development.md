@@ -42,8 +42,8 @@ pnpm test           # vitest run
 pnpm test:watch
 ```
 
-Content tests (`src/content/content.test.ts`) guard the tale data: 12 pages, both languages
-filled, gloss present, valid colours.
+Tests are co-located (`*.test.ts`). `src/books/books.test.ts` and `src/books/v13-conversion.test.ts`
+guard the book manifests and the tale content; `src/isolation.test.ts` guards the universe import rules.
 
 ## Conventions
 

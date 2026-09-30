@@ -2,7 +2,7 @@
 
 - **Date**: 2026-09-29
 - **Branch**: `feat/universes-per-book`
-- **Status**: awaiting review
+- **Status**: implemented
 
 ## 1. Goal
 
