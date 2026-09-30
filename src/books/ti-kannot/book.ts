@@ -4,7 +4,8 @@ import { paintCover } from "./cover";
 export default defineBook({
   id: "ti-kannot",
   order: 1,
-  ready: false,
+  ready: true,
   card: { title: "Ti Kannot é Gwo Rako", sub: "Larivyè-la té swèf", theme: "Dlo · L’eau" },
   cover: paintCover,
+  world: () => import("./world/index"),
 });
