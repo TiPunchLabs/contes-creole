@@ -43,11 +43,13 @@ export default defineWorld({
     let paint: ReturnType<typeof createPaint> | null = null;
     let ambience: Ambience | null = null;
     let mute: { dispose(): void } | null = null;
+    let water: ReturnType<typeof createWater> | null = null;
     const release = (): void => {
       clearTimeout(speakTimer);
       removeListeners();
       mute?.dispose();
       ambience?.dispose();
+      water?.dispose();
       paint?.dispose();
       stage.dispose();
     };
@@ -59,7 +61,9 @@ export default defineWorld({
       const village = createVillage(rng);
       const source = createSource(rng);
       const stock = createStock(rng);
-      const water = createWater();
+      const quality = paintQuality(matchMedia("(pointer: coarse)").matches, devicePixelRatio);
+      const sea = createWater({ reflect: quality === "high" });
+      water = sea;
       const sky = createSky(rng);
       const cast = createCharacters(
         restingPoints([...vegetation.canopies, village.group, source.group]),
@@ -68,19 +72,14 @@ export default defineWorld({
       scene.add(
         sky.group,
         ground.mesh,
-        water.group,
+        sea.group,
         vegetation.group,
         village.group,
         source.group,
         stock.group,
         cast.group,
       );
-      const painter = createPaint(
-        renderer,
-        scene,
-        camera,
-        paintQuality(matchMedia("(pointer: coarse)").matches, devicePixelRatio),
-      );
+      const painter = createPaint(renderer, scene, camera, quality);
       paint = painter;
       const sound = createAmbience();
       ambience = sound;
@@ -127,7 +126,7 @@ export default defineWorld({
         const [dx, dy] = frameOffset(view.x, view.y);
         camera.setViewOffset(view.x, view.y, dx, dy, view.x, view.y);
         sky.update(env, time, camera.position);
-        water.update(env, time, camera.position);
+        sea.update(env, time, camera.position);
         ground.update(env);
         vegetation.update(env);
         village.update(env);

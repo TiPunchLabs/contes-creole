@@ -64,7 +64,7 @@ export const STAGING: Record<string, PageEnv> = {
   "ye-krik": {
     ...BASE,
     shot: { focus: "island", azimuth: 20, elevation: 28, distance: 46 },
-    sky: ["#9fd8e0", "#f6d9c0"],
+    sky: ["#bfe8e6", "#ffd9b8"],
     sun: [-60, 8, "#ffc9a0", 1.1],
     mist: 0.8,
     branches: 1,
@@ -74,7 +74,7 @@ export const STAGING: Record<string, PageEnv> = {
   "ti-kannot-e-gwo-rako": {
     ...BASE,
     shot: { focus: "perch", azimuth: 35, elevation: 18, distance: 16 },
-    sky: ["#8fd3e6", "#fbeed2"],
+    sky: ["#a9e2ea", "#ffe6c4"],
     sun: [-30, 40, "#fff3d6", 1.4],
     mist: 0.2,
     branches: 1,
@@ -84,7 +84,7 @@ export const STAGING: Record<string, PageEnv> = {
   "on-lide-gwo-rako": {
     ...BASE,
     shot: { focus: "yard", azimuth: 140, elevation: 26, distance: 15 },
-    sky: ["#4b5d8a", "#f2a46a"],
+    sky: ["#7f8fbf", "#ffb07a"],
     sun: [80, 6, "#ff9a5a", 1.1],
     night: 0.25,
     water: -0.15,
@@ -96,7 +96,7 @@ export const STAGING: Record<string, PageEnv> = {
   "larivye-la-ka-desann": {
     ...BASE,
     shot: { focus: "bank", azimuth: 10, elevation: 30, distance: 18 },
-    sky: ["#bfe0e6", "#fff4dc"],
+    sky: ["#d6eef0", "#fff1d6"],
     sun: [10, 70, "#fffbe8", 1.9],
     water: -0.85,
     wilt: 0.4,
@@ -108,7 +108,7 @@ export const STAGING: Record<string, PageEnv> = {
   "sa-ti-kannot-jwenn": {
     ...BASE,
     shot: { focus: "spring", azimuth: -20, elevation: 16, distance: 12 },
-    sky: ["#9bd6c8", "#e8f2d0"],
+    sky: ["#b4e6d8", "#f4f6d8"],
     sun: [-40, 35, "#f4ffd8", 1.3],
     mist: 0.5,
     water: -1,
@@ -121,7 +121,7 @@ export const STAGING: Record<string, PageEnv> = {
   "gwo-rako-vle-sous-la": {
     ...BASE,
     shot: { focus: "spring", azimuth: 25, elevation: 22, distance: 13 },
-    sky: ["#a9b8bf", "#dfe2da"],
+    sky: ["#c4d0d4", "#ece9df"],
     sun: [30, 40, "#f0f0e8", 1],
     water: -1.05,
     wilt: 0.5,
@@ -133,7 +133,7 @@ export const STAGING: Record<string, PageEnv> = {
   "on-mache": {
     ...BASE,
     shot: { focus: "bank", azimuth: -35, elevation: 12, distance: 14 },
-    sky: ["#0d1a3a", "#3a4f7a"],
+    sky: ["#1d2f5e", "#56709e"],
     sun: [150, 35, "#c8d8ff", 1.2],
     night: 1,
     water: -1.1,
@@ -146,7 +146,7 @@ export const STAGING: Record<string, PageEnv> = {
   "demen-maten": {
     ...BASE,
     shot: { focus: "yard", azimuth: 70, elevation: 32, distance: 17 },
-    sky: ["#cfe3e0", "#ffe7b8"],
+    sky: ["#dcefee", "#ffe9c0"],
     sun: [40, 55, "#fff0c8", 1.8],
     water: -1.35,
     wilt: 0.8,
@@ -160,7 +160,7 @@ export const STAGING: Record<string, PageEnv> = {
   "sa-dlo-la-ka-aprann": {
     ...BASE,
     shot: { focus: "spring", azimuth: 0, elevation: 26, distance: 16 },
-    sky: ["#a6dccf", "#f1f5dc"],
+    sky: ["#bde8dc", "#f7f6e0"],
     sun: [-20, 45, "#f8ffe0", 1.4],
     water: -0.9,
     wilt: 0.5,
@@ -174,7 +174,7 @@ export const STAGING: Record<string, PageEnv> = {
   "denye-leson-la": {
     ...BASE,
     shot: { focus: "yard", azimuth: 130, elevation: 30, distance: 17 },
-    sky: ["#e6e8d8", "#fff6d0"],
+    sky: ["#eef0e0", "#fff8dc"],
     sun: [0, 78, "#ffffff", 2.1],
     water: -1,
     wilt: 0.7,
@@ -188,7 +188,7 @@ export const STAGING: Record<string, PageEnv> = {
   "on-nouvo-rezev": {
     ...BASE,
     shot: { focus: "tank", azimuth: -40, elevation: 20, distance: 14 },
-    sky: ["#93d0e4", "#fde9cf"],
+    sky: ["#ade0ec", "#ffe4c8"],
     sun: [-70, 30, "#ffe2b0", 1.3],
     water: -0.4,
     wilt: 0.2,
@@ -199,7 +199,7 @@ export const STAGING: Record<string, PageEnv> = {
   "ye-mistrikrik": {
     ...BASE,
     shot: { focus: "island", azimuth: -10, elevation: 24, distance: 44 },
-    sky: ["#8aa3b3", "#d7e4e4"],
+    sky: ["#a9bfcc", "#e3ece8"],
     sun: [-50, 25, "#fff4e0", 1],
     mist: 0.4,
     water: 0.25,

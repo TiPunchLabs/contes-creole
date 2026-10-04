@@ -12,7 +12,8 @@ const DOME_FRAGMENT = `uniform vec3 cZenith,cHorizon,cSun,uSunDir; uniform float
   float fbm(vec2 p){ float v=0.,a=.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.03; a*=.5; } return v; }
   void main(){ vec3 d=normalize(vD); float h=clamp(d.y,0.,1.);
     vec3 c=mix(cHorizon,cZenith,pow(h,.55));
-    float s=max(dot(d,uSunDir),0.); c+=cSun*(pow(s,600.)*1.5+pow(s,12.)*.35);
+    float s=max(dot(d,uSunDir),0.);
+    c+=cSun*(pow(s,600.)*1.5+pow(s,12.)*.35+pow(s,3.)*.22+pow(s,2.)*exp(-d.y*6.)*.25);
     vec2 p=d.xz/(d.y+.25);
     float cl=smoothstep(.45,.85,fbm(p*1.6+vec2(uTime*.01,0.)))*smoothstep(0.,.25,d.y);
     c=mix(c,mix(vec3(1.,.98,.95),cHorizon*.8,uCloud*.6),cl*(.55+uCloud*.4));
@@ -27,13 +28,15 @@ const RAINBOW_FRAGMENT = `uniform float uOpacity; varying float vR;
     gl_FragColor=vec4(c*.9,smoothstep(0.,.15,t)*smoothstep(1.,.85,t)*uOpacity); }`;
 
 const ISLET_TINT = new THREE.Color("#5f9a86");
-const GROUND_LIGHT = new THREE.Color("#6a8f5a");
+const GROUND_LIGHT = new THREE.Color("#e2cc9e");
+const WHITE = new THREE.Color("#ffffff");
+const HAZE = 0.0075;
 const NIGHT_GROUND = new THREE.Color("#4a5f8f");
 
 /** Painted sky dome, sun light, far islets, rain, fireflies, low mist and the final rainbow. */
 export function createSky(rng: Rng): {
   group: THREE.Group;
-  fog: THREE.Fog;
+  fog: THREE.FogExp2;
   update(env: MixedEnv, time: number, camera: THREE.Vector3): void;
 } {
   const domeMaterial = new THREE.ShaderMaterial({
@@ -109,7 +112,7 @@ export function createSky(rng: Rng): {
 
   const hemi = new THREE.HemisphereLight("#bfe6ff", GROUND_LIGHT, 0.9);
   const sun = new THREE.DirectionalLight("#ffffff", 1.4);
-  const fog = new THREE.Fog("#f6d9c0", 70, 240);
+  const fog = new THREE.FogExp2("#f6d9c0", HAZE);
   const dir = new THREE.Vector3();
 
   const group = new THREE.Group();
@@ -141,12 +144,12 @@ export function createSky(rng: Rng): {
       fog.color.copy(env.horizon);
       isletMaterial.color.copy(ISLET_TINT).lerp(env.horizon, 0.45);
       sun.color.copy(env.sunColor);
-      sun.intensity = env.sunIntensity * (1 - env.rain * 0.4);
+      sun.intensity = env.sunIntensity * 1.15 * (1 - env.rain * 0.4);
       sun.position.copy(env.shot.focus).addScaledVector(dir, 50);
       sun.target.position.copy(env.shot.focus);
-      hemi.color.copy(env.zenith);
+      hemi.color.copy(env.zenith).lerp(WHITE, 0.35);
       hemi.groundColor.copy(GROUND_LIGHT).lerp(NIGHT_GROUND, env.night);
-      hemi.intensity = 1 + env.night * 0.6;
+      hemi.intensity = 1.5 + env.night * 0.3;
       rain.position.set(env.shot.focus.x, 0, env.shot.focus.z);
       rain.material.uniforms.uTime.value = time;
       rain.material.uniforms.uOpacity.value = env.rain * 0.7;

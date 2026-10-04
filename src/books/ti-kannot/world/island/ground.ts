@@ -6,13 +6,13 @@ import { islandHeight, riverDistance } from "./terrain";
 const SIZE = 64;
 const SEGMENTS = 128;
 const PALETTE = {
-  bed: new THREE.Color("#b8a47c"),
-  sand: new THREE.Color("#efdcaa"),
-  lush: new THREE.Color("#7cc46a"),
-  grass: new THREE.Color("#9ccc6c"),
-  forest: new THREE.Color("#4f9459"),
-  high: new THREE.Color("#5d7f5a"),
-  rock: new THREE.Color("#9a8f84"),
+  bed: new THREE.Color("#cdb88e"),
+  sand: new THREE.Color("#f6e6b8"),
+  lush: new THREE.Color("#8fd27a"),
+  grass: new THREE.Color("#ade07c"),
+  forest: new THREE.Color("#6aae6c"),
+  high: new THREE.Color("#7c9a72"),
+  rock: new THREE.Color("#b3a99c"),
 };
 const DRY = new THREE.Color("#e8d39a");
 const WHITE = new THREE.Color("#ffffff");
@@ -28,13 +28,18 @@ function faceColor(h: number, up: number, toRiver: number): THREE.Color {
   return PALETTE.grass;
 }
 
-/** Flat-shaded island ground; the drought tints it towards dry straw. */
+/** Softly lit island ground painted in patches; the drought tints it towards dry straw. */
 export function createGround(rng: Rng): { mesh: THREE.Mesh; update(env: MixedEnv): void } {
-  const geometry = new THREE.PlaneGeometry(SIZE, SIZE, SEGMENTS, SEGMENTS)
-    .rotateX(-Math.PI / 2)
-    .toNonIndexed();
+  const relief = new THREE.PlaneGeometry(SIZE, SIZE, SEGMENTS, SEGMENTS).rotateX(-Math.PI / 2);
+  const heights = relief.getAttribute("position");
+  for (let i = 0; i < heights.count; i++) {
+    heights.setY(i, islandHeight(heights.getX(i), heights.getZ(i)));
+  }
+  relief.computeVertexNormals();
+  // Smooth light over the relief, but one paint colour per face.
+  const geometry = relief.toNonIndexed();
+  relief.dispose();
   const pos = geometry.getAttribute("position");
-  for (let i = 0; i < pos.count; i++) pos.setY(i, islandHeight(pos.getX(i), pos.getZ(i)));
   const colors = new Float32Array(pos.count * 3);
   const va = new THREE.Vector3();
   const vb = new THREE.Vector3();
@@ -55,8 +60,7 @@ export function createGround(rng: Rng): { mesh: THREE.Mesh; update(env: MixedEnv
     for (let k = 0; k < 3; k++) tint.toArray(colors, (i + k) * 3);
   }
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  geometry.computeVertexNormals();
-  const material = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
+  const material = new THREE.MeshLambertMaterial({ vertexColors: true });
   return {
     mesh: new THREE.Mesh(geometry, material),
     update(env) {

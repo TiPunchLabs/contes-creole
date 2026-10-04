@@ -3,6 +3,7 @@ import { lerp, smoothstep } from "@shared/math";
 import type { MixedEnv } from "./env";
 import { SPOTS, spotPoint, type Spot } from "./island/spots";
 import { islandHeight } from "./island/terrain";
+import { soften } from "./soft";
 import type { CharacterName } from "./speech";
 
 const FLIGHT_SECONDS = 1.6;
@@ -10,7 +11,7 @@ const FLIGHT_HEIGHT = 2.5;
 
 /** Flat-shaded Lambert material. */
 const paint = (color: string): THREE.MeshLambertMaterial =>
-  new THREE.MeshLambertMaterial({ color, flatShading: true });
+  new THREE.MeshLambertMaterial({ color });
 
 /** Mesh at a local position. */
 function part(
@@ -31,15 +32,15 @@ function buildBird(): { root: THREE.Group; wings: THREE.Mesh[] } {
   const dark = paint("#55525c");
   const ink = paint("#151316");
   root.add(
-    part(new THREE.IcosahedronGeometry(0.3, 1).scale(1.35, 0.95, 0.95), dark, 0, 0, 0),
+    part(soften(new THREE.IcosahedronGeometry(0.3, 1).scale(1.35, 0.95, 0.95)), dark, 0, 0, 0),
     part(
-      new THREE.IcosahedronGeometry(0.26, 1).scale(1.1, 0.75, 0.85),
+      soften(new THREE.IcosahedronGeometry(0.26, 1).scale(1.1, 0.75, 0.85)),
       paint("#f4c21b"),
       0.06,
       -0.08,
       0,
     ),
-    part(new THREE.IcosahedronGeometry(0.2, 1), dark, 0.38, 0.2, 0),
+    part(soften(new THREE.IcosahedronGeometry(0.2, 1)), dark, 0.38, 0.2, 0),
     part(new THREE.BoxGeometry(0.16, 0.035, 0.3), paint("#f7f3e8"), 0.42, 0.29, 0),
     part(new THREE.ConeGeometry(0.12, 0.4, 4).rotateZ(Math.PI / 2), dark, -0.5, 0.05, 0),
   );
@@ -79,8 +80,14 @@ function buildCrab(): {
   const shell = new THREE.Group();
   const red = paint("#d8452f");
   shell.add(
-    part(new THREE.IcosahedronGeometry(0.9, 1).scale(1.25, 0.5, 0.95), red, 0, 0.55, 0),
-    part(new THREE.IcosahedronGeometry(0.8, 1).scale(1.15, 0.3, 0.85), paint("#f1dcc0"), 0, 0.4, 0),
+    part(soften(new THREE.IcosahedronGeometry(0.9, 1).scale(1.25, 0.5, 0.95)), red, 0, 0.55, 0),
+    part(
+      soften(new THREE.IcosahedronGeometry(0.8, 1).scale(1.15, 0.3, 0.85)),
+      paint("#f1dcc0"),
+      0,
+      0.4,
+      0,
+    ),
   );
   const white = paint("#fbf6ea");
   const ink = paint("#151316");

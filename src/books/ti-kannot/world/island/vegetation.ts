@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { Rng } from "@shared/random";
 import type { MixedEnv } from "../env";
+import { soften } from "../soft";
 import { HOUSE, SPOTS, VILLAGE } from "./spots";
 import { islandHeight, riverDistance } from "./terrain";
 
@@ -12,39 +13,47 @@ interface Part {
 
 type Species = "flamboyant" | "palm" | "forest" | "banana" | "grass" | "reed" | "rock";
 
-const TRUNK = "#8a5a3b";
+const TRUNK = "#9a6a48";
 const SPECIES: Record<Species, Part[]> = {
   palm: [
     { geometry: new THREE.CylinderGeometry(0.12, 0.2, 3.2, 5).translate(0, 1.6, 0), color: TRUNK },
     {
-      geometry: new THREE.IcosahedronGeometry(1, 0).scale(1.5, 0.35, 1.5).translate(0, 3.3, 0),
-      color: "#5fae5a",
+      geometry: soften(
+        new THREE.IcosahedronGeometry(1, 1).scale(1.5, 0.35, 1.5).translate(0, 3.3, 0),
+      ),
+      color: "#7cc46e",
       dry: "#b5ad5c",
     },
   ],
   flamboyant: [
     { geometry: new THREE.CylinderGeometry(0.18, 0.28, 1.8, 6).translate(0, 0.9, 0), color: TRUNK },
     {
-      geometry: new THREE.IcosahedronGeometry(1.3, 0).scale(1.5, 0.45, 1.5).translate(0, 2, 0),
-      color: "#4f9a52",
+      geometry: soften(
+        new THREE.IcosahedronGeometry(1.3, 1).scale(1.5, 0.45, 1.5).translate(0, 2, 0),
+      ),
+      color: "#6db86a",
       dry: "#a39a55",
     },
     {
-      geometry: new THREE.IcosahedronGeometry(1.4, 0).scale(1.6, 0.5, 1.6).translate(0, 2.4, 0),
-      color: "#e0523a",
+      geometry: soften(
+        new THREE.IcosahedronGeometry(1.4, 1).scale(1.6, 0.5, 1.6).translate(0, 2.4, 0),
+      ),
+      color: "#ef6a4a",
       dry: "#b8664a",
     },
   ],
   forest: [
     { geometry: new THREE.CylinderGeometry(0.2, 0.3, 2, 6).translate(0, 1, 0), color: TRUNK },
     {
-      geometry: new THREE.IcosahedronGeometry(1.3, 0).scale(1, 1.15, 1).translate(0, 2.6, 0),
-      color: "#3f8a4f",
+      geometry: soften(
+        new THREE.IcosahedronGeometry(1.3, 1).scale(1, 1.15, 1).translate(0, 2.6, 0),
+      ),
+      color: "#5fa868",
       dry: "#8f8a4c",
     },
     {
-      geometry: new THREE.IcosahedronGeometry(0.9, 0).translate(0, 3.6, 0),
-      color: "#4f9e58",
+      geometry: soften(new THREE.IcosahedronGeometry(0.9, 1).translate(0, 3.6, 0)),
+      color: "#74bd72",
       dry: "#a09a52",
     },
   ],
@@ -55,14 +64,14 @@ const SPECIES: Record<Species, Part[]> = {
     },
     {
       geometry: new THREE.ConeGeometry(0.9, 0.9, 5, 1, true).rotateX(Math.PI).translate(0, 1.4, 0),
-      color: "#9ed36a",
+      color: "#b4e27e",
       dry: "#c9c070",
     },
   ],
   grass: [
     {
       geometry: new THREE.ConeGeometry(0.12, 0.55, 3).translate(0, 0.27, 0),
-      color: "#86c25e",
+      color: "#9fd478",
       dry: "#d2c27a",
     },
   ],
@@ -72,7 +81,7 @@ const SPECIES: Record<Species, Part[]> = {
       color: "#6f9d4f",
     },
   ],
-  rock: [{ geometry: new THREE.DodecahedronGeometry(0.6, 0), color: "#a39b90" }],
+  rock: [{ geometry: soften(new THREE.DodecahedronGeometry(0.6, 0)), color: "#b8b2a6" }],
 };
 
 const CLEAR: readonly (readonly [readonly [number, number], number])[] = [
@@ -155,7 +164,7 @@ export function createVegetation(rng: Rng): {
         .clone();
     });
     for (const part of SPECIES[name]) {
-      const material = new THREE.MeshLambertMaterial({ color: part.color, flatShading: true });
+      const material = new THREE.MeshLambertMaterial({ color: part.color });
       if (part.dry) {
         tinted.push({
           material,
