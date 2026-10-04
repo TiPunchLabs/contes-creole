@@ -31,6 +31,39 @@ export interface Stories {
   en?: Story;
 }
 
+/** Plain text plus escaped HTML with <em>/<strong> only. */
+export interface InlineText {
+  text: string;
+  html: string;
+}
+
+/** A sentence quoted from the tale, with its source page and translation. */
+export interface LanguageExample {
+  /** Id of the source page in story/gcf.md. */
+  pageId: string;
+  gcf: InlineText;
+  translation: InlineText;
+}
+
+export interface LanguageNote {
+  id: string;
+  title: string;
+  summary: InlineText[];
+  examples: LanguageExample[];
+  /** "Pou alé pli lwen" paragraphs; absent when the note has none. */
+  more?: InlineText[];
+  moreExamples?: LanguageExample[];
+}
+
+/** A book's `langue/<lang>.md`: language notes illustrated by the tale. */
+export interface LanguageNotes {
+  lang: Lang;
+  title: string;
+  /** Not yet validated by a Creole speaker. */
+  draft: boolean;
+  notes: LanguageNote[];
+}
+
 export interface ScreenAnchor {
   x: number;
   y: number;
