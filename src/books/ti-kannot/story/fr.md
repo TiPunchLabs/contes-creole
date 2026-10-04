@@ -31,7 +31,7 @@ Gwo Rako prit une grande calebasse et la remplit. Puis une deuxième, une troisi
 
 Des semaines passèrent sans pluie. Les pierres apparurent au milieu de l'eau, les poissons cherchèrent des endroits plus profonds. Gwo Rako, lui, était très content : cinquante calebasses cachées derrière sa maison.
 
-– Désolé. J'en ai juste assez pour moi.
+– Désolé. Cette eau est à moi.
 
 ## Ploc… ploc… {#sa-ti-kannot-jwenn}
 
@@ -71,7 +71,7 @@ Des calebasses, des tonneaux, des jarres…
 – C'est vrai, dit Ti Kannot. Mais les plantes fanaient, les poissons manquaient d'eau, la rivière n'était plus qu'un filet.
 – Gwo Rako, combien de temps ton eau va-t-elle durer ?
 – Très longtemps !
-– Mais après ? Gwo Rako ne répondit pas.
+– Combien de temps ? Gwo Rako ne répondit pas.
 
 ## « Nous ne possédons pas la source. » {#sa-dlo-la-ka-aprann}
 
