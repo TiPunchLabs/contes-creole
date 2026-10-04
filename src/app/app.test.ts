@@ -9,6 +9,7 @@ import type {
   TreeContext,
   TreeHandle,
 } from "./contract";
+import { parseNotes } from "./language/parse";
 import { parseStory } from "./story/parse";
 
 const story = (lang: "gcf" | "fr", titles: string[]): string =>
@@ -19,6 +20,10 @@ const STORIES: Stories = {
   gcf: parseStory(story("gcf", ["Paj en", "Paj dé", "Paj twa"]), "gcf.md"),
   fr: parseStory(story("fr", ["Page un", "Page deux", "Page trois"]), "fr.md"),
 };
+const NOTES = parseNotes(
+  "---\nlang: fr\ntitle: Lang kréyòl\n---\n\n## Not {#not}\n\nRézimé.\n\n> Paj dé tèks. {p1}\n> Page deux.\n",
+  "langue/fr.md",
+);
 const OPEN_MS = TIMING.dive + TIMING.fade + 100;
 const CLOSE_MS = TIMING.rise + TIMING.fade + 100;
 
@@ -47,6 +52,7 @@ function start(overrides: Partial<AppDeps> = {}): void {
       },
       books: [manifest("liv", 1, true), manifest("lock", 2, false)],
       loadStories: vi.fn(async () => STORIES),
+      loadNotes: vi.fn(async () => null),
       ...overrides,
     }),
   );
@@ -246,5 +252,83 @@ describe("app", () => {
     treeCtx.onEnter("liv");
     await vi.advanceTimersByTimeAsync(OPEN_MS);
     expect(root.dataset.book).toBe("liv");
+  });
+});
+
+describe("app language panel", () => {
+  const openBook = async (overrides: Partial<AppDeps> = {}): Promise<void> => {
+    start({ loadNotes: vi.fn(async () => NOTES), ...overrides });
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+  };
+
+  it("shows the burger only inside a book that has notes", async () => {
+    start({ loadNotes: vi.fn(async () => NOTES) });
+    expect($(".lang-burger")?.hidden).toBe(true);
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect($(".lang-burger")?.hidden).toBe(false);
+  });
+
+  it("shows no burger for a book without notes", async () => {
+    await openBook({ loadNotes: vi.fn(async () => null) });
+    expect(root.dataset.book).toBe("liv");
+    expect($(".lang-burger")?.hidden).toBe(true);
+  });
+
+  it("opens the book without a burger when its notes fail to load", async () => {
+    await openBook({ loadNotes: vi.fn().mockRejectedValue(new Error("bad notes")) });
+    expect(root.dataset.book).toBe("liv");
+    expect($(".app-notice")).toBeNull();
+    expect($(".lang-burger")?.hidden).toBe(true);
+    expect(console.error).toHaveBeenCalled();
+  });
+
+  it("leaves the tale untouched while open: no paging from keys, wheel or swipe", async () => {
+    await openBook();
+    $(".lang-burger")?.click();
+    key("ArrowRight");
+    key(" ");
+    key("PageDown");
+    const wheel = new WheelEvent("wheel", { deltaY: 120, cancelable: true });
+    root.dispatchEvent(wheel);
+    root.dispatchEvent(new PointerEvent("pointerdown", { pointerType: "touch", clientY: 400 }));
+    root.dispatchEvent(new PointerEvent("pointermove", { pointerType: "touch", clientY: 100 }));
+    root.dispatchEvent(new PointerEvent("pointerup", { pointerType: "touch" }));
+    expect(wheel.defaultPrevented).toBe(false);
+    expect(handle.setPage).not.toHaveBeenCalled();
+    expect($(".reading-title")?.textContent).toBe("Paj en");
+  });
+
+  it("closes only the panel on Escape; a second Escape leaves the book", async () => {
+    await openBook();
+    $(".lang-burger")?.click();
+    key("Escape");
+    await vi.advanceTimersByTimeAsync(CLOSE_MS);
+    expect($(".lang-panel")?.hidden).toBe(true);
+    expect(handle.dispose).not.toHaveBeenCalled();
+    expect(root.dataset.book).toBe("liv");
+    key("Escape");
+    await vi.advanceTimersByTimeAsync(CLOSE_MS);
+    expect(handle.dispose).toHaveBeenCalledOnce();
+  });
+
+  it("pages again once the panel is closed, from the same page", async () => {
+    await openBook();
+    $(".lang-burger")?.click();
+    $(".lang-close")?.click();
+    key("ArrowRight");
+    expect(handle.setPage).toHaveBeenLastCalledWith(1);
+    expect($(".reading-title")?.textContent).toBe("Paj dé");
+  });
+
+  it("closes the panel and hides the burger when the book closes", async () => {
+    await openBook();
+    $(".lang-burger")?.click();
+    $(".reading-back")?.click();
+    await vi.advanceTimersByTimeAsync(CLOSE_MS);
+    expect(root.dataset.book).toBeUndefined();
+    expect($(".lang-panel")?.hidden).toBe(true);
+    expect($(".lang-burger")?.hidden).toBe(true);
   });
 });
