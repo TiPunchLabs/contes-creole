@@ -3,7 +3,7 @@ import * as THREE from "three";
 import type { MountTree, TreeContext, TreeHandle } from "@app/contract";
 import { clamp, lerp, smoothstep } from "@shared/math";
 import { createRng } from "@shared/random";
-import { createStage, type Stage } from "@shared/three/stage";
+import { createStage, fitFov, type Stage } from "@shared/three/stage";
 import { createTreeOverlay } from "./overlay/overlay";
 import { cardT, hubCam } from "./scene/camera";
 import { createCards, type CardView } from "./scene/cards";
@@ -16,6 +16,7 @@ const TELLER_TEXT =
 const DIVE_SECONDS = 1.7;
 const TAP_DISTANCE = 8;
 const TAP_MS = 600;
+const TELLER_TAP_MS = 4200;
 
 type Pick = { type: "teller" } | { type: "card"; index: number } | null;
 
@@ -50,6 +51,7 @@ function buildTree(container: HTMLElement, ctx: TreeContext, stage: Stage): Tree
   let hover: number | null = null;
   let near = -1;
   let tellerHover = false;
+  let tellerTimer: ReturnType<typeof setTimeout> | undefined;
   let active = true;
   let diving: { index: number; progress: number; resolve: (() => void) | null } | null = null;
   let down: { y: number; t: number; moved: number } | null = null;
@@ -73,6 +75,7 @@ function buildTree(container: HTMLElement, ctx: TreeContext, stage: Stage): Tree
     return { type: "card", index: cards.planes.indexOf(hit as THREE.Mesh) };
   };
   const setTellerHover = (on: boolean): void => {
+    clearTimeout(tellerTimer);
     if (on === tellerHover) return;
     tellerHover = on;
     if (on) ctx.bubble.show(TELLER_TEXT, () => stage.project(konteur.anchor(anchor)));
@@ -114,6 +117,10 @@ function buildTree(container: HTMLElement, ctx: TreeContext, stage: Stage): Tree
     Object.assign(pointer, stage.pointer(e));
     const p = pick();
     if (p?.type === "card") enter(p.index);
+    else if (p?.type === "teller" && e.pointerType !== "mouse") {
+      setTellerHover(true);
+      tellerTimer = setTimeout(() => setTellerHover(false), TELLER_TAP_MS);
+    } else if (e.pointerType !== "mouse") setTellerHover(false);
   };
   const onKey = (e: KeyboardEvent): void => {
     if (!active || diving) return;
@@ -128,9 +135,15 @@ function buildTree(container: HTMLElement, ctx: TreeContext, stage: Stage): Tree
     }
   };
 
+  /** Whether a projected x keeps the card and its label clear of the screen edges. */
+  const onScreen = (x: number): boolean =>
+    x > container.clientWidth * 0.12 && x < container.clientWidth * 0.88;
+
   const frame = (time: number, dt: number): void => {
     t += (target - t) * (1 - Math.exp(-dt * 4.5));
     hubCam(t, cam, look);
+    konteur.place(camera.aspect);
+    const fov = fitFov(50, camera.aspect);
     if (diving) {
       diving.progress = Math.min(1, diving.progress + dt / DIVE_SECONDS);
       const d = smoothstep(diving.progress);
@@ -138,10 +151,10 @@ function buildTree(container: HTMLElement, ctx: TreeContext, stage: Stage): Tree
       dest.copy(cam).sub(card).normalize().multiplyScalar(-0.6).add(card);
       cam.lerp(dest, d);
       look.lerp(card, d);
-      camera.fov = lerp(50, 95, d);
+      camera.fov = lerp(fov, 95, d);
       camera.updateProjectionMatrix();
-    } else if (camera.fov !== 50) {
-      camera.fov = 50;
+    } else if (camera.fov !== fov) {
+      camera.fov = fov;
       camera.updateProjectionMatrix();
     }
     camera.position.copy(cam);
@@ -155,7 +168,7 @@ function buildTree(container: HTMLElement, ctx: TreeContext, stage: Stage): Tree
     const views = cards.update(time, t, hover, camera.position, stage.project);
     let best: CardView | null = null;
     for (const v of views)
-      if (v.visible && v.near > 0.35 && (!best || v.near > best.near)) best = v;
+      if (v.visible && onScreen(v.x) && v.near > 0.35 && (!best || v.near > best.near)) best = v;
     near = best ? best.index : -1;
     const book = best ? ctx.books[best.index] : undefined;
     overlay.update(

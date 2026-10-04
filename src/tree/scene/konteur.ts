@@ -1,18 +1,26 @@
 import * as THREE from "three";
-import { lerp } from "@shared/math";
+import { clamp, lerp } from "@shared/math";
 import { softSprite } from "@shared/three/soft-sprite";
 import konteurUrl from "../assets/konteur.png";
 import { groundHeight } from "./landscape";
+
+const KONTEUR_Z = -12.5;
+const KONTEUR_X_WIDE = 5.2;
+const KONTEUR_X_NARROW = 2.3;
 
 /** The storyteller: a photo cut-out billboard at the foot of the tree, with a lantern. */
 export function createKonteur(): {
   group: THREE.Group;
   plane: THREE.Mesh;
   anchor(out: THREE.Vector3): THREE.Vector3;
+  place(aspect: number): void;
   update(time: number, cameraPosition: THREE.Vector3, hovered: boolean): void;
 } {
   const group = new THREE.Group();
-  group.position.set(5.2, groundHeight(5.2, -12.5) + 0.02, -12.5);
+  const setX = (x: number): void => {
+    group.position.set(x, groundHeight(x, KONTEUR_Z) + 0.02, KONTEUR_Z);
+  };
+  setX(KONTEUR_X_WIDE);
   const texture = new THREE.TextureLoader().load(konteurUrl);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 8;
@@ -71,6 +79,10 @@ export function createKonteur(): {
     group,
     plane,
     anchor: (out) => out.set(0.35, 1.85, 0).add(group.position),
+    place(aspect) {
+      const x = lerp(KONTEUR_X_NARROW, KONTEUR_X_WIDE, clamp((aspect - 0.5) / 0.75, 0, 1));
+      if (x !== group.position.x) setX(x);
+    },
     update(time, cameraPosition, hovered) {
       toCamera.copy(cameraPosition).sub(group.position);
       plane.rotation.y = Math.atan2(toCamera.x, toCamera.z);

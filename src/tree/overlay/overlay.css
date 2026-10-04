@@ -161,6 +161,51 @@
   box-shadow: 0 0 12px #7af0dc;
 }
 
+@media (max-width: 600px) {
+  .tree-brand {
+    left: 18px;
+    top: 18px;
+  }
+
+  .tree-intro {
+    left: 24px;
+    right: 24px;
+    bottom: 10vh;
+  }
+
+  .tree-intro-text {
+    font-size: 14px;
+  }
+
+  .tree-label-title {
+    white-space: normal;
+    max-width: 70vw;
+  }
+
+  .tree-climb {
+    right: 14px;
+    height: 140px;
+  }
+}
+
+@media (max-height: 500px) {
+  .tree-brand {
+    top: 14px;
+  }
+
+  .tree-intro {
+    bottom: 8vh;
+  }
+
+  .tree-intro-title {
+    font-size: 34px;
+  }
+
+  .tree-climb {
+    height: 120px;
+  }
+}
+
 @keyframes tree-rise {
   from {
     opacity: 0;

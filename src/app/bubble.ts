@@ -1,6 +1,8 @@
 import type { Bubble, ScreenAnchor } from "./contract";
 
-/** Speech bubble following a universe-provided screen anchor each frame. */
+const EDGE = 12;
+
+/** Speech bubble following a universe-provided screen anchor each frame, kept inside the screen. */
 export function createBubble(root: HTMLElement): Bubble & { dispose(): void } {
   const el = document.createElement("div");
   el.className = "app-bubble";
@@ -12,7 +14,9 @@ export function createBubble(root: HTMLElement): Bubble & { dispose(): void } {
     if (!anchor) return;
     const a = anchor();
     if (a.visible) {
-      el.style.left = `${a.x}px`;
+      const half = el.offsetWidth / 2;
+      const max = root.clientWidth - half - EDGE;
+      el.style.left = `${Math.max(half + EDGE, Math.min(max, a.x))}px`;
       el.style.top = `${a.y - 12}px`;
       el.style.opacity = "1";
     } else {

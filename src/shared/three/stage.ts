@@ -19,6 +19,20 @@ export interface Stage {
   dispose(): void;
 }
 
+const BASE_FOV = 50;
+const MIN_ASPECT = 1.25;
+const MAX_FOV = 78;
+
+/**
+ * Vertical FOV for `aspect`: `base` on wide screens, widened on narrow (portrait) ones so the
+ * horizontal view stays the one `MIN_ASPECT` would give, up to `MAX_FOV`.
+ */
+export function fitFov(base: number, aspect: number): number {
+  if (aspect >= MIN_ASPECT) return base;
+  const half = Math.atan((Math.tan((base * Math.PI) / 360) * MIN_ASPECT) / aspect);
+  return Math.min(MAX_FOV, (half * 360) / Math.PI);
+}
+
 /** Full-size canvas with the v13 renderer settings and a pausable render loop. Throws without WebGL. */
 export function createStage(container: HTMLElement): Stage {
   const canvas = document.createElement("canvas");
@@ -40,7 +54,7 @@ export function createStage(container: HTMLElement): Stage {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
-  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 600);
+  const camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.1, 600);
   const scene = new THREE.Scene();
   const projected = new THREE.Vector3();
   const t0 = performance.now();
@@ -57,6 +71,7 @@ export function createStage(container: HTMLElement): Stage {
     height = h;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
+    camera.fov = fitFov(BASE_FOV, camera.aspect);
     camera.updateProjectionMatrix();
   };
 
@@ -80,6 +95,7 @@ export function createStage(container: HTMLElement): Stage {
     },
     pointer: (event) => {
       const r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return { x: 0, y: 0 };
       return {
         x: ((event.clientX - r.left) / r.width) * 2 - 1,
         y: -(((event.clientY - r.top) / r.height) * 2 - 1),

@@ -52,7 +52,7 @@ export function createTreeOverlay(
   return {
     update(t, next) {
       intro.style.opacity = String(Math.max(0, 1 - t * 9));
-      thumb.style.top = `${t * (180 - 22)}px`;
+      thumb.style.top = `calc((100% - 22px) * ${t})`;
       current = next ? next.book : null;
       if (!next) {
         label.style.opacity = "0";
@@ -60,7 +60,9 @@ export function createTreeOverlay(
         locked.hidden = true;
         return;
       }
-      label.style.left = `${next.x}px`;
+      const half = label.offsetWidth / 2;
+      const edge = 12;
+      label.style.left = `${Math.max(half + edge, Math.min(container.clientWidth - half - edge, next.x))}px`;
       label.style.top = `${next.y}px`;
       label.style.opacity = String(next.opacity);
       title.textContent = next.book.card.title;
