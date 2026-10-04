@@ -30,12 +30,14 @@ src/
     contract.ts                # TreeUniverse, BookManifest, BookWorld, Story types + defineBook()
     registry.ts                # discovers books/*/book.ts, sorts by `order`, loads stories lazily
     story/parse.ts             # Markdown story parser (no dependency)
+    language/parse.ts          # langue/<lang>.md parser (language notes)
+    language-panel/            # "Lang kréyòl" burger + dialog, over the tale
     reading-ui/                # text card, language switch, dots, arrows, back button, bubble
     transition.ts, backdrop.ts, bubble.ts, fallback.ts, languages.ts, paging.ts, notice.ts
   shared/                      # optional toolbox: random.ts (createRng), math.ts, three/ helpers
   tree/                        # tree universe: index.ts (mountTree), scene/, overlay/, assets/konteur.png
   books/
-    ti-kannot/                 # book.ts, cover.ts, staging.ts, theme.css, story/{gcf,fr}.md, world/
+    ti-kannot/                 # book.ts, cover.ts, staging.ts, theme.css, story/{gcf,fr}.md, langue/fr.md, world/
     zanba/, konpe-lapen/       # manifest only (book.ts), ready: false
 doc/                           # architecture.md, development.md
 ```
@@ -50,6 +52,10 @@ doc/                           # architecture.md, development.md
   with `book.ts` (+ `story/gcf.md`, `cover.ts`, `staging.ts`, `world/` when ready).
 - Tale text lives in `src/books/<id>/story/<lang>.md` (gcf required, fr, en). Format: spec §4 in
   `docs/superpowers/specs/2026-09-29-universes-per-book-design.md`.
+- Language notes live in `src/books/<id>/langue/fr.md` (optional), format in
+  `docs/superpowers/specs/2026-10-04-kreyol-language-notes-design.md` §2. Every Kréyòl example is
+  quoted verbatim from `story/gcf.md` (enforced by `books.test.ts`); `draft: true` until a Creole
+  speaker validates it. The panel never changes the tale's mechanics.
 - Each universe owns its own seeded RNG (`createRng`). The tree scene is built in the v13 random
   order (`createLandscape` → `createLightTree` → `createSky`, one `createRng(11)`) — reordering
   changes the layout.

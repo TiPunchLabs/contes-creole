@@ -50,6 +50,33 @@ guard the book manifests and the tale content; `src/isolation.test.ts` guards th
 - Conventional Commits, GitHub Flow (`feat/…`, `fix/…` branches + PR to `main`).
 - Tale text is authored content: keep it byte-identical when moving it around.
 
+## Language notes
+
+A book may ship `src/books/<id>/langue/fr.md`, shown in the "Lang kréyòl" panel (burger, top right):
+
+```markdown
+---
+lang: fr
+title: Lang kréyòl
+draft: true
+---
+
+## « té ka » : ce qui durait {#te-ka}
+
+Short takeaway, visible to everyone.
+
+> Bonmaten, larivyè-la **té ka** chanté. {ye-krik}
+> Le matin, la rivière chantait.
+
+### Pou alé pli lwen
+
+Optional detail, collapsed.
+```
+
+An example is two `>` lines: the Kréyòl sentence ending with the `{page-id}` it comes from, then its
+translation. `pnpm test` fails if the sentence is not found verbatim on that page of `story/gcf.md`.
+Remove `draft: true` only after a Creole speaker has reviewed the notes.
+
 ## Troubleshooting
 
 | Symptom                                | Cause / fix                                                                   |
