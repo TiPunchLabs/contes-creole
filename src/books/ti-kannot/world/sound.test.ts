@@ -5,11 +5,26 @@ import { createAmbience, createMuteButton, readMuted, soundLevels } from "./soun
 const day = { water: 0, night: 0, rain: 0, wilt: 0 };
 
 describe("soundLevels", () => {
-  it("quiets the river and wakes the cicadas in the drought", () => {
+  it("quiets the river in the drought", () => {
     const full = soundLevels(day);
     const dry = soundLevels({ ...day, water: -1.35, wilt: 0.8 });
     expect(dry.river).toBeLessThan(full.river);
-    expect(dry.cicadas).toBeGreaterThan(full.cicadas);
+  });
+
+  it("has no insect buzz", () => {
+    expect(Object.keys(soundLevels({ ...day, wilt: 1 }))).toEqual([
+      "river",
+      "birds",
+      "frogs",
+      "rain",
+    ]);
+  });
+
+  it("stays in the background on every page", () => {
+    const loudest = { ...day, water: 0.25, rain: 1, night: 1 };
+    for (const env of [day, loudest, { ...day, water: 0.25 }]) {
+      for (const level of Object.values(soundLevels(env))) expect(level).toBeLessThanOrEqual(0.3);
+    }
   });
 
   it("swaps birds for tree frogs at night", () => {
@@ -22,6 +37,13 @@ describe("soundLevels", () => {
     const wet = soundLevels({ ...day, rain: 1 });
     expect(wet.rain).toBeGreaterThan(0);
     expect(wet.birds).toBe(0);
+  });
+
+  it("swells the rain with the downpour", () => {
+    expect(soundLevels({ ...day, rain: 0.3 }).rain).toBeLessThan(
+      soundLevels({ ...day, rain: 1 }).rain,
+    );
+    expect(soundLevels(day).rain).toBe(0);
   });
 });
 

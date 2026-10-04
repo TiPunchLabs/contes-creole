@@ -5,7 +5,6 @@ export interface SoundLevels {
   river: number;
   birds: number;
   frogs: number;
-  cicadas: number;
   rain: number;
 }
 
@@ -16,20 +15,19 @@ export interface Ambience {
 }
 
 const STORAGE_KEY = "ti-kannot:muted";
-const MASTER = 0.8;
+const MASTER = 0.2;
 const NOTE = `<path d="M9 18V5l11-2v13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" fill="currentColor"/><circle cx="17" cy="16" r="3" fill="currentColor"/>`;
 const ICON_ON = `<svg viewBox="0 0 24 24" aria-hidden="true">${NOTE}</svg>`;
 const ICON_OFF = `<svg viewBox="0 0 24 24" aria-hidden="true">${NOTE}<path d="M3 3l18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
-/** Per-layer gains for a mixed env: the river follows the water, the drought brings cicadas. */
+/** Per-layer gains for a mixed env: the river follows the water, birds by day, frogs by night. */
 export function soundLevels(env: Pick<MixedEnv, "water" | "night" | "rain" | "wilt">): SoundLevels {
   const day = 1 - env.night;
   return {
-    river: clamp(0.1 + (0.5 * (env.water + 1.35)) / 1.6, 0.1, 0.6),
-    birds: 0.5 * day * (1 - env.wilt) * (1 - env.rain),
-    frogs: 0.45 * env.night,
-    cicadas: 0.35 * day * env.wilt,
-    rain: 0.6 * env.rain,
+    river: clamp(0.05 + (0.2 * (env.water + 1.35)) / 1.6, 0.05, 0.3),
+    birds: 0.25 * day * (1 - env.wilt) * (1 - env.rain),
+    frogs: 0.2 * env.night,
+    rain: 0.3 * env.rain,
   };
 }
 
@@ -71,26 +69,35 @@ export function createAmbience(target: EventTarget = window): Ambience {
     f.Q.value = q;
     return f;
   };
+  const brownBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+  const brownData = brownBuffer.getChannelData(0);
+  let last = 0;
+  for (let i = 0; i < brownData.length; i++) {
+    last = (last + 0.02 * data[i]) / 1.02;
+    brownData[i] = last * 3.5;
+  }
+  const brown = ctx.createBufferSource();
+  brown.buffer = brownBuffer;
+  brown.loop = true;
+
   const river = layer(noise, filter("bandpass", 500, 0.6), filter("lowpass", 1400));
-  const rain = layer(noise, filter("highpass", 1800));
-  const buzz = ctx.createOscillator();
-  buzz.type = "sawtooth";
-  buzz.frequency.value = 4300;
-  const pulse = ctx.createGain();
-  pulse.gain.value = 0.5;
+  const downpour = layer(brown, filter("lowpass", 900));
+  const swell = ctx.createGain();
+  swell.gain.value = 0.75;
   const lfo = ctx.createOscillator();
-  lfo.frequency.value = 28;
+  lfo.frequency.value = 0.25;
   const depth = ctx.createGain();
-  depth.gain.value = 0.5;
-  lfo.connect(depth).connect(pulse.gain);
-  const cicadas = layer(buzz, filter("bandpass", 4300, 6), pulse);
+  depth.gain.value = 0.25;
+  lfo.connect(depth).connect(swell.gain);
+  const patter = layer(noise, filter("bandpass", 2200, 0.5), filter("lowpass", 5000), swell);
   noise.start();
-  buzz.start();
+  brown.start();
   lfo.start();
 
-  let levels: SoundLevels = { river: 0, birds: 0, frogs: 0, cicadas: 0, rain: 0 };
+  let levels: SoundLevels = { river: 0, birds: 0, frogs: 0, rain: 0 };
   let birdTimer: ReturnType<typeof setTimeout> | undefined;
   let frogTimer: ReturnType<typeof setTimeout> | undefined;
+  let dropTimer: ReturnType<typeof setTimeout> | undefined;
 
   /** One short sine note sliding from f0 to f1. */
   const note = (f0: number, f1: number, at: number, length: number, gain: number): void => {
@@ -126,8 +133,36 @@ export function createAmbience(target: EventTarget = window): Ambience {
     }
     frogTimer = setTimeout(frogs, 600 + Math.random() * 900);
   };
+  /** One drop on a leaf or a roof: a short, pitched, panned noise click. */
+  const drop = (): void => {
+    const t = ctx.currentTime;
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(levels.rain * (0.15 + Math.random() * 0.35), t);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 0.02 + Math.random() * 0.04);
+    const pan = ctx.createStereoPanner();
+    pan.pan.value = Math.random() * 1.6 - 0.8;
+    source
+      .connect(filter("bandpass", 1400 + Math.random() * 3600, 3 + Math.random() * 5))
+      .connect(env)
+      .connect(pan)
+      .connect(master);
+    source.start(t, Math.random() * 1.5, 0.08);
+  };
+  /** Scattered drops, denser as the rain grows; idles slowly when it is dry. */
+  const drops = (): void => {
+    if (levels.rain > 0.02) {
+      const count = 1 + Math.floor(levels.rain * 3);
+      for (let k = 0; k < count; k++) drop();
+      dropTimer = setTimeout(drops, 40 + Math.random() * (160 - levels.rain * 110));
+    } else {
+      dropTimer = setTimeout(drops, 400);
+    }
+  };
   birds();
   frogs();
+  drops();
 
   const resume = (): void => void ctx.resume().catch(() => {});
   target.addEventListener("pointerdown", resume);
@@ -140,8 +175,8 @@ export function createAmbience(target: EventTarget = window): Ambience {
       levels = next;
       const now = ctx.currentTime;
       river.gain.setTargetAtTime(next.river, now, 0.6);
-      rain.gain.setTargetAtTime(next.rain, now, 0.6);
-      cicadas.gain.setTargetAtTime(next.cicadas * 0.15, now, 0.6);
+      downpour.gain.setTargetAtTime(next.rain * 0.9, now, 0.8);
+      patter.gain.setTargetAtTime(next.rain * 0.35, now, 0.8);
     },
     setMuted(muted) {
       master.gain.setTargetAtTime(muted ? 0 : MASTER, ctx.currentTime, 0.3);
@@ -150,6 +185,7 @@ export function createAmbience(target: EventTarget = window): Ambience {
     dispose() {
       clearTimeout(birdTimer);
       clearTimeout(frogTimer);
+      clearTimeout(dropTimer);
       target.removeEventListener("pointerdown", resume);
       void ctx.close().catch(() => {});
     },
