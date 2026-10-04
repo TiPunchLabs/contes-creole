@@ -8,8 +8,74 @@
       content="Pyébwa a Sav — contes créoles de Guadeloupe en 3D, en kréyòl et en français."
     />
     <title>Pyébwa a Sav — Kont Gwadloup</title>
+    <style>
+      .loader {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        padding: 24px;
+        background: radial-gradient(ellipse at 50% 42%, #0d2430 0%, #050c12 70%);
+        color: #f6ead0;
+        text-align: center;
+        transition: opacity 0.7s ease;
+      }
+      .loader.is-done {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .loader-logo {
+        width: min(180px, 42vw);
+        height: auto;
+        filter: drop-shadow(0 0 28px rgba(122, 200, 60, 0.25));
+        animation: loader-breathe 2.4s ease-in-out infinite;
+      }
+      .loader-brand {
+        margin: 0;
+        font:
+          600 15px/1 "Quicksand",
+          sans-serif;
+        letter-spacing: 0.34em;
+        text-transform: lowercase;
+        color: #8fd14f;
+      }
+      .loader-line {
+        margin: 10px 0 0;
+        font:
+          italic 500 clamp(22px, 5vw, 30px)/1.2 "Cormorant Garamond",
+          serif;
+      }
+      @keyframes loader-breathe {
+        50% {
+          transform: scale(1.04);
+          opacity: 0.85;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .loader-logo {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div class="loader" role="status" aria-live="polite">
+      <img
+        class="loader-logo"
+        src="/src/app/assets/tipunchlabs-logo.webp"
+        alt=""
+        width="360"
+        height="285"
+      />
+      <div>
+        <p class="loader-brand">tipunchlabs</p>
+        <p class="loader-line">presente kont gwadeloup</p>
+      </div>
+    </div>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
