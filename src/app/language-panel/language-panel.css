@@ -1,0 +1,215 @@
+/* Restated: the display rules below would otherwise defeat the hidden attribute. */
+.lang-burger[hidden],
+.lang-scrim[hidden],
+.lang-panel[hidden],
+.lang-draft[hidden] {
+  display: none;
+}
+
+.lang-burger {
+  position: absolute;
+  right: 22px;
+  top: 22px;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(238, 243, 238, 0.12);
+  background: rgba(5, 12, 18, 0.5);
+  backdrop-filter: blur(8px);
+  color: rgba(238, 243, 238, 0.85);
+  cursor: pointer;
+  transition: color 0.25s;
+}
+
+.lang-burger:hover,
+.lang-burger:focus-visible {
+  color: var(--reading-accent);
+}
+
+/* The language switch steps aside for the burger; it keeps working the same way. */
+[data-notes] .reading-langs {
+  right: 70px;
+}
+
+.lang-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: rgba(5, 12, 18, 0.45);
+}
+
+.lang-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 31;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(440px, 92vw);
+  background: var(--reading-card-bg);
+  backdrop-filter: blur(14px);
+  border-left: 1px solid var(--reading-card-border);
+  box-shadow: -18px 0 40px rgba(0, 0, 0, 0.3);
+  color: var(--reading-text);
+  font: 400 15px/1.55 var(--reading-font-body);
+  animation: lang-slide-in 0.32s ease-out;
+}
+
+.lang-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 14px 24px;
+  border-bottom: 1px solid var(--reading-card-border);
+}
+
+.lang-title {
+  margin: 0;
+  color: var(--reading-title);
+  font: italic 600 28px/1.1 var(--reading-font-display);
+}
+
+.lang-draft {
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--reading-accent);
+  color: var(--reading-accent);
+  font: 600 10px/1 var(--reading-font-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lang-close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.lang-close:hover,
+.lang-close:focus-visible {
+  color: var(--reading-accent);
+}
+
+.lang-notes {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 24px 32px;
+}
+
+.lang-note {
+  padding: 20px 0;
+}
+
+.lang-note + .lang-note {
+  border-top: 1px dashed var(--reading-card-border);
+}
+
+.lang-note-title {
+  margin: 0 0 6px;
+  color: var(--reading-title);
+  font: italic 600 22px/1.2 var(--reading-font-display);
+}
+
+.lang-text {
+  margin: 0 0 8px;
+}
+
+.lang-example {
+  margin: 12px 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--reading-accent);
+}
+
+.lang-gcf {
+  margin: 0;
+  color: var(--reading-title);
+  font: italic 500 20px/1.3 var(--reading-font-display);
+}
+
+.lang-gcf strong {
+  color: var(--reading-accent);
+  font-weight: 600;
+}
+
+.lang-tr {
+  margin: 2px 0 0;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.lang-source {
+  margin-top: 4px;
+  font: 600 10px/1.4 var(--reading-font-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.lang-more summary {
+  cursor: pointer;
+  color: var(--reading-accent);
+  font: 600 11px/2 var(--reading-font-body);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@keyframes lang-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes lang-rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+/* Phones: a full-screen sheet rising from the bottom; nothing of the tale shows behind it. */
+@media (max-width: 600px) {
+  .lang-burger {
+    right: 12px;
+    top: 14px;
+    width: 34px;
+    height: 34px;
+  }
+
+  [data-notes] .reading-langs {
+    right: 54px;
+  }
+
+  .lang-panel {
+    width: 100%;
+    border-left: 0;
+    animation-name: lang-rise;
+  }
+
+  .lang-head {
+    padding: 14px 12px 12px 18px;
+  }
+
+  .lang-notes {
+    padding: 0 18px 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lang-panel {
+    animation: none;
+  }
+}
