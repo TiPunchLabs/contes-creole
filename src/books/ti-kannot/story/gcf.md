@@ -7,7 +7,7 @@ title: Ti Kannot é Gwo Rako
 
 <!-- label: Yé krik ! -->
 
-On lè, adan on ti bouk ki té ant gwo pyébwa, flè wouj é montangn vè, té ni on bèl larivyè ki té ka travèsé bwa-la avan i té ka alé jwenn lanmè. Bonmaten, larivyè-la té ka chanté. Tout zannimo té sav : tan Larivyè Klè ka koulé, pon moun pa té bizwen pè pou dlo.
+On lè, adan on ti bouk ki té ant gwo pyébwa, flè wouj é montangn vè, té ni on bèl larivyè ki té ka travèsé bwa-la avan i té ka alé jwenn lanmè. Bonmaten, larivyè-la té ka chanté. Tout zannimo té sav : toutan Larivyè Klè té ka koulé, pon moun pa té bizwen pè pou dlo.
 
 ## On ti zwazo é on gwo krab {#ti-kannot-e-gwo-rako}
 
@@ -15,14 +15,14 @@ On lè, adan on ti bouk ki té ant gwo pyébwa, flè wouj é montangn vè, té n
 
 Ti Kannot té piti, piti anpil. Mé i té ni dé zyé ki té ka vwè tout biten, é sitou, i té sav kouté. Pa two lwen té ka rété Gwo Rako, on gwo krab, fò toubònman. Mé i té toujou vlé ni plis. Plis fwi, plis tè… é sitou, plis dlo.
 
-## « Poukwa lésé tout dlo-tala alé an lanmè ? » {#on-lide-gwo-rako}
+## « Poukwa lésé tout dlo-lasa alé an lanmè ? » {#on-lide-gwo-rako}
 
 <!-- label: On lidé Gwo Rako -->
 
 Gwo Rako pran on gran kalbas, i plen-y. On dézyèm, on twazyèm… Lè lannuit rivé, i té ni ven gran kalbas dlo.
 
-– Gwo Rako, poukwa ou ka pran tout dlo-tala ?
-– Pou jou ké rivé épi pé ké ni dlo ankò !
+– Gwo Rako, poukwa ou ka pran tout dlo-lasa ?
+– Pou jou-la ki pé ké ni dlo ankò !
 – Mé si tout moun fè menm biten ki vou, talè pé ké ni dlo ankò.
 
 ## « Ola dlo-la alé ? » {#larivye-la-ka-desann}
@@ -48,7 +48,7 @@ On bonmaten, Ti Kannot monté byen lwen an bwa-la. Dèyè on gran wòch, on ti s
 – Poukwa i sé pou vou ?
 – Pas sé mwen ki jwenn-li !
 – Non, di Ti Kannot. Sé nou tout ki nétwayé-y. Gwo Rako tapé tè-la :
-– Mwen sé pli fò ! I fè on baryè alantou sous-la é plen kalbas a-y, ankò é ankò.
+– Sé mwen ki pli fò ! I fè on baryè alantou sous-la é plen kalbas a-y, ankò é ankò.
 – Ou sèten ?
 – Sèten !
 
@@ -68,7 +68,7 @@ On bonmaten, Ti Kannot monté byen lwen an bwa-la. Dèyè on gran wòch, on ti s
 
 Kalbas, barik, gwo kannari, ti kannari…
 
-– Sé vré, di Ti Kannot. Mé plant té ka fann, pwason té ka chèché dlo, larivyè-la té vini piti.
+– Sé vré, di Ti Kannot. Mé plant té ka fanné, pwason té ka chèché dlo, larivyè-la té vini piti.
 – Gwo Rako, konmen tan dlo a-w ké diré ?
 – Onlo tan !
 – Konmen tan ? Gwo Rako pa réponn.
@@ -77,7 +77,7 @@ Kalbas, barik, gwo kannari, ti kannari…
 
 <!-- label: Sa dlo-la ka aprann -->
 
-Ti Kannot menné Gwo Rako koté sous-la. Yonn té ka ranmasé wòch, on lòt té ka nétwayé bor larivyè-la, zwazo té ka pòté grenn. Tout moun té ka travay ansanm.
+Ti Kannot menné Gwo Rako koté sous-la. Yonn té ka ranmasé wòch, on lòt té ka nétwayé bò larivyè-la, zwazo té ka pòté grenn. Tout moun té ka travay ansanm.
 
 – Alò, poukwa zòt ka travay pou-y ?
 – Pas si nou pwotéjé-y, i ké kontinyé ban nou dlo.
@@ -87,7 +87,7 @@ Ti Kannot menné Gwo Rako koté sous-la. Yonn té ka ranmasé wòch, on lòt té
 <!-- label: Dènyé leson-la -->
 
 – É si mwen gadé dlo an mwen pou mwen tousèl ?
-– Alò, gadé-y. Ou ké konprann tousèl. Twa jou pasé, solèy-la té cho. On kalbas, dé, dis, venn… tout vid. Gwo Rako kouri koté sous-la : i té toujou ka koulé.
+– Alò, gadé-y. Ou ké konprann tousèl. Twa jou pasé, solèy-la té cho. On kalbas, dé, dis, ven… tout vid. Gwo Rako kouri koté sous-la : i té toujou ka koulé.
 – Ti Kannot… Es mwen pé édé ?
 – Wi, Gwo Rako.
 
@@ -95,7 +95,7 @@ Ti Kannot menné Gwo Rako koté sous-la. Yonn té ka ranmasé wòch, on lòt té
 
 <!-- label: On nouvo rézèv -->
 
-Dépi jou-lasa, Gwo Rako chanjé. I fè on gran rézèv dlo an mitan bouk-la, épi twa ti robinè. Té ni on sèl règ : pran sèlman sa ou bizwen. Lè on moun té ka lésé robinè-la ouvè, i pa té ka di « sé dlo an mwen ! » mé :
+Dépi jou-lasa, Gwo Rako chanjé. I fè on gran rézèv dlo anmitan bouk-la, épi twa ti robinè. Té ni on sèl règ : pran sèlman sa ou bizwen. Lè on moun té ka lésé robinè-la ouvè, i pa té ka di « sé dlo an mwen ! » mé :
 
 – Fè atansyon ! Sé dlo pou nou tout !
 
@@ -103,7 +103,7 @@ Dépi jou-lasa, Gwo Rako chanjé. I fè on gran rézèv dlo an mitan bouk-la, é
 
 <!-- label: Yé mistrikrik ! -->
 
-Nwaj vin kouvè syèl-la, lapli tonbé. Sous-la plen, ti ma-yo plen, é Larivyè Klè koumansé chanté ankò. Chhhhhh…
+Nwaj vin kouvè syèl-la, lapli tonbé. Sous-la plen, sé ti ma-la plen, é Larivyè Klè koumansé chanté ankò. Chhhhhh…
 
 – Ou té sav tout sa dépi koumansman ?
 – Non. Mwen pran tan pou mwen gadé.

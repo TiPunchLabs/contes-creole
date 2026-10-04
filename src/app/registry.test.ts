@@ -51,4 +51,26 @@ describe("createRegistry", () => {
     const registry = createRegistry({ "../books/a/book.ts": manifest("a", 1) }, {});
     await expect(registry.loadStories("a")).rejects.toThrow(/story\/gcf\.md/);
   });
+
+  const notes =
+    "---\nlang: fr\ntitle: Lang\n---\n\n## Not {#not}\n\nRézimé.\n\n> Tèks. {paj}\n> Texte.\n";
+
+  it("loads a book's language notes, null when it has none", async () => {
+    const registry = createRegistry(
+      { "../books/a/book.ts": manifest("a", 1), "../books/b/book.ts": manifest("b", 2) },
+      {},
+      { "../books/a/langue/fr.md": async () => notes },
+    );
+    expect((await registry.loadNotes("a"))?.notes.map((n) => n.id)).toEqual(["not"]);
+    expect(await registry.loadNotes("b")).toBeNull();
+  });
+
+  it("rejects malformed notes, naming the file", async () => {
+    const registry = createRegistry(
+      { "../books/a/book.ts": manifest("a", 1) },
+      {},
+      { "../books/a/langue/fr.md": async () => "oops" },
+    );
+    await expect(registry.loadNotes("a")).rejects.toThrow(/langue\/fr\.md:1: missing front matter/);
+  });
 });

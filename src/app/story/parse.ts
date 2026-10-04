@@ -3,7 +3,7 @@ import { LANGS, type Lang, type Story, type StoryPage } from "../contract";
 /** Thrown for a malformed story file; the message starts with `file:line:`. */
 export class StoryParseError extends Error {}
 
-const HEADING = /^##\s+(.+?)\s+\{#([a-z0-9]+(?:-[a-z0-9]+)*)\}$/;
+export const HEADING = /^##\s+(.+?)\s+\{#([a-z0-9]+(?:-[a-z0-9]+)*)\}$/;
 const LABEL = /^<!--\s*label:\s*(.*?)\s*-->$/;
 const META = /^([a-z]+):\s*(.*)$/;
 const DIALOGUE = "– ";
@@ -15,25 +15,40 @@ const ESCAPES: Record<string, string> = {
   "'": "&#39;",
 };
 
-/** Renders `**bold**` and `*italic*` to escaped HTML, and strips them for plain text. */
+/** `_italic_` as Prettier writes it; underscores inside words (`snake_case`) are left alone. */
+const UNDERSCORE_ITALIC = /(?<![\p{L}\p{N}_])_(.+?)_(?![\p{L}\p{N}_])/gu;
+
+/** Renders `**bold**`, `*italic*` and `_italic_` to escaped HTML, and strips them for plain text. */
 export function renderInline(source: string): { text: string; html: string } {
   const html = source
     .replace(/[&<>"']/g, (c) => ESCAPES[c] ?? c)
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.+?)\*/g, "<em>$1</em>");
-  const text = source.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1");
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(UNDERSCORE_ITALIC, "<em>$1</em>");
+  const text = source
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(UNDERSCORE_ITALIC, "$1");
   return { text, html };
 }
 
 const isLang = (value: string | undefined): value is Lang => LANGS.includes(value as Lang);
 
-/** Parses one `story/<lang>.md` file; `file` names errors and must end with `<lang>.md`. */
-export function parseStory(source: string, file: string): Story {
-  const lines = source.replace(/\r\n?/g, "\n").split("\n");
-  const fail = (line: number, message: string): never => {
-    throw new StoryParseError(`${file}:${line}: ${message}`);
-  };
+/** Front matter shared by story and notes files. */
+export interface Header {
+  lang: Lang;
+  title: string;
+  meta: Map<string, string>;
+  /** Index of the closing `---` line. */
+  end: number;
+}
 
+/** Reads the `---` front matter and checks lang (matching the file name) and title. */
+export function readHeader(
+  lines: string[],
+  file: string,
+  fail: (line: number, message: string) => never,
+): Header {
   if (lines[0]?.trim() !== "---") fail(1, "missing front matter");
   const meta = new Map<string, string>();
   let i = 1;
@@ -51,6 +66,17 @@ export function parseStory(source: string, file: string): Story {
     fail(1, `lang "${lang}" does not match the file name`);
   const title = meta.get("title");
   if (!title) return fail(1, "missing title");
+  return { lang, title, meta, end: i };
+}
+
+/** Parses one `story/<lang>.md` file; `file` names errors and must end with `<lang>.md`. */
+export function parseStory(source: string, file: string): Story {
+  const lines = source.replace(/\r\n?/g, "\n").split("\n");
+  const fail = (line: number, message: string): never => {
+    throw new StoryParseError(`${file}:${line}: ${message}`);
+  };
+
+  const { lang, title, end } = readHeader(lines, file, fail);
 
   const pages: StoryPage[] = [];
   const ids = new Set<string>();
@@ -83,7 +109,7 @@ export function parseStory(source: string, file: string): Story {
     page = null;
   };
 
-  for (i += 1; i < lines.length; i++) {
+  for (let i = end + 1; i < lines.length; i++) {
     const line = lines[i].trim();
     const n = i + 1;
     if (line.startsWith("## ")) {

@@ -1,16 +1,21 @@
-import type { BookManifest, Lang, Stories, Story } from "./contract";
+import type { BookManifest, Lang, LanguageNotes, Stories, Story } from "./contract";
+import { parseNotes } from "./language/parse";
 import { parseStory } from "./story/parse";
 
 type ManifestModules = Record<string, { default: BookManifest }>;
 type StoryLoaders = Record<string, () => Promise<string>>;
+type NotesLoaders = Record<string, () => Promise<string>>;
 
 export interface Registry {
   books: BookManifest[];
   loadStories(bookId: string): Promise<Stories>;
+  /** The book's `langue/fr.md`, parsed; null when the book has none. */
+  loadNotes(bookId: string): Promise<LanguageNotes | null>;
 }
 
 const BOOK_PATH = /\/books\/([^/]+)\/book\.ts$/;
 const STORY_PATH = /\/books\/([^/]+)\/story\/[^/]+\.md$/;
+const NOTES_PATH = /\/books\/([^/]+)\/langue\/fr\.md$/;
 
 /** Copies Kréyòl labels onto pages of a translation that do not set their own. */
 function withLabels(story: Story, source: Story): Story {
@@ -22,7 +27,11 @@ function withLabels(story: Story, source: Story): Story {
 }
 
 /** Builds the book registry from glob results; validates folder ids and unique order values. */
-export function createRegistry(manifests: ManifestModules, stories: StoryLoaders): Registry {
+export function createRegistry(
+  manifests: ManifestModules,
+  stories: StoryLoaders,
+  notes: NotesLoaders = {},
+): Registry {
   const books = Object.entries(manifests).map(([path, module]) => {
     const folder = BOOK_PATH.exec(path)?.[1];
     const book = module.default;
@@ -55,10 +64,17 @@ export function createRegistry(manifests: ManifestModules, stories: StoryLoaders
         en: byLang.en && withLabels(byLang.en, gcf),
       };
     },
+    async loadNotes(bookId) {
+      const entry = Object.entries(notes).find(([path]) => NOTES_PATH.exec(path)?.[1] === bookId);
+      if (!entry) return null;
+      const [path, load] = entry;
+      return parseNotes(await load(), path);
+    },
   };
 }
 
 export const registry = createRegistry(
   import.meta.glob<{ default: BookManifest }>("../books/*/book.ts", { eager: true }),
   import.meta.glob<string>("../books/*/story/*.md", { query: "?raw", import: "default" }),
+  import.meta.glob<string>("../books/*/langue/fr.md", { query: "?raw", import: "default" }),
 );

@@ -1,7 +1,15 @@
 import { createBackdrop } from "./backdrop";
 import { createBubble } from "./bubble";
-import type { BookHandle, BookManifest, MountTree, Stories, TreeHandle } from "./contract";
+import type {
+  BookHandle,
+  BookManifest,
+  LanguageNotes,
+  MountTree,
+  Stories,
+  TreeHandle,
+} from "./contract";
 import { showFallback } from "./fallback";
+import { createLanguagePanel } from "./language-panel/language-panel";
 import { readingLangs, storyFor, type ReadingLang } from "./languages";
 import { showNotice } from "./notice";
 import { clampPage, createPager } from "./paging";
@@ -23,6 +31,8 @@ export interface AppDeps {
   mountTree: MountTree;
   books: BookManifest[];
   loadStories(bookId: string): Promise<Stories>;
+  /** The book's language notes; null when it has none. */
+  loadNotes(bookId: string): Promise<LanguageNotes | null>;
 }
 
 type Mode = "tree" | "dive" | "book" | "rise";
@@ -33,7 +43,7 @@ interface OpenBook {
   handle: BookHandle;
 }
 
-/** Shell: mounts the tree, runs tree ⇄ book transitions, owns reading UI and book-mode input. */
+/** Shell: mounts the tree, runs tree ⇄ book transitions, owns reading UI, language panel and book-mode input. */
 export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } {
   root.classList.add("app");
   const treeLayer = addLayer("app-tree");
@@ -45,6 +55,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     onLang: (lang) => setLang(lang),
     onBack: () => void leave(),
   });
+  const panel = createLanguagePanel(root);
   const bubble = createBubble(root);
   const flash = createFlash(root);
   const pager = createPager();
@@ -85,6 +96,16 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     }
   }
 
+  /** Loads a book's language notes; a broken file only costs the burger, never the tale. */
+  async function loadNotes(bookId: string): Promise<LanguageNotes | null> {
+    try {
+      return await deps.loadNotes(bookId);
+    } catch (err) {
+      console.error(`Language notes of "${bookId}" failed to load`, err);
+      return null;
+    }
+  }
+
   function render(): void {
     reading.render({ page, lang, showHint: page === 0 && !scrolled });
   }
@@ -98,6 +119,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     }
     book = null;
     bubble.hide();
+    panel.detach();
     reading.close();
     bookLayer.replaceChildren();
     bookLayer.hidden = true;
@@ -112,7 +134,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     mode = "dive";
     bubble.hide();
     const loading = Promise.resolve().then(() =>
-      Promise.all([manifest.world?.(), deps.loadStories(bookId)]),
+      Promise.all([manifest.world?.(), deps.loadStories(bookId), loadNotes(bookId)]),
     );
     loading.catch(() => undefined);
     try {
@@ -122,7 +144,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       ]);
       activeTree.pause();
       treeLayer.hidden = true;
-      const [world, stories] = await loading;
+      const [world, stories, notes] = await loading;
       if (!world) throw new Error(`Book "${bookId}" has no world`);
       if (!readingLangs(stories).includes(lang)) lang = "gcf";
       page = 0;
@@ -138,6 +160,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       book = { id: bookId, stories, handle };
       reading.open(stories);
       render();
+      if (notes) panel.attach(notes, stories.gcf);
       mode = "book";
     } catch (err) {
       console.error(`Book "${bookId}" failed to open`, err);
@@ -184,7 +207,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     if (direction !== 0) goPage(page + direction);
   };
   const onWheel = (e: WheelEvent): void => {
-    if (mode !== "book") return;
+    if (mode !== "book" || panel.isOpen) return;
     e.preventDefault();
     step(e.deltaY);
   };
@@ -192,7 +215,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     touchY = e.pointerType === "mouse" ? null : e.clientY;
   };
   const onPointerMove = (e: PointerEvent): void => {
-    if (mode !== "book" || touchY === null) return;
+    if (mode !== "book" || touchY === null || panel.isOpen) return;
     const dy = touchY - e.clientY;
     touchY = e.clientY;
     step(dy * 2.2);
@@ -202,6 +225,10 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   };
   const onKey = (e: KeyboardEvent): void => {
     if (mode !== "book") return;
+    if (panel.isOpen) {
+      if (e.key === "Escape") panel.close();
+      return;
+    }
     if (NEXT_KEYS.includes(e.key)) {
       e.preventDefault();
       goPage(page + 1);
@@ -231,6 +258,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       book?.handle.dispose();
       tree?.dispose();
       bubble.dispose();
+      panel.dispose();
       root.replaceChildren();
     },
   };

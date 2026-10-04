@@ -36,7 +36,13 @@ const frames = (count: number): Promise<void> =>
 
 const root = document.querySelector<HTMLElement>("#app");
 const textures = watchTextures();
-if (root) startApp(root, { mountTree, books: registry.books, loadStories: registry.loadStories });
+if (root)
+  startApp(root, {
+    mountTree,
+    books: registry.books,
+    loadStories: registry.loadStories,
+    loadNotes: registry.loadNotes,
+  });
 void dismissLoader(
   document.querySelector<HTMLElement>(".loader"),
   Promise.all([document.fonts.ready, textures.settled()]).then(() => frames(3)),

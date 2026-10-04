@@ -7,6 +7,12 @@ const storyFolders = new Set(
 const stagings = import.meta.glob<{ STAGING: Record<string, unknown> }>("./*/staging.ts", {
   eager: true,
 });
+const notesFolders = new Set(
+  Object.keys(import.meta.glob("./*/langue/fr.md")).map((p) => p.split("/")[1]),
+);
+
+/** Folds spacing (incl. no-break spaces) and apostrophes so quotes compare on words only. */
+const normalize = (text: string): string => text.replace(/[’']/g, "'").replace(/\s+/g, " ").trim();
 
 describe("books", () => {
   it("have unique ids and order values", () => {
@@ -34,6 +40,28 @@ describe("books", () => {
       expect(stories.gcf.pages.every((p) => p.label !== "")).toBe(true);
       const staging = stagings[`./${id}/staging.ts`];
       if (staging) expect(Object.keys(staging.STAGING).sort()).toEqual([...ids].sort());
+    });
+
+    it("quotes its language examples verbatim from its Kréyòl pages", async () => {
+      if (!notesFolders.has(id)) return;
+      const [stories, notes] = await Promise.all([
+        registry.loadStories(id),
+        registry.loadNotes(id),
+      ]);
+      const pages = new Map(
+        stories.gcf.pages.map((p) => [
+          p.id,
+          normalize([p.title, p.label, ...p.blocks.map((b) => b.text)].join(" ")),
+        ]),
+      );
+      expect(notes).not.toBeNull();
+      for (const note of notes?.notes ?? []) {
+        for (const example of [...note.examples, ...(note.moreExamples ?? [])]) {
+          const page = pages.get(example.pageId);
+          expect(page, `${note.id}: unknown page "${example.pageId}"`).toBeDefined();
+          expect(page, `${note.id}: "${example.gcf.text}"`).toContain(normalize(example.gcf.text));
+        }
+      }
     });
   });
 });

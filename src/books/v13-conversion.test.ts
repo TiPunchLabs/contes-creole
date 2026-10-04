@@ -21,6 +21,29 @@ function v13Pages(): V13Page[] {
   return JSON.parse(match[1]) as V13Page[];
 }
 
+/**
+ * Corrections made to the tale after the v13 port (2026-10-04 Kréyòl review, see
+ * docs/kreyol/2026-10-04-review-ti-kannot.md). Applied to the mockup text before comparing,
+ * so any other drift from v13 still fails.
+ */
+const CORRECTIONS: { lang: "kr" | "fr"; from: string; to: string }[] = [
+  { lang: "kr", from: "tan Larivyè Klè ka koulé", to: "toutan Larivyè Klè té ka koulé" },
+  { lang: "kr", from: "Pou jou ké rivé épi pé ké", to: "Pou jou-la ki pé ké" },
+  { lang: "kr", from: "dlo-tala", to: "dlo-lasa" },
+  { lang: "kr", from: "Mwen sé pli fò", to: "Sé mwen ki pli fò" },
+  { lang: "kr", from: "plant té ka fann,", to: "plant té ka fanné," },
+  { lang: "kr", from: "bor larivyè-la", to: "bò larivyè-la" },
+  { lang: "kr", from: "dis, venn…", to: "dis, ven…" },
+  { lang: "kr", from: "an mitan bouk-la", to: "anmitan bouk-la" },
+  { lang: "kr", from: "ti ma-yo plen", to: "sé ti ma-la plen" },
+  { lang: "fr", from: "J'en ai juste assez pour moi.", to: "Cette eau est à moi." },
+  { lang: "fr", from: "Mais après ? Gwo Rako", to: "Combien de temps ? Gwo Rako" },
+];
+
+/** Mockup text with the post-port corrections applied. */
+const corrected = (lang: "kr" | "fr", text: string): string =>
+  CORRECTIONS.filter((c) => c.lang === lang).reduce((acc, c) => acc.split(c.from).join(c.to), text);
+
 const plain = (page: StoryPage | undefined): string =>
   page ? page.blocks.map((b) => b.text).join(" ") : "";
 
@@ -45,16 +68,24 @@ describe("Ti Kannot conversion from v13", () => {
     expect(gcf.pages.map((p) => p.id)).toEqual(IDS);
   });
 
+  it("applies every listed correction to the mockup text", () => {
+    const text = (lang: "kr" | "fr"): string =>
+      v13Pages()
+        .map((p) => p[lang].b)
+        .join(" ");
+    for (const c of CORRECTIONS) expect(text(c.lang), c.from).toContain(c.from);
+  });
+
   it("keeps every Kréyòl and French word, label and gloss", async () => {
     const { gcf, fr } = await registry.loadStories("ti-kannot");
     const pages = v13Pages();
     expect(gcf.pages).toHaveLength(pages.length);
     pages.forEach((v13, i) => {
       expect(gcf.pages[i].label).toBe(v13.label);
-      expect(gcf.pages[i].title).toBe(v13.kr.t);
-      expect(plain(gcf.pages[i])).toBe(v13.kr.b);
-      expect(fr?.pages[i].title).toBe(v13.fr.t);
-      expect(plain(fr?.pages[i])).toBe(v13.fr.b);
+      expect(gcf.pages[i].title).toBe(corrected("kr", v13.kr.t));
+      expect(plain(gcf.pages[i])).toBe(corrected("kr", v13.kr.b));
+      expect(fr?.pages[i].title).toBe(corrected("fr", v13.fr.t));
+      expect(plain(fr?.pages[i])).toBe(corrected("fr", v13.fr.b));
       expect(fr?.pages[i].summary).toBe(v13.kr.g);
     });
   });
