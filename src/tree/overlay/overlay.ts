@@ -23,8 +23,8 @@ export function createTreeOverlay(
     </div>
     <div class="tree-intro"><div class="tree-intro-inner">
       <p class="tree-intro-title">Chak fèy sé on kont.</p>
-      <p class="tree-intro-text">Chaque feuille est un conte. Grimpez dans l'arbre pour trouver le vôtre.</p>
-      <div class="tree-intro-hint"><span>Défilez · Glisez</span>${MOUSE}</div>
+      <p class="tree-intro-text">Chaque feuille est un conte. Cueillez celui qui vous appelle.</p>
+      <div class="tree-intro-hint"><span>Défilez · Glissez</span>${MOUSE}</div>
     </div></div>
     <div class="tree-label">
       <div class="tree-label-title"></div>
