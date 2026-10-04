@@ -105,7 +105,7 @@ export function createLanguagePanel(root: HTMLElement): LanguagePanel {
   const head = make("header", "lang-head");
   const title = make("h2", "lang-title");
   title.id = TITLE_ID;
-  const draft = make("span", "lang-draft", "brouyon — à valider");
+  const draft = make("span", "lang-draft", "bwouyon — à valider");
   const closeButton = make("button", "lang-close");
   closeButton.type = "button";
   closeButton.innerHTML = CROSS;

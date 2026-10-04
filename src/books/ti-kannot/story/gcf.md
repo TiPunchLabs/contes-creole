@@ -88,14 +88,14 @@ Ti Kannot menné Gwo Rako koté sous-la. Yonn té ka ranmasé wòch, on lòt té
 
 – É si mwen gadé dlo an mwen pou mwen tousèl ?
 – Alò, gadé-y. Ou ké konprann tousèl. Twa jou pasé, solèy-la té cho. On kalbas, dé, dis, ven… tout vid. Gwo Rako kouri koté sous-la : i té toujou ka koulé.
-– Ti Kannot… Es mwen pé édé ?
+– Ti Kannot… Ès mwen pé édé ?
 – Wi, Gwo Rako.
 
 ## « Sé dlo pou nou tout ! » {#on-nouvo-rezev}
 
 <!-- label: On nouvo rézèv -->
 
-Dépi jou-lasa, Gwo Rako chanjé. I fè on gran rézèv dlo anmitan bouk-la, épi twa ti robinè. Té ni on sèl règ : pran sèlman sa ou bizwen. Lè on moun té ka lésé robinè-la ouvè, i pa té ka di « sé dlo an mwen ! » mé :
+Dépi jou-lasa, Gwo Rako chanjé. I fè on gran rézèv dlo anmitan bouk-la, épi twa ti wobinè. Té ni on sèl règ : pran sèlman sa ou bizwen. Lè on moun té ka lésé wobinè-la ouvè, i pa té ka di « sé dlo an mwen ! » mé :
 
 – Fè atansyon ! Sé dlo pou nou tout !
 

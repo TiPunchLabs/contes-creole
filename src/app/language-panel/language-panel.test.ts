@@ -84,7 +84,7 @@ describe("language panel", () => {
     expect($(".lang-draft")?.hidden).toBe(true);
     panel.attach(notes(true), STORY);
     expect($(".lang-draft")?.hidden).toBe(false);
-    expect($(".lang-draft")?.textContent).toBe("brouyon — à valider");
+    expect($(".lang-draft")?.textContent).toBe("bwouyon — à valider");
   });
 
   it("drops the page reference of an unknown page with a warning", () => {

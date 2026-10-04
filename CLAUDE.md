@@ -56,6 +56,9 @@ doc/                           # architecture.md, development.md
   `docs/superpowers/specs/2026-10-04-kreyol-language-notes-design.md` §2. Every Kréyòl example is
   quoted verbatim from `story/gcf.md` (enforced by `books.test.ts`); `draft: true` until a Creole
   speaker validates it. The panel never changes the tale's mechanics.
+- Any Kréyòl you write or edit (tale, notes, UI strings, `index.html`) follows
+  `docs/kreyol/AGENT_RULES.md` (gcf, GEREC conventions, source hierarchy, no mixing with other
+  creoles; uncertain cases go to `docs/kreyol/variants.md`, never into the text).
 - Each universe owns its own seeded RNG (`createRng`). The tree scene is built in the v13 random
   order (`createLandscape` → `createLightTree` → `createSky`, one `createRng(11)`) — reordering
   changes the layout.

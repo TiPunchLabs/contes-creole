@@ -47,7 +47,7 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       <button type="button" class="reading-prev" aria-label="←">${ARROW}</button>
       <button type="button" class="reading-next" aria-label="→">${ARROW}</button>
     </div>
-    <div class="reading-hint" aria-hidden="true"><span>Défilez pou kontinyé</span>${ARROW}</div>`;
+    <div class="reading-hint" aria-hidden="true"><span>Défilez pour continuer</span>${ARROW}</div>`;
   root.append(el);
 
   const part = <T extends HTMLElement>(selector: string): T => {
