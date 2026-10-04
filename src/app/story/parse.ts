@@ -15,13 +15,20 @@ const ESCAPES: Record<string, string> = {
   "'": "&#39;",
 };
 
-/** Renders `**bold**` and `*italic*` to escaped HTML, and strips them for plain text. */
+/** `_italic_` as Prettier writes it; underscores inside words (`snake_case`) are left alone. */
+const UNDERSCORE_ITALIC = /(?<![\p{L}\p{N}_])_(.+?)_(?![\p{L}\p{N}_])/gu;
+
+/** Renders `**bold**`, `*italic*` and `_italic_` to escaped HTML, and strips them for plain text. */
 export function renderInline(source: string): { text: string; html: string } {
   const html = source
     .replace(/[&<>"']/g, (c) => ESCAPES[c] ?? c)
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.+?)\*/g, "<em>$1</em>");
-  const text = source.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1");
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(UNDERSCORE_ITALIC, "<em>$1</em>");
+  const text = source
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(UNDERSCORE_ITALIC, "$1");
   return { text, html };
 }
 

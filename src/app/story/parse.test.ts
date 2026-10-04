@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseStory } from "./parse";
+import { parseStory, renderInline } from "./parse";
 
 const md = (body: string, lang = "gcf"): string =>
   `---\nlang: ${lang}\ntitle: Ti Kannot é Gwo Rako\n---\n\n${body}`;
@@ -56,6 +56,13 @@ describe("parseStory", () => {
       kind: "text",
       text: `Gwo Rako <b>&"'</b>`,
       html: "<strong>Gwo</strong> <em>Rako</em> &lt;b&gt;&amp;&quot;&#39;&lt;/b&gt;",
+    });
+  });
+
+  it("renders Prettier's _italic_ but keeps underscores inside words", () => {
+    expect(renderInline("_sous-la_, _piti_ é snake_case_word")).toEqual({
+      text: "sous-la, piti é snake_case_word",
+      html: "<em>sous-la</em>, <em>piti</em> é snake_case_word",
     });
   });
 
