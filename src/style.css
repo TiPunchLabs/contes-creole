@@ -70,6 +70,8 @@ body {
 .app-flash {
   position: absolute;
   inset: 0;
+  /* Above the language panel and burger (30–31) and book overlays; below notice and fallback. */
+  z-index: 35;
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(circle at 50% 50%, #dffcf6 0%, #2fa89a 45%, #0a1e33 100%);

@@ -119,6 +119,29 @@ describe("language panel", () => {
     expect(document.activeElement).toBe(last);
   });
 
+  it("makes everything behind the open panel inert, and restores it on close", () => {
+    const tale = document.createElement("div");
+    tale.className = "tale";
+    tale.setAttribute("inert", "");
+    const reading = document.createElement("div");
+    reading.className = "reading";
+    root.prepend(tale, reading);
+    panel.attach(notes(false), STORY);
+    panel.open();
+    expect($(".reading")?.hasAttribute("inert")).toBe(true);
+    expect($(".lang-burger")?.hasAttribute("inert")).toBe(true);
+    expect($(".lang-panel")?.hasAttribute("inert")).toBe(false);
+    expect($(".lang-scrim")?.hasAttribute("inert")).toBe(false);
+    panel.close();
+    expect($(".reading")?.hasAttribute("inert")).toBe(false);
+    expect($(".lang-burger")?.hasAttribute("inert")).toBe(false);
+    expect($(".tale")?.hasAttribute("inert")).toBe(true);
+    expect(document.activeElement).toBe($(".lang-burger"));
+    panel.open();
+    panel.detach();
+    expect($(".reading")?.hasAttribute("inert")).toBe(false);
+  });
+
   it("cannot open without notes and closes on detach", () => {
     panel.open();
     expect(panel.isOpen).toBe(false);

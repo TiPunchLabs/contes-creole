@@ -297,6 +297,8 @@ describe("app language panel", () => {
     root.dispatchEvent(new PointerEvent("pointerup", { pointerType: "touch" }));
     expect(wheel.defaultPrevented).toBe(false);
     expect(handle.setPage).not.toHaveBeenCalled();
+    expect($(".reading")?.hasAttribute("inert")).toBe(true);
+    expect($(".app-book")?.hasAttribute("inert")).toBe(true);
     expect($(".reading-title")?.textContent).toBe("Paj en");
   });
 

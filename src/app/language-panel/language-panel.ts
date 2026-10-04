@@ -116,8 +116,23 @@ export function createLanguagePanel(root: HTMLElement): LanguagePanel {
   root.append(burger, scrim, panel);
 
   let isOpen = false;
+  let inerted: Element[] = [];
+
+  /** Keeps keyboard and pointer out of the tale (and the burger) while the dialog is open. */
+  const setBackgroundInert = (on: boolean): void => {
+    if (on) {
+      inerted = [...root.children].filter(
+        (el) => el !== panel && el !== scrim && !el.hasAttribute("inert"),
+      );
+      for (const el of inerted) el.setAttribute("inert", "");
+    } else {
+      for (const el of inerted) el.removeAttribute("inert");
+      inerted = [];
+    }
+  };
 
   const hide = (): void => {
+    if (isOpen) setBackgroundInert(false);
     isOpen = false;
     scrim.hidden = true;
     panel.hidden = true;
@@ -126,6 +141,7 @@ export function createLanguagePanel(root: HTMLElement): LanguagePanel {
   const open = (): void => {
     if (burger.hidden || isOpen) return;
     isOpen = true;
+    setBackgroundInert(true);
     scrim.hidden = false;
     panel.hidden = false;
     burger.setAttribute("aria-expanded", "true");
