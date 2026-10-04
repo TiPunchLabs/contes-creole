@@ -1,9 +1,62 @@
 [data-book="ti-kannot"] {
-  --reading-accent: #7af0dc;
-  --reading-text: rgba(238, 243, 238, 0.92);
-  --reading-title: #f6ead0;
-  --reading-card-bg: rgba(5, 14, 20, 0.58);
-  --reading-card-border: rgba(122, 240, 220, 0.18);
-  --reading-font-display: "Cormorant Garamond", serif;
+  --reading-accent: #1f8f86;
+  --reading-text: #4a3524;
+  --reading-title: #5a2f1c;
+  --reading-card-bg: rgba(250, 243, 228, 0.88);
+  --reading-card-border: rgba(120, 84, 52, 0.22);
+  --reading-font-display: "Caveat", "Cormorant Garamond", cursive;
   --reading-font-body: "Quicksand", sans-serif;
+}
+
+[data-book="ti-kannot"] .reading-card {
+  box-shadow: 0 18px 40px rgba(60, 40, 20, 0.18);
+}
+
+[data-book="ti-kannot"] .reading-title {
+  font-style: normal;
+  font-size: clamp(28px, 3vw, 38px);
+}
+
+[data-book="ti-kannot"] .reading-num {
+  font-style: normal;
+  color: rgba(74, 53, 36, 0.55);
+}
+
+[data-book="ti-kannot"] .reading-gloss {
+  font-style: normal;
+  font-size: 19px;
+  color: rgba(74, 53, 36, 0.78);
+  border-top-color: rgba(31, 143, 134, 0.3);
+}
+
+.tk-sound {
+  position: absolute;
+  top: 72px;
+  right: 18px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  border: 1px solid rgba(120, 84, 52, 0.25);
+  border-radius: 50%;
+  background: rgba(250, 243, 228, 0.75);
+  color: #5a2f1c;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tk-sound:hover {
+  background: rgba(250, 243, 228, 0.95);
+}
+
+.tk-sound:focus-visible {
+  outline: 2px solid #1f8f86;
+  outline-offset: 2px;
+}
+
+.tk-sound svg {
+  width: 100%;
+  height: 100%;
 }

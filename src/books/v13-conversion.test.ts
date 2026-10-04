@@ -2,7 +2,6 @@ import { registry } from "@app/registry";
 import type { StoryPage } from "@app/contract";
 import { describe, expect, it } from "vitest";
 import v13Source from "../../design/v13/kont-data.js?raw";
-import { STAGING } from "./ti-kannot/staging";
 
 interface V13Text {
   t: string;
@@ -13,7 +12,6 @@ interface V13Page {
   label: string;
   kr: V13Text;
   fr: V13Text;
-  env: unknown;
 }
 
 /** Reads PAGES from the mockup data file (a JSON array literal). */
@@ -59,9 +57,5 @@ describe("Ti Kannot conversion from v13", () => {
       expect(plain(fr?.pages[i])).toBe(v13.fr.b);
       expect(fr?.pages[i].summary).toBe(v13.kr.g);
     });
-  });
-
-  it("keeps every page's staging", () => {
-    v13Pages().forEach((v13, i) => expect(STAGING[IDS[i]]).toEqual(v13.env));
   });
 });

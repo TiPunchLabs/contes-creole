@@ -14,7 +14,8 @@ export interface Stage {
   readonly camera: THREE.PerspectiveCamera;
   project(point: THREE.Vector3): ScreenPoint;
   pointer(event: PointerEvent): { x: number; y: number };
-  start(frame: (time: number, dt: number) => void): void;
+  /** Starts the loop; `render` replaces the default `renderer.render(scene, camera)`. */
+  start(frame: (time: number, dt: number) => void, render?: () => void): void;
   stop(): void;
   dispose(): void;
 }
@@ -101,7 +102,7 @@ export function createStage(container: HTMLElement): Stage {
         y: -(((event.clientY - r.top) / r.height) * 2 - 1),
       };
     },
-    start: (frame) => {
+    start: (frame, render) => {
       stop();
       last = 0;
       const loop = (now: number): void => {
@@ -110,7 +111,8 @@ export function createStage(container: HTMLElement): Stage {
         last = now;
         resize();
         frame((now - t0) / 1000, dt);
-        renderer.render(scene, camera);
+        if (render) render();
+        else renderer.render(scene, camera);
       };
       raf = requestAnimationFrame(loop);
     },
