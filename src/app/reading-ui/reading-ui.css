@@ -1,0 +1,366 @@
+:root {
+  --reading-accent: #7af0dc;
+  --reading-text: rgba(238, 243, 238, 0.92);
+  --reading-title: #f6ead0;
+  --reading-card-bg: rgba(5, 14, 20, 0.58);
+  --reading-card-border: rgba(122, 240, 220, 0.18);
+  --reading-font-display: "Cormorant Garamond", serif;
+  --reading-font-body: "Quicksand", sans-serif;
+}
+
+.reading {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.reading button,
+.reading-langs,
+.reading-card {
+  pointer-events: auto;
+}
+
+.reading-back {
+  position: absolute;
+  left: 22px;
+  top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--reading-title);
+  font: italic 600 18px/1 var(--reading-font-display);
+  cursor: pointer;
+  padding: 10px 12px;
+}
+
+.reading-back:hover {
+  color: var(--reading-accent);
+}
+
+.reading-langs {
+  position: absolute;
+  right: 22px;
+  top: 22px;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(5, 12, 18, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(238, 243, 238, 0.12);
+}
+
+.reading-langs button {
+  border: 0;
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font: 600 11px/1 var(--reading-font-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: transparent;
+  color: rgba(238, 243, 238, 0.75);
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+
+.reading-langs button[aria-pressed="true"] {
+  background: var(--reading-accent);
+  color: #0a1e33;
+}
+
+.reading-card {
+  position: absolute;
+  left: clamp(16px, 4vw, 56px);
+  bottom: clamp(16px, 5vh, 56px);
+  box-sizing: border-box;
+  width: min(460px, calc(100vw - 32px));
+  max-height: 52vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px 28px 24px;
+  border-radius: 18px;
+  background: var(--reading-card-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--reading-card-border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  transition:
+    opacity 0.35s,
+    transform 0.35s;
+  overflow: auto;
+}
+
+.reading-card.is-changing {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.reading-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.reading-label {
+  font: 600 11px/1 var(--reading-font-body);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--reading-accent);
+}
+
+.reading-num {
+  font: italic 500 14px/1 var(--reading-font-display);
+  color: rgba(238, 243, 238, 0.55);
+}
+
+.reading-title {
+  margin: 0;
+  font: italic 600 clamp(22px, 2.4vw, 30px)/1.15 var(--reading-font-display);
+  color: var(--reading-title);
+  text-wrap: balance;
+}
+
+.reading-body {
+  font: 400 16px/1.55 var(--reading-font-body);
+  color: var(--reading-text);
+  text-wrap: pretty;
+}
+
+.reading-body p,
+.reading-gloss p {
+  margin: 0;
+}
+
+.reading-gloss {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(122, 240, 220, 0.25);
+  font: italic 500 15px/1.5 var(--reading-font-display);
+  color: rgba(238, 243, 238, 0.7);
+  text-wrap: pretty;
+}
+
+.reading-dots {
+  position: absolute;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.reading-dot {
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  width: 6px;
+  height: 8px;
+  border-radius: 3px;
+  background: rgba(238, 243, 238, 0.25);
+  transition:
+    height 0.35s,
+    background 0.35s;
+}
+
+.reading-dot.is-done {
+  background: color-mix(in srgb, var(--reading-accent) 55%, transparent);
+}
+
+.reading-dot.is-current {
+  height: 26px;
+  background: var(--reading-accent);
+  box-shadow: 0 0 12px var(--reading-accent);
+}
+
+.reading-arrows {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  display: flex;
+  gap: 8px;
+}
+
+.reading-arrows button {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(238, 243, 238, 0.2);
+  background: rgba(5, 12, 18, 0.5);
+  backdrop-filter: blur(8px);
+  color: var(--reading-title);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.reading-arrows button:hover {
+  border-color: var(--reading-accent);
+  color: var(--reading-accent);
+}
+
+.reading-next {
+  transform: rotate(180deg);
+}
+
+.reading-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 500 11px/1 var(--reading-font-body);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(122, 240, 220, 0.8);
+}
+
+.reading-hint[hidden] {
+  display: none;
+}
+
+.reading-hint svg {
+  width: 14px;
+  height: 14px;
+  animation: reading-bob 1.8s ease-in-out infinite;
+}
+
+@keyframes reading-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+/* Phones in portrait: full-width card above a bottom bar holding dots (left) and arrows (right). */
+@media (max-width: 600px) {
+  .reading-back {
+    left: 6px;
+    top: 12px;
+  }
+
+  .reading-back span {
+    display: none;
+  }
+
+  .reading-langs {
+    right: 12px;
+    top: 14px;
+  }
+
+  .reading-langs button {
+    padding: 8px 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .reading-card {
+    left: 12px;
+    right: 12px;
+    bottom: 96px;
+    width: auto;
+    max-height: calc(100svh - 180px);
+    padding: 20px 20px 18px;
+    gap: 8px;
+  }
+
+  .reading-title {
+    font-size: 23px;
+  }
+
+  .reading-body {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .reading-gloss {
+    font-size: 14px;
+  }
+
+  .reading-dots {
+    left: 18px;
+    right: auto;
+    top: auto;
+    bottom: 38px;
+    transform: none;
+    flex-direction: row;
+    gap: 7px;
+  }
+
+  .reading-dot {
+    width: 8px;
+    height: 6px;
+    transition:
+      width 0.35s,
+      background 0.35s;
+  }
+
+  .reading-dot.is-current {
+    width: 22px;
+    height: 6px;
+  }
+
+  .reading-arrows {
+    right: 12px;
+    bottom: 18px;
+  }
+
+  .reading-hint {
+    bottom: 72px;
+    white-space: nowrap;
+  }
+}
+
+/* Phones in landscape: the card takes the left side at full height, dots stay on the right. */
+@media (max-height: 500px) and (min-width: 601px) {
+  .reading-back {
+    top: 8px;
+  }
+
+  .reading-langs {
+    top: 10px;
+  }
+
+  .reading-card {
+    bottom: 12px;
+    width: min(460px, 58vw);
+    max-height: calc(100svh - 72px);
+    padding: 18px 22px 16px;
+    gap: 8px;
+  }
+
+  .reading-title {
+    font-size: 22px;
+  }
+
+  .reading-body {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .reading-dots {
+    gap: 6px;
+  }
+
+  .reading-arrows {
+    right: 14px;
+    bottom: 12px;
+  }
+
+  .reading-hint {
+    left: auto;
+    right: 130px;
+    bottom: 28px;
+    transform: none;
+  }
+}

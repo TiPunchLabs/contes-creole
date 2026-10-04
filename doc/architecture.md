@@ -42,34 +42,37 @@ sources are in `design/v13/`.
 - **Characters**: clicking Ti Kannot (bird) or Gwo Rako (crab) shows a speech bubble.
 - **Languages**: Kréyòl / Bileng / Français switch.
 
-## 3. Target architecture
+## 3. Architecture
+
+Each universe (the tree, every book) is isolated; the app shell drives them through
+`src/app/contract.ts`. Full design: [`docs/superpowers/specs/2026-09-29-universes-per-book-design.md`](../docs/superpowers/specs/2026-09-29-universes-per-book-design.md).
 
 ```
 index.html
-└─ src/main.ts ─────────── state machine (hub | dive | tale | rise), input, rAF loop
-   ├─ ui/                  DOM overlays: hub intro, card label, text card, dots, bubble, lang switch
-   ├─ scene/               createScene(canvas, data) → { frame, pick, resetWorld, dispose, cardT }
-   │  ├─ hub.ts            tree, cards, Konteur, landscape
-   │  ├─ shaders/          glow points, water, sky (GLSL)
-   │  └─ util.ts           seeded PRNG, lerp/smoothstep, soft sprites
-   ├─ worlds/<tale-id>.ts  one world per tale, loaded with dynamic import()
-   └─ content/             typed tale data (done)
+└─ src/main.ts ───────────── boot
+   ├─ app/                   shell: state machine (tree | dive | book | rise), registry,
+   │                         story parser, reading UI, transitions, WebGL fallback
+   ├─ shared/                optional toolbox: createRng, lerp/clamp/smoothstep, three helpers
+   ├─ tree/                  tree universe: scene (landscape, tree, Konteur, cards), overlay
+   └─ books/<id>/            one folder per book: book.ts, story/<lang>.md, cover, staging,
+                             theme.css, world/ (Three.js)
 ```
 
-The mockup already separates scene from UI cleanly — keep that seam, port the UI to vanilla DOM.
+Isolation is enforced by ESLint `no-restricted-imports`: universes import only their own files,
+`@shared/*` and `@app/contract`.
 
 ## 4. Issues to fix during the port
 
-| #   | Issue                                                                   | Fix                                                    |
-| --- | ----------------------------------------------------------------------- | ------------------------------------------------------ |
-| 1   | Bileng mode shows full `fr.b`; the `kr.g` gloss is never used           | Show `kr.g` under the Kréyòl text                      |
-| 2   | Ti Kannot's world is hard-coded in the scene                            | `worlds/<id>.ts` per tale, selected by `TALES[i].id`   |
-| 3   | `speak()` parses dialogue by splitting on "–" and assumes speaker order | Structured dialogue lines with explicit speaker        |
-| 4   | Mouse-only card selection; canvas has no text alternative               | Focusable DOM buttons for cards, `aria-live` text card |
-| 5   | `preserveDrawingBuffer: true`                                           | Remove                                                 |
-| 6   | 936 KB PNG; unused Cyrillic/Vietnamese font subsets                     | WebP (~100 KB); latin + latin-ext only                 |
-| 7   | Global PRNG seed → layout changes on remount                            | Reset seed in `createScene`                            |
-| 8   | Copy: "Glisez"; "Yé mistrikrik" (data) vs "Yé mistikrik" (bubble)       | Confirm spelling with the author                       |
+| #   | Issue                                                                   | Fix                                                         |
+| --- | ----------------------------------------------------------------------- | ----------------------------------------------------------- |
+| 1   | Bileng mode shows full `fr.b`; the `kr.g` gloss is never used           | Done — `kr.g` is gone; `story/fr.md` shows under the Kréyòl |
+| 2   | Ti Kannot's world is hard-coded in the scene                            | Done — `src/books/<id>/world/`, discovered by the registry  |
+| 3   | `speak()` parses dialogue by splitting on "–" and assumes speaker order | Structured dialogue lines with explicit speaker             |
+| 4   | Mouse-only card selection; canvas has no text alternative               | Focusable DOM buttons for cards, `aria-live` text card      |
+| 5   | `preserveDrawingBuffer: true`                                           | Remove                                                      |
+| 6   | 936 KB PNG; unused Cyrillic/Vietnamese font subsets                     | WebP (~100 KB); latin + latin-ext only                      |
+| 7   | Global PRNG seed → layout changes on remount                            | Done — one `createRng` per universe                         |
+| 8   | Copy: "Glisez"; "Yé mistrikrik" (data) vs "Yé mistikrik" (bubble)       | Confirm spelling with the author                            |
 
 ## 5. Design decisions
 
