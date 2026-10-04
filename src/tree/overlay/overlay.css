@@ -161,6 +161,29 @@
   box-shadow: 0 0 12px #7af0dc;
 }
 
+.tree-credit {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  font:
+    500 11px/1 "Quicksand",
+    sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(238, 243, 238, 0.45);
+  text-decoration: none;
+  padding: 6px 8px;
+  transition: color 0.25s;
+}
+
+.tree-credit:hover,
+.tree-credit:focus-visible {
+  color: #7af0dc;
+}
+
 @media (max-width: 600px) {
   .tree-brand {
     left: 18px;

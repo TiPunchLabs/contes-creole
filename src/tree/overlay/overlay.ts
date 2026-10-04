@@ -31,7 +31,8 @@ export function createTreeOverlay(
       <button type="button" class="tree-enter" hidden>Antré adan kont-la</button>
       <div class="tree-locked" hidden>Talè · bientôt</div>
     </div>
-    <div class="tree-climb"><div class="tree-climb-thumb"></div></div>`;
+    <div class="tree-climb"><div class="tree-climb-thumb"></div></div>
+    <a class="tree-credit" href="https://xgueret.tipunchlabs.fr/" target="_blank" rel="noopener">Imaginé par xgueret</a>`;
   container.append(el);
   const part = (selector: string): HTMLElement => {
     const found = el.querySelector<HTMLElement>(selector);

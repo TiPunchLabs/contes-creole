@@ -113,7 +113,7 @@ function buildTree(container: HTMLElement, ctx: TreeContext, stage: Stage): Tree
     down = null;
     if (!d || !active || diving) return;
     if (d.moved > TAP_DISTANCE || performance.now() - d.t > TAP_MS) return;
-    if (e.target instanceof Element && e.target.closest("button")) return;
+    if (e.target instanceof Element && e.target.closest("button, a")) return;
     Object.assign(pointer, stage.pointer(e));
     const p = pick();
     if (p?.type === "card") enter(p.index);
