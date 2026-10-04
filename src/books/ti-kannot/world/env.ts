@@ -133,7 +133,7 @@ export function sunDirection(env: MixedEnv, out: THREE.Vector3): THREE.Vector3 {
   return orbit(env.sunAzimuth, env.sunElevation, out);
 }
 
-const CARD_SHIFT_WIDE = 0.14;
+const CARD_SHIFT_WIDE = 0.19;
 const CARD_SHIFT_TALL = 0.16;
 
 /**
