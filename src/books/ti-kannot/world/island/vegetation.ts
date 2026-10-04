@@ -109,7 +109,12 @@ function scatter(
 }
 
 /** Palms, flamboyants (Ti Kannot's tree first), forest, bananas, grass, reeds and rocks. */
-export function createVegetation(rng: Rng): { group: THREE.Group; update(env: MixedEnv): void } {
+export function createVegetation(rng: Rng): {
+  group: THREE.Group;
+  /** Flamboyant meshes, Ti Kannot's tree among them. */
+  canopies: THREE.Object3D[];
+  update(env: MixedEnv): void;
+} {
   const places: Record<Species, [number, number][]> = {
     flamboyant: [
       [SPOTS.perch[0] - 0.6, SPOTS.perch[1] - 0.4],
@@ -131,6 +136,7 @@ export function createVegetation(rng: Rng): { group: THREE.Group; update(env: Mi
     rock: scatter(rng, 50, (_x, _z, h, d) => (h > -0.6 && h < 0.6) || (d > 1 && d < 1.6)),
   };
   const group = new THREE.Group();
+  const canopies: THREE.Object3D[] = [];
   const tinted: { material: THREE.MeshLambertMaterial; base: THREE.Color; dry: THREE.Color }[] = [];
   const m4 = new THREE.Matrix4();
   const q = new THREE.Quaternion();
@@ -160,10 +166,12 @@ export function createVegetation(rng: Rng): { group: THREE.Group; update(env: Mi
       const mesh = new THREE.InstancedMesh(part.geometry, material, transforms.length);
       transforms.forEach((t, i) => mesh.setMatrixAt(i, t));
       group.add(mesh);
+      if (name === "flamboyant") canopies.push(mesh);
     }
   }
   return {
     group,
+    canopies,
     update(env) {
       for (const { material, base, dry } of tinted) material.color.copy(base).lerp(dry, env.wilt);
     },

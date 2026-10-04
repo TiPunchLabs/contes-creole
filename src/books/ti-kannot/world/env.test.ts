@@ -22,7 +22,7 @@ const env = (over: Partial<PageEnv>): PageEnv => ({
   dam: 0,
   tank: 0,
   helpers: 0,
-  bird: ["perch", 2.6],
+  bird: "perch",
   crab: null,
   ...over,
 });

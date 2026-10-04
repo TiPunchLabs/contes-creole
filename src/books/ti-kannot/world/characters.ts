@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { lerp, smoothstep } from "@shared/math";
 import type { MixedEnv } from "./env";
-import { SPOTS, spotPoint } from "./island/spots";
+import { SPOTS, spotPoint, type Spot } from "./island/spots";
 import { islandHeight } from "./island/terrain";
 import type { CharacterName } from "./speech";
 
@@ -185,7 +185,7 @@ function buildHelpers(): { root: THREE.Group; peckers: THREE.Group[]; flock: THR
 }
 
 /** Ti Kannot, Gwo Rako and the helpers; the bird flies in an arc between spots. */
-export function createCharacters(): {
+export function createCharacters(rest: Record<Spot, THREE.Vector3>): {
   group: THREE.Group;
   snap(env: MixedEnv): void;
   update(env: MixedEnv, time: number, dt: number, camera: THREE.Vector3): void;
@@ -193,6 +193,7 @@ export function createCharacters(): {
   anchor(name: CharacterName, out: THREE.Vector3): { point: THREE.Vector3; visible: boolean };
 } {
   const bird = buildBird();
+  const birdStand = -new THREE.Box3().setFromObject(bird.root).min.y;
   const crab = buildCrab();
   const helpers = buildHelpers();
   const group = new THREE.Group();
@@ -207,11 +208,9 @@ export function createCharacters(): {
   let flight = 1;
   let crabVisible = 0;
 
-  /** Ground point of the bird's spot plus its lift. */
-  const birdSpot = (env: MixedEnv, out: THREE.Vector3): THREE.Vector3 => {
-    spotPoint(env.bird.spot, out);
-    return out.setY(out.y + env.bird.lift);
-  };
+  /** Where the bird's body sits so that his feet touch his resting point. */
+  const birdSpot = (env: MixedEnv, out: THREE.Vector3): THREE.Vector3 =>
+    out.copy(rest[env.bird]).setY(rest[env.bird].y + birdStand);
 
   return {
     group,
@@ -219,13 +218,13 @@ export function createCharacters(): {
       birdSpot(env, birdTarget);
       from.copy(birdTarget);
       bird.root.position.copy(birdTarget);
-      birdKey = `${env.bird.spot}/${env.bird.lift}`;
+      birdKey = env.bird;
       flight = 1;
       if (env.crab) crabPos.copy(spotPoint(env.crab, crabTarget));
       crabVisible = env.crab ? 1 : 0;
     },
     update(env, time, dt, camera) {
-      const key = `${env.bird.spot}/${env.bird.lift}`;
+      const key = env.bird;
       if (key !== birdKey) {
         birdKey = key;
         from.copy(bird.root.position);

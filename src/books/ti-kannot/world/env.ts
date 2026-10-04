@@ -37,7 +37,7 @@ export interface MixedEnv extends Record<Weight, number> {
   kalbas: number;
   barrels: number;
   jars: number;
-  bird: { spot: Spot; lift: number };
+  bird: Spot;
   crab: Spot | null;
   /** Page whose characters apply (switches at mid-way). */
   anchorPage: number;
@@ -102,7 +102,7 @@ export function mixEnv(envs: PageEnv[], i0: number, i1: number, f: number): Mixe
     kalbas: Math.round(num(pa.kalbas, pb.kalbas)),
     barrels: Math.round(num(pa.barrels, pb.barrels)),
     jars: Math.round(num(pa.jars, pb.jars)),
-    bird: { spot: anchor.bird[0], lift: anchor.bird[1] },
+    bird: anchor.bird,
     crab: anchor.crab,
     anchorPage,
   };

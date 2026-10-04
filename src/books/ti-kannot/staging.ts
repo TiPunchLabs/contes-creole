@@ -36,8 +36,8 @@ export interface PageEnv {
   tank: number;
   /** Other animals working at the source. */
   helpers: number;
-  /** Ti Kannot: spot and height above the ground. */
-  bird: [Spot, number];
+  /** Ti Kannot's spot; he stands on whatever is there (rock, roof, crown, ground). */
+  bird: Spot;
   /** Gwo Rako's spot, or null when absent. */
   crab: Spot | null;
 }
@@ -68,7 +68,7 @@ export const STAGING: Record<string, PageEnv> = {
     sun: [-60, 8, "#ffc9a0", 1.1],
     mist: 0.8,
     branches: 1,
-    bird: ["perch", 2.6],
+    bird: "perch",
     crab: null,
   },
   "ti-kannot-e-gwo-rako": {
@@ -78,7 +78,7 @@ export const STAGING: Record<string, PageEnv> = {
     sun: [-30, 40, "#fff3d6", 1.4],
     mist: 0.2,
     branches: 1,
-    bird: ["perch", 2.6],
+    bird: "perch",
     crab: "ford",
   },
   "on-lide-gwo-rako": {
@@ -90,7 +90,7 @@ export const STAGING: Record<string, PageEnv> = {
     water: -0.15,
     kalbas: 20,
     branches: 1,
-    bird: ["roof", 2.9],
+    bird: "roof",
     crab: "yard",
   },
   "larivye-la-ka-desann": {
@@ -102,7 +102,7 @@ export const STAGING: Record<string, PageEnv> = {
     wilt: 0.4,
     kalbas: 50,
     branches: 1,
-    bird: ["bank", 0.5],
+    bird: "bank",
     crab: "ford",
   },
   "sa-ti-kannot-jwenn": {
@@ -115,7 +115,7 @@ export const STAGING: Record<string, PageEnv> = {
     wilt: 0.4,
     kalbas: 50,
     helpers: 1,
-    bird: ["rock", 1.8],
+    bird: "rock",
     crab: null,
   },
   "gwo-rako-vle-sous-la": {
@@ -127,7 +127,7 @@ export const STAGING: Record<string, PageEnv> = {
     wilt: 0.5,
     kalbas: 50,
     dam: 1,
-    bird: ["rock", 1.8],
+    bird: "rock",
     crab: "spring",
   },
   "on-mache": {
@@ -140,7 +140,7 @@ export const STAGING: Record<string, PageEnv> = {
     wilt: 0.5,
     kalbas: 50,
     dam: 1,
-    bird: ["bank", 0.5],
+    bird: "bank",
     crab: "ford",
   },
   "demen-maten": {
@@ -154,7 +154,7 @@ export const STAGING: Record<string, PageEnv> = {
     barrels: 8,
     jars: 10,
     dam: 1,
-    bird: ["roof", 2.9],
+    bird: "roof",
     crab: "yard",
   },
   "sa-dlo-la-ka-aprann": {
@@ -168,7 +168,7 @@ export const STAGING: Record<string, PageEnv> = {
     barrels: 8,
     jars: 10,
     helpers: 1,
-    bird: ["rock", 1.8],
+    bird: "rock",
     crab: "spring",
   },
   "denye-leson-la": {
@@ -182,7 +182,7 @@ export const STAGING: Record<string, PageEnv> = {
     barrels: 8,
     jars: 10,
     empty: 1,
-    bird: ["roof", 2.9],
+    bird: "roof",
     crab: "yard",
   },
   "on-nouvo-rezev": {
@@ -193,7 +193,7 @@ export const STAGING: Record<string, PageEnv> = {
     water: -0.4,
     wilt: 0.2,
     tank: 1,
-    bird: ["tank", 2.3],
+    bird: "tank",
     crab: "tap",
   },
   "ye-mistrikrik": {
@@ -206,7 +206,7 @@ export const STAGING: Record<string, PageEnv> = {
     rain: 1,
     rainbow: 1,
     tank: 1,
-    bird: ["perch", 2.6],
+    bird: "perch",
     crab: "tap",
   },
 };

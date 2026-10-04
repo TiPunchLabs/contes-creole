@@ -8,6 +8,7 @@ import { STAGING, type PageEnv } from "../staging";
 import { createCharacters } from "./characters";
 import { frameOffset, mixEnv, pageSpan, shotCamera, type MixedEnv } from "./env";
 import { createGround } from "./island/ground";
+import { restingPoints } from "./island/perches";
 import { createSource } from "./island/source";
 import { createVegetation } from "./island/vegetation";
 import { createVillage } from "./island/village";
@@ -60,7 +61,9 @@ export default defineWorld({
       const stock = createStock(rng);
       const water = createWater();
       const sky = createSky(rng);
-      const cast = createCharacters();
+      const cast = createCharacters(
+        restingPoints([...vegetation.canopies, village.group, source.group]),
+      );
       scene.fog = sky.fog;
       scene.add(
         sky.group,
