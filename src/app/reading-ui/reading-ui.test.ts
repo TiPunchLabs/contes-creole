@@ -59,6 +59,7 @@ describe("reading UI", () => {
     expect($(".reading-body").innerHTML).toContain("Tèks &lt;b&gt;en&lt;/b&gt;.");
     expect(root.querySelectorAll(".reading-body .reading-dialogue")).toHaveLength(1);
     expect($(".reading-hint").hidden).toBe(false);
+    expect($(".reading-hint").textContent).toBe("Défilez pour continuer");
   });
 
   it("shows the French text under the Kréyòl text in Bileng", () => {

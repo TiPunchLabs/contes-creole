@@ -36,6 +36,9 @@ const CORRECTIONS: { lang: "kr" | "fr"; from: string; to: string }[] = [
   { lang: "kr", from: "dis, venn…", to: "dis, ven…" },
   { lang: "kr", from: "an mitan bouk-la", to: "anmitan bouk-la" },
   { lang: "kr", from: "ti ma-yo plen", to: "sé ti ma-la plen" },
+  // 2026-10-04 gcf audit, see docs/kreyol/correction-report.md
+  { lang: "kr", from: "Es mwen pé édé", to: "Ès mwen pé édé" },
+  { lang: "kr", from: "robinè", to: "wobinè" },
   { lang: "fr", from: "J'en ai juste assez pour moi.", to: "Cette eau est à moi." },
   { lang: "fr", from: "Mais après ? Gwo Rako", to: "Combien de temps ? Gwo Rako" },
 ];
