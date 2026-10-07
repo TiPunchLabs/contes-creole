@@ -1,0 +1,13 @@
+# Netlify build for the Vite app; pnpm comes from package.json "packageManager" (Corepack).
+[build]
+  command = "pnpm build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Vite emits content-hashed file names under /assets: safe to cache forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
