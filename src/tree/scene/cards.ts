@@ -29,19 +29,23 @@ export interface Cards {
   ): CardView[];
 }
 
-/** Paints the tree-owned part of every card: double frame, sub-title, title, theme. */
+/** Paints the tree-owned part of every card: title panel, rounded border, sub-title, title, theme. */
 function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, H: number): void {
   const { ready, card } = book;
-  c.strokeStyle = ready ? "rgba(242,196,109,.7)" : "rgba(160,180,190,.3)";
-  c.lineWidth = 3;
-  c.strokeRect(22, 22, W - 44, H - 44);
-  c.lineWidth = 1;
-  c.strokeRect(32, 32, W - 64, H - 64);
+  c.fillStyle = "#fff7e8";
+  c.beginPath();
+  c.roundRect(30, H * 0.69, W - 60, H * 0.27, 22);
+  c.fill();
+  c.strokeStyle = ready ? "#c4572e" : "#b39a7a";
+  c.lineWidth = 8;
+  c.beginPath();
+  c.roundRect(12, 12, W - 24, H - 24, 30);
+  c.stroke();
   c.textAlign = "center";
-  c.fillStyle = ready ? "#f6ead0" : "rgba(200,210,220,.55)";
-  c.font = `500 26px 'Quicksand', sans-serif`;
+  c.fillStyle = ready ? "#3a2a20" : "rgba(58,42,32,.6)";
+  c.font = `700 26px 'Baloo 2', 'Andika', sans-serif`;
   c.fillText(card.sub.toUpperCase(), W / 2, H * 0.745);
-  c.font = `italic 600 54px 'Cormorant Garamond', serif`;
+  c.font = `800 52px 'Baloo 2', 'Andika', sans-serif`;
   const lines: string[] = [];
   let current = "";
   for (const word of card.title.split(" ")) {
@@ -54,8 +58,8 @@ function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, 
   }
   lines.push(current);
   lines.forEach((line, i) => c.fillText(line, W / 2, H * 0.83 + i * 54));
-  c.font = `400 20px 'Quicksand', sans-serif`;
-  c.fillStyle = ready ? "rgba(90,230,210,.9)" : "rgba(200,210,220,.4)";
+  c.font = `700 24px 'Andika', sans-serif`;
+  c.fillStyle = ready ? "#3a2a20" : "rgba(58,42,32,.55)";
   c.fillText(card.theme, W / 2, H * 0.1);
 }
 
@@ -80,19 +84,37 @@ function coverTexture(book: BookManifest): THREE.CanvasTexture {
   return texture;
 }
 
+/** Soft round halo texture behind each card. */
+function haloTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const g = ctx.createRadialGradient(64, 64, 20, 64, 64, 64);
+    g.addColorStop(0, "rgba(255,255,255,1)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 128, 128);
+  }
+  return new THREE.CanvasTexture(canvas);
+}
+
+const CARD_SCALE = 1.18;
+
 /** Book cards hanging from the branches on the camera spiral, with a thread to the nearest tip. */
 export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards {
   const group = new THREE.Group();
   const threadMat = new THREE.LineBasicMaterial({
-    color: "#8fd9cf",
+    color: "#7a5236",
     transparent: true,
-    opacity: 0.35,
+    opacity: 0.85,
   });
+  const haloMap = haloTexture();
   const camPos = new THREE.Vector3();
   const look = new THREE.Vector3();
   const cards = books.map((book, i) => {
-    const t = cardT(i);
-    const a = hubCam(t, camPos, look);
+    const t = cardT(i, books.length);
+    const a = hubCam(t, camPos, look) + (i % 2 ? 0.06 : -0.06);
     const g = new THREE.Group();
     g.position.set(Math.cos(a) * 12.2, camPos.y + 0.3, Math.sin(a) * 12.2);
     const plane = new THREE.Mesh(
@@ -101,15 +123,15 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
     );
     const back = new THREE.Mesh(
       new THREE.PlaneGeometry(1.5, 2.1),
-      new THREE.MeshBasicMaterial({ color: "#0a1a22", side: THREE.BackSide }),
+      new THREE.MeshBasicMaterial({ color: "#f3e3c3", side: THREE.BackSide }),
     );
     const halo = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.1, 2.7),
+      new THREE.PlaneGeometry(2.8, 3.4),
       new THREE.MeshBasicMaterial({
-        color: book.ready ? "#2fa89a" : "#2a3a44",
+        map: haloMap,
+        color: book.ready ? "#ffe08a" : "#fff0d8",
         transparent: true,
         opacity: 0,
-        blending: THREE.AdditiveBlending,
         depthWrite: false,
       }),
     );
@@ -147,9 +169,10 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
         c.g.position.y += Math.sin(time * 0.6 + i * 2) * 0.0015;
         const near = 1 - clamp(Math.abs(t - c.t) / 0.22, 0, 1);
         c.hover = lerp(c.hover, hover === i ? 1 : 0, 0.12);
-        const scale = 1 + near * 0.08 + c.hover * 0.08;
+        const scale = CARD_SCALE * (1 + near * 0.1 + c.hover * 0.08);
         c.g.scale.setScalar(scale);
-        c.halo.material.opacity = 0.12 + near * 0.2 + c.hover * 0.35;
+        c.halo.material.opacity = 0.2 + near * 0.35 + c.hover * 0.35;
+        c.g.rotation.z += Math.sin(time * 5) * 0.03 * c.hover;
         const thread = c.line.geometry.attributes.position;
         thread.setXYZ(1, c.g.position.x, c.g.position.y + 1.05 * scale, c.g.position.z);
         thread.needsUpdate = true;
