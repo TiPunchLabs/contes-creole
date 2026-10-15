@@ -1,4 +1,5 @@
 import type { BookManifest } from "@app/contract";
+import { createShelf } from "./shelf";
 
 export interface CardLabel {
   x: number;
@@ -7,32 +8,38 @@ export interface CardLabel {
   book: BookManifest;
 }
 
-const MOUSE = `<svg width="18" height="26" viewBox="0 0 18 26" fill="none" stroke="#7af0dc" stroke-width="1.5" aria-hidden="true"><rect x="1" y="1" width="16" height="24" rx="8"/><circle cx="9" cy="8" r="1.6" fill="#7af0dc"/></svg>`;
+const BRAND_ICON = `<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="11" r="9" fill="#7fb24e"/><circle cx="9" cy="14" r="6" fill="#6aa043"/><circle cx="21" cy="14" r="6" fill="#8cc05a"/><rect x="13" y="16" width="4" height="11" rx="2" fill="#9a6a46"/><circle cx="15" cy="20" r="1.6" fill="#ffcf7e"/></svg>`;
+const MOUSE = `<svg width="18" height="26" viewBox="0 0 18 26" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="1" width="16" height="24" rx="8"/><circle cx="9" cy="8" r="2" fill="currentColor"/></svg>`;
+const BOOK_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5c2.5-1 4.8-.8 7 .8 2.2-1.6 4.5-1.8 7-.8v11c-2.5-1-4.8-.8-7 .8-2.2-1.6-4.5-1.8-7-.8z"/><path d="M10 5.3v11"/></svg>`;
 
-/** Tree HUD: title, intro (fades as you climb), label of the nearest card, climb bar. */
+/** Tree HUD (v14): brand badge, intro panel, near-card label and enter button, climb bar, shelf. */
 export function createTreeOverlay(
   container: HTMLElement,
-  onEnter: (bookId: string) => void,
-): { update(t: number, label: CardLabel | null): void; dispose(): void } {
+  books: BookManifest[],
+  handlers: { onEnter(bookId: string): void; onShelf(index: number): void },
+): { update(t: number, label: CardLabel | null, near: number): void; dispose(): void } {
   const el = document.createElement("div");
   el.className = "tree-overlay";
   el.innerHTML = `
     <div class="tree-brand">
-      <div class="tree-brand-title">Pyébwa a Sav</div>
-      <div class="tree-brand-sub">Kont Gwadloup</div>
+      ${BRAND_ICON}
+      <div class="tree-brand-text">
+        <div class="tree-brand-title">Pyébwa a Sav</div>
+        <div class="tree-brand-sub">Kont Gwadloup</div>
+      </div>
     </div>
+    <a class="tree-credit" href="https://xgueret.tipunchlabs.fr/" target="_blank" rel="noopener">Imaginé par xgueret</a>
     <div class="tree-intro"><div class="tree-intro-inner">
       <p class="tree-intro-title">Chak fèy sé on kont.</p>
-      <p class="tree-intro-text">Chaque feuille est un conte. Cueillez celui qui vous appelle.</p>
-      <div class="tree-intro-hint"><span>Défilez · Glissez</span>${MOUSE}</div>
+      <p class="tree-intro-text">Chaque feuille est un conte. Tourne autour de l'arbre pour trouver le tien !</p>
+      <div class="tree-intro-hint">${MOUSE}<span>Fais défiler · Glisse avec le doigt</span></div>
     </div></div>
     <div class="tree-label">
       <div class="tree-label-title"></div>
-      <button type="button" class="tree-enter" hidden>Antré adan kont-la</button>
-      <div class="tree-locked" hidden>Talè · bientôt</div>
+      <button type="button" class="tree-enter" hidden>${BOOK_ICON}<span>Antré adan kont-la</span></button>
+      <div class="tree-locked" hidden>Talè · bientôt dans l'arbre</div>
     </div>
-    <div class="tree-climb"><div class="tree-climb-thumb"></div></div>
-    <a class="tree-credit" href="https://xgueret.tipunchlabs.fr/" target="_blank" rel="noopener">Imaginé par xgueret</a>`;
+    <div class="tree-climb"><div class="tree-climb-thumb"></div></div>`;
   container.append(el);
   const part = (selector: string): HTMLElement => {
     const found = el.querySelector<HTMLElement>(selector);
@@ -45,15 +52,21 @@ export function createTreeOverlay(
   const enter = part(".tree-enter");
   const locked = part(".tree-locked");
   const thumb = part(".tree-climb-thumb");
+  const shelf = createShelf(el, books, handlers.onShelf);
   let current: BookManifest | null = null;
+  let shownNear = -2;
   enter.addEventListener("click", () => {
-    if (current) onEnter(current.id);
+    if (current) handlers.onEnter(current.id);
   });
 
   return {
-    update(t, next) {
+    update(t, next, near) {
       intro.style.opacity = String(Math.max(0, 1 - t * 9));
-      thumb.style.top = `calc((100% - 22px) * ${t})`;
+      thumb.style.top = `calc((100% - 24px) * ${t})`;
+      if (near !== shownNear) {
+        shownNear = near;
+        shelf.setNear(near);
+      }
       current = next ? next.book : null;
       if (!next) {
         label.style.opacity = "0";
@@ -71,6 +84,7 @@ export function createTreeOverlay(
       locked.hidden = next.book.ready;
     },
     dispose() {
+      shelf.dispose();
       el.remove();
     },
   };
