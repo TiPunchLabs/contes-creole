@@ -7,7 +7,7 @@ import { createRng } from "@shared/random";
 import { createStage, fitFov, type Stage } from "@shared/three/stage";
 import { detectLite, readLiteEnv, scaleCount } from "./lite";
 import { createTreeOverlay } from "./overlay/overlay";
-import { shelfAction } from "./overlay/shelf";
+import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { cardT, hubCam } from "./scene/camera";
 import { createCards, type CardView } from "./scene/cards";
 import { createLapen } from "./scene/critters/lapen";
@@ -119,12 +119,10 @@ function buildTree(
     const book = ctx.books[index];
     if (book) ctx.onEnter(book.id);
   };
-  const onShelf = (index: number): void => {
-    const book = ctx.books[index];
-    if (!book || !active || diving) return;
-    const bookT = cardT(index, ctx.books.length);
-    if (shelfAction(t, bookT, book.ready) === "enter") enter(index);
-    else target = bookT;
+  const onShelf = (index: number, action: ShelfAction): void => {
+    if (!active || diving) return;
+    if (action === "enter") enter(index);
+    else target = cardT(index, ctx.books.length);
   };
   const overlay = createTreeOverlay(container, ctx.books, { onEnter: ctx.onEnter, onShelf });
 
@@ -179,7 +177,7 @@ function buildTree(
     e.target instanceof Element && e.target.closest("button, a, .tree-shelf") !== null;
 
   const onWheel = (e: WheelEvent): void => {
-    if (fromControl(e)) return;
+    if (isShelfEvent(e.target)) return;
     e.preventDefault();
     if (active && !diving) climb(e.deltaY);
   };

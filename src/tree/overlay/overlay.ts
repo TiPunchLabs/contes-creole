@@ -1,5 +1,5 @@
 import type { BookManifest } from "@app/contract";
-import { createShelf } from "./shelf";
+import { createShelf, type ShelfAction } from "./shelf";
 
 export interface CardLabel {
   x: number;
@@ -16,7 +16,7 @@ const BOOK_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" s
 export function createTreeOverlay(
   container: HTMLElement,
   books: BookManifest[],
-  handlers: { onEnter(bookId: string): void; onShelf(index: number): void },
+  handlers: { onEnter(bookId: string): void; onShelf(index: number, action: ShelfAction): void },
 ): { update(t: number, label: CardLabel | null, near: number): void; dispose(): void } {
   const el = document.createElement("div");
   el.className = "tree-overlay";

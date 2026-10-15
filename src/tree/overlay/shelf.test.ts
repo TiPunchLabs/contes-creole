@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from "vitest";
 import type { BookManifest } from "@app/contract";
-import { createShelf, shelfAction } from "./shelf";
+import { createShelf, isShelfEvent, shelfAction } from "./shelf";
 
 const book = (id: string, ready: boolean, title: string): BookManifest => ({
   id,
@@ -12,16 +12,17 @@ const book = (id: string, ready: boolean, title: string): BookManifest => ({
 const BOOKS = [book("a", true, "Ti Kannot"), book("b", false, "Zanba")];
 
 describe("shelfAction", () => {
-  it("climbs to a book that is not the near one", () => {
-    expect(shelfAction(0.2, 0.88, true)).toBe("climb");
+  it("climbs to a book that is not the highlighted one", () => {
+    expect(shelfAction(0, -1, true)).toBe("climb");
+    expect(shelfAction(0, 1, true)).toBe("climb");
   });
 
-  it("enters a ready book already in front of the camera", () => {
-    expect(shelfAction(0.875, 0.88, true)).toBe("enter");
+  it("enters the highlighted ready book (same rule as aria-current)", () => {
+    expect(shelfAction(0, 0, true)).toBe("enter");
   });
 
-  it("never enters a locked book, even in front of the camera", () => {
-    expect(shelfAction(0.88, 0.88, false)).toBe("climb");
+  it("never enters a locked book, even when highlighted", () => {
+    expect(shelfAction(1, 1, false)).toBe("climb");
   });
 });
 
@@ -55,10 +56,25 @@ describe("createShelf", () => {
     expect(buttons.every((b) => b.getAttribute("aria-current") === "false")).toBe(true);
   });
 
-  it("reports the pressed book (click, Enter and Space all fire click on a native button)", () => {
+  it("asks to climb to a book that is not highlighted (click, Enter and Space all fire click)", () => {
     const { buttons, onSelect } = mount();
+    buttons[0].click();
+    expect(onSelect).toHaveBeenCalledWith(0, "climb");
+  });
+
+  it("asks to enter the highlighted ready book, as its label promises", () => {
+    const { shelf, buttons, onSelect } = mount();
+    shelf.setNear(0);
+    expect(buttons[0].getAttribute("aria-label")).toContain("touche encore pour ouvrir");
+    buttons[0].click();
+    expect(onSelect).toHaveBeenCalledWith(0, "enter");
+  });
+
+  it("only climbs to a highlighted locked book", () => {
+    const { shelf, buttons, onSelect } = mount();
+    shelf.setNear(1);
     buttons[1].click();
-    expect(onSelect).toHaveBeenCalledWith(1);
+    expect(onSelect).toHaveBeenCalledWith(1, "climb");
   });
 
   it("renders book titles as text, never as HTML", () => {
@@ -71,5 +87,19 @@ describe("createShelf", () => {
     const { parent, shelf } = mount();
     shelf.dispose();
     expect(parent.querySelector("nav")).toBeNull();
+  });
+});
+
+describe("isShelfEvent", () => {
+  it("is true inside the shelf only, so the wheel still climbs over the enter button", () => {
+    const parent = document.createElement("div");
+    createShelf(parent, BOOKS, vi.fn());
+    const enter = document.createElement("button");
+    enter.className = "tree-enter";
+    parent.append(enter);
+    const shelfButton = parent.querySelector(".tree-shelf button");
+    expect(isShelfEvent(shelfButton)).toBe(true);
+    expect(isShelfEvent(enter)).toBe(false);
+    expect(isShelfEvent(null)).toBe(false);
   });
 });
