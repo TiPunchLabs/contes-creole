@@ -34,8 +34,15 @@ export function fitFov(base: number, aspect: number): number {
   return Math.min(MAX_FOV, (half * 360) / Math.PI);
 }
 
+export interface StageOptions {
+  /** Tone-mapping exposure (default 1.15, the v13 value). */
+  exposure?: number;
+  /** Upper bound of the device pixel ratio (default 1.5). */
+  maxPixelRatio?: number;
+}
+
 /** Full-size canvas with the v13 renderer settings and a pausable render loop. Throws without WebGL. */
-export function createStage(container: HTMLElement): Stage {
+export function createStage(container: HTMLElement, options: StageOptions = {}): Stage {
   const canvas = document.createElement("canvas");
   canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block";
   container.append(canvas);
@@ -51,10 +58,10 @@ export function createStage(container: HTMLElement): Stage {
     canvas.remove();
     throw err;
   }
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, options.maxPixelRatio ?? 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.15;
+  renderer.toneMappingExposure = options.exposure ?? 1.15;
   const camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.1, 600);
   const scene = new THREE.Scene();
   const projected = new THREE.Vector3();
