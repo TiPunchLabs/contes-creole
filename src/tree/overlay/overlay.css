@@ -308,8 +308,8 @@
   .tree-intro {
     left: 16px;
     right: 16px;
-    top: auto;
-    bottom: 110px;
+    /* Under the credit link, so the Konteur and the critters on the ground stay visible. */
+    top: 106px;
     max-width: none;
   }
 

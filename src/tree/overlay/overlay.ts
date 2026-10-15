@@ -12,6 +12,13 @@ const BRAND_ICON = `<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden=
 const MOUSE = `<svg width="18" height="26" viewBox="0 0 18 26" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="1" width="16" height="24" rx="8"/><circle cx="9" cy="8" r="2" fill="currentColor"/></svg>`;
 const BOOK_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5c2.5-1 4.8-.8 7 .8 2.2-1.6 4.5-1.8 7-.8v11c-2.5-1-4.8-.8-7 .8-2.2-1.6-4.5-1.8-7-.8z"/><path d="M10 5.3v11"/></svg>`;
 
+const SHELF_GAP = 10;
+
+/** Top of the near-card label: the card's y, lifted so the label never slides under the shelf. */
+export function labelTop(y: number, labelHeight: number, shelfTop: number): number {
+  return Math.min(y, shelfTop - labelHeight - SHELF_GAP);
+}
+
 /** Tree HUD (v14): brand badge, intro panel, near-card label and enter button, climb bar, shelf. */
 export function createTreeOverlay(
   container: HTMLElement,
@@ -53,6 +60,7 @@ export function createTreeOverlay(
   const locked = part(".tree-locked");
   const thumb = part(".tree-climb-thumb");
   const shelf = createShelf(el, books, handlers.onShelf);
+  const shelfEl = part(".tree-shelf");
   let current: BookManifest | null = null;
   let shownNear = -2;
   enter.addEventListener("click", () => {
@@ -77,7 +85,7 @@ export function createTreeOverlay(
       const half = label.offsetWidth / 2;
       const edge = 12;
       label.style.left = `${Math.max(half + edge, Math.min(container.clientWidth - half - edge, next.x))}px`;
-      label.style.top = `${next.y}px`;
+      label.style.top = `${labelTop(next.y, label.offsetHeight, shelfEl.offsetTop)}px`;
       label.style.opacity = String(next.opacity);
       title.textContent = next.book.card.title;
       enter.hidden = !next.book.ready;
