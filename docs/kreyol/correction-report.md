@@ -378,3 +378,16 @@ Historique : la revue précédente est dans [`2026-10-04-review-ti-kannot.md`](2
 `src/books/v13-conversion.test.ts` (`CORRECTIONS`) liste les écarts du conte avec la maquette v13 : toute autre dérive reste détectée.
 
 **Non modifié** : les 13 cas du §7, en attente d'un locuteur / réviseur créolophone.
+
+---
+
+## 11. Écran de l'arbre v14 « Jeunesse » (2026-10-14, branche `feat/tree-redesign`)
+
+Chaînes reprises de la maquette v14.2 (`design/v14/`). Seule la correction à confiance haute est appliquée ; le reste est conservé tel quel et listé dans [variants.md](variants.md) § 3 (#14–17).
+
+| Fichier                                    | Maquette                           | Retenu                                | Catégorie                                             | Source                    | Confiance                                                      |
+| ------------------------------------------ | ---------------------------------- | ------------------------------------- | ----------------------------------------------------- | ------------------------- | -------------------------------------------------------------- |
+| `src/tree/overlay/shelf.ts` (étagère)      | `Kont-yo`                          | `Sé kont-la`                          | MELANGE_DE_CREOLES (pluriel `-yo` haïtien / guyanais) | B (glossaire : `sé N-la`) | haute                                                          |
+| `src/tree/overlay/overlay.ts` (indication) | `Fè défilé · Glisse avec le doigt` | `Fais défiler · Glisse avec le doigt` | MELANGE (verbe français dans la partie kréyòl)        | —                         | haute pour l'erreur ; la forme kréyòl attend un locuteur (#14) |
+
+**Non modifié** (en attente d'un locuteur) : bulles de Konpè Lapen (#15) et Konpè Zanba (#16), écran WebGL suspendu (#17).

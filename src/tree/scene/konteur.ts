@@ -2,11 +2,18 @@ import * as THREE from "three";
 import { clamp, lerp } from "@shared/math";
 import { softSprite } from "@shared/three/soft-sprite";
 import konteurUrl from "../assets/konteur.png";
-import { groundHeight } from "./landscape";
+import type { Obstacle } from "./critters/wander";
+import { groundHeight } from "./ground";
 
 const KONTEUR_Z = -12.5;
 const KONTEUR_X_WIDE = 5.2;
 const KONTEUR_X_NARROW = 2.3;
+
+/** Ground footprint of the Konteur at both of its positions (wide and narrow screens). */
+export const KONTEUR_OBSTACLES: Obstacle[] = [
+  [KONTEUR_X_WIDE, KONTEUR_Z, 1.9],
+  [KONTEUR_X_NARROW, KONTEUR_Z, 1.9],
+];
 
 /** The storyteller: a photo cut-out billboard at the foot of the tree, with a lantern. */
 export function createKonteur(): {
@@ -36,12 +43,12 @@ export function createKonteur(): {
       color: "#ffffff",
       emissive: "#6a5040",
       emissiveMap: texture,
-      emissiveIntensity: 0.35,
+      emissiveIntensity: 0.18,
       side: THREE.DoubleSide,
     }),
   );
   plane.position.y = height / 2 - 0.02;
-  const shadow = softSprite("#000000", 1.6, 0.55, false);
+  const shadow = softSprite("#5a3a24", 1.6, 0.35, false);
   shadow.material.rotation = 0;
   shadow.position.set(0, 0.02, 0.2);
   shadow.scale.set(1.7, 0.5, 1);
@@ -66,7 +73,7 @@ export function createKonteur(): {
   glow.position.set(0.7, 0.2, 0.15);
   const seat = new THREE.Mesh(
     new THREE.DodecahedronGeometry(0.55, 0),
-    new THREE.MeshStandardMaterial({ color: "#2a2430", roughness: 1, flatShading: true }),
+    new THREE.MeshStandardMaterial({ color: "#8a6a52", roughness: 1, flatShading: true }),
   );
   seat.position.set(0, -0.12, -0.25);
   seat.scale.set(1.3, 0.42, 1);

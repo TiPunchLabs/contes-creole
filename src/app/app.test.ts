@@ -203,7 +203,7 @@ describe("app", () => {
     start({ mountTree });
     await vi.advanceTimersByTimeAsync(TIMING.retryDelay * 5);
     expect(mountTree).toHaveBeenCalledTimes(5);
-    expect($(".app-fallback")?.textContent).toContain("Pyébwa-la pa ka limé…");
+    expect($(".app-fallback")?.textContent).toContain("Pyébwa-la ka dòmi…");
   });
 
   it("recovers when loadStories throws synchronously", async () => {
