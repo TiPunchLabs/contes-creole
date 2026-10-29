@@ -3,6 +3,7 @@ import "@fontsource/cormorant-garamond/600-italic.css";
 import "@fontsource/quicksand/400.css";
 import "@fontsource/quicksand/500.css";
 import "@fontsource/quicksand/600.css";
+import "@shared/theme/tokens.css";
 import "./style.css";
 import * as THREE from "three";
 import { startApp } from "@app/app";

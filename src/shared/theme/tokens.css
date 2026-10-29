@@ -1,0 +1,24 @@
+/*
+ * Site-wide design tokens: values shared by the shell, the tree and the reading frame.
+ * Universes read them through the cascade (no import), then map them onto their own aliases
+ * (`--tree-*`, `--reading-*`). A book's theme.css overrides the aliases, never these tokens.
+ * index.html's inline loader runs before this file and keeps literal copies of its values.
+ */
+:root {
+  --color-night: #050c12;
+  --color-parchment: #f6ead0;
+  --color-deep-ink: #0a1e33;
+  --color-cream: #fff6e8;
+  --color-cream-light: #fff8ee;
+  --color-ink: #3a2a20;
+  --color-ink-soft: #5a4334;
+  --color-terracotta: #c4572e;
+  --color-terracotta-dark: #a8451f;
+
+  --font-display: "Cormorant Garamond", serif;
+  --font-ui: "Quicksand", sans-serif;
+  --font-brand: "Baloo 2", sans-serif;
+  --font-read: "Andika", sans-serif;
+
+  --radius-pill: 999px;
+}
