@@ -15,10 +15,11 @@
   --color-terracotta: #c4572e;
   --color-terracotta-dark: #a8451f;
 
-  --font-display: "Cormorant Garamond", serif;
-  --font-ui: "Quicksand", sans-serif;
-  --font-brand: "Baloo 2", sans-serif;
+  --font-display: "Newsreader", serif;
+  --font-ui: "Andika", sans-serif;
+  --font-brand: "Newsreader", serif;
   --font-read: "Andika", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
 
   --radius-pill: 999px;
 }
