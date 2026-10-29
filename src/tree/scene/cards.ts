@@ -43,9 +43,9 @@ function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, 
   c.stroke();
   c.textAlign = "center";
   c.fillStyle = ready ? "#3a2a20" : "rgba(58,42,32,.6)";
-  c.font = `700 26px 'Baloo 2', 'Andika', sans-serif`;
+  c.font = `700 26px 'Newsreader', 'Andika', sans-serif`;
   c.fillText(card.sub.toUpperCase(), W / 2, H * 0.745);
-  c.font = `800 52px 'Baloo 2', 'Andika', sans-serif`;
+  c.font = `800 52px 'Newsreader', 'Andika', sans-serif`;
   const lines: string[] = [];
   let current = "";
   for (const word of card.title.split(" ")) {

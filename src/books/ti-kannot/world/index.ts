@@ -1,4 +1,7 @@
 import "@fontsource/caveat/600.css";
+import "@fontsource/quicksand/400.css";
+import "@fontsource/quicksand/500.css";
+import "@fontsource/quicksand/600.css";
 import "../theme.css";
 import * as THREE from "three";
 import { defineWorld, type Story } from "@app/contract";

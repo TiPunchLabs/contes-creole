@@ -20,6 +20,12 @@ importers:
       '@fontsource/cormorant-garamond':
         specifier: ^5.3.0
         version: 5.3.0
+      '@fontsource/ibm-plex-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/newsreader':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/quicksand':
         specifier: ^5.3.0
         version: 5.3.0
@@ -119,6 +125,12 @@ packages:
 
   '@fontsource/cormorant-garamond@5.3.0':
     resolution: {integrity: sha512-weuGsCirGVWBWqpt6YUp0yLThTe4G8YO45noq8wxeJCRvEpq5lFrxNMFSTxcyOyV5k5otzJ8guDzYegdYlcLMQ==}
+
+  '@fontsource/ibm-plex-mono@5.3.0':
+    resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
+
+  '@fontsource/newsreader@5.3.0':
+    resolution: {integrity: sha512-AFR6ZKY89GNL+9qBI2P2+66NhD5bhOj/v6fsLnFYLM4E0JnMB1yKb+Ro8cA64i1hwAWoBfTq5CHJGWH1toLDkw==}
 
   '@fontsource/quicksand@5.3.0':
     resolution: {integrity: sha512-epmMUyXI39f88bZSCyKlHTZqUWg4O7DqrTXOKqsqbVKMLshX9RtIYCUIw+G2nOfEwdIHIjYbeWdwHRcEzRXBRQ==}
@@ -970,6 +982,10 @@ snapshots:
   '@fontsource/caveat@5.3.0': {}
 
   '@fontsource/cormorant-garamond@5.3.0': {}
+
+  '@fontsource/ibm-plex-mono@5.3.0': {}
+
+  '@fontsource/newsreader@5.3.0': {}
 
   '@fontsource/quicksand@5.3.0': {}
 
