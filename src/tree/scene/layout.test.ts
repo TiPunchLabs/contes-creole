@@ -65,6 +65,9 @@ function sample(lite: boolean): unknown {
 // Expected values were recorded from the scene before the M5 re-grade (commit 23f8735). A colour,
 // intensity or uniform change must keep them; a new rng() call, a reordered builder or a changed
 // count() moves them. Never regenerate them to make a visual change pass.
+// Owner-requested exceptions (2026-10-30): a palm and a tree fern moved off the near cards' lines of
+// sight (fixed positions, no rng; see occlusion.test.ts) and the hollow on the trunk removed (four
+// objects). Random draws (next, tips, hills, fireflies) are unchanged.
 const FULL = {
   next: 0.4855,
   tips: {
@@ -80,7 +83,7 @@ const FULL = {
     count: 22,
     first: [
       [-9.5, -0.5589, -10],
-      [11, -0.5459, -8],
+      [12.2, -0.4942, -5.8],
       [-28, -0.949, 22],
       [30, -0.4766, 8],
     ],
@@ -104,8 +107,8 @@ const FULL = {
     [7.9262, 1.1371, -12.8755],
   ],
   digest: {
-    landscape: { objects: 388, sum: [714.2192, 834.0589, 786.5735] },
-    tree: { objects: 9, sum: [10.6, 13.2, 7.96] },
+    landscape: { objects: 388, sum: [713.8192, 834.1137, 789.9735] },
+    tree: { objects: 5, sum: [5, 5, 5] },
     sky: { objects: 18, sum: [168.5138, 343.1593, 227.6373] },
   },
 };
@@ -124,7 +127,7 @@ const LITE = {
     count: 22,
     first: [
       [-9.5, -0.5589, -10],
-      [11, -0.5459, -8],
+      [12.2, -0.4942, -5.8],
       [-28, -0.949, 22],
       [30, -0.4766, 8],
     ],
@@ -148,8 +151,8 @@ const LITE = {
     [3.1591, 1.1061, 19.8227],
   ],
   digest: {
-    landscape: { objects: 388, sum: [714.2192, 834.0589, 786.5735] },
-    tree: { objects: 9, sum: [10.6, 13.2, 7.96] },
+    landscape: { objects: 388, sum: [713.8192, 834.1137, 789.9735] },
+    tree: { objects: 5, sum: [5, 5, 5] },
     sky: { objects: 11, sum: [39.6977, 200.5959, 242.3065] },
   },
 };

@@ -5,7 +5,7 @@ import { groundHeight } from "./ground";
 
 const PALMS: readonly (readonly [number, number, number])[] = [
   [-9.5, -10, 6.5],
-  [11, -8, 5.5],
+  [12.2, -5.8, 5.5],
   [-28, 22, 8],
 ];
 const BREADFRUITS: readonly (readonly [number, number, number])[] = [
@@ -34,14 +34,14 @@ const BALISIERS: readonly (readonly [number, number])[] = [
 ];
 const TREE_FERNS: readonly (readonly [number, number, number])[] = [
   [-4, 13.6, 4.2],
-  [5.5, 13.2, 3.6],
+  [3.9, 14.4, 3.6],
   [13.8, -3.5, 4.6],
 ];
 
 /** Plants the critters walk around (the far palm and the far trees are outside their ring). */
 export const FLORA_OBSTACLES: Obstacle[] = [
   [-9.5, -10, 1],
-  [11, -8, 1],
+  [12.2, -5.8, 1],
   [-12, 4, 1.4],
   [13, 3.5, 1.4],
   [-11.5, 6.5, 1.3],
