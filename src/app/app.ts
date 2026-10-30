@@ -119,6 +119,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     }
     book = null;
     bubble.hide();
+    bubble.setLang("gcf");
     panel.detach();
     reading.close();
     bookLayer.replaceChildren();
@@ -152,8 +153,10 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       pager.reset();
       root.dataset.book = bookId;
       bookLayer.hidden = false;
+      const story = storyFor(stories, lang);
+      bubble.setLang(story.lang);
       const handle = await world.default.mount(bookLayer, {
-        story: storyFor(stories, lang),
+        story,
         page,
         bubble,
       });
@@ -167,7 +170,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       closeBook();
       activeTree.resume(bookId);
       mode = "tree";
-      showNotice(root, LOAD_ERROR);
+      showNotice(root, LOAD_ERROR).lang = "gcf";
     }
     await flash.to(0, TIMING.fade);
   }
@@ -198,7 +201,9 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   function setLang(next: ReadingLang): void {
     if (mode !== "book" || !book || next === lang) return;
     lang = next;
-    book.handle.setStory(storyFor(book.stories, lang));
+    const story = storyFor(book.stories, lang);
+    bubble.setLang(story.lang);
+    book.handle.setStory(story);
     render();
   }
 
