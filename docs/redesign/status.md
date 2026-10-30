@@ -43,10 +43,18 @@ globale — Finalisation autonome"). Decisions and their wording live in
   par xgueret" signature is removed from the home screen (owner's adjustments, same PR). Branch `feat/veillee-claire-accueil`, PR to `feat/veillee-claire`,
   not merged. Evidence: `~/.local/share/contes-creole-qa/accueil/`.
 
+- Konteur integration "Mission Konteur" (2026-10-30): cut-out cleaned in `konteur.png` (alpha only:
+  floor residue under the stool, detached specks, keyed slivers on the right sleeve); flat contact
+  shadow under the feet instead of a hidden upright sprite; the stray seat rock removed; Konteur
+  moved inwards (x 5.2 → 4.4 wide, 2.3 → 1.9 narrow) so he is no longer cut by the left edge;
+  slightly warmer idle lantern glow. Emissive 0.18 kept (A3 still open). Branch
+  `feat/veillee-claire-konteur`, PR to `feat/veillee-claire`, not merged. Evidence:
+  `~/.local/share/contes-creole-qa/konteur/`.
+
 ## Blocked on owner decisions (no work started)
 
 - M6 "the climb brings the evening": A1.
-- M7a Konteur surroundings (halo, contact shadow): A3; M7b PNG floor residue: A2.
+- M7a Konteur halo: not done (no visual need found in the Konteur mission); emissive: A3.
 - M12 shared reading frame and M13 Ti Kannot alignment: A4 (the shared frame has no other
   consumer until a second book is ready).
 - M15 approved copy: A6 (rest) and A7.
