@@ -23,6 +23,8 @@ Sources referenced below:
   cohérence linguistique", French, quoted verbatim).
 - [M11]: owner mission prompt of 2026-10-30 ("Mission M11 : Bulles bilingues accessibles", French,
   quoted verbatim).
+- [ACCUEIL]: owner mission prompt of 2026-10-30 ("Contes Créoles — Mission Accueil", French, quoted
+  verbatim).
 - Mission reports: `~/.local/share/contes-creole-qa/reports/` (durable copies of the `/tmp` reports).
 
 ## Direction inputs (before A1–A8)
@@ -68,6 +70,8 @@ Original question wording is from [phase3] "Decisions required"; what each one b
   restent non autorisés."
   - Constraint: "Monter dans l'arbre", "Voir les contes", "ou touche Entree" and the classes sentence
     stay OPEN; no new Kréyòl text.
+  - [ACCUEIL] confirms it for the home screen: "Ces formulations ne sont pas encore validées comme
+    nouveaux textes de l'interface." "Ne pas les intégrer automatiquement."
 
 ## Technical decisions (T1–T5)
 
@@ -96,6 +100,8 @@ Original wording is from [plan] "Blocking decisions".
 | H-1      | 2026-10-29 | "Créer un commit contenant exclusivement les trois fichiers CSS M4." "Pousser `feat/veillee-claire-m4-palette`." "Ouvrir une PR vers `feat/veillee-claire`." "Ne pas effectuer de merge."                                                                                                               | [M4.1]        | One-off for M4. Done: commit 07a356d, PR #11; merged by the owner as d4d9a96. |
 | H-2      | 2026-10-29 | "Supprimer le worktree temporaire utilisé pour la review M4, après vérification et conservation des preuves nécessaires." "Nettoyer uniquement les ressources temporaires créées par M4." "Préserver les autres worktrees, sessions Herdr et serveurs préexistants."                                    | [M4.1]        | Done in M4.1 (review copied out first; `trash` then `git worktree prune`).    |
 | H-3      | 2026-10-29 | "Accepter provisoirement les écarts documentés entre M4 et les planches 11/12 : Curseur du rail de progression. Disques pleins des livres verrouillés." "Ne pas modifier leur apparence dans cette mission." "Ne pas considérer cette acceptation provisoire comme une décision artistique définitive." | [M4.1]        | Provisional, not an art ruling: both may be revisited (candidates M8/M12).    |
+| ACC-NAME | 2026-10-30 | "Le nom validé du site est : **Pyébwa a Konesans**" "Respecter exactement cette graphie."                                                                                                                                                                                                               | [ACCUEIL]     | Brand title and intro keep this exact spelling.                               |
+| ACC-GIT  | 2026-10-30 | "Ouvrir une PR vers `feat/veillee-claire`." "**Ne pas fusionner automatiquement la PR.**"                                                                                                                                                                                                               | [ACCUEIL]     | Branch `feat/veillee-claire-accueil`; merge waits for the owner's validation. |
 
 ### T4 ruling — Bubble contract
 

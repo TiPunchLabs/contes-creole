@@ -88,14 +88,15 @@ export function createTreeOverlay(
     <div class="tree-brand" lang="gcf">
       ${BRAND_ICON}
       <div class="tree-brand-text">
-        <div class="tree-brand-title">Pyébwa a Konesans</div>
+        <h1 class="tree-brand-title">Pyébwa a Konesans</h1>
         <div class="tree-brand-sub">Kont Gwadloup</div>
       </div>
     </div>
     <a class="tree-credit" lang="fr" href="https://xgueret.tipunchlabs.fr/" target="_blank" rel="noopener">Imaginé par xgueret</a>
     <div class="tree-intro"><div class="tree-intro-inner">
       <p class="tree-intro-title" lang="gcf">Chak fèy sé on kont.</p>
-      <p class="tree-intro-text" lang="fr">Chaque feuille est un conte. Tourne autour de l'arbre pour trouver le tien !</p>
+      <p class="tree-intro-gloss" lang="fr">Chaque feuille est un conte.</p>
+      <p class="tree-intro-text" lang="fr">Tourne autour de l'arbre pour trouver le tien&nbsp;!</p>
       <div class="tree-intro-hint">${MOUSE}<span lang="fr">Fais défiler · Glisse avec le doigt</span></div>
     </div></div>
     <svg class="tree-filet" aria-hidden="true"><line /><circle r="5" /></svg>

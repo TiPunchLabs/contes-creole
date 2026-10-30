@@ -25,6 +25,7 @@
 
 .tree-brand {
   position: absolute;
+  z-index: 1;
   left: 20px;
   top: 18px;
   display: flex;
@@ -43,6 +44,7 @@
 }
 
 .tree-brand-title {
+  margin: 0;
   font: 800 22px/1 var(--font-brand);
 }
 
@@ -53,6 +55,7 @@
 
 .tree-credit {
   position: absolute;
+  z-index: 1;
   left: 30px;
   top: 82px;
   pointer-events: auto;
@@ -69,46 +72,72 @@
   color: var(--tree-ink);
 }
 
+/*
+ * Editorial column (board 11 D1, "Planche"): no card, the text sits on a paper wash over the sky.
+ * The canopy spans about +-0.3 x height around the centre, so the column keeps right of it.
+ */
 .tree-intro {
   position: absolute;
-  right: clamp(16px, 5vw, 80px);
-  top: clamp(90px, 16vh, 160px);
-  max-width: min(380px, calc(100vw - 32px));
+  right: 72px;
+  top: clamp(150px, 23vh, 230px);
+  width: clamp(280px, calc(50vw - 32vh - 72px), 400px);
 }
 
 .tree-intro-inner {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 22px 24px;
-  background: var(--tree-paper);
-  border-radius: 26px;
-  box-shadow: var(--tree-shadow-strong);
   animation: tree-rise 1.2s ease-out both;
+}
+
+.tree-intro-inner::before {
+  content: "";
+  position: absolute;
+  /* Wide enough that the text stays inside the opaque part; the ellipse fades out before the edges. */
+  inset: -80px -96px;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    oklch(0.985 0.012 85 / 0.9) 45%,
+    oklch(0.985 0.012 85 / 0.72) 68%,
+    oklch(0.985 0.012 85 / 0)
+  );
 }
 
 .tree-intro-title {
   margin: 0;
-  font: 800 clamp(28px, 4vw, 40px)/1.05 var(--font-brand);
+  font: 700 clamp(40px, 4vw, 58px)/1 var(--font-display);
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
-.tree-intro-text {
-  margin: 0;
-  font: 400 17px/1.5 var(--font-read);
+.tree-intro-gloss {
+  margin: 12px 0 0;
+  font: italic 500 clamp(21px, 1.8vw, 25px)/1.25 var(--font-display);
   color: var(--tree-ink-soft);
 }
 
+.tree-intro-text {
+  margin: 16px 0 0;
+  font: 400 17px/1.45 var(--font-read);
+  text-wrap: pretty;
+}
+
 .tree-intro-hint {
-  margin-top: 4px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-rule);
   display: flex;
   align-items: center;
   gap: 10px;
-  font: 700 15px/1 var(--font-read);
-  color: var(--tree-ember);
+  font: 700 15px/1.2 var(--font-read);
+  color: var(--tree-ink-soft);
 }
 
 .tree-intro-hint svg {
+  flex: none;
+  color: var(--tree-ember);
   animation: tree-bob 1.8s ease-in-out infinite;
 }
 
@@ -327,6 +356,37 @@
   }
 }
 
+/* Portrait and narrow screens (board 12 M1): no room beside the canopy, so the column becomes a
+   band at the top, under the brand, on a paper veil that fades into the sky above the tree. */
+@media (min-height: 501px) and (max-width: 899px), (min-height: 501px) and (max-aspect-ratio: 7/5) {
+  .tree-intro {
+    left: 0;
+    right: 0;
+    top: 0;
+    width: auto;
+    padding: 108px 24px 44px;
+    /* Opaque enough behind the text for 4.5:1 over foliage, then a short fade into the scene. */
+    background: linear-gradient(
+      180deg,
+      oklch(0.985 0.012 85 / 0.88) 0%,
+      oklch(0.985 0.012 85 / 0.82) calc(100% - 44px),
+      oklch(0.985 0.012 85 / 0)
+    );
+  }
+
+  .tree-intro-inner {
+    max-width: 560px;
+  }
+
+  .tree-intro-inner::before {
+    content: none;
+  }
+
+  .tree-intro-title {
+    font-size: clamp(32px, 6vw, 48px);
+  }
+}
+
 @media (max-width: 600px) {
   .tree-brand {
     left: 12px;
@@ -340,15 +400,24 @@
   }
 
   .tree-intro {
-    left: 16px;
-    right: 16px;
     /* Under the credit link, so the Konteur and the critters on the ground stay visible. */
-    top: 106px;
-    max-width: none;
+    padding: 100px 16px 36px;
+  }
+
+  .tree-intro-gloss {
+    margin-top: 6px;
+    font-size: 19px;
   }
 
   .tree-intro-text {
+    margin-top: 10px;
     font-size: 15px;
+  }
+
+  .tree-intro-hint {
+    margin-top: 12px;
+    padding-top: 10px;
+    font-size: 14px;
   }
 
   .tree-label-title {
@@ -391,6 +460,29 @@
 
   .tree-climb {
     height: 110px;
+  }
+}
+
+/* Small landscape phones: neither the band (too short) nor the side column (too narrow) fits. */
+@media (max-width: 600px) and (max-height: 500px) {
+  .tree-intro {
+    left: 16px;
+    /* Clear of the climb bar on the right and of the credit link above. */
+    right: 40px;
+    top: 100px;
+    width: auto;
+    padding: 0;
+  }
+
+  /* Same veil as the portrait band, from the top edge to just under the hint. */
+  .tree-intro-inner::before {
+    inset: -100px -40px -16px -16px;
+    background: linear-gradient(
+      180deg,
+      oklch(0.985 0.012 85 / 0.88) 0%,
+      oklch(0.985 0.012 85 / 0.82) calc(100% - 16px),
+      oklch(0.985 0.012 85 / 0)
+    );
   }
 }
 
