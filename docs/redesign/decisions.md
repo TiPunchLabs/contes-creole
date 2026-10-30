@@ -19,6 +19,8 @@ Sources referenced below:
   owner answers to multiple-choice questions (option label quoted as selected).
 - [M3.1], [H2.1], [M4.1], [M4.2]: owner mission prompts of 2026-10-29 (French, quoted verbatim).
 - [M8]: owner mission prompt of 2026-10-30 ("Mission M8 : Fiches à filet", French, quoted verbatim).
+- [M10b+c]: owner mission prompt of 2026-10-30 ("Mission M10b+c : Langue HTML, noms accessibles et
+  cohérence linguistique", French, quoted verbatim).
 - Mission reports: `~/.local/share/contes-creole-qa/reports/` (durable copies of the `/tmp` reports).
 
 ## Direction inputs (before A1–A8)
@@ -34,16 +36,16 @@ Constraint: the Konteur photo stays unchanged and no Kréyòl text is added by t
 Original question wording is from [phase3] "Decisions required"; what each one blocks is from
 [plan] "Blocking decisions".
 
-| ID  | Question (verbatim, [phase3])                                                                                                                                                                      | Blocks ([plan])                         | Status                        |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------- |
-| A1  | "adopt "the climb brings the evening" (sky + firefly density depend on t)? Recommendation: yes. Not blocking."                                                                                     | M6                                      | OPEN                          |
-| A2  | "clean the white floor residue under the Konteur stool in the PNG (detourage fix, touches the file)? No recommendation; needs owner consent."                                                      | M7b                                     | OPEN                          |
-| A3  | "keep Konteur material emissive at 0.18? Recommendation: keep."                                                                                                                                    | M7a                                     | OPEN                          |
-| A4  | "Ti Kannot theme (parchment, Caveat, teal) overrides the shared reading frame, or aligns to it (book keeps accent + world)? Boards show alignment. Blocks reading-frame implementation."           | M13; how much of M12 shows in Ti Kannot | OPEN (M3-scoped ruling A4-M3) |
-| A5  | "page default language: `lang="fr"` + `gcf` passages (recommended) or `gcf` + `fr` passages."                                                                                                      | M10b                                    | OPEN                          |
-| A6  | "approve new French strings: "Monter dans l'arbre", "Voir les contes", "Page suivante", "ou touche Entree", "Des contes imagines par des classes de primaire, relus avant d'entrer dans l'arbre."" | M8 (hint), M10c, M12 (labels), M15      | OPEN                          |
-| A7  | "harmonize "Defilez pour continuer" (vous) with tree "Fais defiler" (tu)?"                                                                                                                         | M12 (hint), M15                         | OPEN                          |
-| A8  | "consolidate five font families to three (Newsreader, Andika, IBM Plex Mono); depends on A4 for Caveat."                                                                                           | M3; font part of M13 and M16            | RULED 2026-10-29 (see A8)     |
+| ID  | Question (verbatim, [phase3])                                                                                                                                                                      | Blocks ([plan])                         | Status                           |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | -------------------------------- |
+| A1  | "adopt "the climb brings the evening" (sky + firefly density depend on t)? Recommendation: yes. Not blocking."                                                                                     | M6                                      | OPEN                             |
+| A2  | "clean the white floor residue under the Konteur stool in the PNG (detourage fix, touches the file)? No recommendation; needs owner consent."                                                      | M7b                                     | OPEN                             |
+| A3  | "keep Konteur material emissive at 0.18? Recommendation: keep."                                                                                                                                    | M7a                                     | OPEN                             |
+| A4  | "Ti Kannot theme (parchment, Caveat, teal) overrides the shared reading frame, or aligns to it (book keeps accent + world)? Boards show alignment. Blocks reading-frame implementation."           | M13; how much of M12 shows in Ti Kannot | OPEN (M3-scoped ruling A4-M3)    |
+| A5  | "page default language: `lang="fr"` + `gcf` passages (recommended) or `gcf` + `fr` passages."                                                                                                      | M10b                                    | RULED 2026-10-30 (see A5)        |
+| A6  | "approve new French strings: "Monter dans l'arbre", "Voir les contes", "Page suivante", "ou touche Entree", "Des contes imagines par des classes de primaire, relus avant d'entrer dans l'arbre."" | M8 (hint), M10c, M12 (labels), M15      | PARTIAL 2026-10-30 (see A6-M10c) |
+| A7  | "harmonize "Defilez pour continuer" (vous) with tree "Fais defiler" (tu)?"                                                                                                                         | M12 (hint), M15                         | OPEN                             |
+| A8  | "consolidate five font families to three (Newsreader, Andika, IBM Plex Mono); depends on A4 for Caveat."                                                                                           | M3; font part of M13 and M16            | RULED 2026-10-29 (see A8)        |
 
 ### Rulings
 
@@ -56,6 +58,14 @@ Original question wording is from [phase3] "Decisions required"; what each one b
   open for M13."
   - Constraint: until A4 is ruled, `src/books/ti-kannot/theme.css` is not edited and Ti Kannot's reading
     screen keeps Caveat and Quicksand, page counter included.
+- **A5** — RULED 2026-10-30, [M10b+c]: "Utiliser `lang="fr"` sur l'élément HTML racine." "Les
+  passages créoles devront explicitement déclarer `lang="gcf"` lorsqu'ils n'héritent plus correctement
+  de leur langue."
+- **A6-M10c** — PARTIAL 2026-10-30, [M10b+c]: "Autoriser uniquement les formulations françaises
+  suivantes : « Page précédente » « Page suivante »" "Les autres changements éditoriaux prévus dans A6
+  restent non autorisés."
+  - Constraint: "Monter dans l'arbre", "Voir les contes", "ou touche Entree" and the classes sentence
+    stay OPEN; no new Kréyòl text.
 
 ## Technical decisions (T1–T5)
 
