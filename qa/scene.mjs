@@ -108,10 +108,7 @@ try {
     await p.clock.runFor(4000);
     await p.clock.pauseAt(Date.now() + 3_600_000);
     await p.mouse.move(720, 40);
-    for (const [name, sel] of [
-      ["enter-button", ".tree-enter"],
-      ["credit-link", ".tree-credit"],
-    ]) {
+    for (const [name, sel] of [["enter-button", ".tree-enter"]]) {
       const box = await p.locator(sel).boundingBox();
       const clip = { x: box.x - 8, y: box.y - 8, width: box.width + 16, height: box.height + 16 };
       // A rare transient frame was seen once in a full run (0 of 36 in isolation): wait for two

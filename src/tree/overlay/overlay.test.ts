@@ -19,7 +19,7 @@ describe("placeFiche, wide", () => {
     expect(box.line).toEqual([840, 420, 792, 420]);
   });
 
-  it("keeps clear of the climb bar and of the brand badge", () => {
+  it("keeps clear of the climb bar and of the top of the screen", () => {
     const box = placeFiche({ x: 719, y: 140, cy: 40 }, FICHE, WIDE);
     expect(box.top).toBe(104);
     expect(box.left + FICHE.width).toBeLessThanOrEqual(WIDE.width - 48);

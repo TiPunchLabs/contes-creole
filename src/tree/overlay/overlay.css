@@ -15,100 +15,94 @@
   font-family: var(--font-read);
 }
 
-.tree-overlay button:focus-visible,
-.tree-overlay a:focus-visible {
+.tree-overlay button:focus-visible {
   /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
   outline: 3px solid transparent;
   outline-offset: 2px;
   box-shadow: var(--focus-ring);
 }
 
-.tree-brand {
-  position: absolute;
-  left: 20px;
-  top: 18px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 18px 10px 14px;
-  background: var(--tree-paper);
-  border-radius: 22px;
-  box-shadow: var(--tree-shadow);
-}
-
-.tree-brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.tree-brand-title {
-  font: 800 22px/1 var(--font-brand);
-}
-
-.tree-brand-sub {
-  font: 700 13px/1.2 var(--font-read);
-  color: var(--tree-ink-soft);
-}
-
-.tree-credit {
-  position: absolute;
-  left: 30px;
-  top: 82px;
-  pointer-events: auto;
-  font: 700 12px/1 var(--font-read);
-  color: var(--tree-ink-soft);
-  text-decoration: none;
-  padding: 6px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--tree-paper);
-  transition: color 0.25s;
-}
-
-.tree-credit:hover {
-  color: var(--tree-ink);
-}
-
+/*
+ * Editorial column (board 11 D1, "Planche"): no card, the text sits on a paper wash over the sky.
+ * The canopy spans about +-0.3 x height around the centre, so the column keeps right of it.
+ */
 .tree-intro {
   position: absolute;
-  right: clamp(16px, 5vw, 80px);
-  top: clamp(90px, 16vh, 160px);
-  max-width: min(380px, calc(100vw - 32px));
+  right: 72px;
+  top: clamp(150px, 23vh, 230px);
+  width: clamp(280px, calc(50vw - 32vh - 72px), 400px);
 }
 
 .tree-intro-inner {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 22px 24px;
-  background: var(--tree-paper);
-  border-radius: 26px;
-  box-shadow: var(--tree-shadow-strong);
   animation: tree-rise 1.2s ease-out both;
 }
 
+.tree-intro-inner::before {
+  content: "";
+  position: absolute;
+  /* Wide enough that the text stays inside the opaque part; the ellipse fades out before the edges. */
+  inset: -96px;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    oklch(0.985 0.012 85 / 0.9) 50%,
+    oklch(0.985 0.012 85 / 0.74) 72%,
+    oklch(0.985 0.012 85 / 0)
+  );
+}
+
+/* The site title heads the column; its kicker shows above it but follows it in reading order. */
 .tree-intro-title {
   margin: 0;
-  font: 800 clamp(28px, 4vw, 40px)/1.05 var(--font-brand);
+  font: 700 clamp(40px, 4vw, 58px)/1 var(--font-display);
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
-.tree-intro-text {
-  margin: 0;
-  font: 400 17px/1.5 var(--font-read);
+.tree-intro-kicker {
+  order: -1;
+  margin: 0 0 10px;
+  font: 700 13px/1.2 var(--font-read);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--tree-ink-soft);
 }
 
+.tree-intro-motto {
+  margin: 20px 0 0;
+  font: 700 clamp(24px, 2.2vw, 30px)/1.15 var(--font-display);
+}
+
+.tree-intro-gloss {
+  margin: 4px 0 0;
+  font: italic 500 clamp(19px, 1.6vw, 22px)/1.25 var(--font-display);
+  color: var(--tree-ink-soft);
+}
+
+.tree-intro-text {
+  margin: 16px 0 0;
+  font: 400 17px/1.45 var(--font-read);
+  text-wrap: pretty;
+}
+
 .tree-intro-hint {
-  margin-top: 4px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-rule);
   display: flex;
   align-items: center;
   gap: 10px;
-  font: 700 15px/1 var(--font-read);
-  color: var(--tree-ember);
+  font: 700 15px/1.2 var(--font-read);
+  color: var(--tree-ink-soft);
 }
 
 .tree-intro-hint svg {
+  flex: none;
+  color: var(--tree-ember);
   animation: tree-bob 1.8s ease-in-out infinite;
 }
 
@@ -327,28 +321,61 @@
   }
 }
 
-@media (max-width: 600px) {
-  .tree-brand {
-    left: 12px;
-    top: 12px;
-    padding: 8px 14px 8px 10px;
-  }
-
-  .tree-credit {
-    left: 20px;
-    top: 70px;
-  }
-
+/* Portrait and narrow screens (board 12 M1): no room beside the canopy, so the column becomes a
+   band at the top, on a paper veil that fades into the sky above the tree. */
+@media (min-height: 501px) and (max-width: 899px), (min-height: 501px) and (max-aspect-ratio: 7/5) {
   .tree-intro {
-    left: 16px;
-    right: 16px;
-    /* Under the credit link, so the Konteur and the critters on the ground stay visible. */
-    top: 106px;
-    max-width: none;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: auto;
+    padding: 24px clamp(16px, 4vw, 24px) 40px;
+    /* Opaque enough behind the text for 4.5:1 over foliage, then a short fade into the scene. */
+    background: linear-gradient(
+      180deg,
+      oklch(0.985 0.012 85 / 0.88) 0%,
+      oklch(0.985 0.012 85 / 0.82) calc(100% - 44px),
+      oklch(0.985 0.012 85 / 0)
+    );
+  }
+
+  .tree-intro-inner {
+    max-width: 560px;
+  }
+
+  .tree-intro-inner::before {
+    content: none;
+  }
+
+  .tree-intro-title {
+    font-size: clamp(36px, 6.4vw, 52px);
+  }
+}
+
+@media (max-width: 600px) {
+  .tree-intro-kicker {
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .tree-intro-motto {
+    margin-top: 12px;
+    font-size: 22px;
+  }
+
+  .tree-intro-gloss {
+    font-size: 18px;
   }
 
   .tree-intro-text {
+    margin-top: 10px;
     font-size: 15px;
+  }
+
+  .tree-intro-hint {
+    margin-top: 12px;
+    padding-top: 10px;
+    font-size: 14px;
   }
 
   .tree-label-title {
@@ -361,12 +388,54 @@
   }
 }
 
+/* Landscape phones: neither the band (too short) nor the side column fits, so a compact column
+   sits top left on the same paper veil as the band, clear of the shelf and the climb bar. */
 @media (max-height: 500px) {
   .tree-intro {
-    top: 80px;
+    left: 16px;
+    top: 16px;
+    width: min(520px, calc(100% - 64px));
   }
 
-  /* Compact fiche so it clears the brand badge on landscape phones. */
+  .tree-intro-inner::before {
+    inset: -16px -56px -14px -16px;
+    background: linear-gradient(
+      180deg,
+      oklch(0.985 0.012 85 / 0.88) 0%,
+      oklch(0.985 0.012 85 / 0.82) calc(100% - 14px),
+      oklch(0.985 0.012 85 / 0)
+    );
+    /* Soft right edge too, so the veil never ends in a hard line over the scene. */
+    mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent);
+  }
+
+  .tree-intro-kicker {
+    margin-bottom: 2px;
+    font-size: 11px;
+  }
+
+  .tree-intro-motto {
+    margin-top: 6px;
+    font-size: 19px;
+  }
+
+  .tree-intro-gloss {
+    margin-top: 0;
+    font-size: 16px;
+  }
+
+  .tree-intro-text {
+    margin-top: 6px;
+    font-size: 14px;
+  }
+
+  .tree-intro-hint {
+    margin-top: 8px;
+    padding-top: 6px;
+    font-size: 13px;
+  }
+
+  /* Compact fiche so it fits between the top of the screen and the shelf on landscape phones. */
   .tree-label {
     gap: 4px;
     padding: 10px 14px 12px;
@@ -386,7 +455,7 @@
   }
 
   .tree-intro-title {
-    font-size: 26px;
+    font-size: 28px;
   }
 
   .tree-climb {

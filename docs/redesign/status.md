@@ -37,6 +37,12 @@ globale — Finalisation autonome"). Decisions and their wording live in
   few visible stars. Open art points: star brightness, the banana in the foreground of the climb
   around t = 0.375. Evidence: `~/.local/share/contes-creole-qa/nature/`.
 
+- Home screen "Mission Accueil" (2026-10-30): the intro becomes board C's editorial column (no
+  card, paper wash) on wide screens and a top band on a paper veil on portrait and narrow screens;
+  the site title "Pyébwa a Konesans" heads that column as the page `<h1>` (badge removed), and the "Imaginé
+  par xgueret" signature is removed from the home screen (owner's adjustments, same PR). Branch `feat/veillee-claire-accueil`, PR to `feat/veillee-claire`,
+  not merged. Evidence: `~/.local/share/contes-creole-qa/accueil/`.
+
 ## Blocked on owner decisions (no work started)
 
 - M6 "the climb brings the evening": A1.
