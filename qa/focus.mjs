@@ -1,11 +1,15 @@
-// Visible-focus check by pixels: compares a thin band just outside a control, focused vs unfocused.
+// Visible-focus check by pixels: compares a band just outside a control, focused vs unfocused, and
+// counts the pixels whose colour changes with a contrast of at least 3:1 (WCAG 2.4.13 focus
+// appearance). Visible = those pixels cover at least a 1 CSS px ring around the control's perimeter.
 // It does not care how the ring is drawn (outline, box-shadow, forced-colors system outline), so a
-// transparent outline or a removed box-shadow fails. `node qa/focus.mjs` runs the self-test.
+// transparent outline, a removed ring or a merely vanishing soft shadow fails.
+// The background must be static between the two screenshots (shelf, or a frozen page clock).
+// `node qa/focus.mjs` runs the self-test.
 import { chromium } from "@playwright/test";
 
-const BAND = 6; // px outside the border box that a visible ring must cover
-const MIN_CHANGED = 0.3; // share of band pixels that must change
-const DELTA = 40; // per-channel difference that counts as a change
+const BAND = 8; // CSS px outside the border box that are measured (the M4 ring reaches 7 px)
+const MIN_CONTRAST = 3; // focused vs unfocused contrast that makes a pixel part of the indicator
+const MIN_COVERAGE = 1; // indicator area / perimeter, in CSS px: at least a 1 px solid ring
 
 /** Focuses `locator` with keyboard modality (Tab from a sentinel just before it). */
 async function keyboardFocus(page, locator) {
@@ -13,6 +17,8 @@ async function keyboardFocus(page, locator) {
     const s = document.createElement("span");
     s.tabIndex = 0;
     s.dataset.qaSentinel = "";
+    // Out of flow: inside a flex or grid parent an in-flow sentinel would shift the control.
+    s.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
     el.before(s);
     s.focus();
   });
@@ -26,14 +32,16 @@ async function unfocus(page) {
     const s = document.createElement("span");
     s.tabIndex = -1;
     s.dataset.qaSentinel = "";
+    s.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
     document.body.prepend(s);
     s.focus();
   });
 }
 
 /**
- * Measures the focus indicator of `locator`. Returns { visible, changed, focused, outline, shadow }.
- * `changed` is the share of pixels in the BAND-wide ring around the box that differ focused vs not.
+ * Measures the focus indicator of `locator`. Returns { visible, coverage, focused, outline, shadow }.
+ * `coverage` is the area (CSS px) of band pixels changing by >= 3:1 contrast, divided by the box
+ * perimeter: 1 means the equivalent of a 1 px solid ring all around.
  */
 export async function focusIndicator(page, locator) {
   await locator.scrollIntoViewIfNeeded();
@@ -68,8 +76,8 @@ export async function focusIndicator(page, locator) {
     x1: box.x - clip.x + box.width,
     y1: box.y - clip.y + box.height,
   };
-  const share = await page.evaluate(
-    async ([off, on, inner, cssWidth, delta]) => {
+  const coverage = await page.evaluate(
+    async ([off, on, inner, cssWidth, minContrast]) => {
       const decode = async (b64) => {
         const bitmap = await createImageBitmap(
           await (await fetch(`data:image/png;base64,${b64}`)).blob(),
@@ -81,28 +89,25 @@ export async function focusIndicator(page, locator) {
       };
       const [a, b] = await Promise.all([decode(off), decode(on)]);
       const s = a.width / cssWidth;
-      let band = 0;
+      const lin = (c) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+      const lum = (d, i) => 0.2126 * lin(d[i]) + 0.7152 * lin(d[i + 1]) + 0.0722 * lin(d[i + 2]);
       let changed = 0;
       for (let y = 0; y < a.height; y++)
         for (let x = 0; x < a.width; x++) {
           if (x >= inner.x0 * s && x < inner.x1 * s && y >= inner.y0 * s && y < inner.y1 * s)
             continue;
-          band++;
           const i = (y * a.width + x) * 4;
-          const d = Math.max(
-            Math.abs(a.data[i] - b.data[i]),
-            Math.abs(a.data[i + 1] - b.data[i + 1]),
-            Math.abs(a.data[i + 2] - b.data[i + 2]),
-          );
-          if (d > delta) changed++;
+          const [l1, l2] = [lum(a.data, i), lum(b.data, i)];
+          if ((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05) >= minContrast) changed++;
         }
-      return band ? changed / band : 0;
+      const perimeter = 2 * (inner.x1 - inner.x0 + inner.y1 - inner.y0);
+      return changed / (s * s) / perimeter;
     },
-    [off, on, inner, clip.width, DELTA],
+    [off, on, inner, clip.width, MIN_CONTRAST],
   );
   return {
-    visible: info.focused && share >= MIN_CHANGED,
-    changed: Number(share.toFixed(3)),
+    visible: info.focused && coverage >= MIN_COVERAGE,
+    coverage: Number(coverage.toFixed(2)),
     ...info,
   };
 }
@@ -159,7 +164,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       if (!ok) bad++;
       console.log(
         ok ? "PASS" : "FAIL",
-        `${c.id}: expected visible=${c.expect}, got visible=${r.visible} changed=${r.changed} outline="${r.outline}"`,
+        `${c.id}: expected visible=${c.expect}, got visible=${r.visible} coverage=${r.coverage} outline="${r.outline}"`,
       );
       await ctx.close();
     }
