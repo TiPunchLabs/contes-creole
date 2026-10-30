@@ -68,8 +68,12 @@ function sample(lite: boolean): unknown {
 // Owner-requested exceptions (2026-10-30): a palm and a tree fern moved off the near cards' lines of
 // sight (fixed positions, no rng; see occlusion.test.ts) and the hollow on the trunk removed (four
 // objects). Random draws (next, tips, hills, fireflies) are unchanged.
+// Owner-requested exceptions (2026-10-30, nature pass): two breadfruits moved out of the mornes that
+// buried their trunks and a banana moved off the climb's line of sight (fixed positions, no rng);
+// fewer fireflies (340 to 110), so the sky's later draws (stars, mists, next) moved. Tips, hills and
+// the flora's own draws are unchanged.
 const FULL = {
-  next: 0.4855,
+  next: 0.7323,
   tips: {
     count: 301,
     first: [
@@ -96,24 +100,24 @@ const FULL = {
     ],
   },
   fireflies: {
-    count: 340,
+    count: 110,
     first: [
-      [15.2818, 5.3253, -2.7959],
-      [-10.9888, 3.0912, 11.1015],
+      [11.7472, 0.6411, -5.5685],
+      [-9.5702, 0.3486, 4.2954],
     ],
   },
   mists: [
-    [-13.7936, 0.9513, -17.7935],
-    [7.9262, 1.1371, -12.8755],
+    [-4.7167, 0.8008, -14.4236],
+    [-17.0446, 0.9926, -11.4845],
   ],
   digest: {
-    landscape: { objects: 388, sum: [713.8192, 834.1137, 789.9735] },
+    landscape: { objects: 388, sum: [707.8192, 834.8414, 794.9735] },
     tree: { objects: 5, sum: [5, 5, 5] },
-    sky: { objects: 18, sum: [168.5138, 343.1593, 227.6373] },
+    sky: { objects: 18, sum: [222.1834, 349.9447, 207.2595] },
   },
 };
 const LITE = {
-  next: 0.5875,
+  next: 0.3087,
   tips: {
     count: 266,
     first: [
@@ -140,20 +144,20 @@ const LITE = {
     ],
   },
   fireflies: {
-    count: 153,
+    count: 50,
     first: [
-      [-12.6481, 11.2064, -4.6818],
-      [1.0071, 12.3737, 3.4217],
+      [7.8624, 2.1535, -8.0776],
+      [-12.386, 2.5817, 3.4105],
     ],
   },
   mists: [
-    [-14.4939, 0.6131, -19.7806],
-    [3.1591, 1.1061, 19.8227],
+    [12.1645, 0.8735, 10.8157],
+    [9.9932, 0.4195, -17.6744],
   ],
   digest: {
-    landscape: { objects: 388, sum: [713.8192, 834.1137, 789.9735] },
+    landscape: { objects: 388, sum: [707.8192, 834.8414, 794.9735] },
     tree: { objects: 5, sum: [5, 5, 5] },
-    sky: { objects: 11, sum: [39.6977, 200.5959, 242.3065] },
+    sky: { objects: 11, sum: [94.8892, 197.0314, 223.5069] },
   },
 };
 

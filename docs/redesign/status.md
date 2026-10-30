@@ -22,12 +22,20 @@ globale — Finalisation autonome"). Decisions and their wording live in
 | Edge screens and cleanup (M14+16) | #19 | a07c854      |
 | Bubble French line in italic      | #20 | 09f9c81      |
 | Cards clear of flora, no hollow   | #22 | see git log  |
+| Nature pass (flora, fireflies)    | #23 | see git log  |
 
 ## Remaining work
 
 - None that is unblocked. The redesign is ready for the owner's evaluation; the evaluation pack and
   final report are in `~/.local/share/contes-creole-qa/final-evaluation/` and
   `~/.local/share/contes-creole-qa/reports/contes-creole-veillee-claire-final.md`.
+
+## Awaiting owner's artistic review
+
+- Nature pass (2026-10-30): buried breadfruits moved out of the mornes, palm / banana / tree-fern
+  crowns fan out (Euler order fix), banana leaves with a midrib, 110 fireflies near the plants, a
+  few visible stars. Open art points: star brightness, the banana in the foreground of the climb
+  around t = 0.375. Evidence: `~/.local/share/contes-creole-qa/nature/`.
 
 ## Blocked on owner decisions (no work started)
 

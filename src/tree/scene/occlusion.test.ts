@@ -72,3 +72,23 @@ describe("hanging cards seen from their near camera", () => {
     for (const share of hiddenShare(lite, 3)) expect(share).toBeLessThan(0.02);
   });
 });
+
+describe("flora and mornes", () => {
+  it("never plants a trunk inside a hill", () => {
+    // Before the fix two far breadfruits stood inside a morne: only their crowns showed.
+    const landscape = createLandscape(createRng(11), (n) => n);
+    const plants = landscape.group.children.filter((o) => o.type === "Group");
+    const hills = landscape.group.children.filter(
+      (o) => o instanceof THREE.Mesh && o.geometry instanceof THREE.SphereGeometry,
+    );
+    for (const plant of plants) {
+      for (const hill of hills) {
+        const inside =
+          ((plant.position.x - hill.position.x) / hill.scale.x) ** 2 +
+          ((plant.position.y - hill.position.y) / hill.scale.y) ** 2 +
+          ((plant.position.z - hill.position.z) / hill.scale.z) ** 2;
+        expect(inside).toBeGreaterThan(1);
+      }
+    }
+  });
+});

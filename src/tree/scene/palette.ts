@@ -11,8 +11,8 @@ export const SKY = {
   middle: "#fcc1b6",
   /** "Ciel haut", oklch(.82 .05 300); CSS twin --color-sky-high. */
   top: "#c9bde0",
-  /** Stars fade out in daylight (was 0.55). */
-  starOpacity: 0.3,
+  /** A few stars show through the daylight (was 0.55, then 0.3: lost in the lilac). */
+  starOpacity: 0.85,
   /** Low sun (was a moon): pale warm core and halo; position unchanged. */
   sunDisc: "#fff3c8",
   sunHalo: "#ffe7b8",
