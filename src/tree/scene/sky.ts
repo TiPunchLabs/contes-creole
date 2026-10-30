@@ -3,16 +3,18 @@ import type { Rng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
 import { softSprite } from "@shared/three/soft-sprite";
 import type { Count } from "../lite";
+import { SKY } from "./palette";
 
 const DOME_VERTEX = `varying vec3 vP; void main(){ vP=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
-const DOME_FRAGMENT = `varying vec3 vP; void main(){ float h=normalize(vP).y; vec3 hz=vec3(1.,.87,.66), mid=vec3(.98,.76,.66), top=vec3(.66,.64,.86);
-  vec3 c=mix(hz,mid,smoothstep(-.02,.18,h)); c=mix(c,top,smoothstep(.15,.7,h)); gl_FragColor=vec4(c,1.);
+const DOME_FRAGMENT = `uniform vec3 uHorizon, uMiddle, uTop; varying vec3 vP; void main(){ float h=normalize(vP).y;
+  vec3 c=mix(uHorizon,uMiddle,smoothstep(-.02,.18,h)); c=mix(c,uTop,smoothstep(.15,.7,h)); gl_FragColor=vec4(c,1.);
   #include <colorspace_fragment>
 }`;
 
 /**
- * Evening sky (v14): lavender-to-peach dome following the camera, rising moon, a few stars, mist and
- * golden fireflies. Must be called after `createLightTree` to keep the mockup's random order.
+ * Late-afternoon sky ("Veillée claire"): apricot-rose-lilac dome following the camera, low pale sun,
+ * faint stars, mist and golden fireflies. Must be called after `createLightTree` to keep the mockup's
+ * random order.
  */
 export function createSky(
   rng: Rng,
@@ -25,6 +27,11 @@ export function createSky(
       side: THREE.BackSide,
       depthWrite: false,
       fog: false,
+      uniforms: {
+        uHorizon: { value: new THREE.Color(SKY.horizon) },
+        uMiddle: { value: new THREE.Color(SKY.middle) },
+        uTop: { value: new THREE.Color(SKY.top) },
+      },
       vertexShader: DOME_VERTEX,
       fragmentShader: DOME_FRAGMENT,
     }),
@@ -53,13 +60,13 @@ export function createSky(
     },
     { size: 1.2, a: "#ffffff", b: "#fff6dc" },
   );
-  stars.material.uniforms.uOpacity.value = 0.55;
-  const moon = softSprite("#fff6dc", 34, 1, false);
+  stars.material.uniforms.uOpacity.value = SKY.starOpacity;
+  const moon = softSprite(SKY.sunHalo, 34, 1, false);
   moon.position.set(-46, 30, 120);
   moon.material.fog = false;
   const disc = new THREE.Mesh(
     new THREE.CircleGeometry(7, 40),
-    new THREE.MeshBasicMaterial({ color: "#fff8e6", fog: false }),
+    new THREE.MeshBasicMaterial({ color: SKY.sunDisc, fog: false }),
   );
   disc.position.copy(moon.position).add(new THREE.Vector3(0, 0, 2));
   disc.lookAt(0, 8, 0);
