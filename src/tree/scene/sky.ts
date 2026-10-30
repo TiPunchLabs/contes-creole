@@ -3,6 +3,7 @@ import type { Rng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
 import { softSprite } from "@shared/three/soft-sprite";
 import type { Count } from "../lite";
+import { FLORA_OBSTACLES } from "./flora";
 import { SKY } from "./palette";
 
 const DOME_VERTEX = `varying vec3 vP; void main(){ vP=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
@@ -13,8 +14,8 @@ const DOME_FRAGMENT = `uniform vec3 uHorizon, uMiddle, uTop; varying vec3 vP; vo
 
 /**
  * Late-afternoon sky ("Veillée claire"): apricot-rose-lilac dome following the camera, low pale sun,
- * faint stars, mist and golden fireflies. Must be called after `createLightTree` to keep the mockup's
- * random order.
+ * a few faint stars, mist and golden fireflies hovering low around the plants. Must be called after
+ * `createLightTree` to keep the mockup's random order.
  */
 export function createSky(
   rng: Rng,
@@ -38,27 +39,30 @@ export function createSky(
   );
   const fireflies = glowPoints(
     rng,
-    count(340),
+    count(110),
     () => {
-      const a = rng() * Math.PI * 2,
-        r = 3 + rng() * 13;
-      return [Math.cos(a) * r, rng() * 15, Math.sin(a) * r];
+      // One draw picks the plant (integer part) and the bearing around it (fractional part).
+      const u = rng() * FLORA_OBSTACLES.length,
+        [x, z] = FLORA_OBSTACLES[Math.floor(u)],
+        a = (u % 1) * Math.PI * 2,
+        r = 0.6 + rng() * 2.4;
+      return [x + Math.cos(a) * r, 0.2 + rng() ** 2 * 3.5, z + Math.sin(a) * r];
     },
-    { size: 0.24, drift: 1.2, a: "#fff2a8", b: "#ffcf6a" },
+    { size: 0.22, drift: 0.6, a: "#fff2a8", b: "#ffcf6a" },
   );
   const stars = glowPoints(
     rng,
     count(90),
     () => {
       const th = rng() * Math.PI * 2,
-        ph = 0.55 + rng() * 0.8;
+        ph = 0.15 + rng() * 0.5;
       return [
         Math.cos(th) * Math.cos(ph) * 220,
         Math.sin(ph) * 220 + 10,
         Math.sin(th) * Math.cos(ph) * 220,
       ];
     },
-    { size: 1.2, a: "#ffffff", b: "#fff6dc" },
+    { size: 4, a: "#ffffff", b: "#fff6dc" },
   );
   stars.material.uniforms.uOpacity.value = SKY.starOpacity;
   const moon = softSprite(SKY.sunHalo, 34, 1, false);
