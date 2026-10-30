@@ -34,7 +34,7 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
   el.className = "reading";
   el.hidden = true;
   el.innerHTML = `
-    <button type="button" class="reading-back">${BACK}<span>Pyébwa a Konesans</span></button>
+    <button type="button" class="reading-back" lang="gcf" aria-label="Pyébwa a Konesans">${BACK}<span>Pyébwa a Konesans</span></button>
     <div class="reading-langs" role="group"></div>
     <article class="reading-card" aria-live="polite">
       <div class="reading-head"><div class="reading-label"></div><div class="reading-num"></div></div>
@@ -42,10 +42,10 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       <div class="reading-body"></div>
       <div class="reading-gloss" lang="fr" hidden></div>
     </article>
-    <nav class="reading-dots"></nav>
+    <nav class="reading-dots" lang="gcf"></nav>
     <div class="reading-arrows">
-      <button type="button" class="reading-prev" aria-label="←">${ARROW}</button>
-      <button type="button" class="reading-next" aria-label="→">${ARROW}</button>
+      <button type="button" class="reading-prev" aria-label="Page précédente">${ARROW}</button>
+      <button type="button" class="reading-next" aria-label="Page suivante">${ARROW}</button>
     </div>
     <div class="reading-hint" aria-hidden="true"><span lang="fr">Défilez pour continuer</span>${ARROW}</div>`;
   root.append(el);

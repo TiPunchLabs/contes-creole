@@ -105,6 +105,11 @@ describe("reading UI", () => {
     expect(events.onPage).toHaveBeenCalledWith(0);
     expect(events.onPage).toHaveBeenCalledTimes(2);
     expect(events.onBack).toHaveBeenCalledOnce();
+    expect($(".reading-prev").getAttribute("aria-label")).toBe("Page précédente");
+    expect($(".reading-next").getAttribute("aria-label")).toBe("Page suivante");
+    expect($(".reading-back").lang).toBe("gcf");
+    // Phones hide the visible text, so the name must not depend on it.
+    expect($(".reading-back").getAttribute("aria-label")).toBe("Pyébwa a Konesans");
     ui.render({ page: 0, lang: "fr", showHint: false });
     expect($(".reading-label").textContent).toBe("Un");
     expect($(".reading-label").hasAttribute("lang")).toBe(false);

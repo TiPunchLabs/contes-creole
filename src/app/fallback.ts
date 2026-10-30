@@ -2,6 +2,7 @@
 export function showFallback(root: HTMLElement): void {
   const el = document.createElement("div");
   el.className = "app-fallback";
+  el.lang = "gcf";
   el.innerHTML = `
     <div class="app-fallback-title">Pyébwa-la ka dòmi…</div>
     <div class="app-fallback-text" lang="fr">L'affichage 3D (WebGL) est en pause. Recharge la page ; si rien ne change, ferme puis rouvre le navigateur.</div>

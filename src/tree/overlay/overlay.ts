@@ -85,7 +85,7 @@ export function createTreeOverlay(
   const el = document.createElement("div");
   el.className = "tree-overlay";
   el.innerHTML = `
-    <div class="tree-brand">
+    <div class="tree-brand" lang="gcf">
       ${BRAND_ICON}
       <div class="tree-brand-text">
         <div class="tree-brand-title">Pyébwa a Konesans</div>
@@ -94,12 +94,12 @@ export function createTreeOverlay(
     </div>
     <a class="tree-credit" lang="fr" href="https://xgueret.tipunchlabs.fr/" target="_blank" rel="noopener">Imaginé par xgueret</a>
     <div class="tree-intro"><div class="tree-intro-inner">
-      <p class="tree-intro-title">Chak fèy sé on kont.</p>
+      <p class="tree-intro-title" lang="gcf">Chak fèy sé on kont.</p>
       <p class="tree-intro-text" lang="fr">Chaque feuille est un conte. Tourne autour de l'arbre pour trouver le tien !</p>
       <div class="tree-intro-hint">${MOUSE}<span lang="fr">Fais défiler · Glisse avec le doigt</span></div>
     </div></div>
     <svg class="tree-filet" aria-hidden="true"><line /><circle r="5" /></svg>
-    <div class="tree-label">
+    <div class="tree-label" lang="gcf">
       <div class="tree-label-kicker"></div>
       <div class="tree-label-title"></div>
       <div class="tree-label-sub"></div>

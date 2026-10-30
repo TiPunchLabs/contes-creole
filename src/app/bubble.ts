@@ -1,12 +1,19 @@
-import type { Bubble, ScreenAnchor } from "./contract";
+import type { Bubble, Lang, ScreenAnchor } from "./contract";
 
 const EDGE = 12;
 
-/** Speech bubble following a universe-provided screen anchor each frame, kept inside the screen. */
-export function createBubble(root: HTMLElement): Bubble & { dispose(): void } {
+/**
+ * Speech bubble following a universe-provided screen anchor each frame, kept inside the screen. Its
+ * lang is set by the shell (tree lines open in Kréyòl; a book speaks the language of the story shown)
+ * and applies from the next line, so a line already on screen keeps its own.
+ */
+export function createBubble(
+  root: HTMLElement,
+): Bubble & { setLang(lang: Lang): void; dispose(): void } {
   const el = document.createElement("div");
   el.className = "app-bubble";
   root.append(el);
+  let lang: Lang = "gcf";
   let anchor: (() => ScreenAnchor) | null = null;
   let raf = 0;
 
@@ -34,11 +41,15 @@ export function createBubble(root: HTMLElement): Bubble & { dispose(): void } {
   return {
     show(text, next) {
       el.textContent = text;
+      el.lang = lang;
       anchor = next;
       cancelAnimationFrame(raf);
       follow();
     },
     hide,
+    setLang(next) {
+      lang = next;
+    },
     dispose() {
       hide();
       el.remove();

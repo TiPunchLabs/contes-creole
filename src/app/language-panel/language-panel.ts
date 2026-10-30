@@ -90,6 +90,7 @@ export function createLanguagePanel(root: HTMLElement): LanguagePanel {
   burger.hidden = true;
   burger.innerHTML = BURGER;
   burger.setAttribute("aria-label", "Lang kréyòl");
+  burger.lang = "gcf";
   burger.setAttribute("aria-controls", PANEL_ID);
   burger.setAttribute("aria-expanded", "false");
 
@@ -103,6 +104,7 @@ export function createLanguagePanel(root: HTMLElement): LanguagePanel {
   panel.setAttribute("aria-modal", "true");
   panel.setAttribute("aria-labelledby", TITLE_ID);
   const head = make("header", "lang-head");
+  head.lang = "gcf";
   const title = make("h2", "lang-title");
   title.id = TITLE_ID;
   const draft = make("span", "lang-draft", "bwouyon — ");

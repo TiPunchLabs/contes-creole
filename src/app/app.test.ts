@@ -132,12 +132,20 @@ describe("app", () => {
     start();
     treeCtx.onEnter("liv");
     await vi.advanceTimersByTimeAsync(OPEN_MS);
+    const { bubble } = world.mount.mock.calls[0][1] as { bubble: TreeContext["bubble"] };
+    const anchor = () => ({ x: 0, y: 0, visible: true });
+    bubble.show("Paj en tèks.", anchor);
+    expect($(".app-bubble")?.lang).toBe("gcf");
     $('.reading-langs [data-lang="bi"]')?.click();
     expect(handle.setStory).toHaveBeenLastCalledWith(STORIES.gcf);
     expect($(".reading-gloss")?.textContent).toContain("Page un tèks.");
     $('.reading-langs [data-lang="fr"]')?.click();
     expect(handle.setStory).toHaveBeenLastCalledWith(STORIES.fr);
     expect($(".reading-title")?.textContent).toBe("Page un");
+    // The Kréyòl line still on screen keeps gcf; the next line speaks French.
+    expect($(".app-bubble")?.lang).toBe("gcf");
+    bubble.show("Page un texte.", anchor);
+    expect($(".app-bubble")?.lang).toBe("fr");
   });
 
   it("rises back to the tree at the book's card on Escape", async () => {
@@ -162,6 +170,7 @@ describe("app", () => {
     expect(world.mount).not.toHaveBeenCalled();
     expect(root.dataset.book).toBeUndefined();
     expect($(".app-notice")?.textContent).toBe(LOAD_ERROR);
+    expect($(".app-notice")?.lang).toBe("gcf");
     await vi.advanceTimersByTimeAsync(4000);
     expect($(".app-notice")).toBeNull();
     treeCtx.onEnter("liv");
