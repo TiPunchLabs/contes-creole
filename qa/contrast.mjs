@@ -48,6 +48,7 @@ const ratio = (fg, bg) => {
 // [usage, fg, bg, minimum]: 4.5 for body text (all HUD text is < 24px), 3 for non-text UI.
 const pairs = [
   ["bubble text (tree)", "ink", "paper", 4.5],
+  ["bubble French line (tree)", "inkSoft", "paper", 4.5],
   ["notice text (tree)", "ink", "paper", 4.5],
   ["brand title / intro title / label title", "ink", "paper", 4.5],
   ["brand sub, intro text, credit, locked text", "inkSoft", "paper", 4.5],
