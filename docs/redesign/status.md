@@ -21,6 +21,7 @@ globale — Finalisation autonome"). Decisions and their wording live in
 | M11 bilingual bubbles             | #18 | 3366599      |
 | Edge screens and cleanup (M14+16) | #19 | a07c854      |
 | Bubble French line in italic      | #20 | 09f9c81      |
+| Cards clear of flora, no hollow   | #22 | see git log  |
 
 ## Remaining work
 
