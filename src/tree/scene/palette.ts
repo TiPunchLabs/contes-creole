@@ -24,7 +24,7 @@ export const FOG = { color: SKY.horizon, density: 0.009 } as const;
 export const LIGHTS = {
   /** Sky fill tinted lilac so shaded sides read lilac, never black; ground bounce unchanged. */
   hemisphere: { sky: "#efe2f0", ground: "#86a35a", intensity: 1.6 },
-  /** Warm foyer of the canopy and the hollow (lamp family, CSS twin --color-lamp); unchanged. */
+  /** Warm foyer of the canopy and the foot of the tree (lamp family, CSS twin --color-lamp). */
   canopy: "#ffd890",
   base: "#ffb878",
   pool: "#ffd890",
