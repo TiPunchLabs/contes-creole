@@ -69,6 +69,11 @@ const pairs = [
   ["locked card text (canvas, M9)", "inkSoft", "paper", 4.5],
   ["locked card padlock on placeholder (canvas, M9)", "inkSoft", "paperWarm", 3],
   ["climb thumb on track", "ink", "paper", 3],
+  ["loader and fallback title / line on dusk sky (rose band)", "ink", "skyMiddle", 4.5],
+  ["loader and fallback title / line on dusk sky (low band)", "ink", "skyLow", 4.5],
+  ["fallback text on dusk sky (rose band)", "inkSoft", "skyMiddle", 4.5],
+  ["fallback text on dusk sky (low band)", "inkSoft", "skyLow", 4.5],
+  ["fallback button text", "paper", "ink", 4.5],
   ["reference: lamp on paper-warm (never text)", "lamp", "paperWarm", null],
 ];
 

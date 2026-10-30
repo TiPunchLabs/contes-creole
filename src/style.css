@@ -104,8 +104,8 @@ body {
   gap: 14px;
   padding: 2em;
   text-align: center;
-  background: var(--color-cream);
-  color: var(--color-ink);
+  background: var(--gradient-dusk);
+  color: var(--color-night-ink);
 }
 
 .app-fallback-title {
@@ -115,23 +115,32 @@ body {
 .app-fallback-text {
   max-width: 34ch;
   font: 400 17px/1.5 var(--font-read);
-  color: var(--color-ink-soft);
+  color: var(--color-night-ink-soft);
   text-wrap: pretty;
 }
 
 .app-fallback button {
   min-height: 52px;
   border: 0;
-  background: var(--color-terracotta);
-  color: var(--color-cream-light);
+  background: var(--color-night-ink);
+  color: var(--color-paper);
   font: 800 18px/1 var(--font-brand);
   padding: 14px 26px;
   border-radius: var(--radius-pill);
   cursor: pointer;
+  box-shadow: var(--shadow-dusk);
 }
 
 .app-fallback button:hover {
-  background: var(--color-terracotta-dark);
+  box-shadow:
+    0 0 0 4px oklch(0.78 0.14 70 / 0.45),
+    0 8px 22px oklch(0.78 0.14 70 / 0.45);
+}
+
+.app-fallback button:focus-visible {
+  /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
+  outline: 2px solid transparent;
+  box-shadow: var(--focus-ring);
 }
 
 /* Tree screen ("Veillée claire"): no book open. Book screens keep the rules above. */
