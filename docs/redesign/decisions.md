@@ -21,6 +21,8 @@ Sources referenced below:
 - [M8]: owner mission prompt of 2026-10-30 ("Mission M8 : Fiches à filet", French, quoted verbatim).
 - [M10b+c]: owner mission prompt of 2026-10-30 ("Mission M10b+c : Langue HTML, noms accessibles et
   cohérence linguistique", French, quoted verbatim).
+- [M11]: owner mission prompt of 2026-10-30 ("Mission M11 : Bulles bilingues accessibles", French,
+  quoted verbatim).
 - Mission reports: `~/.local/share/contes-creole-qa/reports/` (durable copies of the `/tmp` reports).
 
 ## Direction inputs (before A1–A8)
@@ -76,7 +78,7 @@ Original wording is from [plan] "Blocking decisions".
 | T1  | "QA harness location." Option a: "scratchpad only"; option b: "committed `qa/` folder with `@playwright/test` as a devDependency". Recommendation: b.                                                | RULED 2026-10-29, [M4.2]: "**Option B : kit QA versionné dans le dépôt.**" Implemented in `qa/` (see below).                                                         |
 | T2  | "Netlify deploy previews for PRs: confirm or enable them in the Netlify site settings (owner action)."                                                                                               | OPEN. Observed: PRs #8 and #9 carry no Netlify check (M2.1, M3.1 reports); Netlify side not verified.                                                                |
 | T3  | "explicit authorization to replace the rendering of interaction 10 (label to fiche a filet, behavior kept)."                                                                                         | RULED 2026-10-30, [M8]: "Cette mission autorise explicitement le remplacement de l'étiquette actuelle par ce nouveau dispositif (décision T3)."                      |
-| T4  | "approval of the additive `Bubble` contract change in @app/contract (shared with books)."                                                                                                            | OPEN. Blocks M11.                                                                                                                                                    |
+| T4  | "approval of the additive `Bubble` contract change in @app/contract (shared with books)."                                                                                                            | RULED 2026-10-30, [M11]: "L'évolution du contrat `Bubble` est autorisée dans les limites suivantes" (see T4 below).                                                  |
 | T5  | "branch strategy." Option a: "one PR per mission into main"; option b: "an integration branch `feat/veillee-claire` that takes the mission PRs and is merged to main once the redesign is coherent." | APPLIED (option b), explicit ruling wording not found. Evidence: PR #8 and PR #9 target `feat/veillee-claire` and were merged by the owner; `main` stays at 3964732. |
 
 ## Mission rulings (M3 and after)
@@ -94,6 +96,16 @@ Original wording is from [plan] "Blocking decisions".
 | H-1      | 2026-10-29 | "Créer un commit contenant exclusivement les trois fichiers CSS M4." "Pousser `feat/veillee-claire-m4-palette`." "Ouvrir une PR vers `feat/veillee-claire`." "Ne pas effectuer de merge."                                                                                                               | [M4.1]        | One-off for M4. Done: commit 07a356d, PR #11; merged by the owner as d4d9a96. |
 | H-2      | 2026-10-29 | "Supprimer le worktree temporaire utilisé pour la review M4, après vérification et conservation des preuves nécessaires." "Nettoyer uniquement les ressources temporaires créées par M4." "Préserver les autres worktrees, sessions Herdr et serveurs préexistants."                                    | [M4.1]        | Done in M4.1 (review copied out first; `trash` then `git worktree prune`).    |
 | H-3      | 2026-10-29 | "Accepter provisoirement les écarts documentés entre M4 et les planches 11/12 : Curseur du rail de progression. Disques pleins des livres verrouillés." "Ne pas modifier leur apparence dans cette mission." "Ne pas considérer cette acceptation provisoire comme une décision artistique définitive." | [M4.1]        | Provisional, not an art ruling: both may be revisited (candidates M8/M12).    |
+
+### T4 ruling — Bubble contract
+
+- [M11]: "L'évolution du contrat `Bubble` est autorisée dans les limites suivantes :" "Elle doit
+  répondre à un besoin concret identifié dans les appels existants." "Elle doit être minimale." "Elle
+  doit préserver les appels existants avec une chaîne simple." "Elle ne doit pas imposer de migration
+  aux contes qui n'utilisent pas de messages bilingues." "Elle ne doit pas introduire de moteur de
+  traduction ou de système de dialogue générique."
+- Constraint: `show` keeps accepting a plain string; the only new form is a list of `{ lang, text }`
+  segments, used by the tree's bilingual lines.
 
 ### T1 ruling — QA kit in the repo
 
