@@ -19,7 +19,8 @@ globale — Finalisation autonome"). Decisions and their wording live in
 | M10a languages, tree rename       | #16 | 52c8aa5      |
 | M10b+c root lang, names           | #17 | 33a8671      |
 | M11 bilingual bubbles             | #18 | 3366599      |
-| Edge screens and cleanup (M14+16) | #19 | see git log  |
+| Edge screens and cleanup (M14+16) | #19 | a07c854      |
+| Bubble French line in italic      | #20 | 09f9c81      |
 
 ## Remaining work
 
