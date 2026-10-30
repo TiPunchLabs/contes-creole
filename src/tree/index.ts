@@ -49,7 +49,7 @@ type Pick =
   | { type: "critter"; name: CritterName }
   | null;
 
-/** Mounts the Pyébwa a Sav universe (v14): climb, hover, pick a card or the shelf, dive into a book. */
+/** Mounts the Pyébwa a Konesans universe (v14): climb, hover, pick a card or the shelf, dive into a book. */
 export const mountTree: MountTree = (container, ctx) => {
   const lite = detectLite(readLiteEnv());
   const stage = createStage(container, { exposure: EXPOSURE, maxPixelRatio: lite ? 1 : 1.5 });

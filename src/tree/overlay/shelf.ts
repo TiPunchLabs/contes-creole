@@ -23,9 +23,11 @@ export function createShelf(
   const nav = document.createElement("nav");
   nav.className = "tree-shelf";
   nav.setAttribute("aria-label", "Les contes de l'arbre");
+  nav.lang = "fr";
   const label = document.createElement("div");
   label.className = "tree-shelf-label";
   label.textContent = "Sé kont-la";
+  label.lang = "gcf";
   nav.append(label);
 
   let near = -1;
@@ -33,6 +35,7 @@ export function createShelf(
     const button = document.createElement("button");
     button.type = "button";
     button.className = "tree-shelf-book";
+    button.lang = "gcf";
     button.style.setProperty(
       "--dot",
       book.ready ? DOT_COLOURS[i % DOT_COLOURS.length] : LOCKED_DOT,
@@ -47,7 +50,12 @@ export function createShelf(
     title.textContent = book.card.title;
     const sub = document.createElement("span");
     sub.className = "tree-shelf-sub";
-    sub.textContent = book.ready ? book.card.theme : "Talè · bientôt";
+    // "Kréyòl · Français": the French half gets its own lang.
+    const [gcf, fr] = (book.ready ? book.card.theme : "Talè · bientôt").split(" · ");
+    const french = document.createElement("span");
+    french.lang = "fr";
+    french.textContent = fr ?? "";
+    sub.append(gcf, ...(fr ? [" · ", french] : []));
     text.append(title, sub);
     button.append(dot, text);
     button.addEventListener("click", () => onSelect(i, shelfAction(i, near, book.ready)));

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Pyébwa a Sav — interactive 3D Guadeloupean Creole tales (Kréyòl / French)",
+  "description": "Pyébwa a Konesans — interactive 3D Guadeloupean Creole tales (Kréyòl / French)",
   "packageManager": "pnpm@10.23.0",
   "scripts": {
     "dev": "vite",

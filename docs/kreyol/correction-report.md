@@ -391,3 +391,15 @@ Chaînes reprises de la maquette v14.2 (`design/v14/`). Seule la correction à c
 | `src/tree/overlay/overlay.ts` (indication) | `Fè défilé · Glisse avec le doigt` | `Fais défiler · Glisse avec le doigt` | MELANGE (verbe français dans la partie kréyòl)        | —                         | haute pour l'erreur ; la forme kréyòl attend un locuteur (#14) |
 
 **Non modifié** (en attente d'un locuteur) : bulles de Konpè Lapen (#15) et Konpè Zanba (#16), écran WebGL suspendu (#17).
+
+## 12. Renommage de l'arbre (2026-10-30, branche `feat/veillee-claire-m10a-lang`)
+
+Décision éditoriale du propriétaire, graphie validée telle quelle : `Pyébwa a Sav` devient `Pyébwa a Konesans`. Elle clôt le cas #10 de [variants.md](variants.md) § 3. Aucune autre chaîne kréyòl n'est modifiée.
+
+| Fichier                                            | Avant          | Après               | Catégorie           | Source                 | Confiance |
+| -------------------------------------------------- | -------------- | ------------------- | ------------------- | ---------------------- | --------- |
+| `src/tree/overlay/overlay.ts` (badge)              | `Pyébwa a Sav` | `Pyébwa a Konesans` | DÉCISION_ÉDITORIALE | propriétaire du projet | validée   |
+| `src/app/reading-ui/reading-ui.ts` (bouton retour) | `Pyébwa a Sav` | `Pyébwa a Konesans` | DÉCISION_ÉDITORIALE | propriétaire du projet | validée   |
+| `index.html` (`<title>`, `meta description`)       | `Pyébwa a Sav` | `Pyébwa a Konesans` | DÉCISION_ÉDITORIALE | propriétaire du projet | validée   |
+
+Les mentions historiques (`design/`, `docs/superpowers/`, sections précédentes de ce rapport) sont conservées.
