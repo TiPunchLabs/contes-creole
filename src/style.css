@@ -169,6 +169,13 @@ body {
   box-shadow: var(--shadow-dusk);
 }
 
+/* Bilingual tree lines (boards 11 D7, 12 M7): the French translation reads lighter, in italic. */
+.app:not([data-book]) .app-bubble [lang="fr"] {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-night-ink-soft);
+}
+
 .app:not([data-book]) .app-notice {
   border: 1px solid var(--color-rule);
   background: var(--color-paper);
