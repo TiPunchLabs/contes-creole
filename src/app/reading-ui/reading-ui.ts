@@ -34,20 +34,20 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
   el.className = "reading";
   el.hidden = true;
   el.innerHTML = `
-    <button type="button" class="reading-back">${BACK}<span>Pyébwa a Sav</span></button>
+    <button type="button" class="reading-back">${BACK}<span>Pyébwa a Konesans</span></button>
     <div class="reading-langs" role="group"></div>
     <article class="reading-card" aria-live="polite">
       <div class="reading-head"><div class="reading-label"></div><div class="reading-num"></div></div>
       <h2 class="reading-title"></h2>
       <div class="reading-body"></div>
-      <div class="reading-gloss" hidden></div>
+      <div class="reading-gloss" lang="fr" hidden></div>
     </article>
     <nav class="reading-dots"></nav>
     <div class="reading-arrows">
       <button type="button" class="reading-prev" aria-label="←">${ARROW}</button>
       <button type="button" class="reading-next" aria-label="→">${ARROW}</button>
     </div>
-    <div class="reading-hint" aria-hidden="true"><span>Défilez pour continuer</span>${ARROW}</div>`;
+    <div class="reading-hint" aria-hidden="true"><span lang="fr">Défilez pour continuer</span>${ARROW}</div>`;
   root.append(el);
 
   const part = <T extends HTMLElement>(selector: string): T => {
@@ -92,6 +92,7 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
         ...readingLangs(next).map((lang) => {
           const b = button("", LANG_NAMES[lang], () => events.onLang(lang));
           b.dataset.lang = lang;
+          b.lang = lang === "bi" ? "gcf" : lang;
           return b;
         }),
       );
@@ -110,7 +111,14 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       const story = storyFor(stories, state.lang);
       const page = story.pages[state.page];
       if (!page) return;
+      card.lang = story === stories.fr ? "fr" : story === stories.en ? "en" : "gcf";
       label.textContent = page.label;
+      // A translation without its own label shows the Kréyòl one (registry withLabels).
+      const inherited =
+        story !== stories.gcf &&
+        page.label === stories.gcf.pages.find((p) => p.id === page.id)?.label;
+      if (inherited) label.lang = "gcf";
+      else label.removeAttribute("lang");
       num.textContent = `${state.page + 1} / ${story.pages.length}`;
       title.textContent = page.title;
       body.innerHTML = blocksHtml(page);

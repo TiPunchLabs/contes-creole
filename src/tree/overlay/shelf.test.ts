@@ -39,11 +39,14 @@ describe("createShelf", () => {
     const { parent, buttons } = mount();
     const nav = parent.querySelector("nav");
     expect(nav?.getAttribute("aria-label")).toBeTruthy();
+    expect(nav?.lang).toBe("fr");
+    expect(buttons.every((b) => b.lang === "gcf")).toBe(true);
     expect(nav?.textContent).toContain("Sé kont-la");
     expect(nav?.textContent).not.toContain("Kont-yo");
     expect(buttons).toHaveLength(2);
     expect(buttons[0].textContent).toContain("Ti Kannot");
     expect(buttons[1].textContent).toContain("Talè · bientôt");
+    expect(buttons[1].querySelector('.tree-shelf-sub [lang="fr"]')?.textContent).toBe("bientôt");
     expect(buttons[1].getAttribute("aria-label")).toContain("bientôt");
   });
 

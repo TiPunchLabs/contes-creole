@@ -15,7 +15,7 @@ const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
 const GREENS = ["#6fae4a", "#86bf55", "#a2cd62", "#5c9d42"];
 
 /**
- * Pyébwa a Sav (v14): straight trunk, balanced crown of round puffs that breathes and rustles,
+ * Pyébwa a Konesans (v14): straight trunk, balanced crown of round puffs that breathes and rustles,
  * buttress roots and a glowing hollow facing the arrival path.
  */
 export function createLightTree(

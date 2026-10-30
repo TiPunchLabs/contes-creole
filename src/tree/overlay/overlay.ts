@@ -88,15 +88,15 @@ export function createTreeOverlay(
     <div class="tree-brand">
       ${BRAND_ICON}
       <div class="tree-brand-text">
-        <div class="tree-brand-title">Pyébwa a Sav</div>
+        <div class="tree-brand-title">Pyébwa a Konesans</div>
         <div class="tree-brand-sub">Kont Gwadloup</div>
       </div>
     </div>
-    <a class="tree-credit" href="https://xgueret.tipunchlabs.fr/" target="_blank" rel="noopener">Imaginé par xgueret</a>
+    <a class="tree-credit" lang="fr" href="https://xgueret.tipunchlabs.fr/" target="_blank" rel="noopener">Imaginé par xgueret</a>
     <div class="tree-intro"><div class="tree-intro-inner">
       <p class="tree-intro-title">Chak fèy sé on kont.</p>
-      <p class="tree-intro-text">Chaque feuille est un conte. Tourne autour de l'arbre pour trouver le tien !</p>
-      <div class="tree-intro-hint">${MOUSE}<span>Fais défiler · Glisse avec le doigt</span></div>
+      <p class="tree-intro-text" lang="fr">Chaque feuille est un conte. Tourne autour de l'arbre pour trouver le tien !</p>
+      <div class="tree-intro-hint">${MOUSE}<span lang="fr">Fais défiler · Glisse avec le doigt</span></div>
     </div></div>
     <svg class="tree-filet" aria-hidden="true"><line /><circle r="5" /></svg>
     <div class="tree-label">
@@ -104,7 +104,7 @@ export function createTreeOverlay(
       <div class="tree-label-title"></div>
       <div class="tree-label-sub"></div>
       <button type="button" class="tree-enter" hidden>${BOOK_ICON}<span>Antré adan kont-la</span></button>
-      <div class="tree-locked" hidden>Talè · bientôt dans l'arbre</div>
+      <div class="tree-locked" hidden>Talè · <span lang="fr">bientôt dans l'arbre</span></div>
     </div>
     <div class="tree-climb"><div class="tree-climb-thumb"></div></div>`;
   container.append(el);
@@ -153,7 +153,12 @@ export function createTreeOverlay(
       if (next.book !== shownBook) {
         shownBook = next.book;
         const { ready, card } = next.book;
-        kicker.textContent = `${next.index + 1} — ${card.theme}`;
+        // Themes follow the "Kréyòl · Français" format: the French half gets its own lang.
+        const [gcf, fr] = card.theme.split(" · ");
+        const french = document.createElement("span");
+        french.lang = "fr";
+        french.textContent = fr ?? "";
+        kicker.replaceChildren(`${next.index + 1} — ${gcf}`, ...(fr ? [" · ", french] : []));
         title.textContent = card.title;
         sub.textContent = card.sub;
         sub.hidden = !ready;

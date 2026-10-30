@@ -34,7 +34,7 @@ sources are in `design/v13/`.
   └──────────── rise (1.1 s) ◄──── Esc / back ──────┘
 ```
 
-- **Hub — Pyébwa a Sav**: a tree of light on a tropical _morne_. Scrolling climbs a camera spiral
+- **Hub — Pyébwa a Konesans**: a tree of light on a tropical _morne_. Scrolling climbs a camera spiral
   around it; book-cards hang from the branches. The Konteur sits at the foot of the tree; hovering
   lights his lantern and shows "Yé krik !…".
 - **World — Larivyè Klè**: a night river. Each page moves the camera along the water and
