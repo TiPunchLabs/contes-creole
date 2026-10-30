@@ -48,6 +48,12 @@ export default tseslint.config(
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: { ecmaVersion: 2022, globals: globals.browser },
   },
+  // QA scripts run in Node and pass callbacks to the page, so both global sets apply.
+  {
+    files: ["qa/**/*.mjs"],
+    extends: [js.configs.recommended],
+    languageOptions: { ecmaVersion: 2024, globals: { ...globals.node, ...globals.browser } },
+  },
   ...universe("src/tree", "^@(books|tree)(/|$)|^@app/(?!contract$)"),
   ...universe("src/books/*", "^@(books|tree)(/|$)|^@app/(?!contract$)"),
   layer(

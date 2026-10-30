@@ -45,6 +45,9 @@ pnpm test:watch
 Tests are co-located (`*.test.ts`). `src/books/books.test.ts` and `src/books/v13-conversion.test.ts`
 guard the book manifests and the tale content; `src/isolation.test.ts` guards the universe import rules.
 
+Visual and accessibility checks of the redesign run by hand on a local GPU, never in CI: see
+`qa/README.md`.
+
 ## Conventions
 
 - Conventional Commits, GitHub Flow (`feat/…`, `fix/…` branches + PR to `main`).
