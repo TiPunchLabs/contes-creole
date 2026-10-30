@@ -2,12 +2,13 @@ import * as THREE from "three";
 import { clamp, lerp } from "@shared/math";
 import { softSprite } from "@shared/three/soft-sprite";
 import konteurUrl from "../assets/konteur.png";
+import { blobShadow } from "./critters/parts";
 import type { Obstacle } from "./critters/wander";
 import { groundHeight } from "./ground";
 
 const KONTEUR_Z = -12.5;
-const KONTEUR_X_WIDE = 5.2;
-const KONTEUR_X_NARROW = 2.3;
+const KONTEUR_X_WIDE = 4.4;
+const KONTEUR_X_NARROW = 1.9;
 
 /** Ground footprint of the Konteur at both of its positions (wide and narrow screens). */
 export const KONTEUR_OBSTACLES: Obstacle[] = [
@@ -48,10 +49,12 @@ export function createKonteur(): {
     }),
   );
   plane.position.y = height / 2 - 0.02;
-  const shadow = softSprite("#5a3a24", 1.6, 0.35, false);
-  shadow.material.rotation = 0;
-  shadow.position.set(0, 0.02, 0.2);
-  shadow.scale.set(1.7, 0.5, 1);
+  // Flat on the ground like the critters' shadows, so it shows under the feet from any side; the
+  // camera sees it at a grazing angle, hence a wide soft blob plus a tighter one under the feet.
+  const shadow = blobShadow(0.75);
+  shadow.scale.set(1.3, 1.4, 1);
+  const contact = blobShadow(0.45);
+  contact.scale.set(1.5, 0.9, 1);
   const glassMat = new THREE.MeshStandardMaterial({
     color: "#f6d38a",
     emissive: "#f0a850",
@@ -71,14 +74,7 @@ export function createKonteur(): {
   fill.position.set(-0.4, 1.4, 2.2);
   const glow = softSprite("#f0b860", 2, 0.2);
   glow.position.set(0.7, 0.2, 0.15);
-  const seat = new THREE.Mesh(
-    new THREE.DodecahedronGeometry(0.55, 0),
-    new THREE.MeshStandardMaterial({ color: "#8a6a52", roughness: 1, flatShading: true }),
-  );
-  seat.position.set(0, -0.12, -0.25);
-  seat.scale.set(1.3, 0.42, 1);
-  seat.rotation.set(0.2, 0.6, 0.1);
-  group.add(plane, shadow, fill, seat, lampGlass, lampCap, lampLight, glow);
+  group.add(plane, shadow, contact, fill, lampGlass, lampCap, lampLight, glow);
 
   let lit = 0;
   const toCamera = new THREE.Vector3();
@@ -97,7 +93,7 @@ export function createKonteur(): {
       lit = lerp(lit, hovered ? 1 : 0, 0.1);
       const flicker = Math.sin(time * 7) * 0.08 + Math.sin(time * 3.3) * 0.06;
       lampLight.intensity = lerp(3, 22, lit) * (1 + flicker);
-      glow.material.opacity = lerp(0.18, 0.75, lit) * (1 + flicker);
+      glow.material.opacity = lerp(0.28, 0.75, lit) * (1 + flicker);
       glow.scale.setScalar(lerp(1.6, 3.4, lit));
       glassMat.emissiveIntensity = lerp(0.5, 2.4, lit);
     },
