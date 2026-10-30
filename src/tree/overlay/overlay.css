@@ -112,27 +112,67 @@
   animation: tree-bob 1.8s ease-in-out infinite;
 }
 
-.tree-label {
+.tree-filet {
   position: absolute;
-  left: 0;
-  top: 0;
-  transform: translate(-50%, 0);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
   opacity: 0;
   transition: opacity 0.3s;
 }
 
-.tree-label-title {
-  font: 800 22px/1.1 var(--font-brand);
-  text-align: center;
-  white-space: nowrap;
-  padding: 8px 18px;
+.tree-filet line {
+  stroke: var(--tree-ink);
+  stroke-width: 1.5;
+}
+
+.tree-filet circle {
+  fill: var(--tree-ink);
+  stroke: var(--tree-paper);
+  stroke-width: 2.5;
+}
+
+/* Near-book fiche (fiche a filet, boards 11 D3/D4 and 12 M3/M4); placed by placeFiche(). */
+.tree-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: min(380px, calc(100vw - 64px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 18px 20px 20px;
   background: var(--tree-paper);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--tree-shadow);
+  border: 1.5px solid var(--tree-ink);
+  border-radius: 14px;
+  box-shadow: var(--tree-shadow-strong);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tree-label.is-locked {
+  border-style: dashed;
+  border-color: var(--tree-ink-soft);
+}
+
+.tree-label-kicker {
+  font: 700 12px/1.2 var(--font-read);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tree-ink-soft);
+}
+
+.tree-label-title {
+  font: 800 30px/1.1 var(--font-display);
+  overflow-wrap: anywhere;
+}
+
+.tree-label-sub {
+  font: italic 500 17px/1.3 var(--font-display);
+  color: var(--tree-ink-soft);
 }
 
 .tree-enter {
@@ -160,11 +200,8 @@
 }
 
 .tree-locked {
-  font: 700 15px/1 var(--font-read);
+  font: 700 15px/1.3 var(--font-read);
   color: var(--tree-ink-soft);
-  padding: 9px 16px;
-  background: var(--tree-paper);
-  border-radius: var(--radius-pill);
 }
 
 .tree-climb {
@@ -277,6 +314,19 @@
   white-space: nowrap;
 }
 
+/* Docked fiche, the DOCK width in overlay.ts: centred above the shelf. */
+@media (max-width: 899px) {
+  .tree-label {
+    width: min(480px, calc(100% - 32px));
+    padding: 14px 16px 16px;
+  }
+
+  .tree-enter {
+    align-self: stretch;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 600px) {
   .tree-brand {
     left: 12px;
@@ -302,8 +352,7 @@
   }
 
   .tree-label-title {
-    white-space: normal;
-    max-width: 70vw;
+    font-size: 26px;
   }
 
   .tree-climb {
@@ -315,6 +364,25 @@
 @media (max-height: 500px) {
   .tree-intro {
     top: 80px;
+  }
+
+  /* Compact fiche so it clears the brand badge on landscape phones. */
+  .tree-label {
+    gap: 4px;
+    padding: 10px 14px 12px;
+  }
+
+  .tree-label-title {
+    font-size: 22px;
+  }
+
+  .tree-label-sub {
+    display: none;
+  }
+
+  .tree-enter {
+    min-height: 44px;
+    padding: 10px 20px;
   }
 
   .tree-intro-title {
@@ -334,6 +402,7 @@
   }
 
   .tree-label,
+  .tree-filet,
   .tree-shelf-book {
     transition: none;
   }

@@ -11,8 +11,11 @@ const COVER_H = 720;
 
 export interface CardView {
   index: number;
+  /** Screen point just below the card. */
   x: number;
   y: number;
+  /** Screen y of the card's centre. */
+  cy: number;
   visible: boolean;
   near: number;
 }
@@ -208,7 +211,8 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
         below.copy(c.g.position);
         below.y -= 1.25 * scale;
         const s = project(below);
-        return { index: i, x: s.x, y: s.y, visible: s.visible, near };
+        const cy = project(c.g.position).y;
+        return { index: i, x: s.x, y: s.y, cy, visible: s.visible, near };
       });
     },
   };
