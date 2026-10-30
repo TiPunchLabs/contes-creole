@@ -269,7 +269,14 @@ function buildTree(
     overlay.update(
       t,
       best && book && !diving
-        ? { x: best.x, y: best.y, opacity: Math.min(1, (best.near - 0.35) * 3), book }
+        ? {
+            index: best.index,
+            x: best.x,
+            y: best.y,
+            cy: best.cy,
+            opacity: Math.min(1, (best.near - 0.35) * 3),
+            book,
+          }
         : null,
       diving ? -1 : near,
     );
