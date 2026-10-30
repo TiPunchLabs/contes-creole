@@ -13,7 +13,6 @@ export interface CardLabel {
   book: BookManifest;
 }
 
-const BRAND_ICON = `<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="11" r="9" fill="#7fb24e"/><circle cx="9" cy="14" r="6" fill="#6aa043"/><circle cx="21" cy="14" r="6" fill="#8cc05a"/><rect x="13" y="16" width="4" height="11" rx="2" fill="#9a6a46"/><circle cx="15" cy="20" r="1.6" fill="#ffcf7e"/></svg>`;
 const MOUSE = `<svg width="18" height="26" viewBox="0 0 18 26" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="1" width="16" height="24" rx="8"/><circle cx="9" cy="8" r="2" fill="currentColor"/></svg>`;
 const BOOK_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5c2.5-1 4.8-.8 7 .8 2.2-1.6 4.5-1.8 7-.8v11c-2.5-1-4.8-.8-7 .8-2.2-1.6-4.5-1.8-7-.8z"/><path d="M10 5.3v11"/></svg>`;
 
@@ -22,7 +21,7 @@ export const DOCK = 900;
 const EDGE = 16;
 /** Room kept for the climb bar on the right edge. */
 const RAIL = 48;
-/** Room kept for the brand badge and credit link on wide screens. */
+/** Room kept at the top of wide screens (credit link, head of the intro column). */
 const TOP_CLEAR = 104;
 const SHELF_GAP = 14;
 const LEADER = 48;
@@ -76,7 +75,7 @@ export function placeFiche(
   };
 }
 
-/** Tree HUD: brand badge, intro panel, near-book fiche with its leader line, climb bar, shelf. */
+/** Tree HUD: credit link, intro column with the site title, near-book fiche with its leader line, climb bar, shelf. */
 export function createTreeOverlay(
   container: HTMLElement,
   books: BookManifest[],
@@ -85,16 +84,11 @@ export function createTreeOverlay(
   const el = document.createElement("div");
   el.className = "tree-overlay";
   el.innerHTML = `
-    <div class="tree-brand" lang="gcf">
-      ${BRAND_ICON}
-      <div class="tree-brand-text">
-        <h1 class="tree-brand-title">Pyébwa a Konesans</h1>
-        <div class="tree-brand-sub">Kont Gwadloup</div>
-      </div>
-    </div>
     <a class="tree-credit" lang="fr" href="https://xgueret.tipunchlabs.fr/" target="_blank" rel="noopener">Imaginé par xgueret</a>
     <div class="tree-intro"><div class="tree-intro-inner">
-      <p class="tree-intro-title" lang="gcf">Chak fèy sé on kont.</p>
+      <h1 class="tree-intro-title" lang="gcf">Pyébwa a Konesans</h1>
+      <p class="tree-intro-kicker" lang="gcf">Kont Gwadloup</p>
+      <p class="tree-intro-motto" lang="gcf">Chak fèy sé on kont.</p>
       <p class="tree-intro-gloss" lang="fr">Chaque feuille est un conte.</p>
       <p class="tree-intro-text" lang="fr">Tourne autour de l'arbre pour trouver le tien&nbsp;!</p>
       <div class="tree-intro-hint">${MOUSE}<span lang="fr">Fais défiler · Glisse avec le doigt</span></div>
