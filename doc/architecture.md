@@ -61,6 +61,18 @@ index.html
 Isolation is enforced by ESLint `no-restricted-imports`: universes import only their own files,
 `@shared/*` and `@app/contract`.
 
+### Theme and language layers ("Veillée claire" redesign)
+
+- **Tokens**: `src/shared/theme/tokens.css` holds the site-wide colours, fonts and the dusk-sky
+  gradient. The tree maps them onto `--tree-*` aliases, the reading frame onto `--reading-*`; a book's
+  `theme.css` overrides only those aliases (Ti Kannot keeps its own reading frame until decision A4).
+  The inline loader in `index.html` runs before the bundle and repeats the token values literally.
+  The 3D scene's colours live in `src/tree/scene/palette.ts` (sRGB twins of the tokens).
+- **Languages**: the page is `lang="fr"`; Kréyòl UI and story text carry `lang="gcf"` explicitly
+  (decision A5). The reading card follows the story shown. Bubbles take a plain string (the
+  shell's current language) or `{ lang, text }` segments for bilingual lines (decision T4).
+- Owner decisions and their wording: `docs/redesign/decisions.md`.
+
 ## 4. Issues to fix during the port
 
 | #   | Issue                                                                   | Fix                                                         |

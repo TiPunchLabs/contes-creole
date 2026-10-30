@@ -1,0 +1,42 @@
+# "Veillée claire" redesign — progress state
+
+Single resume point for the autonomous finalization mission (owner prompt of 2026-10-30, "Mission
+globale — Finalisation autonome"). Decisions and their wording live in
+[decisions.md](decisions.md); evidence and reports live in `~/.local/share/contes-creole-qa/`.
+
+## Integrated into `feat/veillee-claire`
+
+| Work                              | PR  | Merge commit |
+| --------------------------------- | --- | ------------ |
+| M2 tokens                         | #8  | f602503      |
+| Decision register                 | #10 | 81f9875      |
+| QA kit in `qa/` (T1)              | #12 | 23f8735      |
+| M3 typography                     | #9  | b096200      |
+| M4 2D palette                     | #11 | d4d9a96      |
+| M5 3D re-grade                    | #13 | 733369b      |
+| M9 cards                          | #14 | 84c9af5      |
+| M8 fiche à filet                  | #15 | 2f5a8d0      |
+| M10a languages, tree rename       | #16 | 52c8aa5      |
+| M10b+c root lang, names           | #17 | 33a8671      |
+| M11 bilingual bubbles             | #18 | 3366599      |
+| Edge screens and cleanup (M14+16) | #19 | see git log  |
+
+## Remaining work
+
+- None that is unblocked. The redesign is ready for the owner's evaluation; the evaluation pack and
+  final report are in `~/.local/share/contes-creole-qa/final-evaluation/` and
+  `~/.local/share/contes-creole-qa/reports/contes-creole-veillee-claire-final.md`.
+
+## Blocked on owner decisions (no work started)
+
+- M6 "the climb brings the evening": A1.
+- M7a Konteur surroundings (halo, contact shadow): A3; M7b PNG floor residue: A2.
+- M12 shared reading frame and M13 Ti Kannot alignment: A4 (the shared frame has no other
+  consumer until a second book is ready).
+- M15 approved copy: A6 (rest) and A7.
+- Deploy previews: T2.
+
+## Next action
+
+- Owner evaluation: VALIDÉ, AJUSTEMENTS CIBLÉS or À REVOIR, and rulings on the open decisions
+  above. Never open a PR to `main` or deploy without explicit authorization.

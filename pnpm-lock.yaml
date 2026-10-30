@@ -11,13 +11,7 @@ importers:
       '@fontsource/andika':
         specifier: ^5.3.0
         version: 5.3.0
-      '@fontsource/baloo-2':
-        specifier: ^5.3.0
-        version: 5.3.0
       '@fontsource/caveat':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource/cormorant-garamond':
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource/ibm-plex-mono':
@@ -120,14 +114,8 @@ packages:
   '@fontsource/andika@5.3.0':
     resolution: {integrity: sha512-m15/VavWcrOhTJr4xXVKTKrJgI8Ny4fI52ZwcoYH3kH6IyLpAfuYUuFouI223WFbDP0kwvKsOOankklFNyMvNw==}
 
-  '@fontsource/baloo-2@5.3.0':
-    resolution: {integrity: sha512-CBuxZ27jvMmD5+KaaPkMWv/yjdRNppVAd5/002yAyvyQyLNL3aZCbkx6gbAT/bjxPd1A0VMdDQjfcELI8chccQ==}
-
   '@fontsource/caveat@5.3.0':
     resolution: {integrity: sha512-eHTfzQxFSW9ABERRLNruHoNJmKed2J7pqTUc5lp4a4POMgXGKpxmWj3d9Hz10kmAg6iuTTLe6UagbA4bnsmfQw==}
-
-  '@fontsource/cormorant-garamond@5.3.0':
-    resolution: {integrity: sha512-weuGsCirGVWBWqpt6YUp0yLThTe4G8YO45noq8wxeJCRvEpq5lFrxNMFSTxcyOyV5k5otzJ8guDzYegdYlcLMQ==}
 
   '@fontsource/ibm-plex-mono@5.3.0':
     resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
@@ -1000,11 +988,7 @@ snapshots:
 
   '@fontsource/andika@5.3.0': {}
 
-  '@fontsource/baloo-2@5.3.0': {}
-
   '@fontsource/caveat@5.3.0': {}
-
-  '@fontsource/cormorant-garamond@5.3.0': {}
 
   '@fontsource/ibm-plex-mono@5.3.0': {}
 

@@ -8,12 +8,6 @@
   --color-night: #050c12;
   --color-parchment: #f6ead0;
   --color-deep-ink: #0a1e33;
-  --color-cream: #fff6e8;
-  --color-cream-light: #fff8ee;
-  --color-ink: #3a2a20;
-  --color-ink-soft: #5a4334;
-  --color-terracotta: #c4572e;
-  --color-terracotta-dark: #a8451f;
 
   /* "Veillée claire" palette (phase 3 board 10). Lamp is light and selection only, never text. */
   --color-paper: oklch(0.985 0.012 85);
@@ -23,6 +17,17 @@
   --color-lamp: oklch(0.78 0.14 70);
   --color-ember: oklch(0.55 0.15 40);
   --color-sky-high: oklch(0.82 0.05 300);
+  --color-sky-rose: oklch(0.86 0.07 30);
+  --color-sky-low: oklch(0.88 0.08 65);
+  --color-sky-glow: oklch(0.92 0.07 80);
+  /* Late-afternoon sky behind the edge screens (loader, WebGL fallback), boards 11 D8 and 12 M8. */
+  --gradient-dusk: linear-gradient(
+    180deg,
+    var(--color-sky-high) 0%,
+    var(--color-sky-rose) 46%,
+    var(--color-sky-low) 64%,
+    var(--color-sky-glow) 74%
+  );
   --color-rule: oklch(0.27 0.045 280 / 0.55);
   --shadow-dusk: 0 10px 24px oklch(0.4 0.06 300 / 0.2);
   --focus-ring:

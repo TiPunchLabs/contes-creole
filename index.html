@@ -20,8 +20,16 @@
         justify-content: center;
         gap: 28px;
         padding: 24px;
-        background: radial-gradient(ellipse at 50% 42%, #0d2430 0%, #050c12 70%);
-        color: #f6ead0;
+        background:
+          radial-gradient(circle at 50% 46%, oklch(0.94 0.08 80 / 0.9) 0, transparent 230px),
+          linear-gradient(
+            180deg,
+            oklch(0.82 0.05 300) 0%,
+            oklch(0.86 0.07 30) 46%,
+            oklch(0.88 0.08 65) 64%,
+            oklch(0.92 0.07 80) 74%
+          );
+        color: oklch(0.27 0.045 280);
         text-align: center;
         transition: opacity 0.7s ease;
       }
@@ -32,22 +40,21 @@
       .loader-logo {
         width: min(180px, 42vw);
         height: auto;
-        filter: drop-shadow(0 0 28px rgba(122, 200, 60, 0.25));
+        filter: drop-shadow(0 6px 18px oklch(0.78 0.14 70 / 0.35));
         animation: loader-breathe 2.4s ease-in-out infinite;
       }
       .loader-brand {
         margin: 0;
         font:
-          600 15px/1 "Andika",
+          700 13px/1 "Andika",
           sans-serif;
         letter-spacing: 0.34em;
-        text-transform: lowercase;
-        color: #8fd14f;
+        text-transform: uppercase;
       }
       .loader-line {
         margin: 10px 0 0;
         font:
-          italic 500 clamp(22px, 5vw, 30px)/1.2 "Newsreader",
+          italic 500 clamp(24px, 5vw, 32px)/1.2 "Newsreader",
           serif;
       }
       @keyframes loader-breathe {
