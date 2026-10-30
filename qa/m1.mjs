@@ -315,3 +315,5 @@ try {
   const fs = await import("node:fs");
   fs.writeFileSync(OUT + "results.json", JSON.stringify(results, null, 2));
 }
+// A failed check fails the run, so a wrapper or CI step cannot mistake it for a pass.
+process.exitCode = results.some((r) => r.status === "FAIL") ? 1 : 0;
