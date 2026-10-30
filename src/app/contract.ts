@@ -70,9 +70,18 @@ export interface ScreenAnchor {
   visible: boolean;
 }
 
-/** Shared speech bubble; `anchor` is polled every frame while the bubble is shown. */
+/** One run of a bilingual bubble line; the texts of a line's segments join to the full line. */
+export interface BubbleSegment {
+  lang: Lang;
+  text: string;
+}
+
+/**
+ * Shared speech bubble; `anchor` is polled every frame while the bubble is shown. A plain string
+ * speaks the shell's current language; segments carry their own (bilingual lines).
+ */
 export interface Bubble {
-  show(text: string, anchor: () => ScreenAnchor): void;
+  show(text: string | BubbleSegment[], anchor: () => ScreenAnchor): void;
   hide(): void;
 }
 

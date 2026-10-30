@@ -40,8 +40,18 @@ export function createBubble(
 
   return {
     show(text, next) {
-      el.textContent = text;
       el.lang = lang;
+      if (typeof text === "string") el.textContent = text;
+      else {
+        el.replaceChildren(
+          ...text.map((segment) => {
+            const span = document.createElement("span");
+            span.lang = segment.lang;
+            span.textContent = segment.text;
+            return span;
+          }),
+        );
+      }
       anchor = next;
       cancelAnimationFrame(raf);
       follow();
