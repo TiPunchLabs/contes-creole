@@ -1,7 +1,7 @@
 import "./fonts";
 import "./overlay/overlay.css";
 import * as THREE from "three";
-import type { MountTree, TreeContext, TreeHandle } from "@app/contract";
+import type { BubbleSegment, MountTree, TreeContext, TreeHandle } from "@app/contract";
 import { clamp, lerp, smoothstep } from "@shared/math";
 import { createRng } from "@shared/random";
 import { createStage, fitFov, type Stage } from "@shared/three/stage";
@@ -29,12 +29,23 @@ import { createLightTree } from "./scene/tree";
 
 type Speaker = "teller" | CritterName;
 
-const SAY: Record<Speaker, string> = {
-  teller:
-    "« Yé krik ! …… Yé mistikrik ! »\nChwazi on liv adan pyébwa a kont-la.\nChoisis un livre dans l'arbre des contes.",
-  lapen: "Mwen sé Konpè Lapen ! Ti, mé malen…\nJe suis Compère Lapin : petit, mais malin !",
-  zanba:
-    "Mwen sé Konpè Zanba ! Gwo, fò… é toujou fen !\nJe suis Compère Zamba : gros, fort… et toujours affamé !",
+/** Kréyòl lines, then the French one; the line break stays at the end of the Kréyòl segment. */
+const SAY: Record<Speaker, BubbleSegment[]> = {
+  teller: [
+    {
+      lang: "gcf",
+      text: "« Yé krik ! …… Yé mistikrik ! »\nChwazi on liv adan pyébwa a kont-la.\n",
+    },
+    { lang: "fr", text: "Choisis un livre dans l'arbre des contes." },
+  ],
+  lapen: [
+    { lang: "gcf", text: "Mwen sé Konpè Lapen ! Ti, mé malen…\n" },
+    { lang: "fr", text: "Je suis Compère Lapin : petit, mais malin !" },
+  ],
+  zanba: [
+    { lang: "gcf", text: "Mwen sé Konpè Zanba ! Gwo, fò… é toujou fen !\n" },
+    { lang: "fr", text: "Je suis Compère Zamba : gros, fort… et toujours affamé !" },
+  ],
 };
 const DIVE_SECONDS = 1.7;
 const TAP_DISTANCE = 8;
