@@ -23,6 +23,7 @@ import { createZanba } from "./scene/critters/zanba";
 import { FLORA_OBSTACLES } from "./scene/flora";
 import { KONTEUR_OBSTACLES, createKonteur } from "./scene/konteur";
 import { createLandscape } from "./scene/landscape";
+import { EXPOSURE, FOG } from "./scene/palette";
 import { createSky } from "./scene/sky";
 import { createLightTree } from "./scene/tree";
 
@@ -51,7 +52,7 @@ type Pick =
 /** Mounts the Pyébwa a Sav universe (v14): climb, hover, pick a card or the shelf, dive into a book. */
 export const mountTree: MountTree = (container, ctx) => {
   const lite = detectLite(readLiteEnv());
-  const stage = createStage(container, { exposure: 1.05, maxPixelRatio: lite ? 1 : 1.5 });
+  const stage = createStage(container, { exposure: EXPOSURE, maxPixelRatio: lite ? 1 : 1.5 });
   try {
     return buildTree(container, ctx, stage, lite);
   } catch (err) {
@@ -69,7 +70,7 @@ function buildTree(
 ): TreeHandle {
   const { scene, camera } = stage;
   const count = (n: number): number => scaleCount(n, lite);
-  scene.fog = new THREE.FogExp2("#f6cfae", 0.0105);
+  scene.fog = new THREE.FogExp2(FOG.color, FOG.density);
   scene.background = null;
   const rng = createRng(11);
   const landscape = createLandscape(rng, count);

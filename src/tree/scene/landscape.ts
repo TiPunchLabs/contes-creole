@@ -6,27 +6,29 @@ import { softSprite } from "@shared/three/soft-sprite";
 import type { Count } from "../lite";
 import { createFlora } from "./flora";
 import { groundHeight } from "./ground";
+import { LIGHTS } from "./palette";
 
 const MORNES: [number, number, string, number][] = [
   [62, 14, "#c9a7b4", 9],
   [88, 24, "#b9a6cc", 7],
 ];
 
-/** Dusk clearing around the tree (v14): warm lights, green relief, lavender hills, flora, grass, pool. */
+/** Late-afternoon clearing around the tree: low sun, lilac fill, green relief, lavender hills, flora, grass, pool. */
 export function createLandscape(
   rng: Rng,
   count: Count,
 ): { group: THREE.Group; update(time: number): void } {
   const group = new THREE.Group();
 
-  group.add(new THREE.HemisphereLight("#ffe9cc", "#86a35a", 1.6));
-  const canopyLight = new THREE.PointLight("#ffd890", 26, 30, 1.6);
+  const { hemisphere, rim: sun, key: fill } = LIGHTS;
+  group.add(new THREE.HemisphereLight(hemisphere.sky, hemisphere.ground, hemisphere.intensity));
+  const canopyLight = new THREE.PointLight(LIGHTS.canopy, 26, 30, 1.6);
   canopyLight.position.set(0, 11, 0);
-  const baseLight = new THREE.PointLight("#ffb878", 14, 22, 1.6);
+  const baseLight = new THREE.PointLight(LIGHTS.base, 14, 22, 1.6);
   baseLight.position.set(1, 2, -3);
-  const rim = new THREE.DirectionalLight("#ffd2a0", 1.7);
+  const rim = new THREE.DirectionalLight(sun.color, sun.intensity);
   rim.position.set(-30, 26, 60);
-  const key = new THREE.DirectionalLight("#fff3e2", 0.9);
+  const key = new THREE.DirectionalLight(fill.color, fill.intensity);
   key.position.set(10, 20, -40);
   group.add(canopyLight, baseLight, rim, key);
 
@@ -85,7 +87,7 @@ export function createLandscape(
   );
   grass.material.blending = THREE.NormalBlending;
   grass.material.uniforms.uOpacity.value = 0.7;
-  const pool = softSprite("#ffd890", 14, 0.22);
+  const pool = softSprite(LIGHTS.pool, 14, 0.22);
   pool.position.set(0, -0.4, 0);
   group.add(grass, pool);
 

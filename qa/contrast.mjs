@@ -12,6 +12,8 @@ const T = {
   ember: [0.55, 0.15, 40],
   skyLow: [0.88, 0.08, 65],
   skyHigh: [0.82, 0.05, 300],
+  skyMiddle: [0.86, 0.07, 30],
+  skyGlow: [0.92, 0.07, 80],
 };
 
 /** Converts oklch to clamped linear sRGB channels. */
@@ -60,6 +62,8 @@ const pairs = [
   ["focus ring ink edge on paper-warm shelf", "ink", "paperWarm", 3],
   ["focus ring ink edge on sky high", "ink", "skyHigh", 3],
   ["focus ring ink edge on sky low", "ink", "skyLow", 3],
+  ["focus ring ink edge on 3D sky middle (M5 rose)", "ink", "skyMiddle", 3],
+  ["focus ring ink edge on 3D sky horizon glow (M5)", "ink", "skyGlow", 3],
   ["near shelf book ink border on paper-warm", "ink", "paperWarm", 3],
   ["climb thumb on track", "ink", "paper", 3],
   ["reference: lamp on paper-warm (never text)", "lamp", "paperWarm", null],
