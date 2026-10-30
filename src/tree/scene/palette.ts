@@ -33,5 +33,21 @@ export const LIGHTS = {
   key: { color: "#fff3e2", intensity: 0.9 },
 } as const;
 
+/** Hanging cards (M9): paper and ink are the sRGB twins of the tokens.css colours. */
+export const CARD = {
+  /** --color-paper: frame, header and title band. */
+  paper: "#fefaf1",
+  /** --color-paper-warm: back face and locked placeholder. */
+  paperWarm: "#fbf2e5",
+  /** --color-night-ink: title and label of a ready book. */
+  ink: "#22243c",
+  /** --color-night-ink-soft: text, padlock and dashed window of a locked book. */
+  inkSoft: "#4e5166",
+  /** --color-lamp: a ready card is lit (light, never text). */
+  ready: "#f0a646",
+  /** Lilac grey between --color-sky-high and ink-soft: a locked card stays unlit. */
+  locked: "#aaa0bd",
+} as const;
+
 /** Tone-mapping exposure of the tree stage. */
 export const EXPOSURE = 1.05;

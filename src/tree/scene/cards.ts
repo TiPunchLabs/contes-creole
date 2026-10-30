@@ -4,6 +4,7 @@ import { clamp, lerp } from "@shared/math";
 import type { ScreenPoint } from "@shared/three/stage";
 import { cardT, hubCam } from "./camera";
 import { paintLockedCover } from "./locked-cover";
+import { CARD } from "./palette";
 
 const COVER_W = 512;
 const COVER_H = 720;
@@ -29,23 +30,54 @@ export interface Cards {
   ): CardView[];
 }
 
-/** Paints the tree-owned part of every card: title panel, rounded border, sub-title, title, theme. */
+const MARGIN = 28;
+const HEADER = 76;
+
+/**
+ * Paints the tree-owned part of every card: a rounded paper card around the cover window, the theme
+ * label above it, sub-title and title below. Ready cards get a lamp frame; locked cards an unlit
+ * frame and a dashed window, so the state does not rest on colour alone (with the padlock).
+ */
 function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, H: number): void {
   const { ready, card } = book;
-  c.fillStyle = "#fff7e8";
+  const bottom = Math.round(H * 0.66);
+  const win = [MARGIN, HEADER, W - MARGIN * 2, bottom - HEADER] as const;
+  // Round the card's corners with an opaque mask: the cover may leave a translucent fill style.
+  c.globalAlpha = 1;
+  c.fillStyle = "#000";
+  c.globalCompositeOperation = "destination-in";
   c.beginPath();
-  c.roundRect(30, H * 0.69, W - 60, H * 0.27, 22);
+  c.roundRect(0, 0, W, H, 30);
   c.fill();
-  c.strokeStyle = ready ? "#c4572e" : "#b39a7a";
-  c.lineWidth = 8;
+  c.globalCompositeOperation = "source-over";
+  c.fillStyle = CARD.paper;
   c.beginPath();
-  c.roundRect(12, 12, W - 24, H - 24, 30);
+  c.roundRect(0, 0, W, H, 30);
+  c.roundRect(...win, 18);
+  c.fill("evenodd");
+  c.strokeStyle = ready ? CARD.ready : CARD.locked;
+  c.lineWidth = 10;
+  c.beginPath();
+  c.roundRect(5, 5, W - 10, H - 10, 26);
   c.stroke();
-  c.textAlign = "center";
-  c.fillStyle = ready ? "#3a2a20" : "rgba(58,42,32,.6)";
-  c.font = `700 26px 'Newsreader', 'Andika', sans-serif`;
-  c.fillText(card.sub.toUpperCase(), W / 2, H * 0.745);
-  c.font = `800 52px 'Newsreader', 'Andika', sans-serif`;
+  if (!ready) {
+    c.strokeStyle = CARD.inkSoft;
+    c.lineWidth = 3;
+    c.setLineDash([12, 9]);
+    c.beginPath();
+    c.roundRect(...win, 18);
+    c.stroke();
+    c.setLineDash([]);
+  }
+  c.textAlign = "left";
+  c.fillStyle = ready ? CARD.ink : CARD.inkSoft;
+  c.font = `700 22px 'Andika', sans-serif`;
+  c.letterSpacing = "3px";
+  c.fillText(card.theme.toUpperCase(), MARGIN, 50);
+  c.letterSpacing = "0px";
+  c.font = `italic 500 28px 'Newsreader', serif`;
+  c.fillText(card.sub, MARGIN, bottom + 50);
+  c.font = `800 50px 'Newsreader', 'Andika', sans-serif`;
   const lines: string[] = [];
   let current = "";
   for (const word of card.title.split(" ")) {
@@ -57,10 +89,7 @@ function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, 
     }
   }
   lines.push(current);
-  lines.forEach((line, i) => c.fillText(line, W / 2, H * 0.83 + i * 54));
-  c.font = `700 24px 'Andika', sans-serif`;
-  c.fillStyle = ready ? "#3a2a20" : "rgba(58,42,32,.55)";
-  c.fillText(card.theme, W / 2, H * 0.1);
+  lines.forEach((line, i) => c.fillText(line, MARGIN, bottom + 112 + i * 54));
 }
 
 /** Card texture: the book paints its cover, the tree paints frame and title; redrawn once fonts load. */
@@ -123,7 +152,7 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
     );
     const back = new THREE.Mesh(
       new THREE.PlaneGeometry(1.5, 2.1),
-      new THREE.MeshBasicMaterial({ color: "#f3e3c3", side: THREE.BackSide }),
+      new THREE.MeshBasicMaterial({ color: CARD.paperWarm, side: THREE.BackSide }),
     );
     const halo = new THREE.Mesh(
       new THREE.PlaneGeometry(2.8, 3.4),

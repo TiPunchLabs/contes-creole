@@ -65,6 +65,9 @@ const pairs = [
   ["focus ring ink edge on 3D sky middle (M5 rose)", "ink", "skyMiddle", 3],
   ["focus ring ink edge on 3D sky horizon glow (M5)", "ink", "skyGlow", 3],
   ["near shelf book ink border on paper-warm", "ink", "paperWarm", 3],
+  ["card title, sub and label (canvas, M9)", "ink", "paper", 4.5],
+  ["locked card text (canvas, M9)", "inkSoft", "paper", 4.5],
+  ["locked card padlock on placeholder (canvas, M9)", "inkSoft", "paperWarm", 3],
   ["climb thumb on track", "ink", "paper", 3],
   ["reference: lamp on paper-warm (never text)", "lamp", "paperWarm", null],
 ];
