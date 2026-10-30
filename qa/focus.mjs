@@ -121,6 +121,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const cases = [
     { id: "real-ui", expect: true },
     { id: "forced-colors", expect: true, ctx: { forcedColors: "active" } },
+    { id: "real-ui at device pixel ratio 2", expect: true, ctx: { deviceScaleFactor: 2 } },
+    {
+      id: "box-shadow-removed at device pixel ratio 2",
+      expect: false,
+      ctx: { deviceScaleFactor: 2 },
+      css: ".tree-overlay :focus-visible { box-shadow: none !important; }",
+    },
     {
       id: "box-shadow-removed (transparent outline left)",
       expect: false,
