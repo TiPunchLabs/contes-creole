@@ -18,6 +18,7 @@ Sources referenced below:
 - [S-eaa62a80]: Claude Code orchestrator session eaa62a80-fcc1-4cbf-ad9e-67b1dda65a48, 2026-10-29,
   owner answers to multiple-choice questions (option label quoted as selected).
 - [M3.1], [H2.1], [M4.1], [M4.2]: owner mission prompts of 2026-10-29 (French, quoted verbatim).
+- [M8]: owner mission prompt of 2026-10-30 ("Mission M8 : Fiches à filet", French, quoted verbatim).
 - Mission reports: `~/.local/share/contes-creole-qa/reports/` (durable copies of the `/tmp` reports).
 
 ## Direction inputs (before A1–A8)
@@ -64,7 +65,7 @@ Original wording is from [plan] "Blocking decisions".
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | T1  | "QA harness location." Option a: "scratchpad only"; option b: "committed `qa/` folder with `@playwright/test` as a devDependency". Recommendation: b.                                                | RULED 2026-10-29, [M4.2]: "**Option B : kit QA versionné dans le dépôt.**" Implemented in `qa/` (see below).                                                         |
 | T2  | "Netlify deploy previews for PRs: confirm or enable them in the Netlify site settings (owner action)."                                                                                               | OPEN. Observed: PRs #8 and #9 carry no Netlify check (M2.1, M3.1 reports); Netlify side not verified.                                                                |
-| T3  | "explicit authorization to replace the rendering of interaction 10 (label to fiche a filet, behavior kept)."                                                                                         | OPEN. Blocks M8.                                                                                                                                                     |
+| T3  | "explicit authorization to replace the rendering of interaction 10 (label to fiche a filet, behavior kept)."                                                                                         | RULED 2026-10-30, [M8]: "Cette mission autorise explicitement le remplacement de l'étiquette actuelle par ce nouveau dispositif (décision T3)."                      |
 | T4  | "approval of the additive `Bubble` contract change in @app/contract (shared with books)."                                                                                                            | OPEN. Blocks M11.                                                                                                                                                    |
 | T5  | "branch strategy." Option a: "one PR per mission into main"; option b: "an integration branch `feat/veillee-claire` that takes the mission PRs and is merged to main once the redesign is coherent." | APPLIED (option b), explicit ruling wording not found. Evidence: PR #8 and PR #9 target `feat/veillee-claire` and were merged by the owner; `main` stays at 3964732. |
 
