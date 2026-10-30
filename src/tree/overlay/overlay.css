@@ -15,35 +15,11 @@
   font-family: var(--font-read);
 }
 
-.tree-overlay button:focus-visible,
-.tree-overlay a:focus-visible {
+.tree-overlay button:focus-visible {
   /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
   outline: 3px solid transparent;
   outline-offset: 2px;
   box-shadow: var(--focus-ring);
-}
-
-/* Editorial signature: small text in the corner, on a faint paper wash that keeps 4.5:1 over the
-   scene during the whole climb. */
-.tree-credit {
-  position: absolute;
-  z-index: 1;
-  left: 16px;
-  top: 12px;
-  pointer-events: auto;
-  padding: 4px 6px;
-  font: 400 13px/1.2 var(--font-read);
-  color: var(--tree-ink-soft);
-  text-decoration: underline;
-  text-decoration-color: var(--color-rule);
-  text-underline-offset: 3px;
-  background: oklch(0.985 0.012 85 / 0.6);
-  border-radius: 6px;
-  transition: color 0.25s;
-}
-
-.tree-credit:hover {
-  color: var(--tree-ink);
 }
 
 /*
@@ -346,14 +322,14 @@
 }
 
 /* Portrait and narrow screens (board 12 M1): no room beside the canopy, so the column becomes a
-   band at the top, under the credit link, on a paper veil that fades into the sky above the tree. */
+   band at the top, on a paper veil that fades into the sky above the tree. */
 @media (min-height: 501px) and (max-width: 899px), (min-height: 501px) and (max-aspect-ratio: 7/5) {
   .tree-intro {
     left: 0;
     right: 0;
     top: 0;
     width: auto;
-    padding: 52px clamp(16px, 4vw, 24px) 40px;
+    padding: 24px clamp(16px, 4vw, 24px) 40px;
     /* Opaque enough behind the text for 4.5:1 over foliage, then a short fade into the scene. */
     background: linear-gradient(
       180deg,
@@ -417,12 +393,12 @@
 @media (max-height: 500px) {
   .tree-intro {
     left: 16px;
-    top: 40px;
+    top: 16px;
     width: min(520px, calc(100% - 64px));
   }
 
   .tree-intro-inner::before {
-    inset: -40px -56px -14px -16px;
+    inset: -16px -56px -14px -16px;
     background: linear-gradient(
       180deg,
       oklch(0.985 0.012 85 / 0.88) 0%,

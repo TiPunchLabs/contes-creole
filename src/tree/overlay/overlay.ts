@@ -21,7 +21,7 @@ export const DOCK = 900;
 const EDGE = 16;
 /** Room kept for the climb bar on the right edge. */
 const RAIL = 48;
-/** Room kept at the top of wide screens (credit link, head of the intro column). */
+/** Room kept at the top of wide screens (head of the intro column). */
 const TOP_CLEAR = 104;
 const SHELF_GAP = 14;
 const LEADER = 48;
@@ -75,7 +75,7 @@ export function placeFiche(
   };
 }
 
-/** Tree HUD: credit link, intro column with the site title, near-book fiche with its leader line, climb bar, shelf. */
+/** Tree HUD: intro column with the site title, near-book fiche with its leader line, climb bar, shelf. */
 export function createTreeOverlay(
   container: HTMLElement,
   books: BookManifest[],
@@ -84,7 +84,6 @@ export function createTreeOverlay(
   const el = document.createElement("div");
   el.className = "tree-overlay";
   el.innerHTML = `
-    <a class="tree-credit" lang="fr" href="https://xgueret.tipunchlabs.fr/" target="_blank" rel="noopener">Imaginé par xgueret</a>
     <div class="tree-intro"><div class="tree-intro-inner">
       <h1 class="tree-intro-title" lang="gcf">Pyébwa a Konesans</h1>
       <p class="tree-intro-kicker" lang="gcf">Kont Gwadloup</p>
