@@ -84,7 +84,7 @@ describe("reading UI", () => {
     ]);
   });
 
-  it("marks the language and the dots, and reports clicks", () => {
+  it("marks the language and the page, and reports clicks", () => {
     const ui = createReadingUI(root, events);
     ui.open(stories);
     ui.render({ page: 1, lang: "fr", showHint: false, textHidden: false });
@@ -94,16 +94,16 @@ describe("reading UI", () => {
     expect(
       [...root.querySelectorAll<HTMLElement>(".reading-langs button")].map((b) => b.lang),
     ).toEqual(["gcf", "gcf", "fr"]);
-    const dots = root.querySelectorAll(".reading-dot");
-    expect(dots[0].classList.contains("is-done")).toBe(true);
-    expect(dots[1].classList.contains("is-current")).toBe(true);
+    expect($(".reading-count").textContent).toBe("2 / 2");
+    expect($(".reading-count").getAttribute("aria-hidden")).toBe("true");
+    expect($(".reading-count").querySelector("button")).toBeNull();
     ($('.reading-langs [data-lang="bi"]') as HTMLButtonElement).click();
-    (dots[0] as HTMLButtonElement).click();
+    ($(".reading-next") as HTMLButtonElement).click();
     ($(".reading-prev") as HTMLButtonElement).click();
     ($(".reading-back") as HTMLButtonElement).click();
     expect(events.onLang).toHaveBeenCalledWith("bi");
-    expect(events.onPage).toHaveBeenCalledWith(0);
-    expect(events.onPage).toHaveBeenCalledTimes(2);
+    expect(events.onPage).toHaveBeenNthCalledWith(1, 2);
+    expect(events.onPage).toHaveBeenNthCalledWith(2, 0);
     expect(events.onBack).toHaveBeenCalledOnce();
     expect($(".reading-prev").getAttribute("aria-label")).toBe("Page précédente");
     expect($(".reading-next").getAttribute("aria-label")).toBe("Page suivante");
@@ -123,6 +123,9 @@ describe("reading UI", () => {
     expect($(".reading-arrows").hidden).toBe(false);
     expect($(".reading-toggle").getAttribute("aria-label")).toBe("Afficher le texte");
     expect($(".reading-toggle").lang).toBe("fr");
+    // The counter takes over the progress the hidden card was announcing.
+    expect($(".reading-count").getAttribute("aria-hidden")).toBe("false");
+    expect($(".reading-count").getAttribute("aria-live")).toBe("polite");
     ($(".reading-toggle") as HTMLButtonElement).click();
     expect(events.onToggleText).toHaveBeenCalledOnce();
     ui.render({ page: 1, lang: "fr", showHint: false, textHidden: false });

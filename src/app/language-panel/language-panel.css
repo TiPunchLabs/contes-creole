@@ -214,6 +214,13 @@
   }
 }
 
+/* Phones in landscape: level with the language switch, which moves up there. */
+@media (max-height: 500px) and (min-width: 601px) {
+  .lang-burger {
+    top: 10px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lang-panel {
     animation: none;

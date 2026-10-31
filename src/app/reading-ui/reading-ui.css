@@ -39,8 +39,6 @@
 .reading-back,
 .reading-langs,
 .reading-arrows,
-.reading-toggle,
-.reading-dots,
 .reading-hint {
   z-index: 2;
 }
@@ -48,8 +46,7 @@
 .reading-back,
 .reading-langs,
 .reading-arrows button,
-.reading-toggle,
-.reading-dots,
+.reading-count,
 .reading-hint {
   border: 1px solid var(--reading-chrome-edge);
   background: var(--reading-chrome-bg);
@@ -59,7 +56,7 @@
 .reading-back {
   position: absolute;
   left: 22px;
-  top: 20px;
+  top: 22px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -184,53 +181,17 @@
   text-wrap: pretty;
 }
 
-.reading-dots {
-  position: absolute;
-  right: 26px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 6px 2px;
-  border-radius: var(--radius-pill);
-}
-
-/* The transparent border widens the hit area around the small visible mark. */
-.reading-dot {
-  box-sizing: content-box;
-  cursor: pointer;
-  padding: 0;
-  width: 6px;
-  height: 8px;
-  border: 4px solid transparent;
-  border-radius: 7px;
-  background: color-mix(in oklch, var(--reading-chrome-ink) 50%, transparent) content-box;
-  transition:
-    height 0.35s,
-    background 0.35s;
-}
-
-.reading-dot.is-done {
-  background-color: var(--reading-chrome-ink-soft);
-}
-
-.reading-dot.is-current {
-  height: 26px;
-  background-color: var(--reading-accent);
-}
-
+/* One row, left to right: text toggle, previous, counter, next. */
 .reading-arrows {
   position: absolute;
   right: 22px;
   bottom: 22px;
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.reading-arrows button,
-.reading-toggle {
+.reading-arrows button {
   width: 46px;
   height: 46px;
   border-radius: 50%;
@@ -241,11 +202,22 @@
   transition: background 0.25s;
 }
 
-/* Left of the page buttons, a little apart: it changes what is shown, not the page. */
+/* A little apart from the page buttons: it changes what is shown, not the page. */
 .reading-toggle {
-  position: absolute;
-  right: 134px;
-  bottom: 22px;
+  margin-right: 6px;
+}
+
+/* Fixed width, so the row does not shift between "9 / 12" and "10 / 12". */
+.reading-count {
+  margin: 0;
+  box-sizing: border-box;
+  min-width: 76px;
+  padding: 9px 12px;
+  border-radius: var(--radius-pill);
+  font: 600 14px/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--reading-chrome-ink);
 }
 
 /* Next is the main action and points down, the way the wheel and the hint go. */
@@ -258,8 +230,7 @@
 /* Hover only where it exists: on touch screens it would stick after a tap. */
 @media (hover: hover) {
   .reading-back:hover,
-  .reading-arrows button:hover,
-  .reading-toggle:hover {
+  .reading-arrows button:hover {
     background: var(--color-paper);
   }
 
@@ -276,11 +247,11 @@
   transform: rotate(180deg);
 }
 
-/* In the buttons' row, clear of the card on every wide screen. */
+/* Above the buttons' row, right-aligned with it: clear of a card on the left. */
 .reading-hint {
   position: absolute;
-  right: 194px;
-  bottom: 29px;
+  right: 22px;
+  bottom: 80px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -322,11 +293,11 @@
   }
 }
 
-/* Phones in portrait: full-width card above a bottom bar holding dots (left) and arrows (right). */
+/* Phones in portrait: full-width card above the bottom row of buttons. */
 @media (max-width: 600px) {
   .reading-back {
     left: 12px;
-    top: 12px;
+    top: 14px;
     width: 44px;
     padding: 0;
     justify-content: center;
@@ -369,45 +340,9 @@
     font-size: 14px;
   }
 
-  .reading-dots {
-    left: 18px;
-    right: auto;
-    top: auto;
-    bottom: 38px;
-    transform: none;
-    flex-direction: row;
-    gap: 2px;
-    padding: 2px 6px;
-  }
-
-  .reading-dot {
-    width: 8px;
-    height: 6px;
-    border-width: 6px 3px;
-    transition:
-      width 0.35s,
-      background 0.35s;
-  }
-
-  .reading-dot.is-current {
-    width: 22px;
-    height: 6px;
-  }
-
   .reading-arrows {
     right: 12px;
     bottom: 18px;
-  }
-
-  /* Both bars are full: under the back button, level with a book's corner buttons (Ti Kannot's
-     sound button). */
-  .reading-toggle {
-    right: auto;
-    left: 12px;
-    top: 72px;
-    bottom: auto;
-    width: 44px;
-    height: 44px;
   }
 
   /* Between the card (96px up) and the bottom bar (64px up). */
@@ -421,10 +356,27 @@
   }
 }
 
-/* Phones in landscape: the card takes the left side at full height, dots stay on the right. */
+/* Tablets in portrait: a book's card may sit just above the buttons' row (Ti Kannot), so the hint
+   goes in the row, left of the buttons. */
+@media (min-width: 601px) and (orientation: portrait) {
+  .reading-hint {
+    right: 280px;
+    bottom: 29px;
+  }
+}
+
+/* The narrowest phones: the language switch stays clear of the back button. */
+@media (max-width: 340px) {
+  .reading-langs button {
+    padding: 0 7px;
+    font-size: 13px;
+  }
+}
+
+/* Phones in landscape: the card takes the left side at full height, the buttons the bottom right. */
 @media (max-height: 500px) and (min-width: 601px) {
   .reading-back {
-    top: 8px;
+    top: 10px;
   }
 
   .reading-langs {
@@ -448,45 +400,27 @@
     line-height: 1.5;
   }
 
-  /* Too short for a vertical strip: a compact row above the arrows, right of the card, which
-     takes at most 4vw + 58vw (Ti Kannot) of the width. */
-  .reading-dots {
-    top: auto;
-    right: 14px;
-    bottom: 70px;
-    transform: none;
-    flex-direction: row;
-    padding: 2px 6px;
-  }
-
-  .reading-dot {
-    width: 8px;
-    height: 6px;
-    border-width: 6px 2px;
-    transition:
-      width 0.35s,
-      background 0.35s;
-  }
-
-  .reading-dot.is-current {
-    width: 22px;
-    height: 6px;
-  }
-
+  /* Tighter than on wide screens, to stay right of the card, which takes at most 4vw + 58vw
+     (Ti Kannot) of the width. */
   .reading-arrows {
     right: 14px;
     bottom: 12px;
+    gap: 6px;
   }
 
   .reading-toggle {
-    right: 126px;
-    bottom: 12px;
+    margin-right: 4px;
+  }
+
+  .reading-count {
+    min-width: 66px;
+    padding-inline: 8px;
   }
 
   /* Wraps rather than reach the card on the narrowest landscape screens. */
   .reading-hint {
     right: 14px;
-    bottom: 106px;
+    bottom: 70px;
     box-sizing: border-box;
     max-width: calc(38vw - 34px);
     line-height: 1.3;

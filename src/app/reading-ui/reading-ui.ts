@@ -35,7 +35,7 @@ const FADE_MS = 320;
 const blocksHtml = (page: StoryPage): string =>
   page.blocks.map((b) => `<p class="reading-${b.kind}">${b.html}</p>`).join("");
 
-/** Shared reading overlay: text card, language switch, page dots, arrows, text toggle, back button, hint. */
+/** Shared reading overlay: text card, language switch, page counter and buttons, text toggle, back button, hint. */
 export function createReadingUI(root: HTMLElement, events: ReadingEvents): ReadingUI {
   const el = document.createElement("div");
   el.className = "reading";
@@ -49,12 +49,12 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       <div class="reading-body"></div>
       <div class="reading-gloss" lang="fr" hidden></div>
     </article>
-    <nav class="reading-dots" lang="gcf"></nav>
     <div class="reading-arrows">
+      <button type="button" class="reading-toggle" lang="fr"></button>
       <button type="button" class="reading-prev" aria-label="Page précédente">${ARROW}</button>
+      <p class="reading-count" aria-live="polite"></p>
       <button type="button" class="reading-next" aria-label="Page suivante">${ARROW}</button>
     </div>
-    <button type="button" class="reading-toggle" lang="fr"></button>
     <div class="reading-hint" aria-hidden="true"><span lang="fr">Défilez pour continuer</span>${ARROW}</div>`;
   root.append(el);
 
@@ -70,7 +70,7 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
   const title = part(".reading-title");
   const body = part(".reading-body");
   const gloss = part(".reading-gloss");
-  const dots = part(".reading-dots");
+  const count = part(".reading-count");
   const hint = part(".reading-hint");
   const toggle = part(".reading-toggle");
 
@@ -106,14 +106,6 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
           return b;
         }),
       );
-      dots.replaceChildren(
-        ...next.gcf.pages.map((p, i) => {
-          const b = button("reading-dot", "", () => events.onPage(i));
-          b.title = p.label;
-          b.setAttribute("aria-label", p.label);
-          return b;
-        }),
-      );
     },
     render(state) {
       if (!stories) return;
@@ -130,6 +122,7 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       if (inherited) label.lang = "gcf";
       else label.removeAttribute("lang");
       num.textContent = `${state.page + 1} / ${story.pages.length}`;
+      count.textContent = num.textContent;
       title.textContent = page.title;
       body.innerHTML = blocksHtml(page);
       const french = state.lang === "bi" ? stories.fr?.pages[state.page] : undefined;
@@ -138,12 +131,10 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       for (const b of langs.children) {
         b.setAttribute("aria-pressed", String((b as HTMLElement).dataset.lang === state.lang));
       }
-      [...dots.children].forEach((d, i) => {
-        d.classList.toggle("is-current", i === state.page);
-        d.classList.toggle("is-done", i < state.page);
-      });
       hint.hidden = !state.showHint;
       card.hidden = state.textHidden;
+      // The card's live region already says "3 / 12"; the counter speaks only when the card is hidden.
+      count.setAttribute("aria-hidden", String(!state.textHidden));
       const action = state.textHidden ? TOGGLE_LABELS.show : TOGGLE_LABELS.hide;
       if (toggle.getAttribute("aria-label") !== action) {
         toggle.setAttribute("aria-label", action);
