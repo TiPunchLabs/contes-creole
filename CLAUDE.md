@@ -32,7 +32,7 @@ src/
     story/parse.ts             # Markdown story parser (no dependency)
     language/parse.ts          # langue/<lang>.md parser (language notes)
     language-panel/            # "Lang kréyòl" burger + dialog, over the tale
-    reading-ui/                # text card, language switch, dots, arrows, back button, bubble
+    reading-ui/                # text card, language switch, page counter and buttons, back button, bubble
     transition.ts, backdrop.ts, bubble.ts, fallback.ts, languages.ts, paging.ts, notice.ts
   shared/                      # optional toolbox: random.ts (createRng), math.ts, three/ helpers
   tree/                        # tree universe: index.ts (mountTree), scene/, overlay/, assets/konteur.png

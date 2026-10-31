@@ -102,6 +102,8 @@ export interface BookHandle {
   /** Target page; the world animates towards it. */
   setPage(index: number): void;
   setStory(story: Story): void;
+  /** The reading card was hidden ("scène seule") or shown again; a world framed around it may reframe. */
+  setCardHidden?(hidden: boolean): void;
   /** Must stop the render loop and release GPU resources. */
   dispose(): void;
 }

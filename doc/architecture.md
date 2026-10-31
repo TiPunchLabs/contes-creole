@@ -41,6 +41,9 @@ sources are in `design/v13/`.
   interpolates `env`: sky, water level, moon, stars, rain, calabash count, dam / spring / tank.
 - **Characters**: clicking Ti Kannot (bird) or Gwo Rako (crab) shows a speech bubble.
 - **Languages**: Kréyòl / Bileng / Français switch.
+- **Scène seule** (teaching option): a toggle hides the text card; the scene, page controls and
+  language stay, the book's bubble is silent and the world may reframe (`BookHandle.setCardHidden`).
+  Leaving the book resets it.
 
 ## 3. Architecture
 
