@@ -39,6 +39,7 @@
 .reading-back,
 .reading-langs,
 .reading-arrows,
+.reading-toggle,
 .reading-dots,
 .reading-hint {
   z-index: 2;
@@ -47,6 +48,7 @@
 .reading-back,
 .reading-langs,
 .reading-arrows button,
+.reading-toggle,
 .reading-dots,
 .reading-hint {
   border: 1px solid var(--reading-chrome-edge);
@@ -120,6 +122,15 @@
     opacity 0.35s,
     transform 0.35s;
   overflow: auto;
+}
+
+.reading-card[hidden] {
+  display: none;
+}
+
+/* "Scène seule": no scrim left where the card was (Ti Kannot's .app-book::after). */
+.app[data-scene-only] .app-book::after {
+  content: none;
 }
 
 .reading-card.is-changing {
@@ -218,7 +229,8 @@
   gap: 8px;
 }
 
-.reading-arrows button {
+.reading-arrows button,
+.reading-toggle {
   width: 46px;
   height: 46px;
   border-radius: 50%;
@@ -227,6 +239,13 @@
   display: grid;
   place-items: center;
   transition: background 0.25s;
+}
+
+/* Left of the page buttons, a little apart: it changes what is shown, not the page. */
+.reading-toggle {
+  position: absolute;
+  right: 134px;
+  bottom: 22px;
 }
 
 /* Next is the main action and points down, the way the wheel and the hint go. */
@@ -239,7 +258,8 @@
 /* Hover only where it exists: on touch screens it would stick after a tap. */
 @media (hover: hover) {
   .reading-back:hover,
-  .reading-arrows button:hover {
+  .reading-arrows button:hover,
+  .reading-toggle:hover {
     background: var(--color-paper);
   }
 
@@ -256,10 +276,10 @@
   transform: rotate(180deg);
 }
 
-/* In the arrows' row, clear of the card on every wide screen. */
+/* In the buttons' row, clear of the card on every wide screen. */
 .reading-hint {
   position: absolute;
-  right: 136px;
+  right: 194px;
   bottom: 29px;
   display: flex;
   align-items: center;
@@ -379,6 +399,17 @@
     bottom: 18px;
   }
 
+  /* Both bars are full: under the back button, level with a book's corner buttons (Ti Kannot's
+     sound button). */
+  .reading-toggle {
+    right: auto;
+    left: 12px;
+    top: 72px;
+    bottom: auto;
+    width: 44px;
+    height: 44px;
+  }
+
   /* Between the card (96px up) and the bottom bar (64px up). */
   .reading-hint {
     left: 50%;
@@ -444,6 +475,11 @@
 
   .reading-arrows {
     right: 14px;
+    bottom: 12px;
+  }
+
+  .reading-toggle {
+    right: 126px;
     bottom: 12px;
   }
 

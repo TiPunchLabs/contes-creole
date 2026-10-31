@@ -38,7 +38,7 @@ beforeEach(() => {
   document.body.innerHTML = "";
   root = document.createElement("div");
   document.body.append(root);
-  events = { onPage: vi.fn(), onLang: vi.fn(), onBack: vi.fn() };
+  events = { onPage: vi.fn(), onLang: vi.fn(), onBack: vi.fn(), onToggleText: vi.fn() };
   stories = { gcf: parseStory(GCF, "gcf.md"), fr: parseStory(FR, "fr.md") };
 });
 
@@ -52,7 +52,7 @@ describe("reading UI", () => {
   it("shows the page label, number, title and escaped body", () => {
     const ui = createReadingUI(root, events);
     ui.open(stories);
-    ui.render({ page: 0, lang: "gcf", showHint: true });
+    ui.render({ page: 0, lang: "gcf", showHint: true, textHidden: false });
     expect($(".reading").hidden).toBe(false);
     expect($(".reading-label").textContent).toBe("En");
     expect($(".reading-num").textContent).toBe("1 / 2");
@@ -66,7 +66,7 @@ describe("reading UI", () => {
   it("shows the French text under the Kréyòl text in Bileng", () => {
     const ui = createReadingUI(root, events);
     ui.open(stories);
-    ui.render({ page: 0, lang: "bi", showHint: false });
+    ui.render({ page: 0, lang: "bi", showHint: false, textHidden: false });
     expect($(".reading-title").textContent).toBe("Paj en");
     expect($(".reading-gloss").hidden).toBe(false);
     expect($(".reading-gloss").textContent).toContain("Texte un.");
@@ -87,7 +87,7 @@ describe("reading UI", () => {
   it("marks the language and the dots, and reports clicks", () => {
     const ui = createReadingUI(root, events);
     ui.open(stories);
-    ui.render({ page: 1, lang: "fr", showHint: false });
+    ui.render({ page: 1, lang: "fr", showHint: false, textHidden: false });
     expect($('.reading-langs [data-lang="fr"]').getAttribute("aria-pressed")).toBe("true");
     expect($(".reading-card").lang).toBe("fr");
     expect($(".reading-label").lang).toBe("gcf");
@@ -110,9 +110,25 @@ describe("reading UI", () => {
     expect($(".reading-back").lang).toBe("gcf");
     // Phones hide the visible text, so the name must not depend on it.
     expect($(".reading-back").getAttribute("aria-label")).toBe("Pyébwa a Konesans");
-    ui.render({ page: 0, lang: "fr", showHint: false });
+    ui.render({ page: 0, lang: "fr", showHint: false, textHidden: false });
     expect($(".reading-label").textContent).toBe("Un");
     expect($(".reading-label").hasAttribute("lang")).toBe(false);
+  });
+
+  it("hides the card in scène seule and names the toggle after its action", () => {
+    const ui = createReadingUI(root, events);
+    ui.open(stories);
+    ui.render({ page: 1, lang: "fr", showHint: false, textHidden: true });
+    expect($(".reading-card").hidden).toBe(true);
+    expect($(".reading-arrows").hidden).toBe(false);
+    expect($(".reading-toggle").getAttribute("aria-label")).toBe("Afficher le texte");
+    expect($(".reading-toggle").lang).toBe("fr");
+    ($(".reading-toggle") as HTMLButtonElement).click();
+    expect(events.onToggleText).toHaveBeenCalledOnce();
+    ui.render({ page: 1, lang: "fr", showHint: false, textHidden: false });
+    expect($(".reading-card").hidden).toBe(false);
+    expect($(".reading-title").textContent).toBe("Page deux");
+    expect($(".reading-toggle").getAttribute("aria-label")).toBe("Masquer le texte");
   });
 
   it("hides itself on close", () => {

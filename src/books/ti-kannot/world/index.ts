@@ -26,6 +26,7 @@ const SPEAK_MS = 4200;
 const TAP_DISTANCE = 8;
 const TAP_MS = 600;
 const PAGE_EASE = 1.6;
+const CARD_EASE = 2.4;
 
 /** Staging of each story page, in reading order. */
 function envsFor(story: Story): PageEnv[] {
@@ -91,6 +92,10 @@ export default defineWorld({
       let story = ctx.story;
       let page = ctx.page;
       let pageF = ctx.page;
+      /** 1 while the reading card is shown, 0 in "scène seule"; scales the card offset. */
+      let cardShift = 1;
+      let cardTarget = 1;
+      const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
       let down: { y: number; t: number; moved: number } | null = null;
       const pointer = { x: 0, y: 0 };
       const look = new THREE.Vector3();
@@ -126,8 +131,9 @@ export default defineWorld({
         camera.position.y += pointer.y * 0.4;
         camera.lookAt(look);
         renderer.getSize(view);
+        cardShift += (cardTarget - cardShift) * (1 - Math.exp(-dt * CARD_EASE));
         const [dx, dy] = frameOffset(view.x, view.y);
-        camera.setViewOffset(view.x, view.y, dx, dy, view.x, view.y);
+        camera.setViewOffset(view.x, view.y, dx * cardShift, dy * cardShift, view.x, view.y);
         sky.update(env, time, camera.position);
         sea.update(env, time, camera.position);
         ground.update(env);
@@ -177,6 +183,10 @@ export default defineWorld({
         },
         setStory(next) {
           story = next;
+        },
+        setCardHidden(hidden) {
+          cardTarget = hidden ? 0 : 1;
+          if (calm) cardShift = cardTarget;
         },
         dispose: release,
       };
