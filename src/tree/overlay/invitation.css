@@ -177,6 +177,13 @@
   box-shadow: var(--focus-ring);
 }
 
+/* Desktop (the DOCK width in overlay.ts): a wider single column for the room the tree leaves. */
+@media (min-width: 900px) {
+  .tree-invite {
+    width: min(780px, calc(100% - 48px));
+  }
+}
+
 @media (max-width: 600px) {
   .tree-invite {
     width: calc(100% - 16px);
