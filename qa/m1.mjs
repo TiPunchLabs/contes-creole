@@ -1,4 +1,4 @@
-// M1 baseline: 4 critical journeys + reference screenshots, GPU Chromium only.
+// M1 baseline: 4 critical journeys (+ J5 invitation to classes, M2) + reference screenshots, GPU Chromium only.
 import { chromium } from "@playwright/test";
 const SITE = process.env.SITE ?? "http://localhost:4199/";
 // OUT: evidence folder (default qa/out/m1/, git-ignored); point it at the mission evidence folder.
@@ -92,16 +92,18 @@ try {
     check("j1.arrow-keys-climb", (await thumbTop(p)) < t1);
     const shelf = p.locator(".tree-shelf-book");
     const n = await shelf.count();
-    check("j1.shelf-lists-books", n === 3, `count=${n}`);
+    // Published books, then one invitation to classes (pending books are not shown).
+    check("j1.shelf-lists-books-and-invitation", n === 2, `count=${n}`);
     await shelf.nth(1).click();
     await wait(2600);
-    const lockedVisible = await p.isVisible(".tree-locked");
     check(
-      "j1.locked-book-label",
-      lockedVisible && !(await p.isVisible(".tree-enter")),
+      "j1.invitation-fiche",
+      (await p.isVisible(".tree-invite-open")) &&
+        !(await p.isVisible(".tree-enter:not(.tree-invite-open)")) &&
+        (await p.$eval(".tree-label", (e) => e.classList.contains("is-invitation"))),
       await p.$eval(".tree-label-title", (e) => e.textContent),
     );
-    await p.screenshot({ path: OUT + "d3-near-locked-book.png" });
+    await p.screenshot({ path: OUT + "d3-near-invitation.png" });
     await shelf.nth(0).click();
     await wait(2600);
     const title = await p.$eval(".tree-label-title", (e) => e.textContent);
@@ -223,6 +225,93 @@ try {
     }));
     results.push({ id: "j4.lang-state", status: "BASELINE", detail: JSON.stringify(lang) });
     console.log("BASELINE j4.lang-state", JSON.stringify(lang));
+
+    // J5 invitation to classes: shelf -> fiche -> dialog -> contact link, keyboard only
+    await p.keyboard.press("Escape");
+    const invite = p.locator(".tree-shelf-book.is-invitation");
+    await invite.focus();
+    await p.keyboard.press("Enter");
+    await wait(2600);
+    check(
+      "j5.invitation-shelf-name",
+      (await invite.getAttribute("aria-label"))?.includes("invitation aux classes") &&
+        (await invite.getAttribute("aria-current")) === "true",
+      await invite.getAttribute("aria-label"),
+    );
+    await p.keyboard.press("Enter");
+    await wait(700);
+    const dialog = p.locator(".tree-invite");
+    const opened = await dialog.isVisible();
+    const focusIn = await p.evaluate(
+      () => document.querySelector(".tree-invite")?.contains(document.activeElement) ?? false,
+    );
+    check("j5.press-again-opens-dialog-with-focus", opened && focusIn);
+    await p.screenshot({ path: OUT + "d6-invitation-dialog.png" });
+    const cta = p.locator(".tree-invite-cta");
+    const ctaInfo = await cta.evaluate((a) => ({
+      href: a.getAttribute("href"),
+      target: a.target,
+      name: a.textContent.replace(/\s+/g, " ").trim(),
+      inView: a.getBoundingClientRect().bottom <= innerHeight,
+    }));
+    check(
+      "j5.cta-links-existing-contact",
+      ctaInfo.href === "https://xgueret.tipunchlabs.fr/#tp-contact" && ctaInfo.inView,
+      JSON.stringify(ctaInfo),
+    );
+    await p.keyboard.press("Tab");
+    check(
+      "j5.tab-reaches-cta",
+      await p.evaluate(() => document.activeElement?.classList.contains("tree-invite-cta")),
+    );
+    await p.screenshot({ path: OUT + "d7-invitation-cta-focus.png" });
+    await p.keyboard.press("Tab");
+    check(
+      "j5.tab-stays-in-dialog",
+      await p.evaluate(() => document.activeElement?.classList.contains("tree-invite-close")),
+    );
+    const tBefore = await thumbTop(p);
+    const panelTop = () => p.$eval(".tree-invite", (e) => e.scrollTop);
+    const noteInView = () =>
+      p.$eval(".tree-invite-note", (e) => {
+        const r = e.getBoundingClientRect();
+        const c = document.querySelector(".tree-invite-foot").getBoundingClientRect();
+        return r.top >= 0 && r.bottom <= c.top + 1;
+      });
+    await p.mouse.move(W / 2, H / 2);
+    await p.mouse.wheel(0, 400);
+    await wait(900);
+    const wheeled = await panelTop();
+    check(
+      "j5.wheel-scrolls-dialog-not-tree",
+      wheeled > 0 && (await thumbTop(p)) === tBefore,
+      `scrollTop=${wheeled}`,
+    );
+    await p.keyboard.press("Home");
+    await wait(400);
+    const home = await panelTop();
+    await p.keyboard.press("End");
+    await wait(600);
+    check(
+      "j5.keys-scroll-dialog-to-caveat",
+      home === 0 && (await panelTop()) > 0 && (await noteInView()),
+      `home=${home} end=${await panelTop()}`,
+    );
+    await p.keyboard.press("ArrowUp");
+    await wait(600);
+    check("j5.tree-still-while-open", (await thumbTop(p)) === tBefore);
+    await p.keyboard.press("Escape");
+    await wait(400);
+    check(
+      "j5.escape-closes-focus-back",
+      !(await dialog.isVisible()) &&
+        (await p.evaluate(() => document.activeElement?.classList.contains("is-invitation"))),
+    );
+    await p.click(".tree-invite-open");
+    await wait(500);
+    await p.mouse.click(8, H / 2);
+    await wait(400);
+    check("j5.scrim-click-closes", !(await dialog.isVisible()));
     check("j1-j4.no-console-errors-desktop", errors.length === 0, errors.join(" | "));
     await ctx.close();
   }
@@ -255,11 +344,60 @@ try {
     await wait(5000);
     check("j3.mobile-bubble-auto-hides-after-hold", (await bubbleShown(p)) === "");
     const shelf = p.locator(".tree-shelf-book");
+    await shelf.nth(1).tap();
+    await wait(2600);
+    check("j5.mobile-invitation-fiche", await p.isVisible(".tree-invite-open"));
+    await p.screenshot({ path: OUT + "m5-near-invitation.png" });
+    await p.locator(".tree-invite-open").tap();
+    await wait(700);
+    const sheet = await p.$eval(".tree-invite", (e) => {
+      const r = e.getBoundingClientRect();
+      const c = document.querySelector(".tree-invite-cta").getBoundingClientRect();
+      return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, cta: c.bottom };
+    });
+    check(
+      "j5.mobile-dialog-fits-cta-in-view",
+      sheet.left >= 0 && sheet.right <= W && sheet.top >= 0 && sheet.bottom <= H && sheet.cta <= H,
+      JSON.stringify(sheet),
+    );
+    await p.screenshot({ path: OUT + "m6-invitation-dialog.png" });
+    const mThumb = await thumbTop(p);
+    // Raw touch events: synthesizeScrollGesture does not scroll vertical scrollers here.
+    const cdp = await ctx.newCDPSession(p);
+    const touch = (type, y) =>
+      cdp.send("Input.dispatchTouchEvent", {
+        type,
+        touchPoints: y === null ? [] : [{ x: W / 2, y }],
+      });
+    await touch("touchStart", H * 0.7);
+    for (let i = 1; i <= 16; i++) {
+      await touch("touchMove", H * 0.7 - i * 30);
+      await wait(16);
+    }
+    await touch("touchEnd", null);
+    await wait(900);
+    const swiped = await p.$eval(".tree-invite", (e) => ({
+      top: e.scrollTop,
+      max: e.scrollHeight - e.clientHeight,
+    }));
+    const noteShown = await p.$eval(".tree-invite-note", (e) => {
+      const r = e.getBoundingClientRect();
+      const c = document.querySelector(".tree-invite-foot").getBoundingClientRect();
+      return r.top >= 0 && r.bottom <= c.top + 1;
+    });
+    check(
+      "j5.mobile-swipe-scrolls-dialog-to-caveat",
+      swiped.top > 0 && noteShown && (await thumbTop(p)) === mThumb,
+      JSON.stringify(swiped),
+    );
+    await p.screenshot({ path: OUT + "m7-invitation-dialog-end.png" });
+    await p.locator(".tree-invite-close").tap();
+    await wait(400);
     await shelf.nth(0).tap();
     await wait(2600);
     check("j1.mobile-shelf-near-card", await p.isVisible(".tree-enter"));
     await p.screenshot({ path: OUT + "m3-near-ready-book.png" });
-    await p.locator(".tree-enter").tap({ force: true });
+    await p.locator(".tree-enter:not(.tree-invite-open)").tap({ force: true });
     await p.waitForSelector(".reading:not([hidden])", { timeout: 15000 }).catch(() => {});
     await wait(1800);
     check("j2.mobile-open-book", await p.isVisible(".reading"));
@@ -288,6 +426,13 @@ try {
       (await thumbTop(p)) > t0 && errors.length === 0,
       errors.join(" | "),
     );
+    await p.click(".tree-shelf-book.is-invitation");
+    await wait(2600);
+    await p.click(".tree-invite-open");
+    await wait(300);
+    const anim = await p.$eval(".tree-invite", (e) => getComputedStyle(e).animationName);
+    check("j5.reduced-motion-dialog-still", anim === "none", anim);
+    await p.screenshot({ path: OUT + "r1-invitation-reduced.png" });
     await ctx.close();
   }
 

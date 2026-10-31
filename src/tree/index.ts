@@ -1,11 +1,14 @@
 import "./fonts";
 import "./overlay/overlay.css";
+import "./overlay/invitation.css";
 import * as THREE from "three";
 import type { BubbleSegment, MountTree, TreeContext, TreeHandle } from "@app/contract";
 import { clamp, lerp, smoothstep } from "@shared/math";
 import { createRng } from "@shared/random";
 import { createStage, fitFov, type Stage } from "@shared/three/stage";
+import { isInvitation, treeSlots } from "./invitation";
 import { detectLite, readLiteEnv, scaleCount } from "./lite";
+import { createInvitationDialog } from "./overlay/invitation";
 import { createTreeOverlay } from "./overlay/overlay";
 import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { cardT, hubCam } from "./scene/camera";
@@ -60,7 +63,10 @@ type Pick =
   | { type: "critter"; name: CritterName }
   | null;
 
-/** Mounts the Pyébwa a Konesans universe (v14): climb, hover, pick a card or the shelf, dive into a book. */
+/**
+ * Mounts the Pyébwa a Konesans universe (v14): climb, hover, pick a card or the shelf, dive into a
+ * book, or open the invitation to classes from its slot at the top.
+ */
 export const mountTree: MountTree = (container, ctx) => {
   const lite = detectLite(readLiteEnv());
   const stage = createStage(container, { exposure: EXPOSURE, maxPixelRatio: lite ? 1 : 1.5 });
@@ -80,6 +86,7 @@ function buildTree(
   lite: boolean,
 ): TreeHandle {
   const { scene, camera } = stage;
+  const slots = treeSlots(ctx.books);
   const count = (n: number): number => scaleCount(n, lite);
   scene.fog = new THREE.FogExp2(FOG.color, FOG.density);
   scene.background = null;
@@ -88,7 +95,7 @@ function buildTree(
   const tree = createLightTree(rng, { lite, count });
   const sky = createSky(rng, count);
   const konteur = createKonteur();
-  const cards = createCards(ctx.books, tree.tips);
+  const cards = createCards(slots, tree.tips);
   const critterRng = createRng(17);
   const critters = createCritterStates();
   const views: Record<CritterName, CritterView> = { lapen: createLapen(), zanba: createZanba() };
@@ -127,16 +134,30 @@ function buildTree(
   const climb = (dy: number): void => {
     target = clamp(target + dy * 0.00055, 0, 1);
   };
+  const invitation = createInvitationDialog(container);
+  /** Opens the invitation over a quiet tree: no hovered card, no bubble left on screen. */
+  const invite = (): void => {
+    hover = null;
+    setSpeaker(null);
+    invitation.open();
+  };
+  /** Opens a slot: dives into its book, or opens the invitation (which never dives). */
   const enter = (index: number): void => {
-    const book = ctx.books[index];
-    if (book) ctx.onEnter(book.id);
+    const slot = slots[index];
+    if (!slot) return;
+    if (isInvitation(slot)) invite();
+    else ctx.onEnter(slot.id);
   };
   const onShelf = (index: number, action: ShelfAction): void => {
     if (!active || diving) return;
     if (action === "enter") enter(index);
-    else target = cardT(index, ctx.books.length);
+    else target = cardT(index, slots.length);
   };
-  const overlay = createTreeOverlay(container, ctx.books, { onEnter: ctx.onEnter, onShelf });
+  const overlay = createTreeOverlay(container, slots, {
+    onEnter: ctx.onEnter,
+    onInvite: invite,
+    onShelf,
+  });
 
   /** Screen anchor of a speaker's bubble. */
   const anchorOf = (who: Speaker) => () => {
@@ -189,16 +210,17 @@ function buildTree(
     e.target instanceof Element && e.target.closest("button, a, .tree-shelf") !== null;
 
   const onWheel = (e: WheelEvent): void => {
-    if (isShelfEvent(e.target)) return;
+    if (invitation.isOpen || isShelfEvent(e.target)) return;
     e.preventDefault();
     if (active && !diving) climb(e.deltaY);
   };
   const onPointerDown = (e: PointerEvent): void => {
-    down = fromControl(e) ? null : { y: e.clientY, t: performance.now(), moved: 0 };
+    down =
+      invitation.isOpen || fromControl(e) ? null : { y: e.clientY, t: performance.now(), moved: 0 };
   };
   const onPointerMove = (e: PointerEvent): void => {
     Object.assign(pointer, stage.pointer(e));
-    if (!active || diving) return;
+    if (!active || diving || invitation.isOpen) return;
     if (down && e.pointerType !== "mouse") {
       const dy = down.y - e.clientY;
       down.y = e.clientY;
@@ -226,7 +248,7 @@ function buildTree(
     else if (!p && e.pointerType !== "mouse") setSpeaker(null);
   };
   const onKey = (e: KeyboardEvent): void => {
-    if (!active || diving) return;
+    if (!active || diving || invitation.isOpen) return;
     if ((e.key === "Enter" || e.key === " ") && e.target instanceof HTMLButtonElement) return;
     if (CLIMB_KEYS_DOWN.includes(e.key)) {
       e.preventDefault();
@@ -276,7 +298,7 @@ function buildTree(
     for (const v of cardViews)
       if (v.visible && onScreen(v.x) && v.near > 0.35 && (!best || v.near > best.near)) best = v;
     near = best ? best.index : -1;
-    const book = best ? ctx.books[best.index] : undefined;
+    const book = best ? slots[best.index] : undefined;
     overlay.update(
       t,
       best && book && !diving
@@ -308,7 +330,7 @@ function buildTree(
     dive(bookId) {
       const index = Math.max(
         0,
-        ctx.books.findIndex((b) => b.id === bookId),
+        slots.findIndex((b) => b.id === bookId),
       );
       hover = null;
       setSpeaker(null);
@@ -318,13 +340,14 @@ function buildTree(
     },
     pause() {
       active = false;
+      invitation.close();
       setSpeaker(null);
       clearTimeout(holdTimer);
       stage.stop();
     },
     resume(fromBookId) {
-      const index = fromBookId ? ctx.books.findIndex((b) => b.id === fromBookId) : -1;
-      if (index >= 0) t = target = cardT(index, ctx.books.length);
+      const index = fromBookId ? slots.findIndex((b) => b.id === fromBookId) : -1;
+      if (index >= 0) t = target = cardT(index, slots.length);
       diving = null;
       hover = null;
       near = -1;
@@ -339,6 +362,7 @@ function buildTree(
       container.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKey);
+      invitation.dispose();
       overlay.dispose();
       stage.dispose();
     },

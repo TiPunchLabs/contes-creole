@@ -147,7 +147,8 @@
   transition: opacity 0.3s;
 }
 
-.tree-label.is-locked {
+/* A story still to write: the dashed edge echoes the invitation card's frame. */
+.tree-label.is-invitation {
   border-style: dashed;
   border-color: var(--tree-ink-soft);
 }
@@ -193,9 +194,13 @@
     0 8px 22px oklch(0.78 0.14 70 / 0.45);
 }
 
-.tree-locked {
-  font: 700 15px/1.3 var(--font-read);
-  color: var(--tree-ink-soft);
+/* An invitation, not a way into a tale: no nudge, a quieter paper button. */
+.tree-invite-open {
+  animation: none;
+  background: var(--tree-paper);
+  color: var(--tree-ink);
+  border: 1.5px solid var(--tree-ink);
+  box-shadow: none;
 }
 
 .tree-climb {
@@ -271,6 +276,18 @@
 .tree-shelf-book.is-near {
   border-color: var(--tree-ink);
   box-shadow: 0 0 0 4px oklch(0.78 0.14 70 / 0.55);
+}
+
+/* The invitation: a dashed edge, like its card and fiche, and a "+" on paper instead of a number. */
+.tree-shelf-book.is-invitation {
+  border-style: dashed;
+}
+
+.tree-shelf-book.is-invitation .tree-shelf-dot {
+  background: var(--tree-paper-warm);
+  color: var(--tree-ink);
+  box-shadow: 0 0 0 2px var(--tree-ink-soft);
+  font-size: 22px;
 }
 
 .tree-shelf-dot {
