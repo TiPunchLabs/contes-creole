@@ -55,11 +55,11 @@ function pageRef(story: Story, example: LanguageExample): string {
 function exampleEl(example: LanguageExample, story: Story): HTMLElement {
   const figure = make("figure", "lang-example");
   figure.append(
-    fromHtml("p", "lang-gcf", example.gcf.html),
+    Object.assign(fromHtml("p", "lang-gcf", example.gcf.html), { lang: "gcf" }),
     fromHtml("p", "lang-tr", example.translation.html),
   );
   const ref = pageRef(story, example);
-  if (ref) figure.append(make("figcaption", "lang-source", ref));
+  if (ref) figure.append(Object.assign(make("figcaption", "lang-source", ref), { lang: "gcf" }));
   return figure;
 }
 
@@ -74,7 +74,7 @@ function noteEl(note: LanguageNote, story: Story): HTMLElement {
   if (note.more || note.moreExamples) {
     const details = make("details", "lang-more");
     details.append(
-      make("summary", "", "Pou alé pli lwen"),
+      Object.assign(make("summary", "", "Pou alé pli lwen"), { lang: "gcf" }),
       ...(note.more ?? []).map((p) => fromHtml("p", "lang-text", p.html)),
       ...(note.moreExamples ?? []).map((e) => exampleEl(e, story)),
     );
@@ -90,6 +90,7 @@ export function createLanguagePanel(root: HTMLElement): LanguagePanel {
   burger.hidden = true;
   burger.innerHTML = BURGER;
   burger.setAttribute("aria-label", "Lang kréyòl");
+  burger.lang = "gcf";
   burger.setAttribute("aria-controls", PANEL_ID);
   burger.setAttribute("aria-expanded", "false");
 
@@ -103,9 +104,11 @@ export function createLanguagePanel(root: HTMLElement): LanguagePanel {
   panel.setAttribute("aria-modal", "true");
   panel.setAttribute("aria-labelledby", TITLE_ID);
   const head = make("header", "lang-head");
+  head.lang = "gcf";
   const title = make("h2", "lang-title");
   title.id = TITLE_ID;
-  const draft = make("span", "lang-draft", "bwouyon — à valider");
+  const draft = make("span", "lang-draft", "bwouyon — ");
+  draft.append(Object.assign(make("span", "", "à valider"), { lang: "fr" }));
   const closeButton = make("button", "lang-close");
   closeButton.type = "button";
   closeButton.innerHTML = CROSS;
@@ -175,6 +178,7 @@ export function createLanguagePanel(root: HTMLElement): LanguagePanel {
       hide();
       title.textContent = notes.title;
       draft.hidden = !notes.draft;
+      list.lang = notes.lang;
       list.replaceChildren(...notes.notes.map((n) => noteEl(n, story)));
       list.scrollTop = 0;
       burger.hidden = false;

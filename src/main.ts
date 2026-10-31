@@ -1,8 +1,10 @@
-import "@fontsource/cormorant-garamond/500-italic.css";
-import "@fontsource/cormorant-garamond/600-italic.css";
-import "@fontsource/quicksand/400.css";
-import "@fontsource/quicksand/500.css";
-import "@fontsource/quicksand/600.css";
+import "@fontsource/newsreader/500-italic.css";
+import "@fontsource/newsreader/600-italic.css";
+import "@fontsource/newsreader/800.css";
+import "@fontsource/andika/400.css";
+import "@fontsource/andika/400-italic.css";
+import "@fontsource/andika/700.css";
+import "@shared/theme/tokens.css";
 import "./style.css";
 import * as THREE from "three";
 import { startApp } from "@app/app";

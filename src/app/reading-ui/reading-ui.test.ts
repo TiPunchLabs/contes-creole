@@ -24,6 +24,7 @@ Tèks <b>en</b>.
 Tèks dé.
 `;
 const FR = GCF.replace("lang: gcf", "lang: fr")
+  .replace("label: En", "label: Un")
   .replace("Paj en", "Page un")
   .replace("Tèks <b>en</b>.", "Texte un.")
   .replace("Paj dé", "Page deux")
@@ -69,6 +70,9 @@ describe("reading UI", () => {
     expect($(".reading-title").textContent).toBe("Paj en");
     expect($(".reading-gloss").hidden).toBe(false);
     expect($(".reading-gloss").textContent).toContain("Texte un.");
+    expect($(".reading-card").lang).toBe("gcf");
+    expect($(".reading-gloss").lang).toBe("fr");
+    expect($(".reading-label").hasAttribute("lang")).toBe(false);
     expect($(".reading-hint").hidden).toBe(true);
   });
 
@@ -85,6 +89,11 @@ describe("reading UI", () => {
     ui.open(stories);
     ui.render({ page: 1, lang: "fr", showHint: false });
     expect($('.reading-langs [data-lang="fr"]').getAttribute("aria-pressed")).toBe("true");
+    expect($(".reading-card").lang).toBe("fr");
+    expect($(".reading-label").lang).toBe("gcf");
+    expect(
+      [...root.querySelectorAll<HTMLElement>(".reading-langs button")].map((b) => b.lang),
+    ).toEqual(["gcf", "gcf", "fr"]);
     const dots = root.querySelectorAll(".reading-dot");
     expect(dots[0].classList.contains("is-done")).toBe(true);
     expect(dots[1].classList.contains("is-current")).toBe(true);
@@ -96,6 +105,14 @@ describe("reading UI", () => {
     expect(events.onPage).toHaveBeenCalledWith(0);
     expect(events.onPage).toHaveBeenCalledTimes(2);
     expect(events.onBack).toHaveBeenCalledOnce();
+    expect($(".reading-prev").getAttribute("aria-label")).toBe("Page précédente");
+    expect($(".reading-next").getAttribute("aria-label")).toBe("Page suivante");
+    expect($(".reading-back").lang).toBe("gcf");
+    // Phones hide the visible text, so the name must not depend on it.
+    expect($(".reading-back").getAttribute("aria-label")).toBe("Pyébwa a Konesans");
+    ui.render({ page: 0, lang: "fr", showHint: false });
+    expect($(".reading-label").textContent).toBe("Un");
+    expect($(".reading-label").hasAttribute("lang")).toBe(false);
   });
 
   it("hides itself on close", () => {

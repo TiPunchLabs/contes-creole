@@ -73,6 +73,9 @@ describe("language panel", () => {
     expect(first?.textContent).toContain("<b>x</b>");
     expect(first?.querySelector(".lang-gcf strong")?.textContent).toBe("dé");
     expect(first?.querySelector(".lang-tr")?.textContent).toBe("Texte deux.");
+    expect($(".lang-notes")?.lang).toBe("fr");
+    expect(first?.querySelector<HTMLElement>(".lang-gcf")?.lang).toBe("gcf");
+    expect(first?.querySelector("summary")?.lang).toBe("gcf");
     expect(first?.querySelector(".lang-source")?.textContent).toBe("p. 2 · Dé");
     expect(first?.querySelector("details summary")?.textContent).toBe("Pou alé pli lwen");
     expect(first?.querySelector("details")?.textContent).toContain("Plis.");
@@ -85,6 +88,7 @@ describe("language panel", () => {
     panel.attach(notes(true), STORY);
     expect($(".lang-draft")?.hidden).toBe(false);
     expect($(".lang-draft")?.textContent).toBe("bwouyon — à valider");
+    expect($('.lang-draft [lang="fr"]')?.textContent).toBe("à valider");
   });
 
   it("drops the page reference of an unknown page with a warning", () => {

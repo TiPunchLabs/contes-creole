@@ -1,150 +1,172 @@
 .tree-overlay {
-  --tree-cream: #fff6e8;
-  --tree-cream-soft: rgba(255, 246, 232, 0.92);
-  --tree-ink: #3a2a20;
-  --tree-ink-soft: #5a4334;
-  --tree-terracotta: #c4572e;
-  --tree-terracotta-dark: #a8451f;
-  --tree-green: #4f8a3a;
-  --tree-shadow: 0 6px 18px rgba(120, 70, 40, 0.18);
-  --tree-shadow-strong: 0 12px 32px rgba(120, 70, 40, 0.2);
+  --tree-paper: var(--color-paper);
+  --tree-paper-warm: var(--color-paper-warm);
+  --tree-ink: var(--color-night-ink);
+  --tree-ink-soft: var(--color-night-ink-soft);
+  --tree-lamp: var(--color-lamp);
+  --tree-ember: var(--color-ember);
+  --tree-edge: oklch(0.27 0.045 280 / 0.18);
+  --tree-shadow: 0 6px 18px oklch(0.4 0.06 300 / 0.18);
+  --tree-shadow-strong: var(--shadow-dusk);
   position: absolute;
   inset: 0;
   pointer-events: none;
   color: var(--tree-ink);
-  font-family: "Andika", sans-serif;
+  font-family: var(--font-read);
 }
 
-.tree-overlay button:focus-visible,
-.tree-overlay a:focus-visible {
-  outline: 3px solid var(--tree-terracotta);
-  outline-offset: 3px;
+.tree-overlay button:focus-visible {
+  /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
 }
 
-.tree-brand {
-  position: absolute;
-  left: 20px;
-  top: 18px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 18px 10px 14px;
-  background: var(--tree-cream);
-  border-radius: 22px;
-  box-shadow: var(--tree-shadow);
-}
-
-.tree-brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.tree-brand-title {
-  font:
-    800 22px/1 "Baloo 2",
-    sans-serif;
-}
-
-.tree-brand-sub {
-  font:
-    700 13px/1.2 "Andika",
-    sans-serif;
-  color: var(--tree-green);
-}
-
-.tree-credit {
-  position: absolute;
-  left: 30px;
-  top: 82px;
-  pointer-events: auto;
-  font:
-    700 12px/1 "Andika",
-    sans-serif;
-  color: var(--tree-ink-soft);
-  text-decoration: none;
-  padding: 6px 8px;
-  border-radius: 999px;
-  background: rgba(255, 246, 232, 0.7);
-  transition: color 0.25s;
-}
-
-.tree-credit:hover {
-  color: var(--tree-terracotta);
-}
-
+/*
+ * Editorial column (board 11 D1, "Planche"): no card, the text sits on a paper wash over the sky.
+ * The canopy spans about +-0.3 x height around the centre, so the column keeps right of it.
+ */
 .tree-intro {
   position: absolute;
-  right: clamp(16px, 5vw, 80px);
-  top: clamp(90px, 16vh, 160px);
-  max-width: min(380px, calc(100vw - 32px));
+  right: 72px;
+  top: clamp(150px, 23vh, 230px);
+  width: clamp(280px, calc(50vw - 32vh - 72px), 400px);
 }
 
 .tree-intro-inner {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 22px 24px;
-  background: var(--tree-cream);
-  border-radius: 26px;
-  box-shadow: var(--tree-shadow-strong);
   animation: tree-rise 1.2s ease-out both;
 }
 
+.tree-intro-inner::before {
+  content: "";
+  position: absolute;
+  /* Wide enough that the text stays inside the opaque part; the ellipse fades out before the edges. */
+  inset: -96px;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    oklch(0.985 0.012 85 / 0.9) 50%,
+    oklch(0.985 0.012 85 / 0.74) 72%,
+    oklch(0.985 0.012 85 / 0)
+  );
+}
+
+/* The site title heads the column; its kicker shows above it but follows it in reading order. */
 .tree-intro-title {
   margin: 0;
-  font:
-    800 clamp(28px, 4vw, 40px)/1.05 "Baloo 2",
-    sans-serif;
+  font: 700 clamp(40px, 4vw, 58px)/1 var(--font-display);
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
-.tree-intro-text {
-  margin: 0;
-  font:
-    400 17px/1.5 "Andika",
-    sans-serif;
+.tree-intro-kicker {
+  order: -1;
+  margin: 0 0 10px;
+  font: 700 13px/1.2 var(--font-read);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--tree-ink-soft);
 }
 
+.tree-intro-motto {
+  margin: 20px 0 0;
+  font: 700 clamp(24px, 2.2vw, 30px)/1.15 var(--font-display);
+}
+
+.tree-intro-gloss {
+  margin: 4px 0 0;
+  font: italic 500 clamp(19px, 1.6vw, 22px)/1.25 var(--font-display);
+  color: var(--tree-ink-soft);
+}
+
+.tree-intro-text {
+  margin: 16px 0 0;
+  font: 400 17px/1.45 var(--font-read);
+  text-wrap: pretty;
+}
+
 .tree-intro-hint {
-  margin-top: 4px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-rule);
   display: flex;
   align-items: center;
   gap: 10px;
-  font:
-    700 15px/1 "Andika",
-    sans-serif;
-  color: var(--tree-terracotta);
+  font: 700 15px/1.2 var(--font-read);
+  color: var(--tree-ink-soft);
 }
 
 .tree-intro-hint svg {
+  flex: none;
+  color: var(--tree-ember);
   animation: tree-bob 1.8s ease-in-out infinite;
 }
 
-.tree-label {
+.tree-filet {
   position: absolute;
-  left: 0;
-  top: 0;
-  transform: translate(-50%, 0);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
   opacity: 0;
   transition: opacity 0.3s;
 }
 
+.tree-filet line {
+  stroke: var(--tree-ink);
+  stroke-width: 1.5;
+}
+
+.tree-filet circle {
+  fill: var(--tree-ink);
+  stroke: var(--tree-paper);
+  stroke-width: 2.5;
+}
+
+/* Near-book fiche (fiche a filet, boards 11 D3/D4 and 12 M3/M4); placed by placeFiche(). */
+.tree-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: min(380px, calc(100vw - 64px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 18px 20px 20px;
+  background: var(--tree-paper);
+  border: 1.5px solid var(--tree-ink);
+  border-radius: 14px;
+  box-shadow: var(--tree-shadow-strong);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tree-label.is-locked {
+  border-style: dashed;
+  border-color: var(--tree-ink-soft);
+}
+
+.tree-label-kicker {
+  font: 700 12px/1.2 var(--font-read);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tree-ink-soft);
+}
+
 .tree-label-title {
-  font:
-    800 22px/1.1 "Baloo 2",
-    sans-serif;
-  text-align: center;
-  white-space: nowrap;
-  padding: 8px 18px;
-  background: var(--tree-cream);
-  border-radius: 999px;
-  box-shadow: 0 6px 16px rgba(120, 70, 40, 0.2);
+  font: 800 30px/1.1 var(--font-display);
+  overflow-wrap: anywhere;
+}
+
+.tree-label-sub {
+  font: italic 500 17px/1.3 var(--font-display);
+  color: var(--tree-ink-soft);
 }
 
 .tree-enter {
@@ -154,31 +176,26 @@
   align-items: center;
   gap: 10px;
   border: 0;
-  background: var(--tree-terracotta);
-  color: #fff8ee;
-  font:
-    800 19px/1 "Baloo 2",
-    sans-serif;
+  background: var(--tree-ink);
+  color: var(--tree-paper);
+  font: 800 19px/1 var(--font-brand);
   padding: 14px 26px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 8px 20px rgba(196, 87, 46, 0.38);
+  box-shadow: 0 8px 20px oklch(0.4 0.06 300 / 0.3);
   animation: tree-nudge 2.2s ease-in-out infinite;
 }
 
 .tree-enter:hover {
-  background: var(--tree-terracotta-dark);
+  box-shadow:
+    0 0 0 4px oklch(0.78 0.14 70 / 0.45),
+    0 8px 22px oklch(0.78 0.14 70 / 0.45);
 }
 
 .tree-locked {
-  font:
-    700 15px/1 "Andika",
-    sans-serif;
+  font: 700 15px/1.3 var(--font-read);
   color: var(--tree-ink-soft);
-  padding: 9px 16px;
-  background: var(--tree-cream-soft);
-  border-radius: 999px;
 }
 
 .tree-climb {
@@ -188,8 +205,9 @@
   transform: translateY(-50%);
   width: 6px;
   height: 170px;
-  background: rgba(255, 246, 232, 0.7);
+  background: var(--tree-paper);
   border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--tree-edge);
 }
 
 .tree-climb-thumb {
@@ -199,8 +217,8 @@
   width: 12px;
   height: 24px;
   border-radius: 6px;
-  background: var(--tree-green);
-  box-shadow: 0 2px 8px rgba(60, 90, 40, 0.4);
+  background: var(--tree-ink);
+  box-shadow: 0 2px 8px oklch(0.4 0.06 300 / 0.35);
 }
 
 .tree-shelf {
@@ -214,19 +232,17 @@
   align-items: center;
   gap: 8px;
   padding: 8px;
-  background: var(--tree-cream);
+  background: var(--tree-paper-warm);
   border-radius: 28px;
-  box-shadow: 0 12px 30px rgba(120, 70, 40, 0.22);
+  box-shadow: var(--tree-shadow-strong);
   overflow-x: auto;
   pointer-events: auto;
   touch-action: pan-x;
 }
 
 .tree-shelf-label {
-  font:
-    800 15px/1 "Baloo 2",
-    sans-serif;
-  color: var(--tree-green);
+  font: 800 15px/1 var(--font-brand);
+  color: var(--tree-ink-soft);
   padding: 0 8px 0 10px;
   white-space: nowrap;
 }
@@ -238,9 +254,9 @@
   align-items: center;
   gap: 10px;
   padding: 6px 16px 6px 6px;
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background: #fffaf2;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--tree-edge);
+  background: var(--tree-paper);
   cursor: pointer;
   transition:
     background 0.25s,
@@ -248,12 +264,13 @@
 }
 
 .tree-shelf-book:hover {
-  border-color: var(--tree-terracotta);
+  border-color: var(--tree-ink);
 }
 
+/* Near book: ink edge plus lamp halo, so the state never rests on colour alone. */
 .tree-shelf-book.is-near {
-  background: #ffe9c8;
-  border-color: var(--tree-terracotta);
+  border-color: var(--tree-ink);
+  box-shadow: 0 0 0 4px oklch(0.78 0.14 70 / 0.55);
 }
 
 .tree-shelf-dot {
@@ -262,11 +279,13 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--dot);
-  color: #fff8ee;
-  font:
-    800 15px/1 "Baloo 2",
-    sans-serif;
+  background: var(--tree-ink);
+  color: var(--tree-paper);
+  /* The book's own colour stays as a ring; the number sits on ink for contrast. */
+  box-shadow:
+    0 0 0 2px var(--tree-paper),
+    0 0 0 4px var(--dot);
+  font: 800 15px/1 var(--font-brand);
 }
 
 .tree-shelf-text {
@@ -278,48 +297,89 @@
 }
 
 .tree-shelf-title {
-  font:
-    800 15px/1.1 "Baloo 2",
-    sans-serif;
+  font: 800 15px/1.1 var(--font-brand);
   color: var(--tree-ink);
   white-space: nowrap;
 }
 
 .tree-shelf-sub {
-  font:
-    700 12px/1.1 "Andika",
-    sans-serif;
-  color: var(--tree-green);
+  font: 700 12px/1.1 var(--font-read);
+  color: var(--tree-ink-soft);
   white-space: nowrap;
 }
 
-@media (max-width: 600px) {
-  .tree-brand {
-    left: 12px;
-    top: 12px;
-    padding: 8px 14px 8px 10px;
+/* Docked fiche, the DOCK width in overlay.ts: centred above the shelf. */
+@media (max-width: 899px) {
+  .tree-label {
+    width: min(480px, calc(100% - 32px));
+    padding: 14px 16px 16px;
   }
 
-  .tree-credit {
-    left: 20px;
-    top: 70px;
+  .tree-enter {
+    align-self: stretch;
+    justify-content: center;
   }
+}
 
+/* Portrait and narrow screens (board 12 M1): no room beside the canopy, so the column becomes a
+   band at the top, on a paper veil that fades into the sky above the tree. */
+@media (min-height: 501px) and (max-width: 899px), (min-height: 501px) and (max-aspect-ratio: 7/5) {
   .tree-intro {
-    left: 16px;
-    right: 16px;
-    /* Under the credit link, so the Konteur and the critters on the ground stay visible. */
-    top: 106px;
-    max-width: none;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: auto;
+    padding: 24px clamp(16px, 4vw, 24px) 40px;
+    /* Opaque enough behind the text for 4.5:1 over foliage, then a short fade into the scene. */
+    background: linear-gradient(
+      180deg,
+      oklch(0.985 0.012 85 / 0.88) 0%,
+      oklch(0.985 0.012 85 / 0.82) calc(100% - 44px),
+      oklch(0.985 0.012 85 / 0)
+    );
+  }
+
+  .tree-intro-inner {
+    max-width: 560px;
+  }
+
+  .tree-intro-inner::before {
+    content: none;
+  }
+
+  .tree-intro-title {
+    font-size: clamp(36px, 6.4vw, 52px);
+  }
+}
+
+@media (max-width: 600px) {
+  .tree-intro-kicker {
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .tree-intro-motto {
+    margin-top: 12px;
+    font-size: 22px;
+  }
+
+  .tree-intro-gloss {
+    font-size: 18px;
   }
 
   .tree-intro-text {
+    margin-top: 10px;
     font-size: 15px;
   }
 
+  .tree-intro-hint {
+    margin-top: 12px;
+    padding-top: 10px;
+    font-size: 14px;
+  }
+
   .tree-label-title {
-    white-space: normal;
-    max-width: 70vw;
+    font-size: 26px;
   }
 
   .tree-climb {
@@ -328,13 +388,74 @@
   }
 }
 
+/* Landscape phones: neither the band (too short) nor the side column fits, so a compact column
+   sits top left on the same paper veil as the band, clear of the shelf and the climb bar. */
 @media (max-height: 500px) {
   .tree-intro {
-    top: 80px;
+    left: 16px;
+    top: 16px;
+    width: min(520px, calc(100% - 64px));
+  }
+
+  .tree-intro-inner::before {
+    inset: -16px -56px -14px -16px;
+    background: linear-gradient(
+      180deg,
+      oklch(0.985 0.012 85 / 0.88) 0%,
+      oklch(0.985 0.012 85 / 0.82) calc(100% - 14px),
+      oklch(0.985 0.012 85 / 0)
+    );
+    /* Soft right edge too, so the veil never ends in a hard line over the scene. */
+    mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent);
+  }
+
+  .tree-intro-kicker {
+    margin-bottom: 2px;
+    font-size: 11px;
+  }
+
+  .tree-intro-motto {
+    margin-top: 6px;
+    font-size: 19px;
+  }
+
+  .tree-intro-gloss {
+    margin-top: 0;
+    font-size: 16px;
+  }
+
+  .tree-intro-text {
+    margin-top: 6px;
+    font-size: 14px;
+  }
+
+  .tree-intro-hint {
+    margin-top: 8px;
+    padding-top: 6px;
+    font-size: 13px;
+  }
+
+  /* Compact fiche so it fits between the top of the screen and the shelf on landscape phones. */
+  .tree-label {
+    gap: 4px;
+    padding: 10px 14px 12px;
+  }
+
+  .tree-label-title {
+    font-size: 22px;
+  }
+
+  .tree-label-sub {
+    display: none;
+  }
+
+  .tree-enter {
+    min-height: 44px;
+    padding: 10px 20px;
   }
 
   .tree-intro-title {
-    font-size: 26px;
+    font-size: 28px;
   }
 
   .tree-climb {
@@ -350,6 +471,7 @@
   }
 
   .tree-label,
+  .tree-filet,
   .tree-shelf-book {
     transition: none;
   }

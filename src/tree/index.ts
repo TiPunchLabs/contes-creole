@@ -1,7 +1,7 @@
 import "./fonts";
 import "./overlay/overlay.css";
 import * as THREE from "three";
-import type { MountTree, TreeContext, TreeHandle } from "@app/contract";
+import type { BubbleSegment, MountTree, TreeContext, TreeHandle } from "@app/contract";
 import { clamp, lerp, smoothstep } from "@shared/math";
 import { createRng } from "@shared/random";
 import { createStage, fitFov, type Stage } from "@shared/three/stage";
@@ -23,17 +23,29 @@ import { createZanba } from "./scene/critters/zanba";
 import { FLORA_OBSTACLES } from "./scene/flora";
 import { KONTEUR_OBSTACLES, createKonteur } from "./scene/konteur";
 import { createLandscape } from "./scene/landscape";
+import { EXPOSURE, FOG } from "./scene/palette";
 import { createSky } from "./scene/sky";
 import { createLightTree } from "./scene/tree";
 
 type Speaker = "teller" | CritterName;
 
-const SAY: Record<Speaker, string> = {
-  teller:
-    "« Yé krik ! …… Yé mistikrik ! »\nChwazi on liv adan pyébwa a kont-la.\nChoisis un livre dans l'arbre des contes.",
-  lapen: "Mwen sé Konpè Lapen ! Ti, mé malen…\nJe suis Compère Lapin : petit, mais malin !",
-  zanba:
-    "Mwen sé Konpè Zanba ! Gwo, fò… é toujou fen !\nJe suis Compère Zamba : gros, fort… et toujours affamé !",
+/** Kréyòl lines, then the French one; the line break stays at the end of the Kréyòl segment. */
+const SAY: Record<Speaker, BubbleSegment[]> = {
+  teller: [
+    {
+      lang: "gcf",
+      text: "« Yé krik ! …… Yé mistikrik ! »\nChwazi on liv adan pyébwa a kont-la.\n",
+    },
+    { lang: "fr", text: "Choisis un livre dans l'arbre des contes." },
+  ],
+  lapen: [
+    { lang: "gcf", text: "Mwen sé Konpè Lapen ! Ti, mé malen…\n" },
+    { lang: "fr", text: "Je suis Compère Lapin : petit, mais malin !" },
+  ],
+  zanba: [
+    { lang: "gcf", text: "Mwen sé Konpè Zanba ! Gwo, fò… é toujou fen !\n" },
+    { lang: "fr", text: "Je suis Compère Zamba : gros, fort… et toujours affamé !" },
+  ],
 };
 const DIVE_SECONDS = 1.7;
 const TAP_DISTANCE = 8;
@@ -48,10 +60,10 @@ type Pick =
   | { type: "critter"; name: CritterName }
   | null;
 
-/** Mounts the Pyébwa a Sav universe (v14): climb, hover, pick a card or the shelf, dive into a book. */
+/** Mounts the Pyébwa a Konesans universe (v14): climb, hover, pick a card or the shelf, dive into a book. */
 export const mountTree: MountTree = (container, ctx) => {
   const lite = detectLite(readLiteEnv());
-  const stage = createStage(container, { exposure: 1.05, maxPixelRatio: lite ? 1 : 1.5 });
+  const stage = createStage(container, { exposure: EXPOSURE, maxPixelRatio: lite ? 1 : 1.5 });
   try {
     return buildTree(container, ctx, stage, lite);
   } catch (err) {
@@ -69,7 +81,7 @@ function buildTree(
 ): TreeHandle {
   const { scene, camera } = stage;
   const count = (n: number): number => scaleCount(n, lite);
-  scene.fog = new THREE.FogExp2("#f6cfae", 0.0105);
+  scene.fog = new THREE.FogExp2(FOG.color, FOG.density);
   scene.background = null;
   const rng = createRng(11);
   const landscape = createLandscape(rng, count);
@@ -268,7 +280,14 @@ function buildTree(
     overlay.update(
       t,
       best && book && !diving
-        ? { x: best.x, y: best.y, opacity: Math.min(1, (best.near - 0.35) * 3), book }
+        ? {
+            index: best.index,
+            x: best.x,
+            y: best.y,
+            cy: best.cy,
+            opacity: Math.min(1, (best.near - 0.35) * 3),
+            book,
+          }
         : null,
       diving ? -1 : near,
     );

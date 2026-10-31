@@ -1,4 +1,4 @@
-# contes-creole — Pyébwa a Sav
+# contes-creole — Pyébwa a Konesans
 
 Interactive 3D Guadeloupean Creole tales (Kréyòl / French / bilingual), built with Three.js.
 

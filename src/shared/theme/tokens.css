@@ -1,0 +1,43 @@
+/*
+ * Site-wide design tokens: values shared by the shell, the tree and the reading frame.
+ * Universes read them through the cascade (no import), then map them onto their own aliases
+ * (`--tree-*`, `--reading-*`). A book's theme.css overrides the aliases, never these tokens.
+ * index.html's inline loader runs before this file and keeps literal copies of its values.
+ */
+:root {
+  --color-night: #050c12;
+  --color-parchment: #f6ead0;
+  --color-deep-ink: #0a1e33;
+
+  /* "Veillée claire" palette (phase 3 board 10). Lamp is light and selection only, never text. */
+  --color-paper: oklch(0.985 0.012 85);
+  --color-paper-warm: oklch(0.965 0.02 80);
+  --color-night-ink: oklch(0.27 0.045 280);
+  --color-night-ink-soft: oklch(0.44 0.035 280);
+  --color-lamp: oklch(0.78 0.14 70);
+  --color-ember: oklch(0.55 0.15 40);
+  --color-sky-high: oklch(0.82 0.05 300);
+  --color-sky-rose: oklch(0.86 0.07 30);
+  --color-sky-low: oklch(0.88 0.08 65);
+  --color-sky-glow: oklch(0.92 0.07 80);
+  /* Late-afternoon sky behind the edge screens (loader, WebGL fallback), boards 11 D8 and 12 M8. */
+  --gradient-dusk: linear-gradient(
+    180deg,
+    var(--color-sky-high) 0%,
+    var(--color-sky-rose) 46%,
+    var(--color-sky-low) 64%,
+    var(--color-sky-glow) 74%
+  );
+  --color-rule: oklch(0.27 0.045 280 / 0.55);
+  --shadow-dusk: 0 10px 24px oklch(0.4 0.06 300 / 0.2);
+  --focus-ring:
+    0 0 0 2px var(--color-paper), 0 0 0 5px var(--color-lamp), 0 0 0 7px var(--color-night-ink);
+
+  --font-display: "Newsreader", serif;
+  --font-ui: "Andika", sans-serif;
+  --font-brand: "Newsreader", serif;
+  --font-read: "Andika", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --radius-pill: 999px;
+}

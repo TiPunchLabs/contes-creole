@@ -1,11 +1,18 @@
+/* Card defaults ("Veillée claire" paper and ink) for books without a theme; a book's theme.css
+   overrides the card aliases. The controls around the card (--reading-chrome-*) are the shell's
+   and stay the same in every book, like the tree's HUD. */
 :root {
-  --reading-accent: #7af0dc;
-  --reading-text: rgba(238, 243, 238, 0.92);
-  --reading-title: #f6ead0;
-  --reading-card-bg: rgba(5, 14, 20, 0.58);
-  --reading-card-border: rgba(122, 240, 220, 0.18);
-  --reading-font-display: "Cormorant Garamond", serif;
-  --reading-font-body: "Quicksand", sans-serif;
+  --reading-accent: var(--color-ember);
+  --reading-text: var(--color-night-ink);
+  --reading-title: var(--color-night-ink);
+  --reading-card-bg: oklch(0.985 0.012 85 / 0.94);
+  --reading-card-border: oklch(0.27 0.045 280 / 0.18);
+  --reading-font-display: var(--font-display);
+  --reading-font-body: var(--font-read);
+  --reading-chrome-bg: oklch(0.985 0.012 85 / 0.92);
+  --reading-chrome-ink: var(--color-night-ink);
+  --reading-chrome-ink-soft: var(--color-night-ink-soft);
+  --reading-chrome-edge: oklch(0.27 0.045 280 / 0.18);
 }
 
 .reading {
@@ -20,6 +27,33 @@
   pointer-events: auto;
 }
 
+.reading button:focus-visible {
+  /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
+/* Paper chips over the scene, as on the tree: the controls read the same over any world. The
+   z-index keeps them above a book's scrim over its world (Ti Kannot's .app-book::after). */
+.reading-back,
+.reading-langs,
+.reading-arrows,
+.reading-dots,
+.reading-hint {
+  z-index: 2;
+}
+
+.reading-back,
+.reading-langs,
+.reading-arrows button,
+.reading-dots,
+.reading-hint {
+  border: 1px solid var(--reading-chrome-edge);
+  background: var(--reading-chrome-bg);
+  box-shadow: var(--shadow-dusk);
+}
+
 .reading-back {
   position: absolute;
   left: 22px;
@@ -27,16 +61,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 0;
-  background: transparent;
-  color: var(--reading-title);
-  font: italic 600 18px/1 var(--reading-font-display);
+  min-height: 44px;
+  box-sizing: border-box;
+  border-radius: var(--radius-pill);
+  color: var(--reading-chrome-ink);
+  font: 600 17px/1 var(--font-display);
   cursor: pointer;
-  padding: 10px 12px;
-}
-
-.reading-back:hover {
-  color: var(--reading-accent);
+  padding: 0 18px 0 14px;
+  transition: background 0.25s;
 }
 
 .reading-langs {
@@ -46,30 +78,26 @@
   display: flex;
   gap: 2px;
   padding: 3px;
-  border-radius: 999px;
-  background: rgba(5, 12, 18, 0.5);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(238, 243, 238, 0.12);
+  border-radius: var(--radius-pill);
 }
 
 .reading-langs button {
   border: 0;
   cursor: pointer;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font: 600 11px/1 var(--reading-font-body);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  font: 600 14px/1 var(--font-ui);
   background: transparent;
-  color: rgba(238, 243, 238, 0.75);
+  color: var(--reading-chrome-ink-soft);
   transition:
     background 0.25s,
     color 0.25s;
 }
 
 .reading-langs button[aria-pressed="true"] {
-  background: var(--reading-accent);
-  color: #0a1e33;
+  background: var(--reading-chrome-ink);
+  color: var(--color-paper);
 }
 
 .reading-card {
@@ -115,7 +143,7 @@
 
 .reading-num {
   font: italic 500 14px/1 var(--reading-font-display);
-  color: rgba(238, 243, 238, 0.55);
+  color: var(--color-night-ink-soft);
 }
 
 .reading-title {
@@ -139,9 +167,9 @@
 .reading-gloss {
   margin-top: 4px;
   padding-top: 12px;
-  border-top: 1px dashed rgba(122, 240, 220, 0.25);
+  border-top: 1px dashed var(--color-rule);
   font: italic 500 15px/1.5 var(--reading-font-display);
-  color: rgba(238, 243, 238, 0.7);
+  color: var(--color-night-ink-soft);
   text-wrap: pretty;
 }
 
@@ -153,30 +181,33 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 2px;
+  padding: 6px 2px;
+  border-radius: var(--radius-pill);
 }
 
+/* The transparent border widens the hit area around the small visible mark. */
 .reading-dot {
-  border: 0;
+  box-sizing: content-box;
   cursor: pointer;
   padding: 0;
   width: 6px;
   height: 8px;
-  border-radius: 3px;
-  background: rgba(238, 243, 238, 0.25);
+  border: 4px solid transparent;
+  border-radius: 7px;
+  background: color-mix(in oklch, var(--reading-chrome-ink) 50%, transparent) content-box;
   transition:
     height 0.35s,
     background 0.35s;
 }
 
 .reading-dot.is-done {
-  background: color-mix(in srgb, var(--reading-accent) 55%, transparent);
+  background-color: var(--reading-chrome-ink-soft);
 }
 
 .reading-dot.is-current {
   height: 26px;
-  background: var(--reading-accent);
-  box-shadow: 0 0 12px var(--reading-accent);
+  background-color: var(--reading-accent);
 }
 
 .reading-arrows {
@@ -191,36 +222,54 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 1px solid rgba(238, 243, 238, 0.2);
-  background: rgba(5, 12, 18, 0.5);
-  backdrop-filter: blur(8px);
-  color: var(--reading-title);
+  color: var(--reading-chrome-ink);
   cursor: pointer;
   display: grid;
   place-items: center;
+  transition: background 0.25s;
 }
 
-.reading-arrows button:hover {
-  border-color: var(--reading-accent);
-  color: var(--reading-accent);
+/* Next is the main action and points down, the way the wheel and the hint go. */
+.reading-arrows .reading-next {
+  border-color: var(--reading-chrome-ink);
+  background: var(--reading-chrome-ink);
+  color: var(--color-paper);
 }
 
-.reading-next {
+/* Hover only where it exists: on touch screens it would stick after a tap. */
+@media (hover: hover) {
+  .reading-back:hover,
+  .reading-arrows button:hover {
+    background: var(--color-paper);
+  }
+
+  .reading-langs button:not([aria-pressed="true"]):hover {
+    color: var(--reading-chrome-ink);
+  }
+
+  .reading-arrows .reading-next:hover {
+    background: var(--reading-chrome-ink-soft);
+  }
+}
+
+.reading-prev svg {
   transform: rotate(180deg);
 }
 
+/* In the arrows' row, clear of the card on every wide screen. */
 .reading-hint {
   position: absolute;
-  left: 50%;
-  bottom: 22px;
-  transform: translateX(-50%);
+  right: 136px;
+  bottom: 29px;
   display: flex;
   align-items: center;
   gap: 10px;
-  font: 500 11px/1 var(--reading-font-body);
-  letter-spacing: 0.22em;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font: 600 12px/1 var(--font-ui);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(122, 240, 220, 0.8);
+  color: var(--reading-chrome-ink-soft);
 }
 
 .reading-hint[hidden] {
@@ -231,6 +280,16 @@
   width: 14px;
   height: 14px;
   animation: reading-bob 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reading-hint svg {
+    animation: none;
+  }
+
+  .reading-card.is-changing {
+    transform: none;
+  }
 }
 
 @keyframes reading-bob {
@@ -246,8 +305,11 @@
 /* Phones in portrait: full-width card above a bottom bar holding dots (left) and arrows (right). */
 @media (max-width: 600px) {
   .reading-back {
-    left: 6px;
+    left: 12px;
     top: 12px;
+    width: 44px;
+    padding: 0;
+    justify-content: center;
   }
 
   .reading-back span {
@@ -260,8 +322,8 @@
   }
 
   .reading-langs button {
-    padding: 8px 11px;
-    letter-spacing: 0.1em;
+    min-height: 38px;
+    padding: 0 11px;
   }
 
   .reading-card {
@@ -294,12 +356,14 @@
     bottom: 38px;
     transform: none;
     flex-direction: row;
-    gap: 7px;
+    gap: 2px;
+    padding: 2px 6px;
   }
 
   .reading-dot {
     width: 8px;
     height: 6px;
+    border-width: 6px 3px;
     transition:
       width 0.35s,
       background 0.35s;
@@ -315,8 +379,13 @@
     bottom: 18px;
   }
 
+  /* Between the card (96px up) and the bottom bar (64px up). */
   .reading-hint {
-    bottom: 72px;
+    left: 50%;
+    right: auto;
+    bottom: 66px;
+    transform: translateX(-50%);
+    padding: 6px 12px;
     white-space: nowrap;
   }
 }
@@ -348,8 +417,29 @@
     line-height: 1.5;
   }
 
+  /* Too short for a vertical strip: a compact row above the arrows, right of the card, which
+     takes at most 4vw + 58vw (Ti Kannot) of the width. */
   .reading-dots {
-    gap: 6px;
+    top: auto;
+    right: 14px;
+    bottom: 70px;
+    transform: none;
+    flex-direction: row;
+    padding: 2px 6px;
+  }
+
+  .reading-dot {
+    width: 8px;
+    height: 6px;
+    border-width: 6px 2px;
+    transition:
+      width 0.35s,
+      background 0.35s;
+  }
+
+  .reading-dot.is-current {
+    width: 22px;
+    height: 6px;
   }
 
   .reading-arrows {
@@ -357,10 +447,12 @@
     bottom: 12px;
   }
 
+  /* Wraps rather than reach the card on the narrowest landscape screens. */
   .reading-hint {
-    left: auto;
-    right: 130px;
-    bottom: 28px;
-    transform: none;
+    right: 14px;
+    bottom: 106px;
+    box-sizing: border-box;
+    max-width: calc(38vw - 34px);
+    line-height: 1.3;
   }
 }

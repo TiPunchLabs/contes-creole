@@ -2,7 +2,6 @@ import * as THREE from "three";
 import { lerp } from "@shared/math";
 import type { Rng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
-import { softSprite } from "@shared/three/soft-sprite";
 import type { Count } from "../lite";
 
 interface Branch {
@@ -15,8 +14,8 @@ const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
 const GREENS = ["#6fae4a", "#86bf55", "#a2cd62", "#5c9d42"];
 
 /**
- * Pyébwa a Sav (v14): straight trunk, balanced crown of round puffs that breathes and rustles,
- * buttress roots and a glowing hollow facing the arrival path.
+ * Pyébwa a Konesans (v14): straight trunk, balanced crown of round puffs that breathes and rustles,
+ * buttress roots.
  */
 export function createLightTree(
   rng: Rng,
@@ -154,26 +153,6 @@ export function createLightTree(
   }
   canopy.add(puffs);
 
-  const hollow = new THREE.Group();
-  hollow.position.set(0, 2.1, -0.9);
-  hollow.rotation.x = -0.08;
-  const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(0.4, 0.09, 8, 20),
-    new THREE.MeshStandardMaterial({ color: "#6e4a30", roughness: 1 }),
-  );
-  rim.scale.y = 1.25;
-  const inner = new THREE.Mesh(
-    new THREE.CircleGeometry(0.4, 20),
-    new THREE.MeshBasicMaterial({ color: "#ffcf7e" }),
-  );
-  inner.scale.y = 1.25;
-  inner.rotation.y = Math.PI;
-  inner.position.z = 0.01;
-  const hollowGlow = softSprite("#ffc870", 2.6, 0.45);
-  hollowGlow.position.z = -0.15;
-  hollow.add(rim, inner, hollowGlow);
-  group.add(hollow);
-
   const leaves = glowPoints(
     rng,
     opts.count(tips.length * 6),
@@ -203,7 +182,6 @@ export function createLightTree(
       canopy.scale.set(breath, 1 + Math.sin(time * 0.8 + 0.6) * 0.01, breath);
       canopy.rotation.y = Math.sin(time * 0.25) * 0.015 + Math.sin(time * 9) * 0.006 * rustle;
       canopy.rotation.z = Math.sin(time * 0.4) * 0.006 + Math.sin(time * 11) * 0.004 * rustle;
-      hollowGlow.material.opacity = 0.35 + Math.sin(time * 1.6) * 0.1 + rustle * 0.25;
     },
   };
 }

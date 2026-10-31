@@ -8,17 +8,17 @@ body {
   padding: 0;
   height: 100%;
   overflow: hidden;
-  background: #050c12;
+  background: var(--color-night);
 }
 
 .app {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #050c12;
+  background: var(--color-night);
   touch-action: none;
   color: #eef3ee;
-  font-family: "Quicksand", sans-serif;
+  font-family: var(--font-ui);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -55,10 +55,8 @@ body {
   padding: 12px 16px;
   border-radius: 16px 16px 16px 4px;
   background: rgba(246, 234, 208, 0.96);
-  color: #0a1e33;
-  font:
-    italic 600 17px/1.3 "Cormorant Garamond",
-    serif;
+  color: var(--color-deep-ink);
+  font: italic 600 17px/1.3 var(--font-display);
   text-wrap: pretty;
   white-space: pre-line;
   pointer-events: none;
@@ -87,13 +85,11 @@ body {
   box-sizing: border-box;
   text-align: center;
   padding: 10px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(122, 240, 220, 0.35);
   background: rgba(5, 12, 18, 0.7);
-  color: #f6ead0;
-  font:
-    italic 600 18px/1 "Cormorant Garamond",
-    serif;
+  color: var(--color-parchment);
+  font: italic 600 18px/1 var(--font-display);
   pointer-events: none;
 }
 
@@ -108,71 +104,82 @@ body {
   gap: 14px;
   padding: 2em;
   text-align: center;
-  background: #fff6e8;
-  color: #3a2a20;
+  background: var(--gradient-dusk);
+  color: var(--color-night-ink);
 }
 
 .app-fallback-title {
-  font:
-    800 32px/1.1 "Baloo 2",
-    sans-serif;
+  font: 800 32px/1.1 var(--font-brand);
 }
 
 .app-fallback-text {
   max-width: 34ch;
-  font:
-    400 17px/1.5 "Andika",
-    sans-serif;
-  color: #5a4334;
+  font: 400 17px/1.5 var(--font-read);
+  color: var(--color-night-ink-soft);
   text-wrap: pretty;
 }
 
 .app-fallback button {
   min-height: 52px;
   border: 0;
-  background: #c4572e;
-  color: #fff8ee;
-  font:
-    800 18px/1 "Baloo 2",
-    sans-serif;
+  background: var(--color-night-ink);
+  color: var(--color-paper);
+  font: 800 18px/1 var(--font-brand);
   padding: 14px 26px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
+  box-shadow: var(--shadow-dusk);
 }
 
 .app-fallback button:hover {
-  background: #a8451f;
+  box-shadow:
+    0 0 0 4px oklch(0.78 0.14 70 / 0.45),
+    0 8px 22px oklch(0.78 0.14 70 / 0.45);
 }
 
-/* Tree screen (v14 "Jeunesse"): no book open. Book screens keep the rules above. */
+.app-fallback button:focus-visible {
+  /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
+  outline: 2px solid transparent;
+  box-shadow: var(--focus-ring);
+}
+
+/* Tree screen ("Veillée claire"): no book open. Book screens keep the rules above. */
 .app:not([data-book]) .app-vignette {
-  background: radial-gradient(ellipse at center, transparent 60%, rgba(140, 80, 50, 0.18) 100%);
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    color-mix(in oklch, var(--color-sky-high) 12%, transparent) 100%
+  );
 }
 
 .app:not([data-book]) .app-grain {
   mix-blend-mode: multiply;
-  opacity: 0.12;
+  opacity: 0.06;
   filter: sepia(0.6) brightness(1.35);
 }
 
 .app:not([data-book]) .app-bubble {
   max-width: min(280px, calc(100vw - 32px));
   padding: 14px 18px;
+  border: 1px solid var(--color-night-ink);
   border-radius: 22px 22px 22px 6px;
-  background: #fff8ee;
-  color: #3a2a20;
-  font:
-    700 17px/1.4 "Andika",
-    sans-serif;
-  box-shadow: 0 10px 28px rgba(120, 70, 40, 0.28);
+  background: var(--color-paper);
+  color: var(--color-night-ink);
+  font: 700 17px/1.4 var(--font-read);
+  box-shadow: var(--shadow-dusk);
+}
+
+/* Bilingual tree lines (boards 11 D7, 12 M7): the French translation reads lighter, in italic. */
+.app:not([data-book]) .app-bubble [lang="fr"] {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-night-ink-soft);
 }
 
 .app:not([data-book]) .app-notice {
-  border: 0;
-  background: #fff6e8;
-  color: #3a2a20;
-  font:
-    700 16px/1 "Andika",
-    sans-serif;
-  box-shadow: 0 6px 18px rgba(120, 70, 40, 0.2);
+  border: 1px solid var(--color-rule);
+  background: var(--color-paper);
+  color: var(--color-night-ink);
+  font: 700 16px/1 var(--font-read);
+  box-shadow: var(--shadow-dusk);
 }

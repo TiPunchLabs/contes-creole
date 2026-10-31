@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Pyébwa a Sav — interactive 3D Guadeloupean Creole tales (Kréyòl / French)",
+  "description": "Pyébwa a Konesans — interactive 3D Guadeloupean Creole tales (Kréyòl / French)",
   "packageManager": "pnpm@10.23.0",
   "scripts": {
     "dev": "vite",
@@ -18,14 +18,15 @@
   },
   "dependencies": {
     "@fontsource/andika": "^5.3.0",
-    "@fontsource/baloo-2": "^5.3.0",
     "@fontsource/caveat": "^5.3.0",
-    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/newsreader": "^5.3.0",
     "@fontsource/quicksand": "^5.3.0",
     "three": "^0.186.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.58.2",
     "@types/three": "^0.186.0",
     "eslint": "^10.11.0",
     "globals": "^17.12.0",

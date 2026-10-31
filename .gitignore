@@ -32,6 +32,9 @@ yarn-error.log*
 # Env
 .env
 
+# QA run output (evidence is kept outside the repo)
+qa/out/
+
 # TypeScript incremental build
 *.tsbuildinfo
 

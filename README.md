@@ -1,6 +1,6 @@
-# Pyébwa a Sav — Kont Gwadloup
+# Pyébwa a Konesans — Kont Gwadloup
 
-Interactive 3D Guadeloupean Creole tales. Climb the _Pyébwa a Sav_ (the tree of tales), pick a
+Interactive 3D Guadeloupean Creole tales. Climb the _Pyébwa a Konesans_ (the tree of tales), pick a
 book-card from its branches and dive into the tale's world, page by page, in Kréyòl, French or
 bilingual mode.
 

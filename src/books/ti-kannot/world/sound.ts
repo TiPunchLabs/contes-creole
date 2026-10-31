@@ -219,6 +219,7 @@ export function createMuteButton(
   const button = document.createElement("button");
   button.type = "button";
   button.className = "tk-sound";
+  button.lang = "fr";
   /** Syncs the icon and accessible state with `muted`. */
   const render = (): void => {
     button.setAttribute("aria-pressed", String(muted));

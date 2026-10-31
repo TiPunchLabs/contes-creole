@@ -5,15 +5,15 @@ import { groundHeight } from "./ground";
 
 const PALMS: readonly (readonly [number, number, number])[] = [
   [-9.5, -10, 6.5],
-  [11, -8, 5.5],
+  [12.2, -5.8, 5.5],
   [-28, 22, 8],
 ];
 const BREADFRUITS: readonly (readonly [number, number, number])[] = [
   [30, 8, 1.15],
-  [-34, -6, 1.3],
+  [-28, -5, 1.3],
   [8, 36, 1.2],
   [-14, -34, 1.1],
-  [36, -22, 1.25],
+  [27, -17, 1.25],
 ];
 const FLAMBOYANTS: readonly (readonly [number, number, number])[] = [
   [-25, 7, 1.15],
@@ -22,7 +22,7 @@ const FLAMBOYANTS: readonly (readonly [number, number, number])[] = [
 ];
 const BANANAS: readonly (readonly [number, number, number])[] = [
   [-12, 4, 2.4],
-  [13, 3.5, 2.1],
+  [10, 2.5, 2.1],
   [-11.5, 6.5, 1.8],
 ];
 const BALISIERS: readonly (readonly [number, number])[] = [
@@ -34,16 +34,16 @@ const BALISIERS: readonly (readonly [number, number])[] = [
 ];
 const TREE_FERNS: readonly (readonly [number, number, number])[] = [
   [-4, 13.6, 4.2],
-  [5.5, 13.2, 3.6],
+  [3.9, 14.4, 3.6],
   [13.8, -3.5, 4.6],
 ];
 
 /** Plants the critters walk around (the far palm and the far trees are outside their ring). */
 export const FLORA_OBSTACLES: Obstacle[] = [
   [-9.5, -10, 1],
-  [11, -8, 1],
+  [12.2, -5.8, 1],
   [-12, 4, 1.4],
-  [13, 3.5, 1.4],
+  [10, 2.5, 1.4],
   [-11.5, 6.5, 1.3],
   ...BALISIERS.map(([x, z]): Obstacle => [x, z, 0.9]),
   ...TREE_FERNS.map(([x, z]): Obstacle => [x, z, 1]),
@@ -63,15 +63,19 @@ function frondGeometry(): THREE.PlaneGeometry {
   return geo;
 }
 
-/** Broad banana / balisier leaf, curled backwards. */
+/**
+ * Broad banana / balisier leaf: narrow stalk, oblong blade with a blunt tip, folded down from a raised
+ * midrib and arching backwards.
+ */
 function bananaLeafGeometry(): THREE.PlaneGeometry {
-  const geo = new THREE.PlaneGeometry(0.75, 2.4, 1, 6);
-  geo.translate(0, 1.2, 0);
+  const geo = new THREE.PlaneGeometry(0.9, 2.6, 2, 8);
+  geo.translate(0, 1.3, 0);
   const p = geo.attributes.position;
   for (let i = 0; i < p.count; i++) {
-    const y = p.getY(i) / 2.4;
-    p.setZ(i, -y * y * 1.2);
-    p.setX(i, p.getX(i) * Math.sin(Math.min(1, y * 1.3 + 0.15) * Math.PI) * 1.1);
+    const y = p.getY(i) / 2.6;
+    const x = p.getX(i) * (0.12 + 0.88 * Math.sqrt(Math.max(0, 1 - ((y - 0.58) / 0.45) ** 2)));
+    p.setX(i, x);
+    p.setZ(i, -y * y * 1.5 - Math.abs(x) * 0.5);
   }
   geo.computeVertexNormals();
   return geo;
@@ -112,8 +116,9 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     crown.position.set(Math.sin(-lean) * h * 0.5, Math.cos(lean) * h, 0);
     for (let i = 0; i < 8; i++) {
       const f = new THREE.Mesh(frondGeo, frondMat);
+      f.rotation.order = "YXZ";
       f.rotation.y = (i / 8) * Math.PI * 2 + rng() * 0.3;
-      f.rotation.x = -0.35 - rng() * 0.35;
+      f.rotation.x = -(i % 2 ? 1.2 : 0.85) - rng() * 0.3;
       f.scale.setScalar(0.8 + rng() * 0.4);
       crown.add(f);
     }
@@ -217,8 +222,9 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     crown.position.y = h;
     for (let i = 0; i < 7; i++) {
       const l = new THREE.Mesh(leafGeo, bananaMat);
+      l.rotation.order = "YXZ";
       l.rotation.y = (i / 7) * Math.PI * 2 + rng() * 0.4;
-      l.rotation.x = -0.25 - rng() * 0.45;
+      l.rotation.x = i ? -0.7 - rng() * 0.5 : -0.15 - rng() * 0.1;
       l.scale.setScalar(0.85 + rng() * 0.3);
       crown.add(l);
     }
@@ -239,6 +245,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     g.add(crown);
     for (let i = 0; i < 6; i++) {
       const l = new THREE.Mesh(leafGeo, bananaMat);
+      l.rotation.order = "YXZ";
       l.rotation.y = (i / 6) * Math.PI * 2 + rng() * 0.5;
       l.rotation.x = -0.12 - rng() * 0.2;
       l.scale.set(0.55, 0.62 + rng() * 0.2, 0.55);
@@ -278,6 +285,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     crown.position.y = h;
     for (let i = 0; i < 11; i++) {
       const f = new THREE.Mesh(frondGeo, tfernMat);
+      f.rotation.order = "YXZ";
       f.rotation.y = (i / 11) * Math.PI * 2;
       f.rotation.x = -0.7 - rng() * 0.3;
       f.scale.set(0.75, 0.62, 0.75);

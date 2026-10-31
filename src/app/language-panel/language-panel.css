@@ -13,26 +13,28 @@
   z-index: 30;
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   padding: 0;
-  border-radius: 999px;
-  border: 1px solid rgba(238, 243, 238, 0.12);
-  background: rgba(5, 12, 18, 0.5);
-  backdrop-filter: blur(8px);
-  color: rgba(238, 243, 238, 0.85);
+  border-radius: var(--radius-pill);
+  /* Same paper chip as the reading controls beside it. */
+  border: 1px solid var(--reading-chrome-edge);
+  background: var(--reading-chrome-bg);
+  box-shadow: var(--shadow-dusk);
+  color: var(--reading-chrome-ink);
   cursor: pointer;
-  transition: color 0.25s;
+  transition: background 0.25s;
 }
 
-.lang-burger:hover,
-.lang-burger:focus-visible {
-  color: var(--reading-accent);
+@media (hover: hover) {
+  .lang-burger:hover {
+    background: var(--color-paper);
+  }
 }
 
 /* The language switch steps aside for the burger; it keeps working the same way. */
 [data-notes] .reading-langs {
-  right: 70px;
+  right: 76px;
 }
 
 .lang-scrim {
@@ -77,7 +79,7 @@
 
 .lang-draft {
   padding: 4px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--reading-accent);
   color: var(--reading-accent);
   font: 600 10px/1 var(--reading-font-body);
@@ -93,15 +95,21 @@
   margin-left: auto;
   padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: inherit;
   cursor: pointer;
 }
 
-.lang-close:hover,
-.lang-close:focus-visible {
+.lang-close:hover {
   color: var(--reading-accent);
+}
+
+.lang-burger:focus-visible,
+.lang-close:focus-visible {
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
 }
 
 .lang-notes {
@@ -185,12 +193,10 @@
   .lang-burger {
     right: 12px;
     top: 14px;
-    width: 34px;
-    height: 34px;
   }
 
   [data-notes] .reading-langs {
-    right: 54px;
+    right: 64px;
   }
 
   .lang-panel {
