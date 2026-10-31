@@ -108,6 +108,46 @@ export function mixEnv(envs: PageEnv[], i0: number, i1: number, f: number): Mixe
   };
 }
 
+/** Number of values in a shot vector (see `shotVector`). */
+export const SHOT_SIZE = 6;
+const MOVE_MIN = 1.6;
+const MOVE_MAX = 3.4;
+
+/**
+ * A shot as the numbers the camera glides on: focus x, y, z, azimuth, elevation and the log of
+ * the distance (so zooms feel even). The azimuth is unwrapped to the turn nearest `fromAzimuth`.
+ */
+export function shotVector(shot: Shot, fromAzimuth: number, out: number[]): number[] {
+  focusPoint(shot.focus, scratch);
+  out[0] = scratch.x;
+  out[1] = scratch.y;
+  out[2] = scratch.z;
+  out[3] = lerpAngle(fromAzimuth, shot.azimuth, 1);
+  out[4] = shot.elevation;
+  out[5] = Math.log(shot.distance);
+  return out;
+}
+
+/** Reads a shot vector back into a mixed shot. */
+export function vectorShot(v: ArrayLike<number>, out: MixedShot): MixedShot {
+  out.focus.set(v[0], v[1], v[2]);
+  out.azimuth = v[3];
+  out.elevation = v[4];
+  out.distance = Math.exp(v[5]);
+  return out;
+}
+
+/**
+ * Duration of a camera move between two shot vectors: a short reframing takes `MOVE_MIN`, wide
+ * turns, long travels and big zooms take longer, up to `MOVE_MAX`, so no move rushes.
+ */
+export function moveSeconds(from: ArrayLike<number>, to: ArrayLike<number>): number {
+  const travel = Math.hypot(to[0] - from[0], to[1] - from[1], to[2] - from[2]);
+  const turn = Math.abs(to[3] - from[3]) + Math.abs(to[4] - from[4]);
+  const zoom = Math.abs(to[5] - from[5]);
+  return clamp(MOVE_MIN + turn / 150 + travel / 30 + zoom * 0.6, MOVE_MIN, MOVE_MAX);
+}
+
 /** Unit vector for an azimuth/elevation pair in degrees (0° azimuth = towards +z). */
 function orbit(azimuth: number, elevation: number, out: THREE.Vector3): THREE.Vector3 {
   const az = THREE.MathUtils.degToRad(azimuth);
