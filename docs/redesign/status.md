@@ -60,12 +60,18 @@ globale — Finalisation autonome"). Decisions and their wording live in
   (LEC-FRAME, A4-M3). Branch `feat/veillee-claire-lecture`, PR to `feat/veillee-claire`, not
   merged. Evidence: `~/.local/share/contes-creole-qa/lecture/`.
 
+- M13 Ti Kannot reading comfort (2026-10-30): on portrait tablets the card takes
+  `min(580px, 96vw - 96px)` and sits above the page-button row (768 px: card 327 -> 583 px, text
+  column 249 -> 505 px); with reduced motion the phone page change no longer slides (rendered offset
+  15 px -> 0, fade kept). `theme.css` only (M13-THEME). Branch `feat/veillee-claire-m13-lecture`,
+  PR to `feat/veillee-claire`, not merged. Evidence: `~/.local/share/contes-creole-qa/m13-lecture/`.
+
 ## Blocked on owner decisions (no work started)
 
 - M6 "the climb brings the evening": A1.
 - M7a Konteur halo: not done (no visual need found in the Konteur mission); emissive: A3.
-- M13 Ti Kannot card alignment (width on tablets, fonts): A4 card part, A8 for Caveat. The
-  shared controls (M12) were done in the Lecture mission; the M12 labels part still needs A6/A7.
+- Ti Kannot card alignment beyond M13 (fonts, card design): A4 card part, A8 for Caveat. The M12
+  labels part still needs A6/A7.
 - M15 approved copy: A6 (rest) and A7.
 - Deploy previews: T2.
 

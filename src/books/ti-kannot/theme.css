@@ -187,6 +187,23 @@
   }
 }
 
+/* Tablets in portrait: the world sits above the page, so the page can take the width (42vw gave
+   about 30 characters a line at 768 px). It stays left of the page dots and above the row of page
+   buttons and hint. */
+@media (min-width: 601px) and (orientation: portrait) {
+  [data-book="ti-kannot"] .reading-card {
+    width: min(580px, calc(96vw - 96px));
+    bottom: 88px;
+  }
+}
+
+/* Must follow the phone rule above, which sets its own page-change offset. */
+@media (prefers-reduced-motion: reduce) and (max-width: 600px) {
+  [data-book="ti-kannot"] .reading-card.is-changing {
+    transform: none;
+  }
+}
+
 .tk-sound {
   position: absolute;
   top: 72px;
