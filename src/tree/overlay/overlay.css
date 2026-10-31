@@ -194,9 +194,10 @@
     0 8px 22px oklch(0.78 0.14 70 / 0.45);
 }
 
-/* An invitation, not a way into a tale: no nudge, a quieter paper button. */
+/* An invitation, not a way into a tale: no nudge, a quieter paper link. */
 .tree-invite-open {
   animation: none;
+  text-decoration: none;
   background: var(--tree-paper);
   color: var(--tree-ink);
   border: 1.5px solid var(--tree-ink);

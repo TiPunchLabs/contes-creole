@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BookManifest } from "@app/contract";
-import { CONTACT_URL, INVITATION, isInvitation, treeSlots } from "./invitation";
+import { CLASSES_PAGE, INVITATION, RETURN_HASH, isInvitation, treeSlots } from "./invitation";
 
 const book = (id: string, ready: boolean): BookManifest => ({
   id,
@@ -37,7 +37,8 @@ describe("INVITATION", () => {
     expect(INVITATION.cover).toBeUndefined();
   });
 
-  it("leads to the owner's existing contact section", () => {
-    expect(CONTACT_URL).toBe("https://xgueret.tipunchlabs.fr/#tp-contact");
+  it("leads to the classes page, whose way back names the slot", () => {
+    expect(CLASSES_PAGE).toBe("/contes-des-classes/");
+    expect(RETURN_HASH).toBe("#invitation");
   });
 });

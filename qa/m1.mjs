@@ -226,7 +226,7 @@ try {
     results.push({ id: "j4.lang-state", status: "BASELINE", detail: JSON.stringify(lang) });
     console.log("BASELINE j4.lang-state", JSON.stringify(lang));
 
-    // J5 invitation to classes: shelf -> fiche -> dialog -> contact link, keyboard only
+    // J5 invitation to classes: shelf -> fiche -> classes page -> contact link -> back, keyboard only
     await p.keyboard.press("Escape");
     const invite = p.locator(".tree-shelf-book.is-invitation");
     await invite.focus();
@@ -239,79 +239,72 @@ try {
       await invite.getAttribute("aria-label"),
     );
     await p.keyboard.press("Enter");
-    await wait(700);
-    const dialog = p.locator(".tree-invite");
-    const opened = await dialog.isVisible();
-    const focusIn = await p.evaluate(
-      () => document.querySelector(".tree-invite")?.contains(document.activeElement) ?? false,
-    );
-    check("j5.press-again-opens-dialog-with-focus", opened && focusIn);
-    await p.screenshot({ path: OUT + "d6-invitation-dialog.png" });
-    const cta = p.locator(".tree-invite-cta");
-    const ctaInfo = await cta.evaluate((a) => ({
-      href: a.getAttribute("href"),
-      target: a.target,
-      name: a.textContent.replace(/\s+/g, " ").trim(),
-      inView: a.getBoundingClientRect().bottom <= innerHeight,
-    }));
+    await p.waitForURL(/\/contes-des-classes\/$/, { timeout: 10000 }).catch(() => {});
+    await p.evaluate(() => document.fonts.ready);
     check(
-      "j5.cta-links-existing-contact",
-      ctaInfo.href === "https://xgueret.tipunchlabs.fr/#tp-contact" && ctaInfo.inView,
-      JSON.stringify(ctaInfo),
+      "j5.press-again-opens-classes-page",
+      new URL(p.url()).pathname === "/contes-des-classes/",
+      p.url(),
+    );
+    await p.screenshot({ path: OUT + "d6-classes-page.png" });
+    const page = await p.evaluate(() => {
+      const a = document.querySelector(".cc-cta");
+      return {
+        h1: document.querySelector("h1")?.textContent.trim(),
+        href: a?.getAttribute("href"),
+        target: a?.target,
+        hScroll: document.documentElement.scrollWidth > innerWidth,
+        nested: [...document.querySelectorAll("body *")].filter((e) => {
+          const st = getComputedStyle(e);
+          return /(auto|scroll)/.test(st.overflowY) && e.scrollHeight > e.clientHeight;
+        }).length,
+        three: [...document.scripts].some((x) => /main-/.test(x.src)),
+      };
+    });
+    check(
+      "j5.page-cta-links-existing-contact",
+      page.href === "https://xgueret.tipunchlabs.fr/#tp-contact" && page.target === "_blank",
+      JSON.stringify(page),
+    );
+    check(
+      "j5.page-one-scroll-no-tree-bundle",
+      !page.hScroll && page.nested === 0 && !page.three,
+      JSON.stringify(page),
     );
     await p.keyboard.press("Tab");
     check(
-      "j5.tab-reaches-cta",
-      await p.evaluate(() => document.activeElement?.classList.contains("tree-invite-cta")),
+      "j5.tab-starts-on-way-back",
+      await p.evaluate(() => document.activeElement?.classList.contains("cc-back")),
     );
-    await p.screenshot({ path: OUT + "d7-invitation-cta-focus.png" });
-    await p.keyboard.press("Tab");
-    check(
-      "j5.tab-stays-in-dialog",
-      await p.evaluate(() => document.activeElement?.classList.contains("tree-invite-close")),
-    );
-    const tBefore = await thumbTop(p);
-    const panelTop = () => p.$eval(".tree-invite", (e) => e.scrollTop);
-    const noteInView = () =>
-      p.$eval(".tree-invite-note", (e) => {
-        const r = e.getBoundingClientRect();
-        const c = document.querySelector(".tree-invite-foot").getBoundingClientRect();
-        return r.top >= 0 && r.bottom <= c.top + 1;
-      });
-    await p.mouse.move(W / 2, H / 2);
-    await p.mouse.wheel(0, 400);
+    let ctaFocused = false;
+    for (let i = 0; i < 6 && !ctaFocused; i++) {
+      await p.keyboard.press("Tab");
+      ctaFocused = await p.evaluate(() => document.activeElement?.classList.contains("cc-cta"));
+    }
     await wait(900);
-    const wheeled = await panelTop();
+    const ctaInView = await p.$eval(".cc-cta", (a) => {
+      const r = a.getBoundingClientRect();
+      return r.top >= 0 && r.bottom <= innerHeight;
+    });
     check(
-      "j5.wheel-scrolls-dialog-not-tree",
-      wheeled > 0 && (await thumbTop(p)) === tBefore,
-      `scrollTop=${wheeled}`,
+      "j5.tab-reaches-cta-scrolled-into-view",
+      ctaFocused && ctaInView,
+      `focused=${ctaFocused} inView=${ctaInView}`,
     );
+    await p.screenshot({ path: OUT + "d7-classes-cta-focus.png" });
     await p.keyboard.press("Home");
-    await wait(400);
-    const home = await panelTop();
-    await p.keyboard.press("End");
     await wait(600);
+    await p.focus(".cc-top .cc-back");
+    await p.keyboard.press("Enter");
+    await p.waitForURL((u) => new URL(u).pathname === "/", { timeout: 10000 }).catch(() => {});
+    await p.waitForSelector(".loader.is-done", { state: "attached", timeout: 20000 });
+    await wait(2200);
     check(
-      "j5.keys-scroll-dialog-to-caveat",
-      home === 0 && (await panelTop()) > 0 && (await noteInView()),
-      `home=${home} end=${await panelTop()}`,
+      "j5.way-back-opens-tree-on-invitation",
+      (await p.isVisible(".tree-invite-open")) && new URL(p.url()).hash === "",
+      p.url(),
     );
-    await p.keyboard.press("ArrowUp");
-    await wait(600);
-    check("j5.tree-still-while-open", (await thumbTop(p)) === tBefore);
-    await p.keyboard.press("Escape");
-    await wait(400);
-    check(
-      "j5.escape-closes-focus-back",
-      !(await dialog.isVisible()) &&
-        (await p.evaluate(() => document.activeElement?.classList.contains("is-invitation"))),
-    );
-    await p.click(".tree-invite-open");
-    await wait(500);
-    await p.mouse.click(8, H / 2);
-    await wait(400);
-    check("j5.scrim-click-closes", !(await dialog.isVisible()));
+    await p.screenshot({ path: OUT + "d8-back-on-invitation.png" });
     check("j1-j4.no-console-errors-desktop", errors.length === 0, errors.join(" | "));
     await ctx.close();
   }
@@ -349,50 +342,52 @@ try {
     check("j5.mobile-invitation-fiche", await p.isVisible(".tree-invite-open"));
     await p.screenshot({ path: OUT + "m5-near-invitation.png" });
     await p.locator(".tree-invite-open").tap();
-    await wait(700);
-    const sheet = await p.$eval(".tree-invite", (e) => {
-      const r = e.getBoundingClientRect();
-      const c = document.querySelector(".tree-invite-cta").getBoundingClientRect();
-      return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, cta: c.bottom };
+    await p.waitForURL(/\/contes-des-classes\/$/, { timeout: 10000 }).catch(() => {});
+    await p.evaluate(() => document.fonts.ready);
+    const first = await p.evaluate(() => {
+      const h = document.querySelector("h1").getBoundingClientRect();
+      return {
+        h1Top: h.top,
+        h1Bottom: h.bottom,
+        hScroll: document.documentElement.scrollWidth > innerWidth,
+      };
     });
     check(
-      "j5.mobile-dialog-fits-cta-in-view",
-      sheet.left >= 0 && sheet.right <= W && sheet.top >= 0 && sheet.bottom <= H && sheet.cta <= H,
-      JSON.stringify(sheet),
+      "j5.mobile-page-title-in-first-screen",
+      first.h1Top >= 0 && first.h1Bottom <= H && !first.hScroll,
+      JSON.stringify(first),
     );
-    await p.screenshot({ path: OUT + "m6-invitation-dialog.png" });
-    const mThumb = await thumbTop(p);
-    // Raw touch events: synthesizeScrollGesture does not scroll vertical scrollers here.
+    await p.screenshot({ path: OUT + "m6-classes-page.png" });
+    // Raw touch events: synthesizeScrollGesture does not scroll here headless.
     const cdp = await ctx.newCDPSession(p);
     const touch = (type, y) =>
       cdp.send("Input.dispatchTouchEvent", {
         type,
         touchPoints: y === null ? [] : [{ x: W / 2, y }],
       });
-    await touch("touchStart", H * 0.7);
-    for (let i = 1; i <= 16; i++) {
-      await touch("touchMove", H * 0.7 - i * 30);
-      await wait(16);
+    for (let swipe = 0; swipe < 6; swipe++) {
+      await touch("touchStart", H * 0.8);
+      for (let i = 1; i <= 16; i++) {
+        await touch("touchMove", H * 0.8 - i * 36);
+        await wait(16);
+      }
+      await touch("touchEnd", null);
+      await wait(500);
     }
-    await touch("touchEnd", null);
-    await wait(900);
-    const swiped = await p.$eval(".tree-invite", (e) => ({
-      top: e.scrollTop,
-      max: e.scrollHeight - e.clientHeight,
-    }));
-    const noteShown = await p.$eval(".tree-invite-note", (e) => {
-      const r = e.getBoundingClientRect();
-      const c = document.querySelector(".tree-invite-foot").getBoundingClientRect();
-      return r.top >= 0 && r.bottom <= c.top + 1;
+    await wait(800);
+    const end = await p.evaluate(() => {
+      const c = document.querySelector(".cc-cta").getBoundingClientRect();
+      return { scrollY, ctaSeen: c.bottom <= innerHeight || c.top < innerHeight };
     });
     check(
-      "j5.mobile-swipe-scrolls-dialog-to-caveat",
-      swiped.top > 0 && noteShown && (await thumbTop(p)) === mThumb,
-      JSON.stringify(swiped),
+      "j5.mobile-swipe-scrolls-page-to-cta",
+      end.scrollY > 0 && end.ctaSeen,
+      JSON.stringify(end),
     );
-    await p.screenshot({ path: OUT + "m7-invitation-dialog-end.png" });
-    await p.locator(".tree-invite-close").tap();
-    await wait(400);
+    await p.screenshot({ path: OUT + "m7-classes-page-cta.png" });
+    await p.goBack();
+    await p.waitForSelector(".tree-shelf", { timeout: 20000 });
+    await wait(1500);
     await shelf.nth(0).tap();
     await wait(2600);
     check("j1.mobile-shelf-near-card", await p.isVisible(".tree-enter"));
@@ -429,10 +424,12 @@ try {
     await p.click(".tree-shelf-book.is-invitation");
     await wait(2600);
     await p.click(".tree-invite-open");
-    await wait(300);
-    const anim = await p.$eval(".tree-invite", (e) => getComputedStyle(e).animationName);
-    check("j5.reduced-motion-dialog-still", anim === "none", anim);
-    await p.screenshot({ path: OUT + "r1-invitation-reduced.png" });
+    await p.waitForURL(/\/contes-des-classes\/$/, { timeout: 10000 }).catch(() => {});
+    const behavior = await p.evaluate(
+      () => getComputedStyle(document.documentElement).scrollBehavior,
+    );
+    check("j5.reduced-motion-page-no-smooth-scroll", behavior === "auto", behavior);
+    await p.screenshot({ path: OUT + "r1-classes-reduced.png" });
     await ctx.close();
   }
 

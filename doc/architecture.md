@@ -41,9 +41,15 @@ sources are in `design/v13/`.
   interpolates `env`: sky, water level, moon, stars, rain, calabash count, dam / spring / tank.
 - **Invitation to classes** (M2): the tree shows the published books (`ready: true`), then one
   invitation slot at the top of the climb (`src/tree/invitation.ts`, `treeSlots`). Pending books
-  stay in `src/books/` but are not shown. The invitation's card, fiche and shelf entry open a
-  French dialog (`tree/overlay/invitation.ts`) that explains the collaboration and links to the
-  owner's existing contact form; nothing is collected or stored by the site.
+  stay in `src/books/` but are not shown. The invitation's card, fiche and shelf entry lead to
+  the **"Les contes des classes" page** (`/contes-des-classes/`), which explains the collaboration
+  and links to the owner's existing contact form; nothing is collected or stored by the site.
+- **Classes page**: a second Vite HTML entry (`contes-des-classes/index.html`, listed in
+  `vite.config.ts` `build.rolldownOptions.input`), with its own script and styles in
+  `src/pages/contes-des-classes/`. It loads tokens and fonts only (no Three.js, no app shell); ESLint
+  keeps `src/pages/` off `@app`, `@tree` and `@books`. Its way back is `/#invitation`: the tree reads
+  that hash at mount, starts on the invitation slot and removes it. A future page about how a class
+  tale was made is a sibling folder (`contes-des-classes/<tale>/index.html`) reusing `page.css`.
 - **A class tale later**: it is an ordinary book folder (`book.ts` with `ready: true`, `story/`,
   `cover.ts`, a world in 2D or 3D). Its class credit fits the card texts and the story file; no
   school or author model is needed until a real tale asks for one.

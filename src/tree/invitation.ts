@@ -1,14 +1,14 @@
 import type { BookManifest } from "@app/contract";
 
-/** The owner's existing contact form: a class project starts there, never in a form of our own. */
-export const CONTACT_URL = "https://xgueret.tipunchlabs.fr/#tp-contact";
+/** The "Les contes des classes" page: a static page of its own, reachable by a shareable URL. */
+export const CLASSES_PAGE = "/contes-des-classes/";
 
-/** First words of the teacher's message, so the owner can spot class projects. */
-export const SUBJECT = "Projet Contes Créoles — Classe";
+/** URL hash the page's way back uses: the tree then opens on the invitation's slot. */
+export const RETURN_HASH = "#invitation";
 
 /**
  * The tree's one "story still to invent" slot, inviting a class to write the next tale. It is not a
- * book: no world, no cover, never entered. Its card, fiche and shelf entry open the invitation.
+ * book: no world, no cover, never entered. Its card, fiche and shelf entry lead to CLASSES_PAGE.
  */
 export const INVITATION: BookManifest = {
   id: "invitation",

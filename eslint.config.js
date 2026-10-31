@@ -62,4 +62,9 @@ export default tseslint.config(
     "The app reaches books only through the registry glob.",
   ),
   layer(["src/shared/**/*.ts"], ["app", "tree", "books"], "src/shared is a leaf toolbox."),
+  layer(
+    ["src/pages/**/*.ts"],
+    ["app", "tree", "books"],
+    "A page stands alone: its own files and @shared only, no app shell or Three.js scene.",
+  ),
 );

@@ -1,14 +1,12 @@
 import "./fonts";
 import "./overlay/overlay.css";
-import "./overlay/invitation.css";
 import * as THREE from "three";
 import type { BubbleSegment, MountTree, TreeContext, TreeHandle } from "@app/contract";
 import { clamp, lerp, smoothstep } from "@shared/math";
 import { createRng } from "@shared/random";
 import { createStage, fitFov, type Stage } from "@shared/three/stage";
-import { isInvitation, treeSlots } from "./invitation";
+import { CLASSES_PAGE, RETURN_HASH, isInvitation, treeSlots } from "./invitation";
 import { detectLite, readLiteEnv, scaleCount } from "./lite";
-import { createInvitationDialog } from "./overlay/invitation";
 import { createTreeOverlay } from "./overlay/overlay";
 import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { cardT, hubCam } from "./scene/camera";
@@ -65,7 +63,7 @@ type Pick =
 
 /**
  * Mounts the Pyébwa a Konesans universe (v14): climb, hover, pick a card or the shelf, dive into a
- * book, or open the invitation to classes from its slot at the top.
+ * book, or follow the invitation to classes from its slot at the top to the classes page.
  */
 export const mountTree: MountTree = (container, ctx) => {
   const lite = detectLite(readLiteEnv());
@@ -114,6 +112,11 @@ function buildTree(
 
   let t = 0;
   let target = 0;
+  // Back from the classes page: open on the invitation, then drop the hash so a reload starts low.
+  if (location.hash === RETURN_HASH) {
+    t = target = cardT(slots.length - 1, slots.length);
+    history.replaceState(null, "", location.pathname + location.search);
+  }
   let hover: number | null = null;
   let near = -1;
   let speaker: Speaker | null = null;
@@ -134,14 +137,13 @@ function buildTree(
   const climb = (dy: number): void => {
     target = clamp(target + dy * 0.00055, 0, 1);
   };
-  const invitation = createInvitationDialog(container);
-  /** Opens the invitation over a quiet tree: no hovered card, no bubble left on screen. */
+  /** Leaves a quiet tree (no hovered card, no bubble) for the classes page. */
   const invite = (): void => {
     hover = null;
     setSpeaker(null);
-    invitation.open();
+    location.assign(CLASSES_PAGE);
   };
-  /** Opens a slot: dives into its book, or opens the invitation (which never dives). */
+  /** Opens a slot: dives into its book, or goes to the classes page (the invitation never dives). */
   const enter = (index: number): void => {
     const slot = slots[index];
     if (!slot) return;
@@ -155,7 +157,6 @@ function buildTree(
   };
   const overlay = createTreeOverlay(container, slots, {
     onEnter: ctx.onEnter,
-    onInvite: invite,
     onShelf,
   });
 
@@ -210,17 +211,16 @@ function buildTree(
     e.target instanceof Element && e.target.closest("button, a, .tree-shelf") !== null;
 
   const onWheel = (e: WheelEvent): void => {
-    if (invitation.isOpen || isShelfEvent(e.target)) return;
+    if (isShelfEvent(e.target)) return;
     e.preventDefault();
     if (active && !diving) climb(e.deltaY);
   };
   const onPointerDown = (e: PointerEvent): void => {
-    down =
-      invitation.isOpen || fromControl(e) ? null : { y: e.clientY, t: performance.now(), moved: 0 };
+    down = fromControl(e) ? null : { y: e.clientY, t: performance.now(), moved: 0 };
   };
   const onPointerMove = (e: PointerEvent): void => {
     Object.assign(pointer, stage.pointer(e));
-    if (!active || diving || invitation.isOpen) return;
+    if (!active || diving) return;
     if (down && e.pointerType !== "mouse") {
       const dy = down.y - e.clientY;
       down.y = e.clientY;
@@ -248,8 +248,13 @@ function buildTree(
     else if (!p && e.pointerType !== "mouse") setSpeaker(null);
   };
   const onKey = (e: KeyboardEvent): void => {
-    if (!active || diving || invitation.isOpen) return;
-    if ((e.key === "Enter" || e.key === " ") && e.target instanceof HTMLButtonElement) return;
+    if (!active || diving) return;
+    if (
+      (e.key === "Enter" || e.key === " ") &&
+      e.target instanceof Element &&
+      e.target.closest("button, a")
+    )
+      return;
     if (CLIMB_KEYS_DOWN.includes(e.key)) {
       e.preventDefault();
       climb(140);
@@ -340,7 +345,6 @@ function buildTree(
     },
     pause() {
       active = false;
-      invitation.close();
       setSpeaker(null);
       clearTimeout(holdTimer);
       stage.stop();
@@ -362,7 +366,6 @@ function buildTree(
       container.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKey);
-      invitation.dispose();
       overlay.dispose();
       stage.dispose();
     },

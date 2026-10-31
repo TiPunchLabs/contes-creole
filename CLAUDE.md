@@ -35,11 +35,13 @@ src/
     reading-ui/                # text card, language switch, page counter and buttons, back button, bubble
     transition.ts, backdrop.ts, bubble.ts, fallback.ts, languages.ts, paging.ts, notice.ts
   shared/                      # optional toolbox: random.ts (createRng), math.ts, three/ helpers
+  pages/contes-des-classes/    # script + styles of the static "Les contes des classes" page (no Three.js)
   tree/                        # tree universe: index.ts (mountTree), invitation.ts (class invitation slot),
                                # scene/, overlay/, assets/konteur.png
   books/
     ti-kannot/                 # book.ts, cover.ts, staging.ts, theme.css, story/{gcf,fr}.md, langue/fr.md, world/
     zanba/, konpe-lapen/       # manifest only (book.ts), ready: false — kept, not shown in the tree
+contes-des-classes/index.html  # that page's HTML (second Vite entry, served at /contes-des-classes/)
 doc/                           # architecture.md, development.md
 ```
 

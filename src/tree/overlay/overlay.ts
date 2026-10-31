@@ -1,6 +1,6 @@
 import type { BookManifest } from "@app/contract";
 import { clamp } from "@shared/math";
-import { INVITATION_FICHE, isInvitation } from "../invitation";
+import { CLASSES_PAGE, INVITATION_FICHE, isInvitation } from "../invitation";
 import { createShelf, type ShelfAction } from "./shelf";
 
 export interface CardLabel {
@@ -79,14 +79,13 @@ export function placeFiche(
 
 /**
  * Tree HUD: intro column with the site title, near-slot fiche with its leader line, climb bar,
- * shelf. The invitation slot's fiche opens the invitation instead of entering a book.
+ * shelf. The invitation slot's fiche links to the classes page instead of entering a book.
  */
 export function createTreeOverlay(
   container: HTMLElement,
   books: BookManifest[],
   handlers: {
     onEnter(bookId: string): void;
-    onInvite(): void;
     onShelf(index: number, action: ShelfAction): void;
   },
 ): { update(t: number, label: CardLabel | null, near: number): void; dispose(): void } {
@@ -107,7 +106,7 @@ export function createTreeOverlay(
       <div class="tree-label-title"></div>
       <div class="tree-label-sub"></div>
       <button type="button" class="tree-enter" hidden>${BOOK_ICON}<span>Antré adan kont-la</span></button>
-      <button type="button" class="tree-enter tree-invite-open" lang="fr" hidden>${QUILL_ICON}<span>${INVITATION_FICHE.action}</span></button>
+      <a class="tree-enter tree-invite-open" lang="fr" href="${CLASSES_PAGE}" hidden>${QUILL_ICON}<span>${INVITATION_FICHE.action}</span></a>
     </div>
     <div class="tree-climb"><div class="tree-climb-thumb"></div></div>`;
   container.append(el);
@@ -135,7 +134,6 @@ export function createTreeOverlay(
   enter.addEventListener("click", () => {
     if (current) handlers.onEnter(current.id);
   });
-  invite.addEventListener("click", () => handlers.onInvite());
 
   return {
     update(t, next, near) {
