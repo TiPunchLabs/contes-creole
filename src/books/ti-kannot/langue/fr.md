@@ -16,7 +16,7 @@ Le conteur lance **Yé krik !** pour réveiller son public, qui répond **Yé kr
 
 ### Pou alé pli lwen
 
-Le conte se disait traditionnellement le soir, pendant les veillées. Ces appels rythment la parole : le conteur peut les relancer au milieu de l'histoire pour vérifier que personne ne s'endort. On entend aussi **Ès lakou dòmi ?** (« la cour dort-elle ? »), et le public répond **Lakou pa dòmi !**
+Le conte se disait traditionnellement le soir, pendant les veillées. Ces appels rythment la parole : le conteur peut les relancer au milieu de l'histoire pour vérifier que personne ne s'endort. On entend aussi **Ès lakou-la ka dòmi ?** (« la cour dort-elle ? »), et le public répond **Lakou-la pa ka dòmi !**
 
 ## « on » : un, une {#on}
 
