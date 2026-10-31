@@ -76,6 +76,18 @@ Isolation is enforced by ESLint `no-restricted-imports`: universes import only t
   shell's current language) or `{ lang, text }` segments for bilingual lines (decision T4).
 - Owner decisions and their wording: `docs/redesign/decisions.md`.
 
+### Ti Kannot's camera
+
+- **Destination**: each page's shot (`staging.ts`) becomes six numbers (`shotVector` in
+  `world/env.ts`): focus x/y/z, azimuth, elevation, log distance.
+- **Progress**: a `Glide` (`world/glide.ts`) eases those numbers to the new shot in
+  `moveSeconds(from, to)` seconds (1.6 to 3.4, longer for wide turns, long travels and big
+  zooms). A new page mid-move starts from the current position, speed and acceleration, so rapid
+  page turns and going back never jolt and never visit the skipped shots. Under reduced motion the
+  camera cuts. The scene's weather, light and characters still follow the page blend (`pageF`).
+- **Future narration**: a cue would call `lens.to(shotVector(shot, …), cueSeconds)` from
+  `setPage` or a new handle method; the camera itself needs no change.
+
 ## 4. Issues to fix during the port
 
 | #   | Issue                                                                   | Fix                                                         |

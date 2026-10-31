@@ -1,7 +1,17 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import type { PageEnv } from "../staging";
-import { frameOffset, lerpAngle, mixEnv, pageSpan, shotCamera, type MixedShot } from "./env";
+import {
+  frameOffset,
+  lerpAngle,
+  mixEnv,
+  moveSeconds,
+  pageSpan,
+  shotCamera,
+  shotVector,
+  vectorShot,
+  type MixedShot,
+} from "./env";
 import { spotPoint } from "./island/spots";
 
 const env = (over: Partial<PageEnv>): PageEnv => ({
@@ -68,6 +78,41 @@ describe("mixEnv", () => {
 
   it("orbits the short way between pages", () => {
     expect(mixEnv(ENVS, 0, 1, 0.5).shot.azimuth).toBeCloseTo(-5);
+  });
+});
+
+describe("shotVector", () => {
+  it("reads back as the page's shot", () => {
+    const v = shotVector(ENVS[1].shot, 0, []);
+    const shot = vectorShot(v, { ...mixEnv(ENVS, 0, 0, 0).shot });
+    expect(shot.focus.toArray()).toEqual(mixEnv(ENVS, 1, 1, 0).shot.focus.toArray());
+    expect(shot.azimuth).toBeCloseTo(-10);
+    expect(shot.distance).toBeCloseTo(14);
+  });
+
+  it("unwraps the azimuth to the nearest turn", () => {
+    expect(shotVector(ENVS[1].shot, 370, [])[3]).toBeCloseTo(350);
+    expect(shotVector(ENVS[1].shot, -20, [])[3]).toBeCloseTo(-10);
+  });
+});
+
+describe("moveSeconds", () => {
+  const at = (azimuth: number, distance: number, x = 0): number[] => [
+    x,
+    0,
+    0,
+    azimuth,
+    20,
+    Math.log(distance),
+  ];
+
+  it("gives wide turns, long travels and big zooms more time, within bounds", () => {
+    const small = moveSeconds(at(0, 15), at(10, 15));
+    expect(small).toBeGreaterThanOrEqual(1.5);
+    expect(moveSeconds(at(0, 15), at(120, 15))).toBeGreaterThan(small);
+    expect(moveSeconds(at(0, 15), at(0, 15, 15))).toBeGreaterThan(small);
+    expect(moveSeconds(at(0, 15), at(0, 45))).toBeGreaterThan(small);
+    expect(moveSeconds(at(0, 15), at(180, 45, 40))).toBeLessThanOrEqual(3.5);
   });
 });
 

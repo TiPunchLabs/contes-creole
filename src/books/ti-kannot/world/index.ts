@@ -9,7 +9,18 @@ import { createRng } from "@shared/random";
 import { createStage } from "@shared/three/stage";
 import { STAGING, type PageEnv } from "../staging";
 import { createCharacters } from "./characters";
-import { frameOffset, mixEnv, pageSpan, shotCamera, type MixedEnv } from "./env";
+import {
+  frameOffset,
+  mixEnv,
+  moveSeconds,
+  pageSpan,
+  shotCamera,
+  shotVector,
+  vectorShot,
+  type MixedEnv,
+  type MixedShot,
+} from "./env";
+import { createGlide } from "./glide";
 import { createGround } from "./island/ground";
 import { restingPoints } from "./island/perches";
 import { createSource } from "./island/source";
@@ -26,7 +37,8 @@ const SPEAK_MS = 4200;
 const TAP_DISTANCE = 8;
 const TAP_MS = 600;
 const PAGE_EASE = 1.6;
-const CARD_EASE = 2.4;
+const CARD_SECONDS = 1.4;
+const PARALLAX_EASE = 3;
 
 /** Staging of each story page, in reading order. */
 function envsFor(story: Story): PageEnv[] {
@@ -92,12 +104,18 @@ export default defineWorld({
       let story = ctx.story;
       let page = ctx.page;
       let pageF = ctx.page;
-      /** 1 while the reading card is shown, 0 in "scène seule"; scales the card offset. */
-      let cardShift = 1;
-      let cardTarget = 1;
       const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      /** The camera's shot, gliding to the current page's; never reads `pageF`. */
+      const aim: number[] = [];
+      const lens = createGlide(shotVector(envs[page].shot, 0, aim));
+      const shot: MixedShot = { focus: new THREE.Vector3(), azimuth: 0, elevation: 0, distance: 1 };
+      /** 1 while the reading card is shown, 0 in "scène seule"; scales the card offset. */
+      const cardShift = createGlide([1]);
       let down: { y: number; t: number; moved: number } | null = null;
       const pointer = { x: 0, y: 0 };
+      /** Mouse parallax, eased so the camera never follows the cursor in steps. */
+      const sway = new THREE.Vector2();
+      const swayTarget = new THREE.Vector2();
       const look = new THREE.Vector3();
       const anchorPoint = new THREE.Vector3();
       const ray = new THREE.Raycaster();
@@ -110,6 +128,13 @@ export default defineWorld({
         return mixEnv(envs, i0, i1, f);
       };
       cast.snap(place());
+
+      /** Points the camera at a page's shot, in a time that suits the move (a cut when calm). */
+      const frameShot = (index: number): void => {
+        shotVector(envs[index].shot, lens.value[3], aim);
+        if (calm) lens.set(aim);
+        else lens.to(aim, moveSeconds(lens.value, aim));
+      };
 
       /** Shows a character's line in the bubble for a few seconds. */
       const speak = (name: CharacterName): void => {
@@ -126,14 +151,19 @@ export default defineWorld({
       const frame = (time: number, dt: number): void => {
         pageF += (page - pageF) * (1 - Math.exp(-dt * PAGE_EASE));
         const env = place();
-        shotCamera(env.shot, camera.aspect, camera.position, look);
-        camera.position.x += pointer.x * 0.8;
-        camera.position.y += pointer.y * 0.4;
+        lens.update(dt);
+        // The sun and the rain follow the camera's focus.
+        env.shot = vectorShot(lens.value, shot);
+        shotCamera(shot, camera.aspect, camera.position, look);
+        sway.lerp(swayTarget, 1 - Math.exp(-dt * PARALLAX_EASE));
+        camera.position.x += sway.x * 0.8;
+        camera.position.y += sway.y * 0.4;
         camera.lookAt(look);
         renderer.getSize(view);
-        cardShift += (cardTarget - cardShift) * (1 - Math.exp(-dt * CARD_EASE));
+        cardShift.update(dt);
+        const shift = cardShift.value[0];
         const [dx, dy] = frameOffset(view.x, view.y);
-        camera.setViewOffset(view.x, view.y, dx * cardShift, dy * cardShift, view.x, view.y);
+        camera.setViewOffset(view.x, view.y, dx * shift, dy * shift, view.x, view.y);
         sky.update(env, time, camera.position);
         sea.update(env, time, camera.position);
         ground.update(env);
@@ -151,6 +181,7 @@ export default defineWorld({
       };
       const onPointerMove = (e: PointerEvent): void => {
         Object.assign(pointer, stage.pointer(e));
+        if (e.pointerType === "mouse" && !calm) swayTarget.set(pointer.x, pointer.y);
         if (down && e.pointerType !== "mouse") {
           down.moved += Math.abs(e.clientY - down.y);
           down.y = e.clientY;
@@ -180,13 +211,19 @@ export default defineWorld({
         setPage(index) {
           page = index;
           clearTimeout(speakTimer);
+          frameShot(index);
+          if (calm) {
+            pageF = index;
+            cast.snap(place());
+          }
         },
         setStory(next) {
           story = next;
         },
         setCardHidden(hidden) {
-          cardTarget = hidden ? 0 : 1;
-          if (calm) cardShift = cardTarget;
+          const target = [hidden ? 0 : 1];
+          if (calm) cardShift.set(target);
+          else cardShift.to(target, CARD_SECONDS);
         },
         dispose: release,
       };
