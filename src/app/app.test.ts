@@ -166,6 +166,61 @@ describe("app", () => {
     expect(spans().map((s) => s.lang)).toEqual(["gcf", "fr"]);
   });
 
+  it("scène seule: hides the card and the bubble, keeps page and language, resets on reopen", async () => {
+    handle.setCardHidden = vi.fn();
+    start();
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    const { bubble } = world.mount.mock.calls[0][1] as { bubble: TreeContext["bubble"] };
+    const anchor = () => ({ x: 0, y: 0, visible: true });
+    $('.reading-langs [data-lang="fr"]')?.click();
+    key("ArrowRight");
+    bubble.show("Page deux texte.", anchor);
+    $(".reading-toggle")?.click();
+    expect($(".reading-card")?.hidden).toBe(true);
+    expect(root.hasAttribute("data-scene-only")).toBe(true);
+    expect(handle.setCardHidden).toHaveBeenLastCalledWith(true);
+    expect($(".app-bubble")?.style.opacity).toBe("0");
+    bubble.show("Page deux texte.", anchor);
+    expect($(".app-bubble")?.style.opacity).toBe("0");
+    key("ArrowRight");
+    expect(handle.setPage).toHaveBeenLastCalledWith(2);
+    $(".reading-toggle")?.click();
+    expect($(".reading-card")?.hidden).toBe(false);
+    expect(handle.setCardHidden).toHaveBeenLastCalledWith(false);
+    expect($(".reading-title")?.textContent).toBe("Page trois");
+    expect($('.reading-langs [data-lang="fr"]')?.getAttribute("aria-pressed")).toBe("true");
+    expect(world.mount).toHaveBeenCalledOnce();
+    bubble.show("Page trois texte.", anchor);
+    expect($(".app-bubble")?.style.opacity).toBe("1");
+    $(".reading-toggle")?.click();
+    key("Escape");
+    await vi.advanceTimersByTimeAsync(CLOSE_MS);
+    expect(root.hasAttribute("data-scene-only")).toBe(false);
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect($(".reading-card")?.hidden).toBe(false);
+    expect($(".reading-toggle")?.getAttribute("aria-label")).toBe("Masquer le texte");
+  });
+
+  it("leaves Space to a focused button: no page turn, native activation kept", async () => {
+    start();
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    const toggle = $(".reading-toggle") as HTMLButtonElement;
+    for (const hidden of [true, false]) {
+      toggle.focus();
+      const space = new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true });
+      toggle.dispatchEvent(space);
+      expect(space.defaultPrevented).toBe(false);
+      toggle.click();
+      expect($(".reading-card")?.hidden).toBe(hidden);
+    }
+    expect(handle.setPage).not.toHaveBeenCalled();
+    key(" ");
+    expect(handle.setPage).toHaveBeenLastCalledWith(1);
+  });
+
   it("rises back to the tree at the book's card on Escape", async () => {
     start();
     treeCtx.onEnter("liv");

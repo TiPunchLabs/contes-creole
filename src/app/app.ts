@@ -2,6 +2,7 @@ import { createBackdrop } from "./backdrop";
 import { createBubble } from "./bubble";
 import type {
   BookHandle,
+  Bubble,
   BookManifest,
   LanguageNotes,
   MountTree,
@@ -54,6 +55,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     onPage: (index) => goPage(index),
     onLang: (lang) => setLang(lang),
     onBack: () => void leave(),
+    onToggleText: () => toggleText(),
   });
   const panel = createLanguagePanel(root);
   const bubble = createBubble(root);
@@ -65,9 +67,17 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   let book: OpenBook | null = null;
   let page = 0;
   let lang: ReadingLang = "gcf";
+  let textHidden = false;
   let scrolled = false;
   let touchY: number | null = null;
   let retryTimer: ReturnType<typeof setTimeout> | undefined;
+  /** The book's bubble stays silent in "scène seule": its lines come from the hidden text. */
+  const bookBubble: Bubble = {
+    show: (text, anchor) => {
+      if (!textHidden) bubble.show(text, anchor);
+    },
+    hide: () => bubble.hide(),
+  };
 
   /** Adds a full-screen universe container. */
   function addLayer(className: string): HTMLDivElement {
@@ -107,7 +117,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   }
 
   function render(): void {
-    reading.render({ page, lang, showHint: page === 0 && !scrolled });
+    reading.render({ page, lang, showHint: page === 0 && !scrolled, textHidden });
   }
 
   /** Removes the open book (if any) and gives the screen back to the tree layer. */
@@ -118,6 +128,8 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       console.error("Book dispose failed", err);
     }
     book = null;
+    textHidden = false;
+    delete root.dataset.sceneOnly;
     bubble.hide();
     bubble.setLang("gcf");
     panel.detach();
@@ -158,7 +170,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       const handle = await world.default.mount(bookLayer, {
         story,
         page,
-        bubble,
+        bubble: bookBubble,
       });
       book = { id: bookId, stories, handle };
       reading.open(stories);
@@ -207,6 +219,16 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     render();
   }
 
+  /** "Scène seule" on or off: same book, page and language; the next book opens with its text. */
+  function toggleText(): void {
+    if (mode !== "book" || !book) return;
+    textHidden = !textHidden;
+    root.toggleAttribute("data-scene-only", textHidden);
+    if (textHidden) bubble.hide();
+    book.handle.setCardHidden?.(textHidden);
+    render();
+  }
+
   const step = (dy: number): void => {
     const direction = pager.step(dy, Date.now());
     if (direction !== 0) goPage(page + direction);
@@ -234,6 +256,8 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       if (e.key === "Escape") panel.close();
       return;
     }
+    // Space activates a focused button (text toggle, page buttons) instead of turning the page.
+    if (e.key === " " && e.target instanceof HTMLButtonElement) return;
     if (NEXT_KEYS.includes(e.key)) {
       e.preventDefault();
       goPage(page + 1);

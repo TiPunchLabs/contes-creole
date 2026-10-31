@@ -149,7 +149,8 @@
 
   [data-book="ti-kannot"] .reading-card {
     width: auto;
-    max-height: calc(100svh - 180px);
+    /* Stops below the sound button (70 + 44 px from the top). */
+    max-height: calc(100svh - 222px);
     padding: 22px 22px 18px;
     gap: 8px;
     transform: none;
@@ -188,8 +189,7 @@
 }
 
 /* Tablets in portrait: the world sits above the page, so the page can take the width (42vw gave
-   about 30 characters a line at 768 px). It stays left of the page dots and above the row of page
-   buttons and hint. */
+   about 30 characters a line at 768 px). It stays above the row of page buttons and hint. */
 @media (min-width: 601px) and (orientation: portrait) {
   [data-book="ti-kannot"] .reading-card {
     width: min(580px, calc(96vw - 96px));
@@ -204,34 +204,52 @@
   }
 }
 
+/* Same paper chip as the reader's controls, under the language buttons in the same column. */
 .tk-sound {
   position: absolute;
-  top: 72px;
-  right: 18px;
+  top: 78px;
+  right: 22px;
   z-index: 2;
   width: 44px;
   height: 44px;
   display: grid;
   place-items: center;
-  padding: 10px;
-  border: 1px solid rgba(120, 84, 52, 0.25);
+  padding: 0;
+  border: 1px solid var(--reading-chrome-edge);
   border-radius: 50%;
-  background: rgba(250, 243, 228, 0.75);
-  color: #5a2f1c;
+  background: var(--reading-chrome-bg);
+  box-shadow: var(--shadow-dusk);
+  color: var(--reading-chrome-ink);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.25s;
 }
 
-.tk-sound:hover {
-  background: rgba(250, 243, 228, 0.95);
+@media (hover: hover) {
+  .tk-sound:hover {
+    background: var(--color-paper);
+  }
 }
 
 .tk-sound:focus-visible {
-  outline: 2px solid #1f8f86;
+  outline: 3px solid transparent;
   outline-offset: 2px;
+  box-shadow: var(--focus-ring);
 }
 
 .tk-sound svg {
-  width: 100%;
-  height: 100%;
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 600px) {
+  .tk-sound {
+    top: 70px;
+    right: 12px;
+  }
+}
+
+@media (max-height: 500px) and (min-width: 601px) {
+  .tk-sound {
+    top: 64px;
+  }
 }
