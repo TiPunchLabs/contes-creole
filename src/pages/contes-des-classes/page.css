@@ -32,16 +32,12 @@ html {
   text-rendering: optimizeLegibility;
 }
 
-.cc h1,
-.cc h2,
-.cc h3,
-.cc p,
-.cc ul,
-.cc figure {
+/* Resets carry no specificity (:where), so every component class below sets its own spacing. */
+:where(.cc) :where(h1, h2, h3, p, ul, figure) {
   margin: 0;
 }
 
-.cc a {
+:where(.cc) :where(a) {
   color: inherit;
 }
 
@@ -373,7 +369,7 @@ html {
   box-sizing: border-box;
   border-radius: var(--radius-pill);
   background: var(--color-night-ink);
-  color: var(--color-paper) !important;
+  color: var(--color-paper);
   font: 800 19px/1.15 var(--font-display);
   text-align: center;
   text-decoration: none;

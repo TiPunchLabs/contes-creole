@@ -28,8 +28,15 @@ describe("Les contes des classes page", () => {
 
   it("gives the subject and asks only for school, level, language and a few lines", () => {
     expect(document.querySelector(".cc-subject-text")?.textContent).toBe(SUBJECT);
-    const asked = [...document.querySelectorAll(".cc-sheet-list li")].map((li) => li.textContent);
-    expect(asked).toHaveLength(4);
+    const asked = [...document.querySelectorAll(".cc-sheet-list li")].map((li) =>
+      li.textContent?.replace(/\s+/g, " ").trim(),
+    );
+    expect(asked).toEqual([
+      "le nom de l'école et la commune ;",
+      "le niveau de la classe ;",
+      "la langue envisagée : français, créole guadeloupéen ou les deux ;",
+      "quelques lignes sur le projet, même s'il n'est encore qu'une idée.",
+    ]);
     expect(document.querySelector(".cc-privacy")?.textContent).toContain(
       "Aucune information sur les élèves",
     );

@@ -258,7 +258,14 @@ try {
           const st = getComputedStyle(e);
           return /(auto|scroll)/.test(st.overflowY) && e.scrollHeight > e.clientHeight;
         }).length,
-        three: [...document.scripts].some((x) => /main-/.test(x.src)),
+        // Every script the page actually fetched: none may be the tree bundle (Three.js) or a world.
+        three: performance
+          .getEntriesByType("resource")
+          .some((r) => /\/assets\/(main|world)-.*\.js$/.test(r.name)),
+        scripts: performance
+          .getEntriesByType("resource")
+          .filter((r) => r.name.endsWith(".js"))
+          .map((r) => r.name.replace(location.origin, "")),
       };
     });
     check(
@@ -377,7 +384,7 @@ try {
     await wait(800);
     const end = await p.evaluate(() => {
       const c = document.querySelector(".cc-cta").getBoundingClientRect();
-      return { scrollY, ctaSeen: c.bottom <= innerHeight || c.top < innerHeight };
+      return { scrollY, ctaSeen: c.top >= 0 && c.bottom <= innerHeight };
     });
     check(
       "j5.mobile-swipe-scrolls-page-to-cta",
