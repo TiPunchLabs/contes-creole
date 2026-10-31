@@ -51,12 +51,21 @@ globale — Finalisation autonome"). Decisions and their wording live in
   `feat/veillee-claire-konteur`, PR to `feat/veillee-claire`, not merged. Evidence:
   `~/.local/share/contes-creole-qa/konteur/`.
 
+- Reading screen "Mission Lecture" (2026-10-30): the shared reading controls become paper chips
+  with ink text like the tree HUD (back pill, segmented language switch with an ink pressed state,
+  page dots on a chip with a wider hit area, page buttons with "next" as the filled main action
+  pointing down, hint chip), shared focus ring, controls lifted above a book's scrim, horizontal dots
+  on short landscape screens, hover only on hover devices, no hint bob with reduced motion; card
+  defaults moved to paper and ink for future books. Ti Kannot's card and `theme.css` untouched
+  (LEC-FRAME, A4-M3). Branch `feat/veillee-claire-lecture`, PR to `feat/veillee-claire`, not
+  merged. Evidence: `~/.local/share/contes-creole-qa/lecture/`.
+
 ## Blocked on owner decisions (no work started)
 
 - M6 "the climb brings the evening": A1.
 - M7a Konteur halo: not done (no visual need found in the Konteur mission); emissive: A3.
-- M12 shared reading frame and M13 Ti Kannot alignment: A4 (the shared frame has no other
-  consumer until a second book is ready).
+- M13 Ti Kannot card alignment (width on tablets, fonts): A4 card part, A8 for Caveat. The
+  shared controls (M12) were done in the Lecture mission; the M12 labels part still needs A6/A7.
 - M15 approved copy: A6 (rest) and A7.
 - Deploy previews: T2.
 
