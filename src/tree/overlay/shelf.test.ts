@@ -1,28 +1,25 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from "vitest";
 import type { BookManifest } from "@app/contract";
+import { INVITATION } from "../invitation";
 import { createShelf, isShelfEvent, shelfAction } from "./shelf";
 
-const book = (id: string, ready: boolean, title: string): BookManifest => ({
+const book = (id: string, title: string): BookManifest => ({
   id,
   order: 1,
-  ready,
+  ready: true,
   card: { title, sub: "Dlo · L'eau", theme: "Kont pou lékòl" },
 });
-const BOOKS = [book("a", true, "Ti Kannot"), book("b", false, "Zanba")];
+const BOOKS = [book("a", "Ti Kannot"), INVITATION];
 
 describe("shelfAction", () => {
-  it("climbs to a book that is not the highlighted one", () => {
-    expect(shelfAction(0, -1, true)).toBe("climb");
-    expect(shelfAction(0, 1, true)).toBe("climb");
+  it("climbs to a slot that is not the highlighted one", () => {
+    expect(shelfAction(0, -1)).toBe("climb");
+    expect(shelfAction(0, 1)).toBe("climb");
   });
 
-  it("enters the highlighted ready book (same rule as aria-current)", () => {
-    expect(shelfAction(0, 0, true)).toBe("enter");
-  });
-
-  it("never enters a locked book, even when highlighted", () => {
-    expect(shelfAction(1, 1, false)).toBe("climb");
+  it("opens the highlighted slot (same rule as aria-current)", () => {
+    expect(shelfAction(0, 0)).toBe("enter");
   });
 });
 
@@ -35,19 +32,29 @@ describe("createShelf", () => {
     return { parent, shelf, buttons, onSelect };
   }
 
-  it("is a labelled nav with one button per book and the Kréyòl label", () => {
+  it("is a labelled nav with one button per slot and the Kréyòl label", () => {
     const { parent, buttons } = mount();
     const nav = parent.querySelector("nav");
     expect(nav?.getAttribute("aria-label")).toBeTruthy();
     expect(nav?.lang).toBe("fr");
-    expect(buttons.every((b) => b.lang === "gcf")).toBe(true);
+    expect(buttons[0].lang).toBe("gcf");
     expect(nav?.textContent).toContain("Sé kont-la");
     expect(nav?.textContent).not.toContain("Kont-yo");
     expect(buttons).toHaveLength(2);
     expect(buttons[0].textContent).toContain("Ti Kannot");
-    expect(buttons[1].textContent).toContain("Talè · bientôt");
-    expect(buttons[1].querySelector('.tree-shelf-sub [lang="fr"]')?.textContent).toBe("bientôt");
-    expect(buttons[1].getAttribute("aria-label")).toContain("bientôt");
+    expect(buttons[0].querySelector(".tree-shelf-dot")?.textContent).toBe("1");
+  });
+
+  it("shows the invitation in French, dashed and numberless, never as a locked book", () => {
+    const { buttons } = mount();
+    const invite = buttons[1];
+    expect(invite.lang).toBe("fr");
+    expect(invite.classList.contains("is-invitation")).toBe(true);
+    expect(invite.textContent).toContain("Le prochain conte");
+    expect(invite.textContent).toContain("Histoire à inventer");
+    expect(invite.textContent).not.toMatch(/Talè|bientôt/);
+    expect(invite.querySelector(".tree-shelf-dot")?.getAttribute("aria-hidden")).toBe("true");
+    expect(invite.getAttribute("aria-label")).toBe("Le prochain conte, invitation aux classes");
   });
 
   it("marks the near book as current", () => {
@@ -73,16 +80,17 @@ describe("createShelf", () => {
     expect(onSelect).toHaveBeenCalledWith(0, "enter");
   });
 
-  it("only climbs to a highlighted locked book", () => {
+  it("opens the highlighted invitation, as its label promises", () => {
     const { shelf, buttons, onSelect } = mount();
     shelf.setNear(1);
+    expect(buttons[1].getAttribute("aria-label")).toContain("touche encore pour ouvrir");
     buttons[1].click();
-    expect(onSelect).toHaveBeenCalledWith(1, "climb");
+    expect(onSelect).toHaveBeenCalledWith(1, "enter");
   });
 
   it("renders book titles as text, never as HTML", () => {
     const parent = document.createElement("div");
-    createShelf(parent, [book("x", true, "<img src=x onerror=alert(1)>")], vi.fn());
+    createShelf(parent, [book("x", "<img src=x onerror=alert(1)>")], vi.fn());
     expect(parent.querySelector("img")).toBeNull();
   });
 

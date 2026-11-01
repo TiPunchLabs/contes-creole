@@ -1,5 +1,6 @@
 import type { BookManifest } from "@app/contract";
 import { clamp } from "@shared/math";
+import { CLASSES_PAGE, INVITATION_FICHE, isInvitation } from "../invitation";
 import { createShelf, type ShelfAction } from "./shelf";
 
 export interface CardLabel {
@@ -14,6 +15,7 @@ export interface CardLabel {
 }
 
 const MOUSE = `<svg width="18" height="26" viewBox="0 0 18 26" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="1" width="16" height="24" rx="8"/><circle cx="9" cy="8" r="2" fill="currentColor"/></svg>`;
+const QUILL_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17c3-1 5-3 6.5-5.5M17 3c-5 0-9 3.5-10.5 9l1.8 1.8C14 12.5 17 8 17 3z"/></svg>`;
 const BOOK_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5c2.5-1 4.8-.8 7 .8 2.2-1.6 4.5-1.8 7-.8v11c-2.5-1-4.8-.8-7 .8-2.2-1.6-4.5-1.8-7-.8z"/><path d="M10 5.3v11"/></svg>`;
 
 /** Viewport width under which the fiche docks above the shelf (overlay.css uses the same value). */
@@ -75,11 +77,17 @@ export function placeFiche(
   };
 }
 
-/** Tree HUD: intro column with the site title, near-book fiche with its leader line, climb bar, shelf. */
+/**
+ * Tree HUD: intro column with the site title, near-slot fiche with its leader line, climb bar,
+ * shelf. The invitation slot's fiche links to the classes page instead of entering a book.
+ */
 export function createTreeOverlay(
   container: HTMLElement,
   books: BookManifest[],
-  handlers: { onEnter(bookId: string): void; onShelf(index: number, action: ShelfAction): void },
+  handlers: {
+    onEnter(bookId: string): void;
+    onShelf(index: number, action: ShelfAction): void;
+  },
 ): { update(t: number, label: CardLabel | null, near: number): void; dispose(): void } {
   const el = document.createElement("div");
   el.className = "tree-overlay";
@@ -98,7 +106,7 @@ export function createTreeOverlay(
       <div class="tree-label-title"></div>
       <div class="tree-label-sub"></div>
       <button type="button" class="tree-enter" hidden>${BOOK_ICON}<span>Antré adan kont-la</span></button>
-      <div class="tree-locked" hidden>Talè · <span lang="fr">bientôt dans l'arbre</span></div>
+      <a class="tree-enter tree-invite-open" lang="fr" href="${CLASSES_PAGE}" hidden>${QUILL_ICON}<span>${INVITATION_FICHE.action}</span></a>
     </div>
     <div class="tree-climb"><div class="tree-climb-thumb"></div></div>`;
   container.append(el);
@@ -115,8 +123,8 @@ export function createTreeOverlay(
   const filet = part(".tree-filet");
   const leader = filet.querySelector("line");
   const dot = filet.querySelector("circle");
-  const enter = part(".tree-enter");
-  const locked = part(".tree-locked");
+  const enter = part(".tree-enter:not(.tree-invite-open)");
+  const invite = part(".tree-invite-open");
   const thumb = part(".tree-climb-thumb");
   const shelf = createShelf(el, books, handlers.onShelf);
   const shelfEl = part(".tree-shelf");
@@ -140,25 +148,32 @@ export function createTreeOverlay(
         label.style.opacity = "0";
         filet.style.opacity = "0";
         enter.hidden = true;
-        locked.hidden = true;
+        invite.hidden = true;
         shownBook = null;
         return;
       }
       if (next.book !== shownBook) {
         shownBook = next.book;
-        const { ready, card } = next.book;
-        // Themes follow the "Kréyòl · Français" format: the French half gets its own lang.
-        const [gcf, fr] = card.theme.split(" · ");
-        const french = document.createElement("span");
-        french.lang = "fr";
-        french.textContent = fr ?? "";
-        kicker.replaceChildren(`${next.index + 1} — ${gcf}`, ...(fr ? [" · ", french] : []));
-        title.textContent = card.title;
-        sub.textContent = card.sub;
-        sub.hidden = !ready;
-        enter.hidden = !ready;
-        locked.hidden = ready;
-        label.classList.toggle("is-locked", !ready);
+        const inviting = isInvitation(next.book);
+        label.lang = inviting ? "fr" : "gcf";
+        label.classList.toggle("is-invitation", inviting);
+        enter.hidden = inviting;
+        invite.hidden = !inviting;
+        if (inviting) {
+          kicker.textContent = INVITATION_FICHE.kicker;
+          title.textContent = INVITATION_FICHE.title;
+          sub.textContent = INVITATION_FICHE.sub;
+        } else {
+          const { card } = next.book;
+          // Themes follow the "Kréyòl · Français" format: the French half gets its own lang.
+          const [gcf, fr] = card.theme.split(" · ");
+          const french = document.createElement("span");
+          french.lang = "fr";
+          french.textContent = fr ?? "";
+          kicker.replaceChildren(`${next.index + 1} — ${gcf}`, ...(fr ? [" · ", french] : []));
+          title.textContent = card.title;
+          sub.textContent = card.sub;
+        }
       }
       const box = placeFiche(
         next,

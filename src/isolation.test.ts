@@ -22,6 +22,8 @@ describe("universe isolation", () => {
     ["src/app/story/parse.ts", 'import "../../books/ti-kannot/book";'],
     ["src/shared/math.ts", 'import "@app/contract";'],
     ["src/shared/three/stage.ts", 'import "../../tree/index";'],
+    ["src/pages/contes-des-classes/main.ts", 'import "@tree/invitation";'],
+    ["src/pages/contes-des-classes/main.ts", 'import "../../app/app";'],
   ])("%s rejects %s", async (file, code) => {
     expect(await violations(file, code)).not.toHaveLength(0);
   });
@@ -34,6 +36,7 @@ describe("universe isolation", () => {
     ["src/books/ti-kannot/world/index.ts", 'import "@shared/three/stage";'],
     ["src/app/app.ts", 'import "./contract";'],
     ["src/main.ts", 'import "@tree/index";'],
+    ["src/pages/contes-des-classes/main.ts", 'import "@shared/theme/tokens.css";'],
   ])("%s allows %s", async (file, code) => {
     expect(await violations(file, code)).toHaveLength(0);
   });

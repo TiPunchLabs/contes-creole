@@ -1,4 +1,4 @@
-// M1 baseline: 4 critical journeys + reference screenshots, GPU Chromium only.
+// M1 baseline: 4 critical journeys (+ J5 invitation to classes, M2) + reference screenshots, GPU Chromium only.
 import { chromium } from "@playwright/test";
 const SITE = process.env.SITE ?? "http://localhost:4199/";
 // OUT: evidence folder (default qa/out/m1/, git-ignored); point it at the mission evidence folder.
@@ -92,16 +92,18 @@ try {
     check("j1.arrow-keys-climb", (await thumbTop(p)) < t1);
     const shelf = p.locator(".tree-shelf-book");
     const n = await shelf.count();
-    check("j1.shelf-lists-books", n === 3, `count=${n}`);
+    // Published books, then one invitation to classes (pending books are not shown).
+    check("j1.shelf-lists-books-and-invitation", n === 2, `count=${n}`);
     await shelf.nth(1).click();
     await wait(2600);
-    const lockedVisible = await p.isVisible(".tree-locked");
     check(
-      "j1.locked-book-label",
-      lockedVisible && !(await p.isVisible(".tree-enter")),
+      "j1.invitation-fiche",
+      (await p.isVisible(".tree-invite-open")) &&
+        !(await p.isVisible(".tree-enter:not(.tree-invite-open)")) &&
+        (await p.$eval(".tree-label", (e) => e.classList.contains("is-invitation"))),
       await p.$eval(".tree-label-title", (e) => e.textContent),
     );
-    await p.screenshot({ path: OUT + "d3-near-locked-book.png" });
+    await p.screenshot({ path: OUT + "d3-near-invitation.png" });
     await shelf.nth(0).click();
     await wait(2600);
     const title = await p.$eval(".tree-label-title", (e) => e.textContent);
@@ -223,6 +225,93 @@ try {
     }));
     results.push({ id: "j4.lang-state", status: "BASELINE", detail: JSON.stringify(lang) });
     console.log("BASELINE j4.lang-state", JSON.stringify(lang));
+
+    // J5 invitation to classes: shelf -> fiche -> classes page -> contact link -> back, keyboard only
+    await p.keyboard.press("Escape");
+    const invite = p.locator(".tree-shelf-book.is-invitation");
+    await invite.focus();
+    await p.keyboard.press("Enter");
+    await wait(2600);
+    check(
+      "j5.invitation-shelf-name",
+      (await invite.getAttribute("aria-label"))?.includes("invitation aux classes") &&
+        (await invite.getAttribute("aria-current")) === "true",
+      await invite.getAttribute("aria-label"),
+    );
+    await p.keyboard.press("Enter");
+    await p.waitForURL(/\/contes-des-classes\/$/, { timeout: 10000 }).catch(() => {});
+    await p.evaluate(() => document.fonts.ready);
+    check(
+      "j5.press-again-opens-classes-page",
+      new URL(p.url()).pathname === "/contes-des-classes/",
+      p.url(),
+    );
+    await p.screenshot({ path: OUT + "d6-classes-page.png" });
+    const page = await p.evaluate(() => {
+      const a = document.querySelector(".cc-cta");
+      return {
+        h1: document.querySelector("h1")?.textContent.trim(),
+        href: a?.getAttribute("href"),
+        target: a?.target,
+        hScroll: document.documentElement.scrollWidth > innerWidth,
+        nested: [...document.querySelectorAll("body *")].filter((e) => {
+          const st = getComputedStyle(e);
+          return /(auto|scroll)/.test(st.overflowY) && e.scrollHeight > e.clientHeight;
+        }).length,
+        // Every script the page actually fetched: none may be the tree bundle (Three.js) or a world.
+        three: performance
+          .getEntriesByType("resource")
+          .some((r) => /\/assets\/(main|world)-.*\.js$/.test(r.name)),
+        scripts: performance
+          .getEntriesByType("resource")
+          .filter((r) => r.name.endsWith(".js"))
+          .map((r) => r.name.replace(location.origin, "")),
+      };
+    });
+    check(
+      "j5.page-cta-links-existing-contact",
+      page.href === "https://xgueret.tipunchlabs.fr/#tp-contact" && page.target === "_blank",
+      JSON.stringify(page),
+    );
+    check(
+      "j5.page-one-scroll-no-tree-bundle",
+      !page.hScroll && page.nested === 0 && !page.three,
+      JSON.stringify(page),
+    );
+    await p.keyboard.press("Tab");
+    check(
+      "j5.tab-starts-on-way-back",
+      await p.evaluate(() => document.activeElement?.classList.contains("cc-back")),
+    );
+    let ctaFocused = false;
+    for (let i = 0; i < 6 && !ctaFocused; i++) {
+      await p.keyboard.press("Tab");
+      ctaFocused = await p.evaluate(() => document.activeElement?.classList.contains("cc-cta"));
+    }
+    await wait(900);
+    const ctaInView = await p.$eval(".cc-cta", (a) => {
+      const r = a.getBoundingClientRect();
+      return r.top >= 0 && r.bottom <= innerHeight;
+    });
+    check(
+      "j5.tab-reaches-cta-scrolled-into-view",
+      ctaFocused && ctaInView,
+      `focused=${ctaFocused} inView=${ctaInView}`,
+    );
+    await p.screenshot({ path: OUT + "d7-classes-cta-focus.png" });
+    await p.keyboard.press("Home");
+    await wait(600);
+    await p.focus(".cc-top .cc-back");
+    await p.keyboard.press("Enter");
+    await p.waitForURL((u) => new URL(u).pathname === "/", { timeout: 10000 }).catch(() => {});
+    await p.waitForSelector(".loader.is-done", { state: "attached", timeout: 20000 });
+    await wait(2200);
+    check(
+      "j5.way-back-opens-tree-on-invitation",
+      (await p.isVisible(".tree-invite-open")) && new URL(p.url()).hash === "",
+      p.url(),
+    );
+    await p.screenshot({ path: OUT + "d8-back-on-invitation.png" });
     check("j1-j4.no-console-errors-desktop", errors.length === 0, errors.join(" | "));
     await ctx.close();
   }
@@ -255,11 +344,62 @@ try {
     await wait(5000);
     check("j3.mobile-bubble-auto-hides-after-hold", (await bubbleShown(p)) === "");
     const shelf = p.locator(".tree-shelf-book");
+    await shelf.nth(1).tap();
+    await wait(2600);
+    check("j5.mobile-invitation-fiche", await p.isVisible(".tree-invite-open"));
+    await p.screenshot({ path: OUT + "m5-near-invitation.png" });
+    await p.locator(".tree-invite-open").tap();
+    await p.waitForURL(/\/contes-des-classes\/$/, { timeout: 10000 }).catch(() => {});
+    await p.evaluate(() => document.fonts.ready);
+    const first = await p.evaluate(() => {
+      const h = document.querySelector("h1").getBoundingClientRect();
+      return {
+        h1Top: h.top,
+        h1Bottom: h.bottom,
+        hScroll: document.documentElement.scrollWidth > innerWidth,
+      };
+    });
+    check(
+      "j5.mobile-page-title-in-first-screen",
+      first.h1Top >= 0 && first.h1Bottom <= H && !first.hScroll,
+      JSON.stringify(first),
+    );
+    await p.screenshot({ path: OUT + "m6-classes-page.png" });
+    // Raw touch events: synthesizeScrollGesture does not scroll here headless.
+    const cdp = await ctx.newCDPSession(p);
+    const touch = (type, y) =>
+      cdp.send("Input.dispatchTouchEvent", {
+        type,
+        touchPoints: y === null ? [] : [{ x: W / 2, y }],
+      });
+    for (let swipe = 0; swipe < 6; swipe++) {
+      await touch("touchStart", H * 0.8);
+      for (let i = 1; i <= 16; i++) {
+        await touch("touchMove", H * 0.8 - i * 36);
+        await wait(16);
+      }
+      await touch("touchEnd", null);
+      await wait(500);
+    }
+    await wait(800);
+    const end = await p.evaluate(() => {
+      const c = document.querySelector(".cc-cta").getBoundingClientRect();
+      return { scrollY, ctaSeen: c.top >= 0 && c.bottom <= innerHeight };
+    });
+    check(
+      "j5.mobile-swipe-scrolls-page-to-cta",
+      end.scrollY > 0 && end.ctaSeen,
+      JSON.stringify(end),
+    );
+    await p.screenshot({ path: OUT + "m7-classes-page-cta.png" });
+    await p.goBack();
+    await p.waitForSelector(".tree-shelf", { timeout: 20000 });
+    await wait(1500);
     await shelf.nth(0).tap();
     await wait(2600);
     check("j1.mobile-shelf-near-card", await p.isVisible(".tree-enter"));
     await p.screenshot({ path: OUT + "m3-near-ready-book.png" });
-    await p.locator(".tree-enter").tap({ force: true });
+    await p.locator(".tree-enter:not(.tree-invite-open)").tap({ force: true });
     await p.waitForSelector(".reading:not([hidden])", { timeout: 15000 }).catch(() => {});
     await wait(1800);
     check("j2.mobile-open-book", await p.isVisible(".reading"));
@@ -288,6 +428,15 @@ try {
       (await thumbTop(p)) > t0 && errors.length === 0,
       errors.join(" | "),
     );
+    await p.click(".tree-shelf-book.is-invitation");
+    await wait(2600);
+    await p.click(".tree-invite-open");
+    await p.waitForURL(/\/contes-des-classes\/$/, { timeout: 10000 }).catch(() => {});
+    const behavior = await p.evaluate(
+      () => getComputedStyle(document.documentElement).scrollBehavior,
+    );
+    check("j5.reduced-motion-page-no-smooth-scroll", behavior === "auto", behavior);
+    await p.screenshot({ path: OUT + "r1-classes-reduced.png" });
     await ctx.close();
   }
 

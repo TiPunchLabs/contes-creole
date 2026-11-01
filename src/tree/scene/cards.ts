@@ -3,7 +3,8 @@ import type { BookManifest } from "@app/contract";
 import { clamp, lerp } from "@shared/math";
 import type { ScreenPoint } from "@shared/three/stage";
 import { cardT, hubCam } from "./camera";
-import { paintLockedCover } from "./locked-cover";
+import { isInvitation } from "../invitation";
+import { paintInvitationCover } from "./invitation-cover";
 import { CARD } from "./palette";
 
 const COVER_W = 512;
@@ -38,11 +39,12 @@ const HEADER = 76;
 
 /**
  * Paints the tree-owned part of every card: a rounded paper card around the cover window, the theme
- * label above it, sub-title and title below. Ready cards get a lamp frame; locked cards an unlit
- * frame and a dashed window, so the state does not rest on colour alone (with the padlock).
+ * label above it, sub-title and title below. Books get a lamp frame; the invitation an unlit dashed
+ * frame and a dashed window, so "to write" never rests on colour alone (with the blank page).
  */
 function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, H: number): void {
-  const { ready, card } = book;
+  const { card } = book;
+  const ready = !isInvitation(book);
   const bottom = Math.round(H * 0.66);
   const win = [MARGIN, HEADER, W - MARGIN * 2, bottom - HEADER] as const;
   // Round the card's corners with an opaque mask: the cover may leave a translucent fill style.
@@ -60,9 +62,11 @@ function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, 
   c.fill("evenodd");
   c.strokeStyle = ready ? CARD.ready : CARD.locked;
   c.lineWidth = 10;
+  if (!ready) c.setLineDash([26, 14]);
   c.beginPath();
   c.roundRect(5, 5, W - 10, H - 10, 26);
   c.stroke();
+  c.setLineDash([]);
   if (!ready) {
     c.strokeStyle = CARD.inkSoft;
     c.lineWidth = 3;
@@ -106,8 +110,8 @@ function coverTexture(book: BookManifest): THREE.CanvasTexture {
   const ctx = canvas.getContext("2d");
   if (!ctx) return texture;
   const draw = (): void => {
-    if (book.ready && book.cover) book.cover(ctx, COVER_W, COVER_H);
-    else paintLockedCover(ctx, COVER_W, COVER_H);
+    if (isInvitation(book)) paintInvitationCover(ctx, COVER_W, COVER_H);
+    else book.cover?.(ctx, COVER_W, COVER_H);
     paintFrame(ctx, book, COVER_W, COVER_H);
     texture.needsUpdate = true;
   };
@@ -161,7 +165,7 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
       new THREE.PlaneGeometry(2.8, 3.4),
       new THREE.MeshBasicMaterial({
         map: haloMap,
-        color: book.ready ? "#ffe08a" : "#fff0d8",
+        color: isInvitation(book) ? "#fff0d8" : "#ffe08a",
         transparent: true,
         opacity: 0,
         depthWrite: false,
