@@ -42,6 +42,17 @@ describe("Les contes des classes page", () => {
     );
   });
 
+  it("leaves the Creole language support to the class, not to Contes Créoles", () => {
+    const [classe, contes] = [...document.querySelectorAll(".cc-voice .cc-list")].map((v) =>
+      v.textContent?.replace(/\s+/g, " "),
+    );
+    expect(classe).toContain(
+      "Si nécessaire, vous vous entourez d'intervenants pour accompagner le travail en créole guadeloupéen.",
+    );
+    expect(contes).toContain("Prend ensuite le relais pour donner vie au conte retenu");
+    expect(contes).not.toMatch(/créole|linguisti|traduction|accompagn/i);
+  });
+
   it("goes back to the tree, opened on the invitation", () => {
     const backs = [...document.querySelectorAll<HTMLAnchorElement>(".cc-back")];
     expect(backs).toHaveLength(2);
