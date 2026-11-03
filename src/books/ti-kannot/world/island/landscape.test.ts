@@ -1,29 +1,32 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { FLORA, type Flora } from "./flora";
 import { createRng } from "@shared/random";
+import { FLORA, type Flora } from "./flora";
 import { createGround, facePaint } from "./ground";
 import { reach } from "./kit";
 import {
   blocked,
+  FOREST_LINE,
+  GWO_RAKO,
   hitsHouse,
-  inPilot,
+  hitsStock,
+  islandPlan,
+  KEEP_BARE,
   LAKOU,
   onStage,
   PATH_HALF,
-  pilotPlan,
+  SHORE,
   sightlines,
   stages,
-  STONE_REACH,
   toSegment,
+  YARD,
   type HousePlan,
   type Placement,
 } from "./landscape";
 import { SPOTS } from "./spots";
 import { islandHeight, riverDistance } from "./terrain";
-import { createVegetation } from "./vegetation";
 
-const plan = pilotPlan();
+const plan = islandPlan();
 const SIZE = Object.fromEntries(
   (Object.keys(FLORA) as Flora[]).map((name) => {
     const p = FLORA[name]();
@@ -32,29 +35,7 @@ const SIZE = Object.fromEntries(
     return [name, size];
   }),
 ) as Record<Flora, ReturnType<(typeof FLORA)[Flora]> & { reach: number }>;
-
-/** Old plants as mounted (same RNG order as the world: ground, then vegetation), one per instance. */
-function oldInstances(): { x: number; z: number; extent: number }[] {
-  const rng = createRng(17);
-  createGround(rng);
-  const { group } = createVegetation(rng);
-  const byPlace = new Map<string, { x: number; z: number; extent: number }>();
-  const m = new THREE.Matrix4();
-  const at = new THREE.Vector3();
-  const q = new THREE.Quaternion();
-  const s = new THREE.Vector3();
-  for (const mesh of group.children as THREE.InstancedMesh[]) {
-    const r = reach(mesh.geometry);
-    for (let i = 0; i < mesh.count; i++) {
-      mesh.getMatrixAt(i, m);
-      m.decompose(at, q, s);
-      const key = `${at.x},${at.z}`;
-      const extent = Math.max(byPlace.get(key)?.extent ?? 0, r * s.x);
-      byPlace.set(key, { x: at.x, z: at.z, extent });
-    }
-  }
-  return [...byPlace.values()];
-}
+const gwoRako = plan.houses.find((h) => h.yard === YARD) as HousePlan;
 
 /** World corners of a case's footprint. */
 function corners(h: HousePlan): [number, number][] {
@@ -70,15 +51,13 @@ function corners(h: HousePlan): [number, number][] {
   ]);
 }
 
-describe("landscape pilot", () => {
-  it("keeps three cases inside the pilot, apart, off the river and the staged spots", () => {
-    expect(plan.houses).toHaveLength(3);
+describe("island scenery", () => {
+  it("keeps the village cases and Gwo Rako's apart, off the river and the staged spots", () => {
+    expect(plan.houses).toHaveLength(4);
+    expect(gwoRako.style).toBe(GWO_RAKO.style);
     for (const h of plan.houses) {
-      for (const [x, z] of corners(h)) {
-        expect(inPilot(x, z)).toBe(true);
-        expect(riverDistance(x, z)).toBeGreaterThan(2);
-      }
-      for (const spot of ["tank", "tap", "perch", "bank"] as const) {
+      for (const [x, z] of corners(h)) expect(riverDistance(x, z)).toBeGreaterThan(2);
+      for (const spot of ["tank", "tap", "perch", "bank", "ford", "spring", "rock"] as const) {
         expect(hitsHouse(h, SPOTS[spot][0], SPOTS[spot][1], 1.6)).toBe(false);
       }
       for (const o of plan.houses) {
@@ -87,7 +66,20 @@ describe("landscape pilot", () => {
     }
   });
 
-  it("seats every case on its stone base: no floating floor, no buried steps", () => {
+  it("builds Gwo Rako's case as the biggest, its ridge under the roof spot, its hoard behind", () => {
+    for (const h of plan.houses) if (h !== gwoRako) expect(gwoRako.top).toBeGreaterThan(h.top);
+    // The roof spot lies on the ridge line, in the case's local frame.
+    const dx = SPOTS.roof[0] - gwoRako.x;
+    const dz = SPOTS.roof[1] - gwoRako.z;
+    const c = Math.cos(gwoRako.yaw);
+    const s = Math.sin(gwoRako.yaw);
+    expect(Math.abs(dx * c - dz * s)).toBeLessThan(0.05);
+    expect(dx * s + dz * c).toBeCloseTo(0.45 * gwoRako.scale, 1);
+    expect(corners(gwoRako).some(([x, z]) => hitsStock(x, z, 0))).toBe(false);
+    expect(Math.hypot(...gwoRako.door.map((v, i) => v - SPOTS.yard[i]))).toBeLessThan(2);
+  });
+
+  it("seats every case on its piers: no floating floor, no buried steps", () => {
     for (const h of plan.houses) {
       for (const [x, z] of corners(h)) expect(h.y - islandHeight(x, z)).toBeLessThan(1.6);
       const foot = islandHeight(...h.door);
@@ -96,37 +88,61 @@ describe("landscape pilot", () => {
     }
   });
 
-  it("keeps foliage off the roofs and every plant off the paths and the lakou", () => {
+  it("grows plants on land only, off the river, the yards, the hoard and the staged spots", () => {
     for (const p of plan.plants) {
       const s = SIZE[p.flora];
+      expect(islandHeight(p.x, p.z)).toBeGreaterThanOrEqual(SHORE);
+      expect(riverDistance(p.x, p.z)).toBeGreaterThan(1.25);
+      for (const y of [LAKOU, YARD])
+        expect(Math.hypot(p.x - y.x, p.z - y.z)).toBeGreaterThan(y.radius);
+      expect(hitsStock(p.x, p.z, 0.2)).toBe(false);
       if (s.stratum !== "low") {
         for (const h of plan.houses) expect(hitsHouse(h, p.x, p.z, s.crown * p.scale)).toBe(false);
+        expect(hitsStock(p.x, p.z, s.crown * p.scale)).toBe(false);
       }
-      expect(Math.hypot(p.x - LAKOU.x, p.z - LAKOU.z)).toBeGreaterThan(LAKOU.radius);
-      expect(riverDistance(p.x, p.z)).toBeGreaterThan(1.25);
+      if (p.flora !== "tuft") {
+        for (const [spot, d] of KEEP_BARE) {
+          expect(Math.hypot(p.x - SPOTS[spot][0], p.z - SPOTS[spot][1])).toBeGreaterThan(d);
+        }
+      }
     }
   });
 
-  it("lets crowns of one height layer overlap only a little", () => {
+  it("lets crowns of one height layer overlap only a little, palms and forest a little more", () => {
     const tall = plan.plants.filter((p) => SIZE[p.flora].stratum !== "low");
     for (const a of tall) {
       for (const b of tall) {
         if (a === b || SIZE[a.flora].stratum !== SIZE[b.flora].stratum) continue;
         const reach = SIZE[a.flora].crown * a.scale + SIZE[b.flora].crown * b.scale;
-        expect(Math.hypot(a.x - b.x, a.z - b.z)).toBeGreaterThanOrEqual(reach * 0.72 - 1e-9);
+        const min = SIZE[a.flora].stratum === "tree" ? 0.6 : 0.72;
+        expect(Math.hypot(a.x - b.x, a.z - b.z)).toBeGreaterThanOrEqual(reach * min - 1e-9);
       }
     }
   });
 
-  it("never hides the focus, the characters or the cases from the tale's cameras", () => {
+  it("never hides a page's focus, characters, helpers, cases or hoard, nor crowds its stage", () => {
     const lines = sightlines(plan.houses);
+    const what = new Set(lines.map((l) => l.what));
+    for (const w of ["focus", "bird", "crab", "helper", "stock", "stage", "house 3"]) {
+      expect(what.has(w)).toBe(true);
+    }
     for (const p of plan.plants)
       expect(blocked(p, lines).map((l) => `${l.page} ${l.what}`)).toEqual([]);
+    const list = stages();
+    for (const p of plan.plants.slice(1))
+      expect(onStage(p, SIZE[p.flora].stratum, list)).toBe(false);
   });
 
-  it("puts Ti Kannot's flamboyant under his perch and grows several kinds in each layer", () => {
-    const tree = plan.plants.find((p) => p.flora === "flamboyant");
-    expect(tree && Math.hypot(tree.x - SPOTS.perch[0], tree.z - SPOTS.perch[1])).toBeLessThan(1);
+  it("puts Ti Kannot's flamboyant under his perch, and wooded mountain, palms and flamboyants", () => {
+    const tree = plan.plants[0];
+    expect(tree.flora).toBe("flamboyant");
+    expect(Math.hypot(tree.x - SPOTS.perch[0], tree.z - SPOTS.perch[1])).toBeLessThan(1);
+    const count = (f: (p: Placement) => boolean): number => plan.plants.filter(f).length;
+    expect(count((p) => p.flora === "flamboyant")).toBeGreaterThanOrEqual(5);
+    expect(count((p) => p.flora === "coconut")).toBeGreaterThanOrEqual(10);
+    expect(
+      count((p) => SIZE[p.flora].stratum === "tree" && islandHeight(p.x, p.z) > FOREST_LINE),
+    ).toBeGreaterThanOrEqual(10);
     for (const stratum of ["tree", "shrub", "low"] as const) {
       const kinds = new Set(
         plan.plants.filter((p) => SIZE[p.flora].stratum === stratum).map((p) => p.flora),
@@ -143,27 +159,12 @@ describe("landscape pilot", () => {
     }
   });
 
-  it("keeps every new plant and stone wholly inside the pilot disc", () => {
-    for (const p of plan.plants)
-      expect(inPilot(p.x, p.z, SIZE[p.flora].reach * p.scale)).toBe(true);
-    for (const st of plan.stones)
-      expect(inPilot(st.x, st.z, STONE_REACH[st.kind] * st.scale)).toBe(true);
-  });
-
-  it("removes only old plants lying wholly inside the pilot, and none of the kept ones reach a case", () => {
-    const old = oldInstances();
-    expect(old.length).toBeGreaterThan(500);
-    for (const o of old) {
-      expect(inPilot(o.x, o.z, o.extent)).toBe(false);
-      for (const h of plan.houses) expect(hitsHouse(h, o.x, o.z, o.extent)).toBe(false);
-    }
-  });
-
-  it("keeps the paths clear of everything but grass", () => {
+  it("keeps the paths clear of everything but grass, and leads Gwo Rako's track to the ford", () => {
     for (const p of plan.plants) {
       if (p.flora === "tuft") continue;
       for (const [a, b] of plan.paths) expect(toSegment(p.x, p.z, a, b)).toBeGreaterThan(PATH_HALF);
     }
+    expect(plan.paths.some(([, [x, z]]) => x === SPOTS.ford[0] && z === SPOTS.ford[1])).toBe(true);
   });
 
   it("detects a plant standing in a sightline, and lets one beside it through", () => {
@@ -173,7 +174,6 @@ describe("landscape pilot", () => {
     if (!line) return;
     const mid = line.from.clone().lerp(line.to, 0.5);
     const tree: Placement = { flora: "mango", x: mid.x, z: mid.z, scale: 1, yaw: 0 };
-    tree.x = mid.x;
     const ground = islandHeight(mid.x, mid.z);
     // Lift the crown onto the line by choosing a scale whose crown centre meets it.
     tree.scale = Math.max(0.5, (mid.y - ground) / ((SIZE.mango.base + SIZE.mango.height) / 2));
@@ -182,36 +182,50 @@ describe("landscape pilot", () => {
     expect(blocked(aside, [line])).toHaveLength(0);
   });
 
-  it("keeps the stage open: a shrub between the page 2 camera and Ti Kannot is refused", () => {
-    const list = stages();
-    const { camera, focus } = list[0];
+  it("keeps the stage open: no shrub between a camera and its subject, no crown filling the frame", () => {
+    // Page 2's landscape camera on Ti Kannot (the island-wide pages have no stage).
+    const page2 = stages().slice(0, 1);
+    const { camera, focus } = page2[0];
+    expect(Math.hypot(focus.x - SPOTS.perch[0], focus.z - SPOTS.perch[1])).toBeLessThan(0.01);
     const between = camera.clone().lerp(focus, 0.5);
     const shrub: Placement = { flora: "banana", x: between.x, z: between.z, scale: 1, yaw: 0 };
-    expect(onStage(shrub, "shrub", list)).toBe(true);
-    expect(onStage({ ...shrub, flora: "tuft" }, "low", list)).toBe(false);
+    expect(onStage(shrub, "shrub", page2)).toBe(true);
+    expect(onStage({ ...shrub, flora: "tuft" }, "low", page2)).toBe(false);
     const behind = focus.clone().lerp(camera, -0.6);
-    expect(onStage({ ...shrub, x: behind.x, z: behind.z }, "shrub", list)).toBe(false);
+    expect(onStage({ ...shrub, x: behind.x, z: behind.z }, "shrub", page2)).toBe(false);
+    const near = camera.clone().lerp(focus, 0.25);
+    const tree: Placement = { flora: "mango", x: near.x, z: near.z, scale: 1, yaw: 0 };
+    expect(onStage(tree, "tree", page2)).toBe(true);
+    expect(onStage({ ...tree, x: behind.x, z: behind.z }, "tree", page2)).toBe(false);
   });
 
-  it("paints earth and bank soil only on ground faces wholly inside the pilot", () => {
+  it("paints beaten earth on the yards, paths and house sites, and bank soil along the river", () => {
     const { mesh } = createGround(createRng(17));
     const pos = mesh.geometry.getAttribute("position");
     const [a, b, c] = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
-    let pilotFaces = 0;
-    let straddling = 0;
+    let earth = 0;
+    let bank = 0;
     for (let i = 0; i < pos.count; i += 3) {
       a.fromBufferAttribute(pos, i);
       b.fromBufferAttribute(pos, i + 1);
       c.fromBufferAttribute(pos, i + 2);
       const paint = facePaint(a, b, c, 1);
-      const inside = [a, b, c].filter((v) => inPilot(v.x, v.z)).length;
-      if (inside > 0 && inside < 3) straddling++;
-      if (paint === "earth" || paint === "bank") {
-        pilotFaces++;
-        expect(inside).toBe(3);
+      const x = (a.x + b.x + c.x) / 3;
+      const z = (a.z + b.z + c.z) / 3;
+      if (paint === "earth") {
+        earth++;
+        const near =
+          [LAKOU, YARD].some((y) => Math.hypot(x - y.x, z - y.z) < y.radius + 0.4) ||
+          plan.paths.some(([p, q]) => toSegment(x, z, p, q) < PATH_HALF + 0.15) ||
+          plan.houses.some((h) => hitsHouse(h, x, z, 0.05, 0.25));
+        expect(near).toBe(true);
+      }
+      if (paint === "bank") {
+        bank++;
+        expect(riverDistance(x, z)).toBeLessThan(1.45);
       }
     }
-    expect(pilotFaces).toBeGreaterThan(100);
-    expect(straddling).toBeGreaterThan(100);
+    expect(earth).toBeGreaterThan(100);
+    expect(bank).toBeGreaterThan(200);
   });
 });

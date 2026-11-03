@@ -1,6 +1,6 @@
 // Ti Kannot world captures from the tale's own cameras, with a fake clock so every run renders the
-// same frame, plus an uncapped fps and draw-call sample on the pilot page.
-// Usage: [SITE=url] [OUT=dir] [PAGES=1,2,3,4] [ONLY=shots|perf] node qa/world.mjs
+// same frame, plus an uncapped fps and draw-call sample on one page (page 2 by default).
+// Usage: [SITE=url] [OUT=dir] [PAGES=1,2,3,4] [PERF_PAGE=2] [ONLY=shots|perf] node qa/world.mjs
 // Shots: <vp>-p<N>.png with the reading card, <vp>-p<N>-scene.png in "scène seule".
 import { chromium } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -11,7 +11,7 @@ const OUT = (process.env.OUT ?? new URL("./out/world/", import.meta.url).pathnam
   "/",
 );
 const PAGES = (process.env.PAGES ?? "1,2,3,4").split(",").map(Number);
-const PERF_PAGE = 2;
+const PERF_PAGE = Number(process.env.PERF_PAGE ?? 2);
 mkdirSync(OUT, { recursive: true });
 // ANGLE on EGL: since the 580.178 driver, the Vulkan flags of the other scripts give no WebGL here.
 const GPU = ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"];

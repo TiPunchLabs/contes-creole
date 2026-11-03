@@ -23,16 +23,21 @@ import {
 import { createGlide } from "./glide";
 import { createGround } from "./island/ground";
 import { restingPoints } from "./island/perches";
-import { createPilot } from "./island/pilot";
+import { createReservoir } from "./island/reservoir";
+import { createScenery } from "./island/scenery";
 import { createSource } from "./island/source";
-import { createVegetation } from "./island/vegetation";
-import { createVillage } from "./island/village";
 import { createPaint, paintQuality } from "./paint";
 import { createSky } from "./sky";
 import { createAmbience, createMuteButton, soundLevels, type Ambience } from "./sound";
 import { dialogueLines, lineFor, type CharacterName } from "./speech";
 import { createStock } from "./stock";
 import { createWater } from "./water";
+
+/**
+ * Draws the retired vegetation and village cases took from the island RNG, after the ground. They
+ * are skipped so the source's branches, the stock and the sky keep their layout.
+ */
+export const RETIRED_DRAWS = 14186;
 
 const SPEAK_MS = 4200;
 const TAP_DISTANCE = 8;
@@ -74,9 +79,9 @@ export default defineWorld({
       const { scene, camera, renderer } = stage;
       const rng = createRng(17);
       const ground = createGround(rng);
-      const vegetation = createVegetation(rng);
-      const village = createVillage(rng);
-      const pilot = createPilot();
+      for (let i = 0; i < RETIRED_DRAWS; i++) rng();
+      const reservoir = createReservoir();
+      const scenery = createScenery();
       const source = createSource(rng);
       const stock = createStock(rng);
       const quality = paintQuality(matchMedia("(pointer: coarse)").matches, devicePixelRatio);
@@ -84,16 +89,15 @@ export default defineWorld({
       water = sea;
       const sky = createSky(rng);
       const cast = createCharacters(
-        restingPoints([...vegetation.canopies, ...pilot.canopies, village.group, source.group]),
+        restingPoints([...scenery.perches, reservoir.group, source.group]),
       );
       scene.fog = sky.fog;
       scene.add(
         sky.group,
         ground.mesh,
         sea.group,
-        vegetation.group,
-        village.group,
-        pilot.group,
+        reservoir.group,
+        scenery.group,
         source.group,
         stock.group,
         cast.group,
@@ -170,9 +174,8 @@ export default defineWorld({
         sky.update(env, time, camera.position);
         sea.update(env, time, camera.position);
         ground.update(env);
-        vegetation.update(env);
-        village.update(env);
-        pilot.update(env);
+        reservoir.update(env);
+        scenery.update(env);
         source.update(env, time);
         stock.update(env);
         cast.update(env, time, dt, camera.position);

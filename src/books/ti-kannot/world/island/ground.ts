@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import type { Rng } from "@shared/random";
 import type { MixedEnv } from "../env";
-import { inPilot, pilotSoil } from "./landscape";
+import { soilAt } from "./landscape";
 import { islandHeight, riverDistance } from "./terrain";
 
 const SIZE = 64;
@@ -23,16 +23,15 @@ const WHITE = new THREE.Color("#ffffff");
 export type Paint = keyof typeof PALETTE;
 
 /**
- * Paint of the ground face a–b–c from its centre, height, steepness (normal y) and river distance.
- * Pilot soils only apply to faces lying wholly inside the pilot, so its edge never spills.
+ * Paint of the ground face a–b–c from its centre, height, steepness (normal y) and river distance;
+ * the scenery's yards, paths and banks first.
  */
 export function facePaint(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, up: number): Paint {
   const x = (a.x + b.x + c.x) / 3;
   const z = (a.z + b.z + c.z) / 3;
   const h = (a.y + b.y + c.y) / 3;
   const toRiver = riverDistance(x, z);
-  const inside = [a, b, c].every((v) => inPilot(v.x, v.z));
-  const soil = inside ? pilotSoil(x, z, toRiver) : null;
+  const soil = soilAt(x, z, toRiver, h);
   if (soil) return soil;
   if (toRiver < 0.9 && h < 6) return "bed";
   if (h < 0.9) return "sand";

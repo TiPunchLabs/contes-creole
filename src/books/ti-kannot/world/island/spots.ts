@@ -16,9 +16,8 @@ export const SPOTS: Record<Spot, readonly [number, number]> = {
   tap: [-5.3, 8.9],
 };
 
-/** Gwo Rako's house, centre of the village and pile behind the house (x, z). */
+/** Gwo Rako's house (the roof Ti Kannot lands on) and his pile behind it (x, z). */
 export const HOUSE = SPOTS.roof;
-export const VILLAGE: readonly [number, number] = [-9.5, 3.5];
 export const STOCK: readonly [number, number] = [HOUSE[0] - 2.4, HOUSE[1] - 2.8];
 
 /** Ground point of `spot`, never below sea level. */
