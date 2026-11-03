@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { Rng } from "@shared/random";
 import type { MixedEnv } from "../env";
+import { inPilot } from "./landscape";
 import { HOUSE, SPOTS, VILLAGE } from "./spots";
 import { islandHeight } from "./terrain";
 
@@ -83,7 +84,7 @@ function reservoir(): THREE.Group {
   return tank;
 }
 
-/** Three village cases, Gwo Rako's bigger case and the reservoir of page 11. */
+/** Gwo Rako's bigger case, the reservoir of page 11 and any village case outside the pilot. */
 export function createVillage(rng: Rng): { group: THREE.Group; update(env: MixedEnv): void } {
   const group = new THREE.Group();
   const cases: [string, string, string][] = [
@@ -96,7 +97,7 @@ export function createVillage(rng: Rng): { group: THREE.Group; update(env: Mixed
     const x = VILLAGE[0] + Math.sin(angle) * 3.2;
     const z = VILLAGE[1] + Math.cos(angle) * 3.2;
     const facing = Math.atan2(VILLAGE[0] - x, VILLAGE[1] - z);
-    group.add(settle(creoleCase(wall, shutter, roof), x, z, facing));
+    if (!inPilot(x, z, 2)) group.add(settle(creoleCase(wall, shutter, roof), x, z, facing));
   });
   group.add(
     settle(creoleCase("#e8b864", "#3f8f5a", "#c0432f", 3.2, 2.6), HOUSE[0], HOUSE[1], -0.25),

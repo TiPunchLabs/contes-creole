@@ -2,6 +2,8 @@ import * as THREE from "three";
 import type { Rng } from "@shared/random";
 import type { MixedEnv } from "../env";
 import { soften } from "../soft";
+import { reach } from "./kit";
+import { inPilot } from "./landscape";
 import { HOUSE, SPOTS, VILLAGE } from "./spots";
 import { islandHeight, riverDistance } from "./terrain";
 
@@ -117,7 +119,7 @@ function scatter(
   return out;
 }
 
-/** Palms, flamboyants (Ti Kannot's tree first), forest, bananas, grass, reeds and rocks. */
+/** Palms, flamboyants, forest, bananas, grass, reeds and rocks, outside the landscape pilot. */
 export function createVegetation(rng: Rng): {
   group: THREE.Group;
   /** Flamboyant meshes, Ti Kannot's tree among them. */
@@ -153,16 +155,20 @@ export function createVegetation(rng: Rng): {
   const at = new THREE.Vector3();
   const scale = new THREE.Vector3();
   for (const name of Object.keys(SPECIES) as Species[]) {
-    const transforms = places[name].map(([x, z], i) => {
-      const s = name === "flamboyant" && i === 0 ? 1.25 : 0.8 + rng() * 0.45;
-      return m4
-        .compose(
+    // Every draw happens before the pilot filter, so the rest of the island keeps its layout; only
+    // instances lying wholly inside the pilot give way to it.
+    const extent = Math.max(...SPECIES[name].map((part) => reach(part.geometry)));
+    const transforms = places[name]
+      .map(([x, z], i) => {
+        const s = name === "flamboyant" && i === 0 ? 1.25 : 0.8 + rng() * 0.45;
+        const t = m4.compose(
           at.set(x, islandHeight(x, z), z),
           q.setFromAxisAngle(up, rng() * 6.28),
           scale.setScalar(s),
-        )
-        .clone();
-    });
+        );
+        return inPilot(x, z, extent * s) ? null : t.clone();
+      })
+      .filter((t) => t !== null);
     for (const part of SPECIES[name]) {
       const material = new THREE.MeshLambertMaterial({ color: part.color });
       if (part.dry) {

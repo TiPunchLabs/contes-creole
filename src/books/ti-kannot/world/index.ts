@@ -23,6 +23,7 @@ import {
 import { createGlide } from "./glide";
 import { createGround } from "./island/ground";
 import { restingPoints } from "./island/perches";
+import { createPilot } from "./island/pilot";
 import { createSource } from "./island/source";
 import { createVegetation } from "./island/vegetation";
 import { createVillage } from "./island/village";
@@ -75,6 +76,7 @@ export default defineWorld({
       const ground = createGround(rng);
       const vegetation = createVegetation(rng);
       const village = createVillage(rng);
+      const pilot = createPilot();
       const source = createSource(rng);
       const stock = createStock(rng);
       const quality = paintQuality(matchMedia("(pointer: coarse)").matches, devicePixelRatio);
@@ -82,7 +84,7 @@ export default defineWorld({
       water = sea;
       const sky = createSky(rng);
       const cast = createCharacters(
-        restingPoints([...vegetation.canopies, village.group, source.group]),
+        restingPoints([...vegetation.canopies, ...pilot.canopies, village.group, source.group]),
       );
       scene.fog = sky.fog;
       scene.add(
@@ -91,6 +93,7 @@ export default defineWorld({
         sea.group,
         vegetation.group,
         village.group,
+        pilot.group,
         source.group,
         stock.group,
         cast.group,
@@ -169,6 +172,7 @@ export default defineWorld({
         ground.update(env);
         vegetation.update(env);
         village.update(env);
+        pilot.update(env);
         source.update(env, time);
         stock.update(env);
         cast.update(env, time, dt, camera.position);

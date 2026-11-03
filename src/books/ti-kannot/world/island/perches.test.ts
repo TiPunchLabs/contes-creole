@@ -1,6 +1,7 @@
 import { createRng } from "@shared/random";
 import { describe, expect, it } from "vitest";
 import { restingPoints } from "./perches";
+import { createPilot } from "./pilot";
 import { createSource } from "./source";
 import { SPOTS } from "./spots";
 import { islandHeight } from "./terrain";
@@ -11,7 +12,13 @@ const rng = createRng(17);
 const vegetation = createVegetation(rng);
 const village = createVillage(rng);
 const source = createSource(rng);
-const rest = restingPoints([...vegetation.canopies, village.group, source.group]);
+const pilot = createPilot();
+const rest = restingPoints([
+  ...vegetation.canopies,
+  ...pilot.canopies,
+  village.group,
+  source.group,
+]);
 
 /** Ground height under a spot. */
 const ground = (spot: keyof typeof SPOTS): number => islandHeight(...SPOTS[spot]);
@@ -25,6 +32,8 @@ describe("restingPoints", () => {
     expect(rest.roof.y).toBeGreaterThan(ground("roof") + 2.5);
     expect(rest.tank.y).toBeCloseTo(ground("tank") + 1.42, 1);
     expect(rest.perch.y).toBeGreaterThan(ground("perch") + 2.5);
+    // Ti Kannot keeps the height validated on the pilot (page 2 framing), whatever the crown's shape.
+    expect(rest.perch.y).toBeCloseTo(5.24, 1);
   });
 
   it("rests on the ground where nothing stands", () => {
