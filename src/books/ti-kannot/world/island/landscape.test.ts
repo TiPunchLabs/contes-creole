@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { createRng } from "@shared/random";
+import { STAGING } from "../../staging";
+import { mixEnv } from "../env";
+import { createStock } from "../stock";
 import { FLORA, type Flora } from "./flora";
 import { createGround, facePaint } from "./ground";
 import { reach } from "./kit";
@@ -16,6 +19,7 @@ import {
   onStage,
   PATH_HALF,
   SHORE,
+  STOCK_AREA,
   sightlines,
   stages,
   toSegment,
@@ -35,6 +39,9 @@ const SIZE = Object.fromEntries(
     return [name, size];
   }),
 ) as Record<Flora, ReturnType<(typeof FLORA)[Flora]> & { reach: number }>;
+/** Roof overhang beyond a katpan's walls (scale 1), and the radius of a hoard item. */
+const EAVE = 0.4;
+const ITEM_RADIUS = 0.33;
 const gwoRako = plan.houses.find((h) => h.yard === YARD) as HousePlan;
 
 /** World corners of a case's footprint. */
@@ -75,8 +82,31 @@ describe("island scenery", () => {
     const s = Math.sin(gwoRako.yaw);
     expect(Math.abs(dx * c - dz * s)).toBeLessThan(0.05);
     expect(dx * s + dz * c).toBeCloseTo(0.45 * gwoRako.scale, 1);
-    expect(corners(gwoRako).some(([x, z]) => hitsStock(x, z, 0))).toBe(false);
     expect(Math.hypot(...gwoRako.door.map((v, i) => v - SPOTS.yard[i]))).toBeLessThan(2);
+  });
+
+  it("keeps Gwo Rako's walls clear of every item of his full hoard, all of it inside STOCK_AREA", () => {
+    const envs = Object.values(STAGING);
+    const full = envs.findIndex((e) => e.kalbas > 0 && e.barrels > 0 && e.jars > 0);
+    const stock = createStock(createRng(1));
+    stock.update(mixEnv(envs, full, full, 0));
+    const m = new THREE.Matrix4();
+    const at = new THREE.Vector3();
+    let items = 0;
+    for (const mesh of stock.group.children as THREE.InstancedMesh[]) {
+      for (let i = 0; i < mesh.count; i++) {
+        mesh.getMatrixAt(i, m);
+        at.setFromMatrixPosition(m);
+        items++;
+        expect(hitsStock(at.x, at.z, 1e-6)).toBe(true);
+        // The walls and piers: the footprint less the roof's eave overhang.
+        expect(hitsHouse(gwoRako, at.x, at.z, ITEM_RADIUS, -EAVE * gwoRako.scale)).toBe(false);
+      }
+    }
+    expect(items).toBe(68);
+    // Controls: the house centre is inside its walls, a hoard item touches the hoard.
+    expect(hitsHouse(gwoRako, gwoRako.x, gwoRako.z, ITEM_RADIUS, -EAVE * gwoRako.scale)).toBe(true);
+    expect(hitsStock(STOCK_AREA.left + 0.1, STOCK_AREA.back + 0.1, 1e-6)).toBe(true);
   });
 
   it("seats every case on its piers: no floating floor, no buried steps", () => {

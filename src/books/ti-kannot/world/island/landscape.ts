@@ -10,6 +10,7 @@ import { FLORA, STONES, type Flora, type Stratum } from "./flora";
 import { KAZ, type Footprint, type KazColors, type KazStyle } from "./kaz";
 import { reach } from "./kit";
 import { HOUSE, SPOTS, STOCK, spotPoint, type Spot } from "./spots";
+import { DAM } from "./source";
 import { islandHeight, riverDistance, riverPoint } from "./terrain";
 
 /** A round open yard of beaten earth. */
@@ -312,6 +313,13 @@ export function sightlines(houses: HousePlan[]): Sightline[] {
       const shown = h.yard === YARD ? env.shot.focus === "yard" : VILLAGE_PAGES.has(page);
       if (shown) targets.push([`house ${i}`, new THREE.Vector3(h.x, h.y + 2, h.z)]);
     }
+    if (env.dam > 0 && env.shot.focus === "spring") {
+      const [mid, across] = damLine();
+      for (const k of [-0.8, 0, 0.8]) {
+        const p = mid.clone().addScaledVector(across, k * DAM.half);
+        targets.push(["dam", p.setY(islandHeight(p.x, p.z) + 0.45)]);
+      }
+    }
     if (env.shot.focus === "yard") {
       targets.push(["stock", new THREE.Vector3(STOCK[0], islandHeight(...STOCK) + 0.8, STOCK[1])]);
     }
@@ -328,6 +336,15 @@ export function sightlines(houses: HousePlan[]): Sightline[] {
     }
   }
   return lines;
+}
+
+/** Middle of Gwo Rako's dam on the ground and the horizontal direction across the river. */
+export function damLine(): [THREE.Vector3, THREE.Vector3] {
+  const at = riverPoint(DAM.t);
+  const ahead = riverPoint(DAM.t + 0.01)
+    .sub(at)
+    .normalize();
+  return [new THREE.Vector3(at.x, 0, at.y), new THREE.Vector3(ahead.y, 0, -ahead.x)];
 }
 
 /** A page with a subject: the camera and what it frames. */
@@ -394,7 +411,17 @@ export function blocked(p: Placement, lines: Sightline[]): Sightline[] {
   );
 }
 
-/** Placement sizes of each plant; `reach` is the true horizontal extent of its geometry. */
+/** Narrative sightlines a stone would block (it may lie on a page's stage, not across a target). */
+export function stoneBlocks(s: StonePlacement, lines: Sightline[]): Sightline[] {
+  const r = STONE_REACH[s.kind] * s.scale;
+  const mass = {
+    center: new THREE.Vector3(s.x, islandHeight(s.x, s.z) + r * 0.3, s.z),
+    radius: new THREE.Vector3(r, r * 0.5, r),
+  };
+  return lines.filter((l) => l.what !== "stage" && crosses(l.from, l.to, mass));
+}
+
+/** Placement sizes of each plant. */
 const PLANTS = Object.fromEntries(
   (Object.keys(FLORA) as Flora[]).map((name) => {
     const plant = FLORA[name]();
@@ -403,15 +430,11 @@ const PLANTS = Object.fromEntries(
       base: plant.base,
       height: plant.height,
       stratum: plant.stratum,
-      reach: reach(plant.geometry),
     };
     plant.geometry.dispose();
     return [name, size];
   }),
-) as Record<
-  Flora,
-  { crown: number; base: number; height: number; stratum: Stratum; reach: number }
->;
+) as Record<Flora, { crown: number; base: number; height: number; stratum: Stratum }>;
 
 /** True horizontal extent of each stone shape at scale 1. */
 export const STONE_REACH = STONES.map((make) => {
@@ -551,6 +574,8 @@ function planIsland(rng: Rng): IslandPlan {
   // Banks: stones at the water's edge, ferns, malanga and balisiers along it, a few bushes and trees
   // further up, from the source to the mouth.
   const stones: StonePlacement[] = [];
+  // The dam's own stones sit low in the bed: bank stones keep their distance.
+  const [dam] = damLine();
   const at = new THREE.Vector2();
   const ahead = new THREE.Vector2();
   for (let t = 0; t <= 1; t += 0.004) {
@@ -569,12 +594,15 @@ function planIsland(rng: Rng): IslandPlan {
         const [x, z] = along(half - 0.15 + rng() * 0.5);
         const kind = Math.floor(rng() * 3);
         const scale = 0.45 + rng() * rng() * 1.1;
+        const stone = { kind, x, z, scale, yaw: yaw(), sink: 0.25 + rng() * 0.3 };
         if (
           !KEEP_CLEAR.slice(0, 2).some(
             ([s, d]) => Math.hypot(x - SPOTS[s][0], z - SPOTS[s][1]) < d * 0.6,
-          )
+          ) &&
+          Math.hypot(x - dam.x, z - dam.z) > DAM.half + 1.2 &&
+          !stoneBlocks(stone, lines).length
         ) {
-          stones.push({ kind, x, z, scale, yaw: yaw(), sink: 0.25 + rng() * 0.3 });
+          stones.push(stone);
         }
       }
       if (rng() < 0.35) {
@@ -626,7 +654,8 @@ function planIsland(rng: Rng): IslandPlan {
       const r = STONE_REACH[kind] * scale;
       if (stones.some((s) => Math.hypot(x - s.x, z - s.z) < r + STONE_REACH[s.kind] * s.scale))
         return;
-      stones.push({ kind, x, z, scale, yaw: yaw(), sink: 0.3 + rng() * 0.2 });
+      const stone = { kind, x, z, scale, yaw: yaw(), sink: 0.3 + rng() * 0.2 };
+      if (!stoneBlocks(stone, lines).length) stones.push(stone);
     },
     -0.45,
   );
