@@ -46,11 +46,19 @@ const SEA_FRAGMENT = `uniform float uTime,uRadius; uniform vec3 cShallow,cDeep,c
     c=mix(c,cHorizon,smoothstep(50.,200.,length(vW.xz-uCam.xz)));
     gl_FragColor=vec4(c,1.); }`;
 
-const RIVER_VERTEX = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
-const RIVER_FRAGMENT = `uniform float uTime; uniform vec3 cWater; varying vec2 vUv;
-  void main(){ float s=abs(vUv.x-.5)*2.; vec3 c=mix(cWater*1.2,cWater,s);
-    float flow=sin(vUv.y*220.-uTime*3.+sin(vUv.x*9.+vUv.y*40.)*1.5);
-    c=mix(c,vec3(1.),smoothstep(.85,1.,flow)*.35); gl_FragColor=vec4(c,.9); }`;
+const RIVER_VERTEX = `varying vec2 vUv; varying vec2 vXZ;
+  void main(){ vUv=uv; vXZ=(modelMatrix*vec4(position,1.)).xz; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
+// Deeper in the middle, shallow and see-through over the bed at the edges, with drifting streaks of
+// current.
+const RIVER_FRAGMENT = `uniform float uTime; uniform vec3 cWater; varying vec2 vUv; varying vec2 vXZ;
+  ${NOISE}
+  void main(){ float s=abs(vUv.x-.5)*2.;
+    float deep=1.-smoothstep(0.,.8,s);
+    vec3 c=mix(cWater*1.16+vec3(.05,.04,-.03),cWater*vec3(.6,.8,.86),deep*.8);
+    c*=.95+.1*noise(vXZ*1.4);
+    float streak=smoothstep(.6,.92,noise(vec2(vUv.x*7.,vUv.y*110.-uTime*2.4)))*(1.-s*.7);
+    c=mix(c,vec3(1.),streak*.4);
+    gl_FragColor=vec4(c,.9*(1.-smoothstep(.7,1.,s)*.55)); }`;
 
 const SEGMENTS = 120;
 const SHALLOW = new THREE.Color("#93f0d8");
@@ -133,7 +141,10 @@ export function createWater({ reflect }: { reflect: boolean }): {
   riverGeometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
   riverGeometry.setIndex(index);
   const riverMaterial = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, cWater: { value: RIVER.clone() } },
+    uniforms: {
+      uTime: { value: 0 },
+      cWater: { value: RIVER.clone() },
+    },
     vertexShader: RIVER_VERTEX,
     fragmentShader: RIVER_FRAGMENT,
     transparent: true,

@@ -2,7 +2,9 @@
 import type { BookHandle, Bubble, Story } from "@app/contract";
 import type * as THREE from "three";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createRng } from "@shared/random";
 import { STAGING } from "../staging";
+import { createGround } from "./island/ground";
 
 const stage = vi.hoisted(() => ({
   dispose: vi.fn(),
@@ -137,5 +139,14 @@ describe("Ti Kannot world mount", () => {
     expect(camera.view?.offsetX).toBeCloseTo(0);
     expect(offset).toBeLessThan(0);
     handle.dispose();
+  });
+
+  it("leaves the island RNG where the retired vegetation and village left it", async () => {
+    const { RETIRED_DRAWS } = await import("./index");
+    const rng = createRng(17);
+    createGround(rng);
+    for (let i = 0; i < RETIRED_DRAWS; i++) rng();
+    // Next draw on main (eb81602) after the ground, the old vegetation and the village cases.
+    expect(rng()).toBe(0.8016128114439667);
   });
 });

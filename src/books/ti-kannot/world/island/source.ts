@@ -4,6 +4,9 @@ import type { MixedEnv } from "../env";
 import { SPOTS } from "./spots";
 import { islandHeight, riverPoint } from "./terrain";
 
+/** Where Gwo Rako's dam stands along the river (0 = source, 1 = mouth), and its half width. */
+export const DAM = { t: 0.06, half: 1.4 } as const;
+
 /** Flat-shaded Lambert material. */
 const paint = (color: string): THREE.MeshLambertMaterial =>
   new THREE.MeshLambertMaterial({ color, flatShading: true });
@@ -43,8 +46,8 @@ export function createSource(rng: Rng): {
   }
   branches.position.copy(pool.position);
 
-  const damAt = riverPoint(0.06);
-  const ahead = riverPoint(0.07).sub(damAt);
+  const damAt = riverPoint(DAM.t);
+  const ahead = riverPoint(DAM.t + 0.01).sub(damAt);
   const stone = paint("#9b9284");
   const dam = new THREE.Group();
   for (let i = 0; i < 5; i++) {
@@ -53,7 +56,7 @@ export function createSource(rng: Rng): {
     dam.add(s);
   }
   for (const y of [0.45, 0.75]) {
-    const plank = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.22, 0.12), wood);
+    const plank = new THREE.Mesh(new THREE.BoxGeometry(DAM.half * 2, 0.22, 0.12), wood);
     plank.position.y = y;
     dam.add(plank);
   }

@@ -132,6 +132,14 @@ function buildCrab(): {
   return { root, shell, jaws, legs };
 }
 
+/** Where the helpers work, as offsets from the spring: two egrets, the agouti and the turtle. */
+export const HELPERS: readonly (readonly [number, number])[] = [
+  [1.8, 1.6],
+  [-1.6, 2.2],
+  [2.6, -0.6],
+  [-2.4, 0.4],
+];
+
 /** The animals clearing the source: two egrets, an agouti, a turtle and a small flock. */
 function buildHelpers(): { root: THREE.Group; peckers: THREE.Group[]; flock: THREE.Mesh[] } {
   const root = new THREE.Group();
@@ -150,10 +158,7 @@ function buildHelpers(): { root: THREE.Group; peckers: THREE.Group[]; flock: THR
   };
   const legs = paint("#2a2629");
   const yellow = paint("#e8b52a");
-  for (const [dx, dz] of [
-    [1.8, 1.6],
-    [-1.6, 2.2],
-  ]) {
+  for (const [dx, dz] of HELPERS.slice(0, 2)) {
     animal(
       dx,
       dz,
@@ -165,14 +170,12 @@ function buildHelpers(): { root: THREE.Group; peckers: THREE.Group[]; flock: THR
     );
   }
   animal(
-    2.6,
-    -0.6,
+    ...HELPERS[2],
     part(new THREE.IcosahedronGeometry(0.3, 0).scale(0.9, 0.9, 1.5), paint("#9a6a3c"), 0, 0.3, 0),
     part(new THREE.SphereGeometry(0.17, 6, 5), paint("#8a5c32"), 0, 0.42, 0.42),
   );
   animal(
-    -2.4,
-    0.4,
+    ...HELPERS[3],
     part(
       new THREE.SphereGeometry(0.35, 6, 4, 0, Math.PI * 2, 0, Math.PI / 2),
       paint("#5f7a3a"),
