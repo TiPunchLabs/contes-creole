@@ -14,13 +14,22 @@ importers:
       '@fontsource/caveat':
         specifier: ^5.3.0
         version: 5.3.0
+      '@fontsource/cormorant-garamond':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/ibm-plex-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/karla':
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource/newsreader':
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource/quicksand':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/spectral':
         specifier: ^5.3.0
         version: 5.3.0
       three:
@@ -117,14 +126,23 @@ packages:
   '@fontsource/caveat@5.3.0':
     resolution: {integrity: sha512-eHTfzQxFSW9ABERRLNruHoNJmKed2J7pqTUc5lp4a4POMgXGKpxmWj3d9Hz10kmAg6iuTTLe6UagbA4bnsmfQw==}
 
+  '@fontsource/cormorant-garamond@5.3.0':
+    resolution: {integrity: sha512-weuGsCirGVWBWqpt6YUp0yLThTe4G8YO45noq8wxeJCRvEpq5lFrxNMFSTxcyOyV5k5otzJ8guDzYegdYlcLMQ==}
+
   '@fontsource/ibm-plex-mono@5.3.0':
     resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
+
+  '@fontsource/karla@5.3.0':
+    resolution: {integrity: sha512-zHBkxMumwFE+K4RgHQAv2xH0O2lAX9y4zPun5JEFZyNQQclZ5Oz/XvByE3CB5+rnxKEV5BXlZShIEfz0VILDmQ==}
 
   '@fontsource/newsreader@5.3.0':
     resolution: {integrity: sha512-AFR6ZKY89GNL+9qBI2P2+66NhD5bhOj/v6fsLnFYLM4E0JnMB1yKb+Ro8cA64i1hwAWoBfTq5CHJGWH1toLDkw==}
 
   '@fontsource/quicksand@5.3.0':
     resolution: {integrity: sha512-epmMUyXI39f88bZSCyKlHTZqUWg4O7DqrTXOKqsqbVKMLshX9RtIYCUIw+G2nOfEwdIHIjYbeWdwHRcEzRXBRQ==}
+
+  '@fontsource/spectral@5.3.0':
+    resolution: {integrity: sha512-2TL5WWGOZj4SIsBmPFEzKeA60tXXd1Qp1OqaaVEWkJL8IfSGLk6YmiusmC441iFkdJDIuFelu1r8lhCmQUU3mw==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -990,11 +1008,17 @@ snapshots:
 
   '@fontsource/caveat@5.3.0': {}
 
+  '@fontsource/cormorant-garamond@5.3.0': {}
+
   '@fontsource/ibm-plex-mono@5.3.0': {}
+
+  '@fontsource/karla@5.3.0': {}
 
   '@fontsource/newsreader@5.3.0': {}
 
   '@fontsource/quicksand@5.3.0': {}
+
+  '@fontsource/spectral@5.3.0': {}
 
   '@humanfs/core@0.19.2':
     dependencies:
