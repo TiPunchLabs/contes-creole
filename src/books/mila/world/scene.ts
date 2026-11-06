@@ -208,6 +208,14 @@ function groundH(x: number, z: number): number {
   return h;
 }
 
+/**
+ * Depth of the conch's spiral groove (prototype `surf`). JavaScript reads `a*b*(c)%1` left to
+ * right, so the prototype's last `% 1` applies to the whole product: keep that grouping.
+ */
+export function conchGroove(th: number, y: number, sp: number): number {
+  return (0.14 * sp * (((th / (Math.PI * 2) + (1 - y) * 4.4) % 1) + 1)) % 1;
+}
+
 /** Underwater zones kept free of rocks and coral (cameras and Mila). */
 const KEEP_CLEAR: [number, number, number][] = [
   [9 - 2.6, -19 + 2.6, 3.2],
@@ -283,6 +291,10 @@ export function createMilaScene(
     listeners.forEach((off) => off());
     timer.dispose();
     for (const b of bursts) disposeObject(b.m);
+    scene.traverse((o) => {
+      if (o instanceof THREE.SkinnedMesh) o.skeleton.dispose();
+      if (o instanceof THREE.DirectionalLight) o.shadow.dispose();
+    });
     disposeObject(scene);
     passes.forEach((p) => p.dispose());
     composer?.dispose();
@@ -1169,7 +1181,7 @@ void main(){
       const kb = Math.exp(-(((y - 0.6) / 0.07) ** 2));
       r += 0.12 * kb * Math.pow(Math.max(0, Math.cos(th * knobs + y * 6)), 6);
       const sp = smooth(0.58, 0.7, y);
-      r *= 1 - 0.14 * sp * ((((th / (Math.PI * 2) + (1 - y) * 4.4) % 1) + 1) % 1);
+      r *= 1 - conchGroove(th, y, sp);
       return V3(r * Math.cos(th), y, r * Math.sin(th));
     };
     for (let i = 0; i <= rows; i++) {
@@ -3220,7 +3232,7 @@ void main(){
   const HEMI_GROUND_SEA = new THREE.Color("#1b5a5a");
   let sky: THREE.Mesh;
 
-  function animateMila(rdt: number, T: number): void {
+  function animateMila(rdt: number): void {
     const M = mila;
     const target = trans ? trans.to : page;
     M.swimW = lerp(M.swimW, M.g.position.y < -0.25 ? 1 : 0, Math.min(1, rdt * 2.4));
@@ -3252,7 +3264,7 @@ void main(){
     M.pose.rotation.x = lerp(M.pose.rotation.x, tilt, Math.min(1, rdt * 2.5));
     const breath = smooth(0.15, 0.38, u) * (1 - smooth(0.45, 0.65, u));
     M.head.rotation.x =
-      -M.pose.rotation.x * 0.5 - breath * 0.22 * M.swimW + Math.sin(T * 0.45) * 0.02;
+      -M.pose.rotation.x * 0.5 - breath * 0.22 * M.swimW + Math.sin(wtime * 0.45) * 0.02;
     // hip sway when walking
     M.pose.rotation.z = Math.sin(M.phase) * 0.045 * M.walk;
     M.body.rotation.y = Math.sin(M.phase) * 0.07 * M.walk;
@@ -3511,7 +3523,7 @@ void main(){
     b.position.y = Math.sin(wtime * 1.7) * 0.004;
     mila.head.rotation.z =
       (-0.1 + Math.sin(wtime * 0.6) * 0.025 - (page === 2 ? 0.04 : 0)) * mila.hold;
-    animateMila(rdt, T);
+    animateMila(rdt);
     mila.puffs.forEach((p, i) => {
       p.rotation.z = Math.sin(wtime * 2.1 + i) * 0.06 * (1 + mila.swim * 2);
       p.rotation.x = Math.sin(wtime * 1.7 + i) * 0.05 * (1 + mila.swim * 2);
@@ -3654,7 +3666,7 @@ void main(){
     pearl.position.y += Math.sin(wtime * 1.3) * 0.0006;
     U_liveGlow.value = 0.1 + (page === 9 ? 0.25 + 0.15 * Math.sin(wtime * 2) : 0);
 
-    updateSigns(rdt, T);
+    updateSigns(rdt, T, wtime);
     for (let i = bursts.length - 1; i >= 0; i--) {
       const B = bursts[i];
       B.t += rdt;
@@ -3686,7 +3698,7 @@ void main(){
   }
 
   /** The three voices: they leave the conch on page 2, join Mila as she finds them, then go home. */
-  function updateSigns(dt: number, T: number): void {
+  function updateSigns(dt: number, T: number, W: number): void {
     const since = T - pageStart;
     const conch = heldConchWorld(V3());
     const homes = [
@@ -3702,9 +3714,9 @@ void main(){
       let sc: number;
       let spd = 1.6;
       const follow = V3(
-        mp.x + Math.cos(T * 0.8 + i * 2.09) * rad,
-        mp.y + up + Math.sin(T * 1.3 + i) * 0.1,
-        mp.z + Math.sin(T * 0.8 + i * 2.09) * rad,
+        mp.x + Math.cos(W * 0.8 + i * 2.09) * rad,
+        mp.y + up + Math.sin(W * 1.3 + i) * 0.1,
+        mp.z + Math.sin(W * 0.8 + i * 2.09) * rad,
       );
       const got = [
         freed && page >= 5,
@@ -3736,9 +3748,9 @@ void main(){
             .clone()
             .add(
               V3(
-                Math.cos(T * 2 + i * 2.1) * 0.4 * k,
+                Math.cos(W * 2 + i * 2.1) * 0.4 * k,
                 0.2 + 0.3 * k,
-                Math.sin(T * 2 + i * 2.1) * 0.4 * k,
+                Math.sin(W * 2 + i * 2.1) * 0.4 * k,
               ),
             );
           sc = 1;
@@ -3754,9 +3766,9 @@ void main(){
         }
       } else if (i === 0 && got && page === 6 && !trans) {
         tgt = V3(
-          mp.x + Math.sin(T * 1.3) * 0.25,
-          mp.y + 0.45 + Math.sin(T * 2) * 0.08,
-          mp.z - 1.5 - Math.sin(T * 0.9) * 0.3,
+          mp.x + Math.sin(W * 1.3) * 0.25,
+          mp.y + 0.45 + Math.sin(W * 2) * 0.08,
+          mp.z - 1.5 - Math.sin(W * 0.9) * 0.3,
         );
         sc = 1.15;
         spd = 1.8;
@@ -3776,10 +3788,10 @@ void main(){
       const was = s.sc > 0.5;
       s.sc = lerp(s.sc, sc, Math.min(1, dt * 2.2));
       if (!was && s.sc > 0.5 && page >= 5) audio.chime(i);
-      const pul = 1 + Math.sin(T * 3 + i) * 0.06;
+      const pul = 1 + Math.sin(W * 3 + i) * 0.06;
       s.g.scale.setScalar(Math.max(0.001, s.sc * 0.95 * pul));
       s.ring.lookAt(camera.position);
-      s.ring.rotateZ(T * (1.2 + i * 0.3));
+      s.ring.rotateZ(W * (1.2 + i * 0.3));
     });
   }
 

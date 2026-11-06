@@ -151,8 +151,8 @@ const layout = (p) =>
     };
   });
 
-/** Clicks over the visible scene until the three pieces of debris are gone (page 5). */
-async function freeCrab(p) {
+/** Clicks (taps on touch devices) over the visible scene until the three pieces of debris are gone (page 5). */
+async function freeCrab(p, touch) {
   const { width, height } = p.viewportSize();
   let clicks = 0;
   for (let y = height * 0.15; y < height * 0.85; y += 22) {
@@ -162,7 +162,8 @@ async function freeCrab(p) {
         [x, y],
       );
       if (!onScene) continue;
-      await p.mouse.click(x, y);
+      if (touch) await p.touchscreen.tap(x, y);
+      else await p.mouse.click(x, y);
       clicks++;
       if (await p.locator(".mila-hint").isHidden()) return clicks;
     }
@@ -259,7 +260,7 @@ async function journey(browser, vp) {
     if (i === 5) {
       const hint = await p.locator(".mila-hint").isVisible();
       check(run, "crab-hint-shown", hint);
-      const clicks = await freeCrab(p);
+      const clicks = await freeCrab(p, touch);
       check(run, "crab-freed-by-touch", clicks > 0, `${Math.abs(clicks)} clicks`);
       await p.waitForTimeout(1500);
       if (vp === "desktop") await p.screenshot({ path: `${OUT}${run}-p05-freed.png` });
