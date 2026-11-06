@@ -78,6 +78,26 @@ index.html
 Isolation is enforced by ESLint `no-restricted-imports`: universes import only their own files,
 `@shared/*` and `@app/contract`.
 
+### Books with their own reading interface (Mila)
+
+A book normally gives the shell a `world` and Markdown stories (`story/gcf.md` required); the shell
+lays its shared reading UI over the world. A book whose experience is designed as a whole, text and
+controls included, declares `immersive` instead (`BookManifest.immersive`, `ImmersiveWorld` in
+`src/app/contract.ts`):
+
+- The shell keeps the tree card, the dive and rise transitions, Escape back to the tree, the load
+  error notice and the focus given back to the control that opened the book. It shows neither its
+  reading UI nor the language panel, loads no story file, leaves page keys, wheel and touch to the
+  world, and hides its own vignette and grain (`.app[data-immersive]`).
+- The world gets `exit()` for its own way back and must release everything in `dispose()`.
+- `card.lang` names the language of the card texts (Kréyòl when absent), and `cover` may return a
+  promise to be painted again once an image has loaded.
+
+`src/books/mila/` is the first such book: a port of the owner's prototype "Le monde de Mila V3"
+(French tale, twelve pages, its own night palette, fonts, Three.js scene, sound and controls).
+Everything is scoped under `.mila`; the world is a lazy chunk (code, CSS, fonts) and only its card
+picture (`assets/cover.webp`) loads with the tree.
+
 ### Theme and language layers ("Veillée claire" redesign)
 
 - **Tokens**: `src/shared/theme/tokens.css` holds the site-wide colours, fonts and the dusk-sky
