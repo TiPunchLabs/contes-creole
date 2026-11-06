@@ -89,6 +89,8 @@ export interface BookCard {
   title: string;
   sub: string;
   theme: string;
+  /** Language of the card texts; Kréyòl when absent. */
+  lang?: Lang;
 }
 
 export interface BookContext {
@@ -112,15 +114,39 @@ export interface BookWorld {
   mount(container: HTMLElement, ctx: BookContext): BookHandle | Promise<BookHandle>;
 }
 
+/** What the shell gives a world that brings its own reading interface. */
+export interface ImmersiveContext {
+  /** Goes back to the tree with the shell's usual rise transition. */
+  exit(): void;
+}
+
+export interface ImmersiveHandle {
+  /** Must stop the render loop, timers, listeners and sound, and release GPU resources. */
+  dispose(): void;
+}
+
+/**
+ * A world that owns its text, page controls and sound: the shell adds only the transitions and
+ * Escape back to the tree, never its reading UI.
+ */
+export interface ImmersiveWorld {
+  mount(container: HTMLElement, ctx: ImmersiveContext): ImmersiveHandle | Promise<ImmersiveHandle>;
+}
+
 export interface BookManifest {
   id: string;
   order: number;
   ready: boolean;
   card: BookCard;
-  /** Paints the card cover; the tree calls it on a 512×720 canvas. Locked books omit it. */
-  cover?: (ctx: CanvasRenderingContext2D, width: number, height: number) => void;
+  /**
+   * Paints the card cover; the tree calls it on a 512×720 canvas. Locked books omit it. A returned
+   * promise (an image still loading) asks for one more paint once it settles.
+   */
+  cover?: (ctx: CanvasRenderingContext2D, width: number, height: number) => void | Promise<void>;
   /** Lazy world module; its import also pulls the book's theme.css. Absent when !ready. */
   world?: () => Promise<{ default: BookWorld }>;
+  /** Lazy world with its own reading interface, used instead of `world`: no story/*.md needed. */
+  immersive?: () => Promise<{ default: ImmersiveWorld }>;
 }
 
 export interface TreeContext {
@@ -148,5 +174,10 @@ export function defineBook(manifest: BookManifest): BookManifest {
 
 /** Identity helper giving type checking to a book's world module. */
 export function defineWorld(world: BookWorld): BookWorld {
+  return world;
+}
+
+/** Identity helper giving type checking to an immersive world module. */
+export function defineImmersive(world: ImmersiveWorld): ImmersiveWorld {
   return world;
 }

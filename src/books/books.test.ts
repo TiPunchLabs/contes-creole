@@ -23,11 +23,20 @@ describe("books", () => {
 
   describe.each(registry.books.map((b) => [b.id, b] as const))("%s", (id, book) => {
     it("is enterable only with a world, a cover, a story and a staging", () => {
-      if (!book.ready) return;
+      if (!book.ready || book.immersive) return;
       expect(book.world).toBeTypeOf("function");
       expect(book.cover).toBeTypeOf("function");
       expect(storyFolders.has(id)).toBe(true);
       expect(stagings[`./${id}/staging.ts`]).toBeDefined();
+    });
+
+    it("brings its own reading interface only with a cover and without the shared story parts", () => {
+      if (!book.ready || !book.immersive) return;
+      expect(book.immersive).toBeTypeOf("function");
+      expect(book.cover).toBeTypeOf("function");
+      expect(book.world).toBeUndefined();
+      expect(storyFolders.has(id)).toBe(false);
+      expect(stagings[`./${id}/staging.ts`]).toBeUndefined();
     });
 
     it("shares its page ids across languages and labels every Kréyòl page", async () => {

@@ -39,7 +39,7 @@ export function createShelf(
     const button = document.createElement("button");
     button.type = "button";
     button.className = inviting ? "tree-shelf-book is-invitation" : "tree-shelf-book";
-    button.lang = inviting ? "fr" : "gcf";
+    button.lang = inviting ? "fr" : (book.card.lang ?? "gcf");
     button.style.setProperty("--dot", DOT_COLOURS[i % DOT_COLOURS.length]);
     const dot = document.createElement("span");
     dot.className = "tree-shelf-dot";

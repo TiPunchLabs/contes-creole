@@ -5,6 +5,9 @@ import type {
   BookHandle,
   BookManifest,
   BookWorld,
+  ImmersiveContext,
+  ImmersiveHandle,
+  ImmersiveWorld,
   Stories,
   TreeContext,
   TreeHandle,
@@ -414,5 +417,114 @@ describe("app language panel", () => {
     expect(root.dataset.book).toBeUndefined();
     expect($(".lang-panel")?.hidden).toBe(true);
     expect($(".lang-burger")?.hidden).toBe(true);
+  });
+
+  describe("immersive book", () => {
+    let own: { dispose: ReturnType<typeof vi.fn> };
+    let ownCtx: ImmersiveContext | null;
+    let ownWorld: ImmersiveWorld & { mount: ReturnType<typeof vi.fn> };
+
+    const immersive = (id: string, order: number): BookManifest => ({
+      id,
+      order,
+      ready: true,
+      card: { title: id, sub: "", theme: "", lang: "fr" },
+      cover: () => undefined,
+      immersive: async () => ({ default: ownWorld }),
+    });
+
+    beforeEach(() => {
+      own = { dispose: vi.fn() };
+      ownCtx = null;
+      ownWorld = {
+        mount: vi.fn((container: HTMLElement, ctx: ImmersiveContext) => {
+          ownCtx = ctx;
+          container.append(Object.assign(document.createElement("div"), { className: "own" }));
+          return own as unknown as ImmersiveHandle;
+        }),
+      };
+    });
+
+    /** Starts the app with one shell book and one immersive book. */
+    const startBoth = (): void =>
+      start({ books: [manifest("liv", 1, true), immersive("mila", 2)] });
+
+    it("mounts its world without the shared reading UI, stories or language panel", async () => {
+      const loadStories = vi.fn(async () => STORIES);
+      const loadNotes = vi.fn(async () => NOTES);
+      start({ books: [immersive("mila", 1)], loadStories, loadNotes });
+      treeCtx.onEnter("mila");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      expect(tree.dive).toHaveBeenCalledWith("mila");
+      expect(ownWorld.mount).toHaveBeenCalledOnce();
+      expect(loadStories).not.toHaveBeenCalled();
+      expect(loadNotes).not.toHaveBeenCalled();
+      expect($(".app-book .own")).not.toBeNull();
+      expect($(".reading")?.hidden).toBe(true);
+      expect(root.dataset.book).toBe("mila");
+      expect(root.hasAttribute("data-immersive")).toBe(true);
+    });
+
+    it("leaves on Escape or on its own exit, disposing the world and resuming the tree", async () => {
+      startBoth();
+      treeCtx.onEnter("mila");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      key("Escape");
+      await vi.advanceTimersByTimeAsync(CLOSE_MS);
+      expect(own.dispose).toHaveBeenCalledOnce();
+      expect(tree.resume).toHaveBeenCalledWith("mila");
+      expect($(".app-book")?.hidden).toBe(true);
+      expect(root.hasAttribute("data-immersive")).toBe(false);
+      expect(root.dataset.book).toBeUndefined();
+
+      treeCtx.onEnter("mila");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      expect(ownWorld.mount).toHaveBeenCalledTimes(2);
+      ownCtx?.exit();
+      await vi.advanceTimersByTimeAsync(CLOSE_MS);
+      expect(own.dispose).toHaveBeenCalledTimes(2);
+      expect(tree.resume).toHaveBeenCalledTimes(2);
+    });
+
+    it("leaves page keys and wheel to the world", async () => {
+      startBoth();
+      treeCtx.onEnter("mila");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      const wheel = new WheelEvent("wheel", { deltaY: 200, cancelable: true });
+      root.dispatchEvent(wheel);
+      key("ArrowRight");
+      expect(wheel.defaultPrevented).toBe(false);
+      expect(own.dispose).not.toHaveBeenCalled();
+      expect(handle.setPage).not.toHaveBeenCalled();
+    });
+
+    it("gives the focus back to the control that opened the book", async () => {
+      startBoth();
+      const opener = document.createElement("button");
+      document.body.append(opener);
+      opener.focus();
+      treeCtx.onEnter("mila");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      (root.querySelector(".app-book") as HTMLElement).tabIndex = -1;
+      (root.querySelector(".app-book") as HTMLElement).focus();
+      key("Escape");
+      await vi.advanceTimersByTimeAsync(CLOSE_MS);
+      expect(document.activeElement).toBe(opener);
+    });
+
+    it("returns to the tree with the load notice when its world fails to mount", async () => {
+      startBoth();
+      ownWorld.mount.mockImplementation(() => {
+        throw new Error("boom");
+      });
+      treeCtx.onEnter("mila");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      expect(tree.resume).toHaveBeenCalledWith("mila");
+      expect($(".app-tree")?.hidden).toBe(false);
+      expect($(".app-notice")?.textContent).toBe(LOAD_ERROR);
+      treeCtx.onEnter("liv");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      expect(world.mount).toHaveBeenCalledOnce();
+    });
   });
 });
