@@ -36,6 +36,8 @@ const VIEWPORTS = {
   },
 };
 const TITLE = "Mila et le lambi qui avait perdu son chant";
+/** Third-party requests a host injects (Netlify's deploy-preview toolbar), not the site's own. */
+const HOST_NOISE = /cdn\.segment\.com|sessions\.bugsnag\.com/;
 const results = { site: SITE, checks: [], runs: {} };
 
 /** Records one check; `pass` false marks the run as failed. */
@@ -106,7 +108,13 @@ async function newPage(browser, vp, extra = {}) {
   const p = await ctx.newPage();
   const errors = [];
   p.on("pageerror", (e) => errors.push("pageerror: " + e.message));
-  p.on("console", (m) => m.type() === "error" && errors.push("console: " + m.text()));
+  p.on("console", (m) => {
+    const url = m.location()?.url ?? "";
+    if (m.type() === "error" && !HOST_NOISE.test(url)) errors.push("console: " + m.text());
+  });
+  p.on("requestfailed", (r) => {
+    if (!HOST_NOISE.test(r.url())) errors.push(`requestfailed: ${r.url()}`);
+  });
   await p.addInitScript(INSTRUMENT);
   await p.goto(SITE);
   await p.waitForSelector(".loader.is-done", { state: "attached", timeout: 20000 });
@@ -461,8 +469,10 @@ async function kannot(browser, vp) {
   const touch = vp !== "desktop";
   const { ctx, p, errors } = await newPage(browser, vp);
   const shelf = p.locator(".tree-shelf-book").nth(0);
-  await press(shelf, touch);
-  await p.waitForTimeout(2600);
+  if (!(await shelf.evaluate((b) => b.classList.contains("is-near")))) {
+    await press(shelf, touch);
+    await p.waitForTimeout(2600);
+  }
   await press(shelf, touch);
   await p.waitForSelector(".reading:not([hidden])", { timeout: 20000 });
   await p.waitForTimeout(4000);
