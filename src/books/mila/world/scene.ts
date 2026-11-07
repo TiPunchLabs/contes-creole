@@ -45,6 +45,106 @@ type Uniform<T> = { value: T };
 type V3 = THREE.Vector3;
 const V3 = (x = 0, y = 0, z = 0): V3 => new THREE.Vector3(x, y, z);
 
+/** Mila's paper dress, one flounce per row: yTop, yBot, rTop, rBot, jag, seed (body space). */
+export const DRESS: [number, number, number, number, number, number][] = [
+  [0.935, 0.77, 0.074, 0.098, 0, 1],
+  [0.84, 0.69, 0.092, 0.158, 0.035, 2],
+  [0.75, 0.6, 0.13, 0.205, 0.045, 3],
+  [0.665, 0.455, 0.17, 0.255, 0.055, 4],
+];
+/** Clearance between an arm's axis and the dress surface (limb radius plus a small gap). */
+export const ARM_CLEARANCE = 0.035;
+
+/**
+ * Widest radius of the dress at height `y` (body space): the flounce profile of `flounce()` with
+ * its crumpled folds at their largest. 0 above and below the dress.
+ */
+export function dressRadius(y: number): number {
+  let r = 0;
+  for (const [yTop, yBot, rTop, rBot] of DRESS) {
+    if (y > yTop || y < yBot) continue;
+    const t = (yTop - y) / (yTop - yBot);
+    r = Math.max(r, lerp(rTop, rBot, Math.pow(t, 0.8)) * (1 + 0.083 * t + 0.035 * t * t));
+  }
+  return r;
+}
+
+/**
+ * Moves a hand target (body space) out of the dress: the hand rests against the flounces instead
+ * of sinking into them. `lean` widens the clearance on the side the wind blows the hem to.
+ */
+export function clearOfDress(h: THREE.Vector3, lean = 0): THREE.Vector3 {
+  const need = dressRadius(h.y) + ARM_CLEARANCE + lean;
+  const r = Math.hypot(h.x, h.z);
+  if (need > 0 && r < need) {
+    if (r < 1e-6) h.x = need;
+    else {
+      h.x *= need / r;
+      h.z *= need / r;
+    }
+  }
+  return h;
+}
+
+/** One crumpled paper flounce of the dress (lathe), `aHem` 0 at its top to 1 at its hem. */
+export function flounce(
+  yTop: number,
+  yBot: number,
+  rTop: number,
+  rBot: number,
+  jag = 0.05,
+  seedK = 0,
+): THREE.LatheGeometry {
+  const pts: THREE.Vector2[] = [];
+  const R = 10;
+  for (let i = 0; i <= R; i++) {
+    const t = i / R;
+    pts.push(new THREE.Vector2(lerp(rTop, rBot, Math.pow(t, 0.8)), lerp(yTop, yBot, t)));
+  }
+  const g = new THREE.LatheGeometry(pts, 96);
+  const p = g.attributes.position;
+  const hem = new Float32Array(p.count);
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i);
+    const y = p.getY(i);
+    const z = p.getZ(i);
+    const a = Math.atan2(z, x);
+    const t = (yTop - y) / (yTop - yBot);
+    // crumpled paper folds and flounces
+    const cr =
+      1 +
+      (fbm(Math.cos(a) * 3 + seedK, Math.sin(a) * 3 + t * 2, 3) - 0.5) * 0.2 * t +
+      Math.sin(a * 14 + seedK * 3) * 0.035 * t * t +
+      Math.sin(a * 31 + seedK) * 0.008 * t;
+    let ny = y;
+    if (t > 0.9)
+      ny -=
+        ((fbm(a * 4 + seedK, 1, 2) - 0.3) * jag +
+          (0.5 + 0.5 * Math.sin(a * 14 + seedK * 3)) * 0.022) *
+        smooth(0.9, 1, t);
+    p.setXYZ(i, x * cr, ny, z * cr);
+    hem[i] = t;
+  }
+  g.setAttribute("aHem", new THREE.BufferAttribute(hem, 1));
+  g.computeVertexNormals();
+  return g;
+}
+
+/**
+ * The turtle's lap around the meadow at angle `ta` (it grows with time): offset from the meadow's
+ * centre on its ellipse, and the heading that turns its head (local +z) along the way it swims.
+ */
+export function turtleCourse(ta: number): { x: number; z: number; heading: number } {
+  const rx = TURTLE_R * 1.3;
+  const rz = TURTLE_R;
+  return {
+    x: Math.cos(ta) * rx,
+    z: Math.sin(ta) * rz,
+    heading: Math.atan2(-Math.sin(ta) * rx, Math.cos(ta) * rz),
+  };
+}
+const TURTLE_R = 2.6;
+
 /** Pages where Mila holds the conch to her ear. */
 const HOLD_PAGES = new Set([0, 1, 2, 3, 4, 5, 11, 12]);
 /** Golden reflections on the sea, per page. */
@@ -209,6 +309,21 @@ function groundH(x: number, z: number): number {
   h -= 6.5 * Math.exp(-((x - 14) ** 2 + (z + 38) ** 2) / 160);
   return h;
 }
+
+/** Mila's place on pages 1-3 and 11-12, on the beach. */
+export const HOME = new THREE.Vector3(3, 0, 5.5);
+HOME.y = groundH(HOME.x, HOME.z);
+/** Mila on page 4, at the water's edge. */
+export const M4 = new THREE.Vector3(8.2, 0, shoreZ(8.2) + 0.45);
+M4.y = groundH(M4.x, M4.z);
+/** The two rocks by the shore between HOME and page 4: x, z, size (see `buildRocks`). */
+export const SHORE_ROCKS: [number, number, number][] = [
+  [5.1, 4.4, 0.35],
+  [5.7, 4.0, 0.22],
+];
+/** The walk 3 -> 4 passes on the landward side of the shore rocks. */
+export const AROUND_ROCKS = new THREE.Vector3(5.3, 0, 5.6);
+AROUND_ROCKS.y = groundH(AROUND_ROCKS.x, AROUND_ROCKS.z);
 
 /**
  * Depth of the conch's spiral groove (prototype `surf`). JavaScript reads `a*b*(c)%1` left to
@@ -1063,8 +1178,7 @@ void main(){
     scene.add(m);
   }
   function buildRocks(): void {
-    rock(5.1, 4.4, 0.35);
-    rock(5.7, 4.0, 0.22);
+    for (const [x, z, sz] of SHORE_ROCKS) rock(x, z, sz);
     rock(1.2, 3.9, 0.28);
     rock(0.6, 4.4, 0.18);
     // the crab's cove
@@ -1354,48 +1468,6 @@ void main(){
     m.quaternion.setFromUnitVectors(V3(0, 1, 0), d.normalize());
     m.castShadow = true;
     return m;
-  }
-  function flounce(
-    yTop: number,
-    yBot: number,
-    rTop: number,
-    rBot: number,
-    jag = 0.05,
-    seedK = 0,
-  ): THREE.LatheGeometry {
-    const pts: THREE.Vector2[] = [];
-    const R = 10;
-    for (let i = 0; i <= R; i++) {
-      const t = i / R;
-      pts.push(new THREE.Vector2(lerp(rTop, rBot, Math.pow(t, 0.8)), lerp(yTop, yBot, t)));
-    }
-    const g = new THREE.LatheGeometry(pts, 96);
-    const p = g.attributes.position;
-    const hem = new Float32Array(p.count);
-    for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i);
-      const y = p.getY(i);
-      const z = p.getZ(i);
-      const a = Math.atan2(z, x);
-      const t = (yTop - y) / (yTop - yBot);
-      // crumpled paper folds and flounces
-      const cr =
-        1 +
-        (fbm(Math.cos(a) * 3 + seedK, Math.sin(a) * 3 + t * 2, 3) - 0.5) * 0.2 * t +
-        Math.sin(a * 14 + seedK * 3) * 0.035 * t * t +
-        Math.sin(a * 31 + seedK) * 0.008 * t;
-      let ny = y;
-      if (t > 0.9)
-        ny -=
-          ((fbm(a * 4 + seedK, 1, 2) - 0.3) * jag +
-            (0.5 + 0.5 * Math.sin(a * 14 + seedK * 3)) * 0.022) *
-          smooth(0.9, 1, t);
-      p.setXYZ(i, x * cr, ny, z * cr);
-      hem[i] = t;
-    }
-    g.setAttribute("aHem", new THREE.BufferAttribute(hem, 1));
-    g.computeVertexNormals();
-    return g;
   }
   /** One skinned mesh bending at its joints; axis +1 for arms (up), -1 for legs (down). */
   function skinnedLimb(
@@ -1719,13 +1791,7 @@ void main(){
       transformed.y+=sin(uTime*3.+an*4.)*.012*hh*uWind;`,
       "attribute float aHem;uniform float uTime;uniform float uWind;uniform float uSwim;\n",
     );
-    const layers: [number, number, number, number, number, number][] = [
-      [0.935, 0.77, 0.074, 0.098, 0, 1],
-      [0.84, 0.69, 0.092, 0.158, 0.035, 2],
-      [0.75, 0.6, 0.13, 0.205, 0.045, 3],
-      [0.665, 0.455, 0.17, 0.255, 0.055, 4],
-    ];
-    for (const L of layers) {
+    for (const L of DRESS) {
       const m = new THREE.Mesh(flounce(...L), dressMat);
       m.castShadow = true;
       body.add(m);
@@ -2915,11 +2981,7 @@ void main(){
     tgt.y -= lookDown;
     return { pos, tgt, subj: mc };
   }
-  const HOME = V3(3, 0, 5.5);
-  HOME.y = groundH(HOME.x, HOME.z);
-  const m4 = V3(8.2, 0, 0);
-  m4.z = shoreZ(m4.x) + 0.45;
-  m4.y = groundH(m4.x, m4.z);
+  const m4 = M4;
   const m5 = V3(12.55, 0, 4.35);
   m5.y = groundH(m5.x, m5.z);
   const M6 = V3(10.6, 0, 0);
@@ -2997,6 +3059,7 @@ void main(){
     },
   ];
   const MILA_VIA: Record<string, V3[]> = {
+    "3>4": [AROUND_ROCKS],
     "4>5": [V3(10.3, groundH(10.3, 3.6), 3.6)],
     "6>7": [V3(M6.x - 0.2, -0.15, M6.z - 1.6), V3(M6.x - 1.2, -2.4, M6.z - 6)],
     "7>8": [V3(10, -4.4, -22)],
@@ -3325,7 +3388,11 @@ void main(){
       const rP = A.S.clone().add(V3(sd * 0.12, 0, -0.3));
       const sH = V3(sp.x * sd, sp.y, sp.z);
       const sP = A.S.clone().add(V3(sd * 0.35, -0.05, -0.15));
-      const H = hH.multiplyScalar(wH).addScaledVector(rH, wR).addScaledVector(sH, wS);
+      // the hem leans towards +x in the wind (dress shader): give the left hand that much more room
+      const H = clearOfDress(
+        hH.multiplyScalar(wH).addScaledVector(rH, wR).addScaledVector(sH, wS),
+        sd > 0 ? 0.03 + U.wind.value * 0.06 : 0,
+      );
       const Pp = hP.multiplyScalar(wH).addScaledVector(rP, wR).addScaledVector(sP, wS);
       const look = (sd > 0 ? cp.clone() : hH.clone().add(V3(0.2, 0, 0)))
         .multiplyScalar(wH)
@@ -3599,14 +3666,13 @@ void main(){
     }
 
     // turtle
-    const ta = wtime * 0.16;
-    const tr = 2.6;
+    const lap = turtleCourse(wtime * 0.16);
     turtle.position.set(
-      MEADOW.x + Math.cos(ta) * tr * 1.3,
+      MEADOW.x + lap.x,
       MEADOW.y + 1.8 + Math.sin(wtime * 0.5) * 0.25,
-      MEADOW.z + Math.sin(ta) * tr,
+      MEADOW.z + lap.z,
     );
-    turtle.rotation.set(Math.sin(wtime * 0.5) * 0.08, -ta + Math.PI, Math.sin(wtime * 0.8) * 0.1);
+    turtle.rotation.set(Math.sin(wtime * 0.5) * 0.08, lap.heading, Math.sin(wtime * 0.8) * 0.1);
     flippers.forEach((f) => {
       f.pv.rotation.z =
         Math.sin(wtime * (f.big ? 1.6 : 1.2) + (f.big ? 0 : 1)) * (f.big ? 0.5 : 0.25) * f.s;
