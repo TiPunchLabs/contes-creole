@@ -47,7 +47,7 @@
   outline-offset: 3px;
 }
 
-/* ---------- Way back to the tree (shell convention, Mila's night palette) ---------- */
+/* ---------- Way back to the tree (shell convention and colors, see "Shell chips" below) ---------- */
 .mila-back {
   position: absolute;
   z-index: 3;
@@ -58,11 +58,8 @@
   gap: 10px;
   min-height: 44px;
   padding: 0 18px 0 14px;
-  border: 1px solid rgba(243, 233, 214, 0.28);
+  border: 1px solid;
   border-radius: 999px;
-  background: rgba(6, 24, 29, 0.45);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
   font-family: var(--f-ui);
   font-size: 0.92rem;
   font-weight: 600;
@@ -198,7 +195,7 @@
 
 /* ---------- Controls ---------- */
 /* The shell's reading row (Ti Kannot), right-aligned: sound and pause a little apart, then
-   previous, counter, next. Mila keeps its own night chips and saffron main button. */
+   previous, counter, next, in the shell's paper chips (see "Shell chips" below). */
 .mila-ui {
   position: absolute;
   z-index: 2;
@@ -297,17 +294,13 @@
   box-sizing: border-box;
   min-width: 76px;
   padding: 9px 12px;
-  border: 1px solid rgba(243, 233, 214, 0.28);
+  border: 1px solid;
   border-radius: 999px;
-  background: rgba(6, 24, 29, 0.45);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
   font-size: 14px;
   font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   text-align: center;
-  color: var(--ecume);
 }
 
 .mila-tools {
@@ -327,7 +320,6 @@
 }
 
 @media (hover: hover) {
-  .mila-back:hover,
   .mila-btn:hover {
     background: rgba(12, 44, 51, 0.7);
     border-color: rgba(240, 196, 106, 0.6);
@@ -335,6 +327,48 @@
 
   .mila-btn.is-main:hover:not([disabled]) {
     background: #f4b648;
+  }
+}
+
+/* ---------- Shell chips ---------- */
+/* The way back and the reading row take the shell's paper chips (--reading-chrome-*, the tree's
+   HUD and Ti Kannot's controls), so they read the same in every book; the tale's own buttons
+   ("Relire le conte") keep Mila's palette. */
+.mila-back,
+.mila-ui .mila-btn,
+.mila-count {
+  border-color: var(--reading-chrome-edge);
+  background: var(--reading-chrome-bg);
+  color: var(--reading-chrome-ink);
+  box-shadow: var(--shadow-dusk);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.mila-ui .mila-btn.is-main {
+  border-color: var(--reading-chrome-ink);
+  background: var(--reading-chrome-ink);
+  color: var(--color-paper);
+}
+
+.mila-back:focus-visible,
+.mila-ui button:focus-visible {
+  /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .mila-back:hover,
+  .mila-ui .mila-btn:hover:not([disabled]) {
+    border-color: var(--reading-chrome-edge);
+    background: var(--color-paper);
+  }
+
+  .mila-ui .mila-btn.is-main:hover:not([disabled]) {
+    border-color: var(--reading-chrome-ink);
+    background: var(--reading-chrome-ink-soft);
   }
 }
 
