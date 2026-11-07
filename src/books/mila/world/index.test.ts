@@ -1,8 +1,22 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ImmersiveHandle } from "@app/contract";
+import type { ImmersiveHandle, ImmersiveText, Lang, Story } from "@app/contract";
 import world from "./index";
-import { PAGE_COUNT, PAGES } from "./text";
+import { CRAB_HINT, PAGE_COUNT } from "./text";
+
+/** A twelve-page story whose titles and texts name their language and page. */
+const storyOf = (lang: Lang, word: string, pages = PAGE_COUNT): Story => ({
+  lang,
+  title: "Mila",
+  pages: Array.from({ length: pages }, (_, i) => ({
+    id: `p${i + 1}`,
+    label: "",
+    title: `${word} ${i + 1}`,
+    blocks: [{ kind: "text" as const, text: `${word} ${i + 1}.`, html: `${word} &amp; ${i + 1}.` }],
+  })),
+});
+const FR = storyOf("fr", "Page");
+const GCF = storyOf("gcf", "Paj");
 
 let container: HTMLElement;
 let handle: ImmersiveHandle | null;
@@ -15,10 +29,11 @@ const key = (k: string, target: EventTarget = window): void => {
   target.dispatchEvent(new KeyboardEvent("keydown", { key: k, cancelable: true, bubbles: true }));
 };
 const heading = (): string | null => $(".mila-heading").textContent;
+const title = (n: number): string => `Page ${n}`;
 
 /** Mounts the world; happy-dom has no WebGL, so this is the text-only reading. */
-async function mount(): Promise<void> {
-  const pending = world.mount(container, { exit });
+async function mount(text: ImmersiveText = { story: FR }): Promise<void> {
+  const pending = world.mount(container, { exit, text });
   await vi.advanceTimersByTimeAsync(2000);
   handle = await pending;
 }
@@ -40,11 +55,38 @@ afterEach(() => {
 });
 
 describe("Mila's world", () => {
-  it("has the prototype's twelve pages", () => {
+  it("keeps the scene's twelve pages and the crab's French hint", () => {
     expect(PAGE_COUNT).toBe(12);
-    expect(PAGES[0].title).toBe("Là où la vague s'endort");
-    expect(PAGES[11].title).toBe("Ce que Mila rapporta");
-    expect(PAGES[4].hint).toBe("Touchez les déchets pour libérer le passage du crabe");
+    expect(CRAB_HINT).toBe("Touchez les déchets pour libérer le passage du crabe");
+  });
+
+  it("refuses a story without the scene's twelve pages, before building anything", async () => {
+    await expect(
+      world.mount(container, { exit, text: { story: storyOf("gcf", "Paj", 11) } }),
+    ).rejects.toThrow("story/gcf.md has 11 pages");
+    expect(container.children).toHaveLength(0);
+  });
+
+  it("switches language on the same page, keeping the interface strings French", async () => {
+    await mount({ story: GCF });
+    for (let i = 2; i <= 5; i++) click(".mila-next");
+    expect(heading()).toBe("Paj 5");
+    expect($(".mila-story").lang).toBe("gcf");
+    expect($(".mila-text").innerHTML).toBe("<p>Paj &amp; 5.</p>");
+    expect($(".mila-num").lang).toBe("fr");
+    expect($(".mila-end").lang).toBe("fr");
+    handle?.setText({ story: GCF, gloss: FR });
+    expect(heading()).toBe("Paj 5");
+    expect($(".mila-gloss").hidden).toBe(false);
+    expect($(".mila-gloss").lang).toBe("fr");
+    expect($(".mila-gloss").textContent).toBe("Page & 5.");
+    handle?.setText({ story: FR });
+    expect(heading()).toBe("Page 5");
+    expect($(".mila-story").lang).toBe("fr");
+    expect($(".mila-gloss").hidden).toBe(true);
+    expect($(".mila-count").textContent).toBe("5 / 12");
+    click(".mila-next");
+    expect(heading()).toBe("Page 6");
   });
 
   it("opens straight on page 1 in French, with no cover screen and the way back to the tree", async () => {
@@ -57,7 +99,7 @@ describe("Mila's world", () => {
     expect(container.querySelector(".mila-cover, .mila-enter, .mila-tocover")).toBeNull();
     expect($(".mila-loader").classList.contains("is-gone")).toBe(true);
     expect($(".mila-ui").classList.contains("is-on")).toBe(true);
-    expect($(".mila-heading").textContent).toBe(PAGES[0].title);
+    expect($(".mila-heading").textContent).toBe(title(1));
     expect($(".mila-num").textContent).toBe("Page 01");
     expect(document.activeElement).toBe($(".mila-next"));
     click(".mila-back");
@@ -69,27 +111,27 @@ describe("Mila's world", () => {
     for (let i = 2; i <= 7; i++) click(".mila-next");
     handle?.dispose();
     await mount();
-    expect($(".mila-heading").textContent).toBe(PAGES[0].title);
+    expect($(".mila-heading").textContent).toBe(title(1));
     expect(container.querySelectorAll(".mila")).toHaveLength(1);
   });
 
   it("reads all twelve pages as text without WebGL, then rereads", async () => {
     await mount();
     expect($(".mila").classList.contains("is-nogl")).toBe(true);
-    expect($(".mila-heading").textContent).toBe(PAGES[0].title);
+    expect($(".mila-heading").textContent).toBe(title(1));
     expect($<HTMLButtonElement>(".mila-prev").disabled).toBe(true);
     for (let i = 2; i <= PAGE_COUNT; i++) click(".mila-next");
     expect($(".mila-num").textContent).toBe("Page 12");
     expect($(".mila-count").textContent).toBe("12 / 12");
     expect($<HTMLButtonElement>(".mila-next").disabled).toBe(true);
     expect($(".mila-end").hidden).toBe(false);
-    expect($(".mila-text").textContent).toContain("à ceux qui savent lui laisser une place.");
+    expect($(".mila-text").textContent).toBe("Page & 12.");
     click(".mila-prev");
-    expect($(".mila-heading").textContent).toBe(PAGES[10].title);
+    expect($(".mila-heading").textContent).toBe(title(11));
     key("ArrowRight");
-    expect($(".mila-heading").textContent).toBe(PAGES[11].title);
+    expect($(".mila-heading").textContent).toBe(title(12));
     click(".mila-reread");
-    expect($(".mila-heading").textContent).toBe(PAGES[0].title);
+    expect($(".mila-heading").textContent).toBe(title(1));
     expect($(".mila-end").hidden).toBe(true);
     expect(document.activeElement).toBe($(".mila-next"));
   });
@@ -114,11 +156,11 @@ describe("Mila's world", () => {
   it("turns pages with the shell's keys, and lets Space press a focused button", async () => {
     await mount();
     for (const k of ["ArrowDown", "PageDown", " ", "ArrowRight"]) key(k);
-    expect(heading()).toBe(PAGES[4].title);
+    expect(heading()).toBe(title(5));
     for (const k of ["ArrowUp", "PageUp", "ArrowLeft"]) key(k);
-    expect(heading()).toBe(PAGES[1].title);
+    expect(heading()).toBe(title(2));
     key(" ", $(".mila-pause"));
-    expect(heading()).toBe(PAGES[1].title);
+    expect(heading()).toBe(title(2));
   });
 
   it("turns one page per wheel or swipe gesture", async () => {
@@ -129,10 +171,10 @@ describe("Mila's world", () => {
     expect(wheel(120)).toBe(false);
     wheel(120);
     wheel(120);
-    expect(heading()).toBe(PAGES[1].title);
+    expect(heading()).toBe(title(2));
     vi.advanceTimersByTime(800);
     wheel(-120);
-    expect(heading()).toBe(PAGES[0].title);
+    expect(heading()).toBe(title(1));
     vi.advanceTimersByTime(800);
     const pointer = (type: string, clientY: number, pointerType = "touch"): void => {
       root.dispatchEvent(new PointerEvent(type, { clientY, pointerType, bubbles: true }));
@@ -141,11 +183,11 @@ describe("Mila's world", () => {
     pointer("pointermove", 500);
     pointer("pointermove", 300);
     pointer("pointerup", 300);
-    expect(heading()).toBe(PAGES[1].title);
+    expect(heading()).toBe(title(2));
     vi.advanceTimersByTime(800);
     pointer("pointerdown", 600, "mouse");
     pointer("pointermove", 300, "mouse");
-    expect(heading()).toBe(PAGES[1].title);
+    expect(heading()).toBe(title(2));
   });
 
   it("leaves the wheel to the text while it has to scroll", async () => {
@@ -154,7 +196,7 @@ describe("Mila's world", () => {
     const event = new WheelEvent("wheel", { deltaY: 120, cancelable: true, bubbles: true });
     $(".mila-text").dispatchEvent(event);
     expect(event.defaultPrevented).toBe(false);
-    expect(heading()).toBe(PAGES[0].title);
+    expect(heading()).toBe(title(1));
   });
 
   it("never shows the crab hint when there is no scene to touch", async () => {

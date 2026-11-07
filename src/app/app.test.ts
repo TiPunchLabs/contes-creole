@@ -420,7 +420,7 @@ describe("app language panel", () => {
   });
 
   describe("immersive book", () => {
-    let own: { dispose: ReturnType<typeof vi.fn> };
+    let own: { setText: ReturnType<typeof vi.fn>; dispose: ReturnType<typeof vi.fn> };
     let ownCtx: ImmersiveContext | null;
     let ownWorld: ImmersiveWorld & { mount: ReturnType<typeof vi.fn> };
 
@@ -434,7 +434,7 @@ describe("app language panel", () => {
     });
 
     beforeEach(() => {
-      own = { dispose: vi.fn() };
+      own = { setText: vi.fn(), dispose: vi.fn() };
       ownCtx = null;
       ownWorld = {
         mount: vi.fn((container: HTMLElement, ctx: ImmersiveContext) => {
@@ -449,7 +449,7 @@ describe("app language panel", () => {
     const startBoth = (): void =>
       start({ books: [manifest("liv", 1, true), immersive("mila", 2)] });
 
-    it("mounts its world without the shared reading UI, stories or language panel", async () => {
+    it("mounts its world with its stories and only the shell's language switch", async () => {
       const loadStories = vi.fn(async () => STORIES);
       const loadNotes = vi.fn(async () => NOTES);
       start({ books: [immersive("mila", 1)], loadStories, loadNotes });
@@ -457,12 +457,36 @@ describe("app language panel", () => {
       await vi.advanceTimersByTimeAsync(OPEN_MS);
       expect(tree.dive).toHaveBeenCalledWith("mila");
       expect(ownWorld.mount).toHaveBeenCalledOnce();
-      expect(loadStories).not.toHaveBeenCalled();
+      expect(loadStories).toHaveBeenCalledWith("mila");
       expect(loadNotes).not.toHaveBeenCalled();
+      expect(ownCtx?.text).toEqual({ story: STORIES.gcf });
       expect($(".app-book .own")).not.toBeNull();
-      expect($(".reading")?.hidden).toBe(true);
+      expect($(".reading")?.hidden).toBe(false);
+      expect($(".reading")?.classList.contains("is-langs-only")).toBe(true);
+      expect($(".reading-hint")?.hidden).toBe(true);
       expect(root.dataset.book).toBe("mila");
       expect(root.hasAttribute("data-immersive")).toBe(true);
+    });
+
+    it("passes the reader's language to the world and keeps it for the next book", async () => {
+      startBoth();
+      treeCtx.onEnter("mila");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      const langButton = (lang: string): HTMLElement =>
+        root.querySelector<HTMLElement>(`.reading-langs [data-lang="${lang}"]`) as HTMLElement;
+      langButton("bi").click();
+      expect(own.setText).toHaveBeenLastCalledWith({ story: STORIES.gcf, gloss: STORIES.fr });
+      langButton("fr").click();
+      expect(own.setText).toHaveBeenLastCalledWith({ story: STORIES.fr });
+      expect(langButton("fr").getAttribute("aria-pressed")).toBe("true");
+      expect(own.dispose).not.toHaveBeenCalled();
+      key("Escape");
+      await vi.advanceTimersByTimeAsync(CLOSE_MS);
+      expect($(".reading")?.hidden).toBe(true);
+      treeCtx.onEnter("liv");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      expect($(".reading")?.classList.contains("is-langs-only")).toBe(false);
+      expect($(".reading-title")?.textContent).toBe("Page un");
     });
 
     it("leaves on Escape or on its own exit, disposing the world and resuming the tree", async () => {

@@ -5,6 +5,7 @@ import type {
   Bubble,
   BookManifest,
   ImmersiveHandle,
+  ImmersiveText,
   LanguageNotes,
   MountTree,
   Stories,
@@ -45,9 +46,10 @@ interface OpenBook {
   handle: BookHandle;
 }
 
-/** A book with its own reading interface: the shell only keeps the way back. */
+/** A book with its own reading interface: the shell keeps the way back and the language switch. */
 interface OpenImmersive {
   id: string;
+  stories: Stories;
   handle: ImmersiveHandle;
 }
 
@@ -127,7 +129,14 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   }
 
   function render(): void {
-    reading.render({ page, lang, showHint: page === 0 && !scrolled, textHidden });
+    const showHint = !immersive && page === 0 && !scrolled;
+    reading.render({ page, lang, showHint, textHidden });
+  }
+
+  /** What an immersive world shows in the current language: Bileng adds the French underneath. */
+  function textFor(stories: Stories): ImmersiveText {
+    const gloss = lang === "bi" ? stories.fr : undefined;
+    return { story: storyFor(stories, lang), ...(gloss ? { gloss } : {}) };
   }
 
   /** Removes the open book (if any) and gives the screen back to the tree layer. */
@@ -159,7 +168,9 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     if (!load) return;
     mode = "dive";
     bubble.hide();
-    const loading = Promise.resolve().then(load);
+    const loading = Promise.resolve().then(() =>
+      Promise.all([load(), deps.loadStories(manifest.id)]),
+    );
     loading.catch(() => undefined);
     try {
       await Promise.all([
@@ -168,12 +179,19 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       ]);
       activeTree.pause();
       treeLayer.hidden = true;
-      const world = await loading;
+      const [world, stories] = await loading;
+      if (!readingLangs(stories).includes(lang)) lang = "gcf";
+      page = 0;
       root.dataset.book = manifest.id;
       root.dataset.immersive = "";
       bookLayer.hidden = false;
-      const handle = await world.default.mount(bookLayer, { exit: () => void leave() });
-      immersive = { id: manifest.id, handle };
+      const handle = await world.default.mount(bookLayer, {
+        exit: () => void leave(),
+        text: textFor(stories),
+      });
+      immersive = { id: manifest.id, stories, handle };
+      reading.open(stories, { langsOnly: true });
+      render();
       mode = "book";
     } catch (err) {
       console.error(`Book "${manifest.id}" failed to open`, err);
@@ -261,7 +279,14 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   }
 
   function setLang(next: ReadingLang): void {
-    if (mode !== "book" || !book || next === lang) return;
+    if (mode !== "book" || next === lang) return;
+    if (immersive) {
+      lang = next;
+      immersive.handle.setText(textFor(immersive.stories));
+      render();
+      return;
+    }
+    if (!book) return;
     lang = next;
     const story = storyFor(book.stories, lang);
     bubble.setLang(story.lang);

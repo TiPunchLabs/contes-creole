@@ -7,11 +7,11 @@ import "@fontsource/spectral/400-italic.css";
 import "@fontsource/karla/400.css";
 import "@fontsource/karla/600.css";
 import "./mila.css";
-import { defineImmersive } from "@app/contract";
+import { defineImmersive, type ImmersiveText, type StoryPage } from "@app/contract";
 import { createPager } from "@shared/paging";
 import { createAmbience } from "./audio";
 import { createMilaScene, type MilaScene } from "./scene";
-import { CRAB_PAGE, PAGE_COUNT, PAGES } from "./text";
+import { CRAB_HINT, CRAB_PAGE, PAGE_COUNT } from "./text";
 
 /** The shell's page arrow (reading UI): down for the next page, turned up for the previous one. */
 const ICON_ARROW = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M3 9l5 5 5-5"/></svg>`;
@@ -29,11 +29,12 @@ const TEMPLATE = `
   <article class="mila-story" aria-live="polite">
     <div class="mila-voile"></div>
     <div class="mila-story-scroll">
-      <p class="mila-num"></p>
+      <p class="mila-num" lang="fr"></p>
       <h2 class="mila-heading"></h2>
       <div class="mila-text"></div>
-      <p class="mila-hint" hidden></p>
-      <div class="mila-end" hidden>
+      <div class="mila-gloss" lang="fr" hidden></div>
+      <p class="mila-hint" lang="fr" hidden></p>
+      <div class="mila-end" lang="fr" hidden>
         <button class="mila-btn is-main mila-reread" type="button">Relire le conte</button>
       </div>
     </div>
@@ -67,6 +68,20 @@ const SWIPE_GAIN = 2.2;
 
 const pad = (n: number): string => String(n).padStart(2, "0");
 
+/** One paragraph per block; block HTML is already escaped by the shell's story parser. */
+const paragraphs = (page: StoryPage): string => page.blocks.map((b) => `<p>${b.html}</p>`).join("");
+
+/** Checks that each language has the scene's twelve pages. */
+function checkPages(text: ImmersiveText): void {
+  for (const story of [text.story, text.gloss]) {
+    if (story && story.pages.length !== PAGE_COUNT) {
+      throw new Error(
+        `Mila: story/${story.lang}.md has ${story.pages.length} pages, not ${PAGE_COUNT}`,
+      );
+    }
+  }
+}
+
 /** Resolves once the reading fonts are loaded (or failed); at once without the Font Loading API. */
 function fontsLoaded(): Promise<unknown> {
   if (!("fonts" in document)) return Promise.resolve();
@@ -76,6 +91,7 @@ function fontsLoaded(): Promise<unknown> {
 /** Mila and the conch that lost its song: the prototype's night world, with its own reading UI. */
 export default defineImmersive({
   async mount(container, ctx) {
+    checkPages(ctx.text);
     const root = document.createElement("div");
     root.className = "mila";
     root.lang = "fr";
@@ -91,7 +107,8 @@ export default defineImmersive({
     const scroll = part(".mila-story-scroll");
     const num = part(".mila-num");
     const heading = part(".mila-heading");
-    const text = part(".mila-text");
+    const body = part(".mila-text");
+    const gloss = part(".mila-gloss");
     const hint = part(".mila-hint");
     const end = part(".mila-end");
     const reread = part<HTMLButtonElement>(".mila-reread");
@@ -125,23 +142,27 @@ export default defineImmersive({
     const page = (): number => (scene ? scene.page : textPage);
     const moving = (): boolean => scene?.moving ?? false;
 
-    function showText(i: number): void {
-      const p = PAGES[i - 1];
+    let text = ctx.text;
+    hint.textContent = CRAB_HINT;
+
+    /** Fills the text block with page `i` in the current language. */
+    function renderText(i: number): void {
+      const p = text.story.pages[i - 1];
+      const french = text.gloss?.pages[i - 1];
+      story.lang = text.story.lang;
       num.textContent = `Page ${pad(i)}`;
       heading.textContent = p.title;
-      text.replaceChildren(
-        ...p.lines.map((line) => {
-          const el = document.createElement("p");
-          el.textContent = line;
-          return el;
-        }),
-      );
+      body.innerHTML = paragraphs(p);
+      gloss.hidden = !french;
+      gloss.innerHTML = french ? paragraphs(french) : "";
       hint.hidden = !(i === CRAB_PAGE && !freed && scene);
-      if (p.hint) hint.textContent = p.hint;
       end.hidden = i !== PAGE_COUNT;
       scroll.scrollTop = 0;
-      story.classList.add("is-on");
       syncScrollable();
+    }
+    function showText(i: number): void {
+      story.classList.add("is-on");
+      renderText(i);
     }
     /** The text takes the pointer only when it overflows and must scroll. */
     function syncScrollable(): void {
@@ -330,6 +351,12 @@ export default defineImmersive({
     restoreFocus();
 
     return {
+      setText(next) {
+        checkPages(next);
+        text = next;
+        // Mid-flight the text is hidden: the next page arrives in the new language.
+        if (story.classList.contains("is-on")) renderText(Math.max(page(), 1));
+      },
       dispose() {
         window.removeEventListener("keydown", onKey);
         window.removeEventListener("keydown", onGesture, true);

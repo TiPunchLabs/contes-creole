@@ -149,6 +149,32 @@
   margin: 0 0 0.15rem;
 }
 
+/* Bileng (the shell's language switch): the French under the Kréyòl, as in Ti Kannot's card. */
+.mila-gloss {
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed rgba(243, 233, 214, 0.32);
+  font-family: var(--f-titre);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.04rem, 1.2vw, 1.15rem);
+  line-height: 1.45;
+  color: var(--ecume);
+  /* A denser halo than the tale's text: the gloss runs to the veil's faint edge, over the bright sea. */
+  text-shadow:
+    0 0 3px rgba(2, 12, 15, 0.95),
+    0 0 8px rgba(2, 12, 15, 0.9),
+    0 1px 16px rgba(2, 12, 15, 0.9);
+}
+
+.mila-gloss[hidden] {
+  display: none;
+}
+
+.mila-gloss p {
+  margin: 0 0 0.15rem;
+}
+
 .mila-voile {
   position: absolute;
   inset: -2.2rem -2.6rem;

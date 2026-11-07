@@ -57,6 +57,8 @@ Sources referenced below:
   validation of the generalisation; commit, push and PR allowed; merge reserved to the owner.
 - [MILA]: owner mission prompt of 2026-11-06 (Mila's book in the tree, English, quoted verbatim;
   copy in `~/.local/share/contes-creole-qa/mila/prompt.md`).
+- [MILA-BILINGUAL]: owner mission prompt of 2026-11-07 (ruling MILA-GCF, Kréyòl translation of Mila,
+  English, quoted verbatim; copy in `~/.local/share/contes-creole-qa/mila-bilingual/prompt.md`).
 - [MILA-NAV]: owner mission prompt of 2026-11-07 ("Align Mila navigation with the existing tale
   standard", English, quoted verbatim; copy in `~/.local/share/contes-creole-qa/mila-nav/prompt.md`).
 - Mission reports: `~/.local/share/contes-creole-qa/reports/` (durable copies of the `/tmp` reports).
@@ -181,6 +183,7 @@ Original wording is from [plan] "Blocking decisions".
 | MILA-FIX3 | 2026-11-07 | "This request authorizes the three targeted visual corrections below" (rock, right arm, turtle). "These bug fixes are authorized departures from prototype fidelity." "Prefer small, understandable corrections over a general collision system, a new animation framework or a model rewrite."                                                                                                                         |
 | MILA-NAV  | 2026-11-07 | "Align the navigation controls and navigation behavior of “Mila et le lambi qui avait perdu son chant” with the established implementation used by “Ti Kannot é Gwo Rako”." "Match applicable navigation conventions without importing Ti Kannot's artistic presentation into Mila." "Preserve the approved entry behavior: opening Mila's book from the tree must lead directly to page 1."                            |
 | MILA-NAVC | 2026-11-07 | "pour les éléments de navigation du conte tu dois reprendre les mêmes courleurs que pour le conte "ti kannot.." afin de garder une homgénéité car ils reprennes les codes couleur des boutons de l'arbre d'accueil" (quoted as written)                                                                                                                                                                                 |
+| MILA-GCF  | 2026-11-07 | "Make “Mila et le lambi qui avait perdu son chant” available in French and Guadeloupean Creole, using the same language-switching conventions as “Ti Kannot é Gwo Rako”." "Use the supplied translation exactly as written below." "Integration is authorized; final linguistic validation remains pending." "Do not invent new Creole translations"                                                                    |
 
 ### T4 ruling — Bubble contract
 
