@@ -57,6 +57,8 @@ Sources referenced below:
   validation of the generalisation; commit, push and PR allowed; merge reserved to the owner.
 - [MILA]: owner mission prompt of 2026-11-06 (Mila's book in the tree, English, quoted verbatim;
   copy in `~/.local/share/contes-creole-qa/mila/prompt.md`).
+- [MILA-NAV]: owner mission prompt of 2026-11-07 ("Align Mila navigation with the existing tale
+  standard", English, quoted verbatim; copy in `~/.local/share/contes-creole-qa/mila-nav/prompt.md`).
 - Mission reports: `~/.local/share/contes-creole-qa/reports/` (durable copies of the `/tmp` reports).
 
 ## Direction inputs (before A1–A8)
@@ -177,6 +179,7 @@ Original wording is from [plan] "Blocking decisions".
 | MILA-GIT  | 2026-11-06 | "You may create commits, push branches, and open PRs within the permissions established by the repository instructions." "Do not merge into main or trigger production publication. Use the existing PR preview mechanism where available."                                                                                                                                                                             |
 | MILA-OPEN | 2026-11-07 | "Depuis la couverture du livre dans l'arbre, l'ouverture du conte doit conduire directement à la page 1, dans son univers animé." "Supprime l'écran d'accueil intermédiaire du conte et son bouton « Entrer dans le conte »." "Le son doit respecter les règles du navigateur, sans imposer un nouvel écran d'entrée." "Conserve la couverture du livre dans l'arbre, les 12 pages, les interactions et la navigation." |
 | MILA-FIX3 | 2026-11-07 | "This request authorizes the three targeted visual corrections below" (rock, right arm, turtle). "These bug fixes are authorized departures from prototype fidelity." "Prefer small, understandable corrections over a general collision system, a new animation framework or a model rewrite."                                                                                                                         |
+| MILA-NAV  | 2026-11-07 | "Align the navigation controls and navigation behavior of “Mila et le lambi qui avait perdu son chant” with the established implementation used by “Ti Kannot é Gwo Rako”." "Match applicable navigation conventions without importing Ti Kannot's artistic presentation into Mila." "Preserve the approved entry behavior: opening Mila's book from the tree must lead directly to page 1."                            |
 
 ### T4 ruling — Bubble contract
 
