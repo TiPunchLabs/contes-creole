@@ -265,6 +265,18 @@ async function journey(browser, vp) {
       await p.waitForTimeout(1500);
       if (vp === "desktop") await p.screenshot({ path: `${OUT}${run}-p05-freed.png` });
     }
+    if (i === 8 && vp === "desktop") {
+      // Paused under water once the page has settled, two frames a second apart must match
+      // (compared with ImageMagick).
+      await p.waitForTimeout(6000);
+      await press(p.locator(".mila-pause"), touch);
+      await p.waitForTimeout(1500);
+      await p.screenshot({ path: `${OUT}${run}-p08-paused-a.png` });
+      await p.waitForTimeout(1000);
+      await p.screenshot({ path: `${OUT}${run}-p08-paused-b.png` });
+      await press(p.locator(".mila-pause"), touch);
+      await p.waitForTimeout(800);
+    }
     if (i < 12) times.push(await turn(p, ".mila-next", touch));
   }
   results.runs[run].transitionMs = times;

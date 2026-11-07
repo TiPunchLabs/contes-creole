@@ -3250,7 +3250,8 @@ void main(){
     M.prev.copy(gp);
     M.phase +=
       (((1 - M.swimW) * Math.min(stepD, 0.05)) / 0.36) * Math.PI +
-      rdt * M.swimW * (2.6 + M.moving * 2.6);
+      // the idle stroke follows the motion control; a stroke that carries her along does not
+      rdt * M.swimW * (2.6 * motion + M.moving * 2.6);
     U.swimD.value = M.swimW;
     const u = (((M.phase / (Math.PI * 2)) % 1) + 1) % 1;
     // pendant / held conch
@@ -3428,6 +3429,8 @@ void main(){
       }
     }
     motion = lerp(motion, motionT, Math.min(1, rdt * 3));
+    // land exactly on the target so a pause really stops the world
+    if (Math.abs(motion - motionT) < 0.002) motion = motionT;
     const dt = rdt * motion;
     wtime += dt;
     U.time.value = wtime;
@@ -3490,7 +3493,8 @@ void main(){
       .normalize()
       .cross(camera.up)
       .normalize();
-    const par = reduceMotion ? 0 : page === 2 ? 0.05 : 0.16;
+    // pointer parallax eases out with the motion control (and never runs with reduced motion)
+    const par = reduceMotion ? 0 : (page === 2 ? 0.05 : 0.16) * motion;
     camera.position
       .addScaledVector(right, pointer.sx * par)
       .add(tmpV2.set(0, -pointer.sy * par * 0.5, 0));
@@ -3631,7 +3635,7 @@ void main(){
         around
           ? tmpV.set(mila.g.position.x, mila.g.position.y + 0.75, mila.g.position.z)
           : tmpV.set(SCHOOL.x, SCHOOL.y + 2.6, SCHOOL.z),
-        Math.min(1, rdt * 0.6),
+        Math.min(1, dt * 0.6),
       );
       const spread = around ? 1.25 : 0.75;
       for (let i = 0; i < schoolData.length; i++) {
@@ -3663,7 +3667,7 @@ void main(){
 
     // pearl
     (pearlHalo.material as THREE.SpriteMaterial).opacity = 0.7 + 0.3 * Math.sin(wtime * 2);
-    pearl.position.y += Math.sin(wtime * 1.3) * 0.0006;
+    pearl.position.y += Math.sin(wtime * 1.3) * 0.0006 * motion;
     U_liveGlow.value = 0.1 + (page === 9 ? 0.25 + 0.15 * Math.sin(wtime * 2) : 0);
 
     updateSigns(rdt, T, wtime);
