@@ -124,7 +124,7 @@ async function newPage(browser, vp, extra = {}) {
 
 const press = async (loc, touch) => (touch ? loc.tap() : loc.click());
 
-/** Selects Mila's card from the shelf, then opens it; returns once its cover is ready. */
+/** Selects Mila's card from the shelf, then opens it; returns ms from the press to page 1's text. */
 async function openMila(p, run, touch, shoot) {
   const shelf = p.locator(".tree-shelf-book").nth(1);
   // Back from the book, the tree already rests on Mila's card: one press opens it.
@@ -133,9 +133,42 @@ async function openMila(p, run, touch, shoot) {
     await p.waitForTimeout(2800);
   }
   if (shoot) await p.screenshot({ path: `${OUT}${run}-tree-card.png` });
+  const t0 = Date.now();
   await press(shelf, touch);
-  await p.waitForSelector(".mila-enter:not([disabled])", { timeout: 20000 });
-  await p.waitForTimeout(1800);
+  await waitPageOne(p);
+  return Date.now() - t0;
+}
+
+/** Waits until the tale shows page 1's text (it opens there, with no cover screen). */
+async function waitPageOne(p) {
+  await p.waitForFunction(
+    () =>
+      document.querySelector(".mila-story")?.classList.contains("is-on") &&
+      document.querySelector(".mila-num")?.textContent === "Page 01",
+    null,
+    { timeout: 25000, polling: 50 },
+  );
+}
+
+/** What the reader finds on arrival: page 1, no cover screen, the focus and the sound. */
+const arrival = (p) =>
+  p.evaluate(() => ({
+    num: document.querySelector(".mila-num")?.textContent,
+    coverScreen: document.querySelectorAll(".mila-cover, .mila-enter, .mila-tocover").length,
+    controls: document.querySelector(".mila-ui")?.classList.contains("is-on"),
+    focus: document.activeElement?.className,
+    audio: window.__qa.audio.map((a) => a.state),
+  }));
+
+/** Checks the arrival on page 1 straight from the tree. */
+function checkArrival(run, a, ms) {
+  check(
+    run,
+    "opens-on-page-1",
+    a.num === "Page 01" && a.coverScreen === 0 && a.controls,
+    `${JSON.stringify(a)} in ${ms} ms`,
+  );
+  check(run, "focus-on-next", /mila-next/.test(a.focus ?? ""), a.focus);
 }
 
 /** Bounding boxes of the story text, the controls and the way back. */
@@ -228,10 +261,13 @@ async function journey(browser, vp) {
   );
   check(run, "shelf-mila-lang-fr", shelf[1]?.lang === "fr");
 
-  await openMila(p, run, touch, true);
+  const openMs = await openMila(p, run, touch, true);
+  await p.waitForTimeout(600);
   const fiche = await p.evaluate(() => ({ lang: document.querySelector(".tree-label")?.lang }));
-  results.runs[run] = { fiche };
-  await p.screenshot({ path: `${OUT}${run}-cover.png` });
+  results.runs[run] = { fiche, openMs };
+  const first1 = await arrival(p);
+  checkArrival(run, first1, openMs);
+  check(run, "sound-starts-on-opening", first1.audio.length === 1, JSON.stringify(first1.audio));
   const cover = await p.evaluate(() => ({
     immersive: document.querySelector(".app")?.hasAttribute("data-immersive"),
     focus: document.activeElement?.className,
@@ -244,12 +280,10 @@ async function journey(browser, vp) {
     cover.immersive && cover.title === TITLE && cover.readingHidden,
     JSON.stringify(cover),
   );
-  check(run, "focus-on-enter", cover.focus === "mila-enter", cover.focus);
 
   // the tale, page by page
   const times = [];
   const layouts = {};
-  times.push(await turn(p, ".mila-enter", touch));
   for (let i = 1; i <= 12; i++) {
     const num = await p.locator(".mila-num").textContent();
     check(run, `page-${i}-shown`, num === `Page ${String(i).padStart(2, "0")}`, num);
@@ -325,7 +359,14 @@ async function journey(browser, vp) {
       first.milaContexts === 1 && first.milaContextsLive === 1,
       JSON.stringify(first),
     );
-    check(run, "one-audio-context", first.audio.length === 1, JSON.stringify(first.audio));
+    check(
+      run,
+      "one-audio-context-running",
+      first.audio.length === 1 && first.audio[0] === "running",
+      JSON.stringify(first.audio),
+    );
+    // leave from another page than 1: the reopening must not resume where the reader left
+    await turn(p, ".mila-next", touch);
 
     // leave by the way back, then reopen and leave by Escape
     await press(p.locator(".mila-back"), touch);
@@ -346,8 +387,15 @@ async function journey(browser, vp) {
     );
     check(run, "mila-dom-removed", (await p.locator(".mila").count()) === 0);
 
-    await openMila(p, run, touch, false);
-    await turn(p, ".mila-enter", touch);
+    const reopenMs = await openMila(p, run, touch, false);
+    await p.waitForTimeout(600);
+    const again = await arrival(p);
+    check(
+      run,
+      "reopen-on-page-1",
+      again.num === "Page 01" && again.coverScreen === 0 && /mila-next/.test(again.focus ?? ""),
+      `${JSON.stringify(again)} in ${reopenMs} ms`,
+    );
     const second = await counters(p);
     results.runs[run].secondOpen = second;
     const ratio = second.milaDrawsPerSec / Math.max(1, first.milaDrawsPerSec);
@@ -389,18 +437,9 @@ async function keys(browser) {
   await p.keyboard.press("Enter");
   await p.waitForTimeout(2800);
   await p.keyboard.press("Enter");
-  await p.waitForSelector(".mila-enter:not([disabled])", { timeout: 20000 });
-  await p.waitForTimeout(1800);
-  check(
-    run,
-    "focus-on-enter",
-    await p.evaluate(() => document.activeElement?.className === "mila-enter"),
-  );
-  await p.keyboard.press("Enter");
-  await p.waitForSelector(".mila-story.is-on", { timeout: 20000 });
+  await waitPageOne(p);
   await p.waitForTimeout(600);
-  const focus1 = await p.evaluate(() => document.activeElement?.className);
-  check(run, "focus-on-next-after-arrival", /mila-next/.test(focus1 ?? ""), focus1);
+  checkArrival(run, await arrival(p), 0);
   await p.keyboard.press("ArrowRight");
   await p.waitForSelector(".mila-story:not(.is-on)", { timeout: 5000 });
   await p.waitForSelector(".mila-story.is-on", { timeout: 20000 });
@@ -427,10 +466,9 @@ async function keys(browser) {
 async function reduced(browser) {
   const run = "reduced";
   const { ctx, p, errors } = await newPage(browser, "desktop", { reducedMotion: "reduce" });
-  await openMila(p, run, false, false);
-  const t1 = await turn(p, ".mila-enter", false);
+  const t1 = await openMila(p, run, false, false);
   const t2 = await turn(p, ".mila-next", false);
-  check(run, "cuts-not-flights", t1 < 2500 && t2 < 2500, `${t1} ms, ${t2} ms`);
+  check(run, "cuts-not-flights", t2 < 2500, `open ${t1} ms, page 2 ${t2} ms`);
   const anim = await p.evaluate(
     () => getComputedStyle(document.querySelector(".mila-hint"), "::before").animationName,
   );
@@ -452,10 +490,10 @@ async function nogl(browser, vp) {
   await p.goto(SITE);
   await p.waitForSelector(".loader.is-done", { state: "attached", timeout: 20000 });
   await p.waitForTimeout(1500);
-  await openMila(p, run, vp !== "desktop", false);
+  const openMs = await openMila(p, run, vp !== "desktop", false);
   check(run, "text-fallback", (await p.locator(".mila.is-nogl").count()) === 1);
-  await p.screenshot({ path: `${OUT}${run}-cover.png` });
-  await press(p.locator(".mila-enter"), vp !== "desktop");
+  checkArrival(run, await arrival(p), openMs);
+  await p.screenshot({ path: `${OUT}${run}-p01.png` });
   for (let i = 1; i < 12; i++) await press(p.locator(".mila-next"), vp !== "desktop");
   check(run, "reads-to-page-12", (await p.locator(".mila-num").textContent()) === "Page 12");
   await p.waitForTimeout(1200);
