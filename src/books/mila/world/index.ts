@@ -8,12 +8,13 @@ import "@fontsource/karla/400.css";
 import "@fontsource/karla/600.css";
 import "./mila.css";
 import { defineImmersive } from "@app/contract";
+import { createPager } from "@shared/paging";
 import { createAmbience } from "./audio";
 import { createMilaScene, type MilaScene } from "./scene";
 import { CRAB_PAGE, PAGE_COUNT, PAGES } from "./text";
 
-const ICON_PREV = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>`;
-const ICON_NEXT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>`;
+/** The shell's page arrow (reading UI): down for the next page, turned up for the previous one. */
+const ICON_ARROW = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M3 9l5 5 5-5"/></svg>`;
 const ICON_SOUND = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 010 6M18 6.5a7.5 7.5 0 010 11"/></svg>`;
 const ICON_PAUSE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>`;
 const ICON_PLAY = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>`;
@@ -38,14 +39,14 @@ const TEMPLATE = `
     </div>
   </article>
   <nav class="mila-ui" aria-label="Lecture du conte">
-    <div class="mila-nav">
-      <button class="mila-btn mila-prev" type="button" aria-label="Page précédente">${ICON_PREV}<span class="mila-lbl-long">Précédent</span></button>
-      <span class="mila-count"></span>
-      <button class="mila-btn is-main mila-next" type="button">Continuer ${ICON_NEXT}</button>
-    </div>
     <div class="mila-tools">
       <button class="mila-btn is-icon mila-sound" type="button" aria-pressed="true" aria-label="Couper l'ambiance sonore" title="Ambiance sonore">${ICON_SOUND}</button>
       <button class="mila-btn is-icon mila-pause" type="button" aria-pressed="false" aria-label="Mettre les mouvements en pause" title="Mouvements">${ICON_PAUSE}</button>
+    </div>
+    <div class="mila-nav">
+      <button class="mila-btn is-icon mila-prev" type="button" aria-label="Page précédente">${ICON_ARROW}</button>
+      <span class="mila-count"></span>
+      <button class="mila-btn is-icon is-main mila-next" type="button" aria-label="Page suivante">${ICON_ARROW}</button>
     </div>
   </nav>
   <div class="mila-loader" role="status">Le monde se dessine…</div>`;
@@ -58,6 +59,11 @@ const FONTS = [
   "600 1em 'Karla'",
 ];
 const FONT_WAIT_MS = 1500;
+/** The shell's page keys (Ti Kannot): the same keys turn the page in every book. */
+const NEXT_KEYS = ["ArrowRight", "ArrowDown", " ", "PageDown"];
+const PREV_KEYS = ["ArrowLeft", "ArrowUp", "PageUp"];
+/** The shell's swipe gain: a finger's travel counts more than a wheel notch. */
+const SWIPE_GAIN = 2.2;
 
 const pad = (n: number): string => String(n).padStart(2, "0");
 
@@ -143,7 +149,7 @@ export default defineImmersive({
     }
     const hideText = (): void => story.classList.remove("is-on");
     function updateCount(): void {
-      count.innerHTML = `<b>${pad(Math.max(page(), 1))}</b> / ${PAGE_COUNT}`;
+      count.textContent = `${Math.max(page(), 1)} / ${PAGE_COUNT}`;
       prev.disabled = page() <= 1 || moving();
       next.disabled = page() >= PAGE_COUNT || moving();
     }
@@ -158,6 +164,7 @@ export default defineImmersive({
     function go(to: number): void {
       if (scene) {
         scene.go(to);
+        updateCount();
         return;
       }
       if (to < 1 || to > PAGE_COUNT) return;
@@ -250,13 +257,44 @@ export default defineImmersive({
     };
     const onKey = (e: KeyboardEvent): void => {
       if (page() === 0) return;
-      if (e.key === "ArrowRight" || (e.key === " " && document.activeElement === document.body)) {
+      // Space activates a focused button (sound, pause, page buttons) instead of turning the page.
+      if (e.key === " " && e.target instanceof HTMLButtonElement) return;
+      if (NEXT_KEYS.includes(e.key)) {
         e.preventDefault();
         go(page() + 1);
-      } else if (e.key === "ArrowLeft") {
+      } else if (PREV_KEYS.includes(e.key)) {
         e.preventDefault();
         go(page() - 1);
       }
+    };
+    /** True when the gesture starts on the tale's text while it overflows: the text scrolls instead. */
+    const onScrollingText = (target: EventTarget | null): boolean =>
+      scroll.classList.contains("is-scrollable") &&
+      target instanceof Node &&
+      scroll.contains(target);
+    const pager = createPager();
+    let touchY: number | null = null;
+    const step = (dy: number): void => {
+      if (page() === 0) return;
+      const direction = pager.step(dy, Date.now());
+      if (direction !== 0) go(page() + direction);
+    };
+    const onWheel = (e: WheelEvent): void => {
+      if (onScrollingText(e.target)) return;
+      e.preventDefault();
+      step(e.deltaY);
+    };
+    const onPointerDown = (e: PointerEvent): void => {
+      touchY = e.pointerType === "mouse" || onScrollingText(e.target) ? null : e.clientY;
+    };
+    const onPointerMove = (e: PointerEvent): void => {
+      if (touchY === null) return;
+      const dy = touchY - e.clientY;
+      touchY = e.clientY;
+      step(dy * SWIPE_GAIN);
+    };
+    const onPointerEnd = (): void => {
+      touchY = null;
     };
     const onBack = (): void => ctx.exit();
     const back = part<HTMLButtonElement>(".mila-back");
@@ -269,6 +307,11 @@ export default defineImmersive({
     back.addEventListener("click", onBack);
     window.addEventListener("keydown", onKey);
     window.addEventListener("resize", syncScrollable);
+    root.addEventListener("wheel", onWheel, { passive: false });
+    root.addEventListener("pointerdown", onPointerDown);
+    root.addEventListener("pointermove", onPointerMove);
+    root.addEventListener("pointerup", onPointerEnd);
+    root.addEventListener("pointercancel", onPointerEnd);
 
     // The tale opens straight on page 1: the tree's dive is its only way in.
     audio.start();

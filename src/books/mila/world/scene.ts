@@ -29,7 +29,7 @@ export interface SceneHooks {
 
 export interface MilaScene {
   readonly page: number;
-  /** A page transition is running. */
+  /** A page transition is running, or about to (the crab's debris clearing first). */
   readonly moving: boolean;
   /** Target page, or -1 when the request is refused (busy, out of range). */
   go(to: number): void;
@@ -3113,17 +3113,23 @@ void main(){
      ===================================================================== */
   let page = 0;
   let trans: Trans | null = null;
+  /** The crab's debris are clearing before the walk to the next page: input waits for it. */
+  let freeing = false;
   const camState = { pos: V3(), tgt: V3() };
   let pageStart = 0;
   let freed = false;
   let mila: MilaRig;
 
   function go(to: number, instant = false): void {
-    if (trans || to < 0 || to > PAGE_COUNT || to === page) return;
+    if (trans || freeing || to < 0 || to > PAGE_COUNT || to === page) return;
     const from = page;
     if (to === CRAB_PAGE + 1 && from === CRAB_PAGE && !freed) {
       freeAll();
-      hooks.later(() => go(to), 1700);
+      freeing = true;
+      hooks.later(() => {
+        freeing = false;
+        go(to);
+      }, 1700);
       return;
     }
     const still = reduceMotion || instant;
@@ -3983,7 +3989,7 @@ void main(){
       return page;
     },
     get moving() {
-      return trans !== null;
+      return trans !== null || freeing;
     },
     go: (to) => go(to),
     show: (to) => go(to, true),

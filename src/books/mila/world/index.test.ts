@@ -11,9 +11,10 @@ const exit = vi.fn();
 const $ = <T extends HTMLElement = HTMLElement>(sel: string): T =>
   container.querySelector<T>(sel) as T;
 const click = (sel: string): void => $(sel).click();
-const key = (k: string): void => {
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: k, cancelable: true }));
+const key = (k: string, target: EventTarget = window): void => {
+  target.dispatchEvent(new KeyboardEvent("keydown", { key: k, cancelable: true, bubbles: true }));
 };
+const heading = (): string | null => $(".mila-heading").textContent;
 
 /** Mounts the world; happy-dom has no WebGL, so this is the text-only reading. */
 async function mount(): Promise<void> {
@@ -91,6 +92,69 @@ describe("Mila's world", () => {
     expect($(".mila-heading").textContent).toBe(PAGES[0].title);
     expect($(".mila-end").hidden).toBe(true);
     expect(document.activeElement).toBe($(".mila-next"));
+  });
+
+  it("has the shell's page buttons and counter (Ti Kannot)", async () => {
+    await mount();
+    const names = [...container.querySelectorAll(".mila-ui button")].map((b) =>
+      b.getAttribute("aria-label"),
+    );
+    expect(names).toEqual([
+      "Couper l'ambiance sonore",
+      "Mettre les mouvements en pause",
+      "Page précédente",
+      "Page suivante",
+    ]);
+    expect($(".mila-next").textContent?.trim()).toBe("");
+    expect($(".mila-count").textContent).toBe("1 / 12");
+    click(".mila-next");
+    expect($(".mila-count").textContent).toBe("2 / 12");
+  });
+
+  it("turns pages with the shell's keys, and lets Space press a focused button", async () => {
+    await mount();
+    for (const k of ["ArrowDown", "PageDown", " ", "ArrowRight"]) key(k);
+    expect(heading()).toBe(PAGES[4].title);
+    for (const k of ["ArrowUp", "PageUp", "ArrowLeft"]) key(k);
+    expect(heading()).toBe(PAGES[1].title);
+    key(" ", $(".mila-pause"));
+    expect(heading()).toBe(PAGES[1].title);
+  });
+
+  it("turns one page per wheel or swipe gesture", async () => {
+    await mount();
+    const root = $(".mila");
+    const wheel = (deltaY: number): boolean =>
+      root.dispatchEvent(new WheelEvent("wheel", { deltaY, cancelable: true, bubbles: true }));
+    expect(wheel(120)).toBe(false);
+    wheel(120);
+    wheel(120);
+    expect(heading()).toBe(PAGES[1].title);
+    vi.advanceTimersByTime(800);
+    wheel(-120);
+    expect(heading()).toBe(PAGES[0].title);
+    vi.advanceTimersByTime(800);
+    const pointer = (type: string, clientY: number, pointerType = "touch"): void => {
+      root.dispatchEvent(new PointerEvent(type, { clientY, pointerType, bubbles: true }));
+    };
+    pointer("pointerdown", 600);
+    pointer("pointermove", 500);
+    pointer("pointermove", 300);
+    pointer("pointerup", 300);
+    expect(heading()).toBe(PAGES[1].title);
+    vi.advanceTimersByTime(800);
+    pointer("pointerdown", 600, "mouse");
+    pointer("pointermove", 300, "mouse");
+    expect(heading()).toBe(PAGES[1].title);
+  });
+
+  it("leaves the wheel to the text while it has to scroll", async () => {
+    await mount();
+    $(".mila-story-scroll").classList.add("is-scrollable");
+    const event = new WheelEvent("wheel", { deltaY: 120, cancelable: true, bubbles: true });
+    $(".mila-text").dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(heading()).toBe(PAGES[0].title);
   });
 
   it("never shows the crab hint when there is no scene to touch", async () => {

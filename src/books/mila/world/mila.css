@@ -197,6 +197,8 @@
 }
 
 /* ---------- Controls ---------- */
+/* The shell's reading row (Ti Kannot), right-aligned: sound and pause a little apart, then
+   previous, counter, next. Mila keeps its own night chips and saffron main button. */
 .mila-ui {
   position: absolute;
   z-index: 2;
@@ -205,8 +207,8 @@
   bottom: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: flex-end;
+  gap: 14px;
   padding: 0 max(18px, env(safe-area-inset-right, 0px)) max(18px, env(safe-area-inset-bottom, 0px))
     max(18px, env(safe-area-inset-left, 0px));
   opacity: 0;
@@ -230,7 +232,7 @@
 .mila-nav {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 8px;
 }
 
 .mila-btn {
@@ -279,18 +281,33 @@
   opacity: 0.55;
 }
 
-.mila-count {
-  min-width: 4.5rem;
-  font-size: 0.82rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.14em;
-  text-align: center;
-  color: var(--ecume-doux);
+/* Round page buttons, the shell's size. */
+.mila-nav .mila-btn {
+  width: 46px;
+  height: 46px;
+  padding: 0;
 }
 
-.mila-count b {
+.mila-prev svg {
+  transform: rotate(180deg);
+}
+
+/* Fixed width, so the row does not shift between "9 / 12" and "10 / 12". */
+.mila-count {
+  box-sizing: border-box;
+  min-width: 76px;
+  padding: 9px 12px;
+  border: 1px solid rgba(243, 233, 214, 0.28);
+  border-radius: 999px;
+  background: rgba(6, 24, 29, 0.45);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  font-size: 14px;
   font-weight: 600;
-  color: var(--or);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--ecume);
 }
 
 .mila-tools {
@@ -411,21 +428,23 @@
   }
 
   .mila-ui {
-    flex-direction: column-reverse;
-    align-items: stretch;
-    gap: 0.6rem;
+    gap: 10px;
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
   }
+}
 
-  .mila-nav {
-    justify-content: space-between;
-  }
-
+/* The narrowest phones: the whole row stays on screen. */
+@media (max-width: 340px) {
+  .mila-ui,
+  .mila-nav,
   .mila-tools {
-    justify-content: flex-end;
+    gap: 6px;
   }
 
-  .mila-btn .mila-lbl-long {
-    display: none;
+  .mila-count {
+    min-width: 64px;
+    padding-inline: 8px;
   }
 }
 
