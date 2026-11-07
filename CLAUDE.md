@@ -39,7 +39,7 @@ src/
   tree/                        # tree universe: index.ts (mountTree), invitation.ts (class invitation slot),
                                # scene/, overlay/, assets/konteur.png
   books/
-    ti-kannot/                 # book.ts, cover.ts, staging.ts, theme.css, story/{gcf,fr}.md, langue/fr.md, world/
+    ti-kannot/                 # book.ts, cover.ts (owner's poster, assets/cover.webp), staging.ts, theme.css, story/{gcf,fr}.md, world/
     mila/                      # immersive book (own reading UI, shell's language switch): book.ts, cover.ts,
                                # assets/cover.webp, story/{gcf,fr}.md, world/ (port of the owner's prototype)
     zanba/, konpe-lapen/       # manifest only (book.ts), ready: false — kept, not shown in the tree
@@ -57,7 +57,8 @@ doc/                           # architecture.md, development.md
   with `book.ts` (+ `story/gcf.md`, `cover.ts`, `staging.ts`, `world/` when ready).
 - Tale text lives in `src/books/<id>/story/<lang>.md` (gcf required, fr, en). Format: spec §4 in
   `docs/superpowers/specs/2026-09-29-universes-per-book-design.md`.
-- Language notes live in `src/books/<id>/langue/fr.md` (optional), format in
+- Language notes live in `src/books/<id>/langue/fr.md` (optional; none in a tale since TKP-EDU, Ti Kannot's
+  are kept in `docs/explanations/ti-kannot/langue/fr.md`), format in
   `docs/superpowers/specs/2026-10-04-kreyol-language-notes-design.md` §2. Every Kréyòl example is
   quoted verbatim from `story/gcf.md` (enforced by `books.test.ts`); `draft: true` until a Creole
   speaker validates it. The panel never changes the tale's mechanics.

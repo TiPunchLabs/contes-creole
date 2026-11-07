@@ -1,5 +1,8 @@
+import { parseNotes } from "@app/language/parse";
+import type { LanguageNotes, Stories } from "@app/contract";
 import { registry } from "@app/registry";
 import { describe, expect, it } from "vitest";
+import tiKannotNotes from "../../docs/explanations/ti-kannot/langue/fr.md?raw";
 
 const storyFolders = new Set(
   Object.keys(import.meta.glob("./*/story/gcf.md")).map((p) => p.split("/")[1]),
@@ -58,21 +61,38 @@ describe("books", () => {
         registry.loadStories(id),
         registry.loadNotes(id),
       ]);
-      const pages = new Map(
-        stories.gcf.pages.map((p) => [
-          p.id,
-          normalize([p.title, p.label, ...p.blocks.map((b) => b.text)].join(" ")),
-        ]),
-      );
       expect(notes).not.toBeNull();
-      for (const note of notes?.notes ?? []) {
-        for (const example of [...note.examples, ...(note.moreExamples ?? [])]) {
-          const page = pages.get(example.pageId);
-          expect(page, `${note.id}: unknown page "${example.pageId}"`).toBeDefined();
-          expect(page, `${note.id}: "${example.gcf.text}"`).toContain(normalize(example.gcf.text));
-        }
-      }
+      expectQuoted(stories, notes);
     });
+  });
+});
+
+/** Every Kréyòl example of `notes` appears word for word on its source page of the tale. */
+function expectQuoted(stories: Stories, notes: LanguageNotes | null): void {
+  const pages = new Map(
+    stories.gcf.pages.map((p) => [
+      p.id,
+      normalize([p.title, p.label, ...p.blocks.map((b) => b.text)].join(" ")),
+    ]),
+  );
+  for (const note of notes?.notes ?? []) {
+    for (const example of [...note.examples, ...(note.moreExamples ?? [])]) {
+      const page = pages.get(example.pageId);
+      expect(page, `${note.id}: unknown page "${example.pageId}"`).toBeDefined();
+      expect(page, `${note.id}: "${example.gcf.text}"`).toContain(normalize(example.gcf.text));
+    }
+  }
+}
+
+describe("ti-kannot", () => {
+  it("keeps no language notes inside the tale (TKP-EDU)", () => {
+    expect(notesFolders.has("ti-kannot")).toBe(false);
+  });
+
+  it("keeps its archived language notes quoted verbatim from the tale", async () => {
+    const notes = parseNotes(tiKannotNotes, "docs/explanations/ti-kannot/langue/fr.md");
+    expect(notes.notes.length).toBeGreaterThan(0);
+    expectQuoted(await registry.loadStories("ti-kannot"), notes);
   });
 });
 

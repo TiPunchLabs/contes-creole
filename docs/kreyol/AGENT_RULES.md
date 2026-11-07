@@ -31,7 +31,8 @@ Read before generating or modifying any Kréyòl in this project (tale text, lan
 ## 3. Project mechanics
 
 - A change to the tale (`src/books/<id>/story/gcf.md`) must be added to `CORRECTIONS` in `src/books/v13-conversion.test.ts`.
-- Language-note examples (`src/books/<id>/langue/fr.md`) are quoted verbatim from `gcf.md`: change both together (`books.test.ts` enforces it).
+- Language-note examples (`src/books/<id>/langue/fr.md`, and Ti Kannot's kept notes in
+  `docs/explanations/ti-kannot/langue/fr.md`) are quoted verbatim from `gcf.md`: change both together (`books.test.ts` enforces it).
 - Keep `draft: true` in `langue/fr.md` until a Creole speaker has reviewed the notes.
 - Run `pnpm typecheck && pnpm lint && pnpm test && pnpm build` after any change.
 
