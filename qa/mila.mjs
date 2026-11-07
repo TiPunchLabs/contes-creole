@@ -287,12 +287,22 @@ async function journey(browser, vp) {
     immersive: document.querySelector(".app")?.hasAttribute("data-immersive"),
     focus: document.activeElement?.className,
     title: document.querySelector(".mila-title")?.textContent,
-    readingHidden: document.querySelector(".reading")?.hidden,
+    // The shell's reading UI shows only its language switch over Mila (MILA-GCF).
+    readingOnlySwitch: (() => {
+      const reading = document.querySelector(".reading");
+      const shown = [...(reading?.children ?? [])].filter((e) => e.getClientRects().length);
+      return (
+        !reading?.hidden &&
+        reading.classList.contains("is-langs-only") &&
+        shown.length === 1 &&
+        shown[0].classList.contains("reading-langs")
+      );
+    })(),
   }));
   check(
     run,
     "dive-opens-mila",
-    cover.immersive && cover.title === TITLE && cover.readingHidden,
+    cover.immersive && cover.title === TITLE && cover.readingOnlySwitch,
     JSON.stringify(cover),
   );
 
