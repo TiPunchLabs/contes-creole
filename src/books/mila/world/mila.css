@@ -351,8 +351,8 @@
   color: var(--color-paper);
 }
 
-.mila-back:focus-visible,
-.mila-ui button:focus-visible {
+.mila .mila-back:focus-visible,
+.mila .mila-ui button:focus-visible {
   /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
   outline: 3px solid transparent;
   outline-offset: 2px;
