@@ -105,7 +105,7 @@ export function createTreeOverlay(
       <div class="tree-label-kicker"></div>
       <div class="tree-label-title"></div>
       <div class="tree-label-sub"></div>
-      <button type="button" class="tree-enter" hidden>${BOOK_ICON}<span>Antré adan kont-la</span></button>
+      <button type="button" class="tree-enter" lang="gcf" hidden>${BOOK_ICON}<span>Antré adan kont-la</span></button>
       <a class="tree-enter tree-invite-open" lang="fr" href="${CLASSES_PAGE}" hidden>${QUILL_ICON}<span>${INVITATION_FICHE.action}</span></a>
     </div>
     <div class="tree-climb"><div class="tree-climb-thumb"></div></div>`;
@@ -155,7 +155,7 @@ export function createTreeOverlay(
       if (next.book !== shownBook) {
         shownBook = next.book;
         const inviting = isInvitation(next.book);
-        label.lang = inviting ? "fr" : "gcf";
+        label.lang = inviting ? "fr" : (next.book.card.lang ?? "gcf");
         label.classList.toggle("is-invitation", inviting);
         enter.hidden = inviting;
         invite.hidden = !inviting;

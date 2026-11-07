@@ -36,6 +36,8 @@ export interface Cards {
 
 const MARGIN = 28;
 const HEADER = 76;
+const TITLE_SIZE = 50;
+const TITLE_SIZE_LONG = 40;
 
 /**
  * Paints the tree-owned part of every card: a rounded paper card around the cover window, the theme
@@ -84,19 +86,27 @@ function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, 
   c.letterSpacing = "0px";
   c.font = `italic 500 28px 'Newsreader', serif`;
   c.fillText(card.sub, MARGIN, bottom + 50);
-  c.font = `800 50px 'Newsreader', 'Andika', sans-serif`;
-  const lines: string[] = [];
-  let current = "";
-  for (const word of card.title.split(" ")) {
-    if (c.measureText(`${current} ${word}`).width > W - 120 && current) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = current ? `${current} ${word}` : word;
+  const wrap = (size: number): string[] => {
+    c.font = `800 ${size}px 'Newsreader', 'Andika', sans-serif`;
+    const lines: string[] = [];
+    let current = "";
+    for (const word of card.title.split(" ")) {
+      if (c.measureText(`${current} ${word}`).width > W - 120 && current) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = current ? `${current} ${word}` : word;
+      }
     }
-  }
-  lines.push(current);
-  lines.forEach((line, i) => c.fillText(line, MARGIN, bottom + 112 + i * 54));
+    lines.push(current);
+    return lines;
+  };
+  // A title longer than two lines steps down a size so its third line stays inside the frame.
+  let size = TITLE_SIZE;
+  let lines = wrap(size);
+  if (lines.length > 2) lines = wrap((size = TITLE_SIZE_LONG));
+  const first = bottom + 112 - (TITLE_SIZE - size) / 2;
+  lines.forEach((line, i) => c.fillText(line, MARGIN, first + i * size * 1.08));
 }
 
 /** Card texture: the book paints its cover, the tree paints frame and title; redrawn once fonts load. */
@@ -110,10 +120,12 @@ function coverTexture(book: BookManifest): THREE.CanvasTexture {
   const ctx = canvas.getContext("2d");
   if (!ctx) return texture;
   const draw = (): void => {
+    let pending: void | Promise<void> = undefined;
     if (isInvitation(book)) paintInvitationCover(ctx, COVER_W, COVER_H);
-    else book.cover?.(ctx, COVER_W, COVER_H);
+    else pending = book.cover?.(ctx, COVER_W, COVER_H);
     paintFrame(ctx, book, COVER_W, COVER_H);
     texture.needsUpdate = true;
+    if (pending) void pending.then(draw, () => undefined);
   };
   draw();
   void document.fonts?.ready.then(draw);
