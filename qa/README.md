@@ -36,6 +36,7 @@ pnpm build && pnpm exec vite preview --port 4199 --strictPort   # stop it when d
 | `compare.mjs`     | Side-by-side sheets, board left, build right: `node qa/compare.mjs <out-dir> D1=<capture.png> M2=<capture.png>`.                                                                                     |
 | `mila.mjs`        | Mila's book: tree card, direct opening on page 1, 12 pages, controls, leave/reopen counters, keys, reduced motion, no WebGL, Ti Kannot. Asserts an NVIDIA renderer. `ONLY=desktop,mobile,...`        |
 | `mila-motion.mjs` | Mila in motion (frames, no assertions): settled pages, walks 3 -> 4 and 4 -> 5, the page-7 turtle over one lap, contact sheets via ImageMagick `montage`. `VP=desktop,mobile`, `LAP=40`.             |
+| `mila-nav.mjs`    | Mila's navigation against Ti Kannot's: control inventory per viewport, boundaries, return/replay, keys, wheel, swipe, rapid input, debris-clearing guard. `ONLY=survey,...`, `VPS=desktop,...`       |
 
 Mila's scripts launch ANGLE on EGL and pin the NVIDIA EGL vendor
 (`__EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.json`, override with
