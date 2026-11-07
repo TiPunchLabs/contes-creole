@@ -14,7 +14,7 @@ import { showFallback } from "./fallback";
 import { createLanguagePanel } from "./language-panel/language-panel";
 import { readingLangs, storyFor, type ReadingLang } from "./languages";
 import { showNotice } from "./notice";
-import { clampPage, createPager } from "./paging";
+import { clampPage, createPager } from "@shared/paging";
 import { createReadingUI } from "./reading-ui/reading-ui";
 import { createFlash } from "./transition";
 

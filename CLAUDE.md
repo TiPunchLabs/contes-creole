@@ -33,8 +33,8 @@ src/
     language/parse.ts          # langue/<lang>.md parser (language notes)
     language-panel/            # "Lang kréyòl" burger + dialog, over the tale
     reading-ui/                # text card, language switch, page counter and buttons, back button, bubble
-    transition.ts, backdrop.ts, bubble.ts, fallback.ts, languages.ts, paging.ts, notice.ts
-  shared/                      # optional toolbox: random.ts (createRng), math.ts, three/ helpers
+    transition.ts, backdrop.ts, bubble.ts, fallback.ts, languages.ts, notice.ts
+  shared/                      # optional toolbox: random.ts (createRng), math.ts, paging.ts (createPager), three/ helpers
   pages/contes-des-classes/    # script + styles of the static "Les contes des classes" page (no Three.js)
   tree/                        # tree universe: index.ts (mountTree), invitation.ts (class invitation slot),
                                # scene/, overlay/, assets/konteur.png
