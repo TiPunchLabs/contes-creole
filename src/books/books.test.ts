@@ -23,21 +23,31 @@ describe("books", () => {
 
   describe.each(registry.books.map((b) => [b.id, b] as const))("%s", (id, book) => {
     it("is enterable only with a world, a cover, a story and a staging", () => {
-      if (!book.ready) return;
+      if (!book.ready || book.immersive) return;
       expect(book.world).toBeTypeOf("function");
       expect(book.cover).toBeTypeOf("function");
       expect(storyFolders.has(id)).toBe(true);
       expect(stagings[`./${id}/staging.ts`]).toBeDefined();
     });
 
-    it("shares its page ids across languages and labels every Kréyòl page", async () => {
+    it("brings its own reading interface with a cover and a story, without a staging", () => {
+      if (!book.ready || !book.immersive) return;
+      expect(book.immersive).toBeTypeOf("function");
+      expect(book.cover).toBeTypeOf("function");
+      expect(book.world).toBeUndefined();
+      expect(storyFolders.has(id)).toBe(true);
+      expect(stagings[`./${id}/staging.ts`]).toBeUndefined();
+    });
+
+    it("shares its page ids across languages and labels every Kréyòl page of the shared card", async () => {
       if (!storyFolders.has(id)) return;
       const stories = await registry.loadStories(id);
       const ids = stories.gcf.pages.map((p) => p.id);
       for (const translation of [stories.fr, stories.en]) {
         if (translation) expect(translation.pages.map((p) => p.id)).toEqual(ids);
       }
-      expect(stories.gcf.pages.every((p) => p.label !== "")).toBe(true);
+      // Labels are the shared reading card's kicker; a book with its own interface has none.
+      if (!book.immersive) expect(stories.gcf.pages.every((p) => p.label !== "")).toBe(true);
       const staging = stagings[`./${id}/staging.ts`];
       if (staging) expect(Object.keys(staging.STAGING).sort()).toEqual([...ids].sort());
     });
@@ -63,5 +73,40 @@ describe("books", () => {
         }
       }
     });
+  });
+});
+
+describe("mila", () => {
+  it("tells its twelve pages in Kréyòl (owner's working translation) and in the prototype's French", async () => {
+    const stories = await registry.loadStories("mila");
+    expect(stories.gcf.pages.map((p) => p.title)).toEqual([
+      "Koté vag-la ka pran sonmèy",
+      "Vwa-la adan espiral-la",
+      "Swa-la lanmè-la pé bouch a-y",
+      "Chimen-la ponmoun pa té ka vwè",
+      "Son a sé ti pa-la",
+      "Douvan dlo-la",
+      "Jaden-la ou pa ka pòté ay",
+      "Séla ki ka najé ansanm",
+      "Pèl a dèmen",
+      "Finèt a lalin",
+      "Twa vwa pou on lanmè",
+      "Sa Mila pòté wouvin",
+    ]);
+    expect(stories.fr?.pages.map((p) => p.title)).toEqual([
+      "Là où la vague s'endort",
+      "La voix dans la spirale",
+      "Le soir où la mer se tut",
+      "Le chemin que personne ne voyait",
+      "Le bruit des petits pas",
+      "Le seuil de l'eau",
+      "Le jardin qu'on n'emporte pas",
+      "Ceux qui nagent ensemble",
+      "La perle de demain",
+      "La fenêtre de lune",
+      "Trois voix pour une mer",
+      "Ce que Mila rapporta",
+    ]);
+    expect(stories.en).toBeUndefined();
   });
 });

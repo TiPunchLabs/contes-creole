@@ -92,9 +92,15 @@ try {
     check("j1.arrow-keys-climb", (await thumbTop(p)) < t1);
     const shelf = p.locator(".tree-shelf-book");
     const n = await shelf.count();
-    // Published books, then one invitation to classes (pending books are not shown).
-    check("j1.shelf-lists-books-and-invitation", n === 2, `count=${n}`);
-    await shelf.nth(1).click();
+    // Published books (Ti Kannot, Mila since MILA-AIM), then one invitation to classes, last
+    // (pending books are not shown).
+    const last = await shelf.nth(n - 1).evaluate((b) => b.classList.contains("is-invitation"));
+    check(
+      "j1.shelf-lists-books-and-invitation",
+      n === 3 && last,
+      `count=${n} invitationLast=${last}`,
+    );
+    await p.locator(".tree-shelf-book.is-invitation").click();
     await wait(2600);
     check(
       "j1.invitation-fiche",
@@ -343,8 +349,7 @@ try {
     if (tapped) await p.screenshot({ path: OUT + "m2-konteur-bubble.png" });
     await wait(5000);
     check("j3.mobile-bubble-auto-hides-after-hold", (await bubbleShown(p)) === "");
-    const shelf = p.locator(".tree-shelf-book");
-    await shelf.nth(1).tap();
+    await p.locator(".tree-shelf-book.is-invitation").tap();
     await wait(2600);
     check("j5.mobile-invitation-fiche", await p.isVisible(".tree-invite-open"));
     await p.screenshot({ path: OUT + "m5-near-invitation.png" });
@@ -395,7 +400,7 @@ try {
     await p.goBack();
     await p.waitForSelector(".tree-shelf", { timeout: 20000 });
     await wait(1500);
-    await shelf.nth(0).tap();
+    await p.locator(".tree-shelf-book").nth(0).tap();
     await wait(2600);
     check("j1.mobile-shelf-near-card", await p.isVisible(".tree-enter"));
     await p.screenshot({ path: OUT + "m3-near-ready-book.png" });

@@ -44,6 +44,12 @@ body {
   background-size: 256px 256px;
 }
 
+/* An immersive book paints its own vignette and grain: the shell's would double them. */
+.app[data-immersive] .app-vignette,
+.app[data-immersive] .app-grain {
+  display: none;
+}
+
 .app-bubble {
   position: absolute;
   left: 0;

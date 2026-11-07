@@ -27,6 +27,11 @@
   pointer-events: auto;
 }
 
+/* A book with its own reading interface (Mila) keeps only the shell's language switch. */
+.reading.is-langs-only > :not(.reading-langs) {
+  display: none;
+}
+
 .reading button:focus-visible {
   /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
   outline: 3px solid transparent;

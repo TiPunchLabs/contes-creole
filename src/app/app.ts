@@ -4,6 +4,8 @@ import type {
   BookHandle,
   Bubble,
   BookManifest,
+  ImmersiveHandle,
+  ImmersiveText,
   LanguageNotes,
   MountTree,
   Stories,
@@ -13,7 +15,7 @@ import { showFallback } from "./fallback";
 import { createLanguagePanel } from "./language-panel/language-panel";
 import { readingLangs, storyFor, type ReadingLang } from "./languages";
 import { showNotice } from "./notice";
-import { clampPage, createPager } from "./paging";
+import { clampPage, createPager } from "@shared/paging";
 import { createReadingUI } from "./reading-ui/reading-ui";
 import { createFlash } from "./transition";
 
@@ -44,6 +46,13 @@ interface OpenBook {
   handle: BookHandle;
 }
 
+/** A book with its own reading interface: the shell keeps the way back and the language switch. */
+interface OpenImmersive {
+  id: string;
+  stories: Stories;
+  handle: ImmersiveHandle;
+}
+
 /** Shell: mounts the tree, runs tree ⇄ book transitions, owns reading UI, language panel and book-mode input. */
 export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } {
   root.classList.add("app");
@@ -65,6 +74,9 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   let mode: Mode = "tree";
   let tree: TreeHandle | null = null;
   let book: OpenBook | null = null;
+  let immersive: OpenImmersive | null = null;
+  /** Element focused when a book was entered (shelf or fiche button), focused again on return. */
+  let returnFocus: HTMLElement | null = null;
   let page = 0;
   let lang: ReadingLang = "gcf";
   let textHidden = false;
@@ -117,17 +129,27 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   }
 
   function render(): void {
-    reading.render({ page, lang, showHint: page === 0 && !scrolled, textHidden });
+    const showHint = !immersive && page === 0 && !scrolled;
+    reading.render({ page, lang, showHint, textHidden });
+  }
+
+  /** What an immersive world shows in the current language: Bileng adds the French underneath. */
+  function textFor(stories: Stories): ImmersiveText {
+    const gloss = lang === "bi" ? stories.fr : undefined;
+    return { story: storyFor(stories, lang), ...(gloss ? { gloss } : {}) };
   }
 
   /** Removes the open book (if any) and gives the screen back to the tree layer. */
   function closeBook(): void {
     try {
       book?.handle.dispose();
+      immersive?.handle.dispose();
     } catch (err) {
       console.error("Book dispose failed", err);
     }
     book = null;
+    immersive = null;
+    delete root.dataset.immersive;
     textHidden = false;
     delete root.dataset.sceneOnly;
     bubble.hide();
@@ -140,9 +162,53 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     treeLayer.hidden = false;
   }
 
+  /** Dives into a book that brings its own reading interface; the tree comes back on failure. */
+  async function enterImmersive(manifest: BookManifest, activeTree: TreeHandle): Promise<void> {
+    const load = manifest.immersive;
+    if (!load) return;
+    mode = "dive";
+    bubble.hide();
+    const loading = Promise.resolve().then(() =>
+      Promise.all([load(), deps.loadStories(manifest.id)]),
+    );
+    loading.catch(() => undefined);
+    try {
+      await Promise.all([
+        activeTree.dive(manifest.id),
+        flash.to(1, TIMING.dive * 0.45, TIMING.dive * 0.55),
+      ]);
+      activeTree.pause();
+      treeLayer.hidden = true;
+      const [world, stories] = await loading;
+      if (!readingLangs(stories).includes(lang)) lang = "gcf";
+      page = 0;
+      root.dataset.book = manifest.id;
+      root.dataset.immersive = "";
+      bookLayer.hidden = false;
+      const handle = await world.default.mount(bookLayer, {
+        exit: () => void leave(),
+        text: textFor(stories),
+      });
+      immersive = { id: manifest.id, stories, handle };
+      reading.open(stories, { langsOnly: true });
+      render();
+      mode = "book";
+    } catch (err) {
+      console.error(`Book "${manifest.id}" failed to open`, err);
+      closeBook();
+      activeTree.resume(manifest.id);
+      mode = "tree";
+      showNotice(root, LOAD_ERROR).lang = "gcf";
+    }
+    await flash.to(0, TIMING.fade);
+  }
+
   async function enter(bookId: string): Promise<void> {
     const manifest = deps.books.find((b) => b.id === bookId);
-    if (mode !== "tree" || !tree || !manifest?.ready || !manifest.world) return;
+    if (mode !== "tree" || !tree || !manifest?.ready) return;
+    returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (manifest.immersive) return enterImmersive(manifest, tree);
+    if (!manifest.world) return;
     const activeTree = tree;
     mode = "dive";
     bubble.hide();
@@ -188,14 +254,16 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   }
 
   async function leave(): Promise<void> {
-    if (mode !== "book" || !book) return;
-    const bookId = book.id;
+    const bookId = book?.id ?? immersive?.id;
+    if (mode !== "book" || !bookId) return;
     mode = "rise";
     bubble.hide();
     await flash.to(1, TIMING.rise);
     closeBook();
     tree?.resume(bookId);
     mode = "tree";
+    if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
+    returnFocus = null;
     await flash.to(0, TIMING.fade);
   }
 
@@ -211,7 +279,14 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   }
 
   function setLang(next: ReadingLang): void {
-    if (mode !== "book" || !book || next === lang) return;
+    if (mode !== "book" || next === lang) return;
+    if (immersive) {
+      lang = next;
+      immersive.handle.setText(textFor(immersive.stories));
+      render();
+      return;
+    }
+    if (!book) return;
     lang = next;
     const story = storyFor(book.stories, lang);
     bubble.setLang(story.lang);
@@ -234,7 +309,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     if (direction !== 0) goPage(page + direction);
   };
   const onWheel = (e: WheelEvent): void => {
-    if (mode !== "book" || panel.isOpen) return;
+    if (mode !== "book" || !book || panel.isOpen) return;
     e.preventDefault();
     step(e.deltaY);
   };
@@ -242,7 +317,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     touchY = e.pointerType === "mouse" ? null : e.clientY;
   };
   const onPointerMove = (e: PointerEvent): void => {
-    if (mode !== "book" || touchY === null || panel.isOpen) return;
+    if (mode !== "book" || !book || touchY === null || panel.isOpen) return;
     const dy = touchY - e.clientY;
     touchY = e.clientY;
     step(dy * 2.2);
@@ -252,6 +327,10 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   };
   const onKey = (e: KeyboardEvent): void => {
     if (mode !== "book") return;
+    if (immersive) {
+      if (e.key === "Escape") void leave();
+      return;
+    }
     if (panel.isOpen) {
       if (e.key === "Escape") panel.close();
       return;
@@ -285,6 +364,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       root.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKey);
       book?.handle.dispose();
+      immersive?.handle.dispose();
       tree?.dispose();
       bubble.dispose();
       panel.dispose();

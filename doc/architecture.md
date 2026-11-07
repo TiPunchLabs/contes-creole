@@ -78,6 +78,37 @@ index.html
 Isolation is enforced by ESLint `no-restricted-imports`: universes import only their own files,
 `@shared/*` and `@app/contract`.
 
+### Books with their own reading interface (Mila)
+
+A book normally gives the shell a `world` and Markdown stories (`story/gcf.md` required); the shell
+lays its shared reading UI over the world. A book whose experience is designed as a whole, text and
+controls included, declares `immersive` instead (`BookManifest.immersive`, `ImmersiveWorld` in
+`src/app/contract.ts`):
+
+- The shell keeps the tree card, the dive and rise transitions, Escape back to the tree, the load
+  error notice, the focus given back to the control that opened the book, and its language switch
+  (`ReadingUI.open(stories, { langsOnly: true })`: the same Kréyòl / Bileng / Français buttons and
+  the same session language as every book). It shows no other part of its reading UI and no
+  language panel, leaves page keys, wheel and touch to the world, and hides its own vignette and
+  grain (`.app[data-immersive]`).
+- The book still keeps its text in `story/<lang>.md` (gcf required), loaded by the registry. The
+  world gets `text` (the story in the reading language, plus the French `gloss` in Bileng) and
+  `exit()` for its own way back; `setText()` changes the language on the same page without touching
+  its scene; it must release everything in `dispose()`.
+- `card.lang` names the language of the card texts (Kréyòl when absent), and `cover` may return a
+  promise to be painted again once an image has loaded.
+
+`src/books/mila/` is the first such book: a port of the owner's prototype "Le monde de Mila V3"
+(twelve pages, its own night palette, fonts, Three.js scene, sound and controls). Its French text
+comes verbatim from the prototype; its Kréyòl is the owner's working translation (ruling MILA-GCF, linguistic validation pending). Interface strings without an approved Kréyòl
+wording (page number, crab hint, "Relire le conte", sound and pause names) stay French, marked
+`lang="fr"`.
+Everything is scoped under `.mila`; the world is a lazy chunk (code, CSS, fonts) and only its card
+picture (`assets/cover.webp`) loads with the tree.
+The prototype's cover screen is not ported (ruling MILA-OPEN): the tree's card is the cover and the
+dive lands on page 1 (`MilaScene.show(1)`, no camera flight). The sound starts on opening; where the
+browser holds it until a gesture, the reader's first tap or key in the tale resumes it.
+
 ### Theme and language layers ("Veillée claire" redesign)
 
 - **Tokens**: `src/shared/theme/tokens.css` holds the site-wide colours, fonts and the dusk-sky

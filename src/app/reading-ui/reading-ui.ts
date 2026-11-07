@@ -18,7 +18,8 @@ export interface ReadingEvents {
 }
 
 export interface ReadingUI {
-  open(stories: Stories): void;
+  /** `langsOnly`: only the language switch, for a book that brings its own reading interface. */
+  open(stories: Stories, options?: { langsOnly?: boolean }): void;
   render(state: ReadingState): void;
   close(): void;
 }
@@ -94,10 +95,11 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
   };
 
   return {
-    open(next) {
+    open(next, options = {}) {
       stories = next;
       shown = -1;
       el.hidden = false;
+      el.classList.toggle("is-langs-only", options.langsOnly === true);
       langs.replaceChildren(
         ...readingLangs(next).map((lang) => {
           const b = button("", LANG_NAMES[lang], () => events.onLang(lang));

@@ -32,6 +32,18 @@ describe("createShelf", () => {
     return { parent, shelf, buttons, onSelect };
   }
 
+  it("tags a book in another language with its card's language", () => {
+    const parent = document.createElement("div");
+    const french: BookManifest = {
+      ...book("m", "Mila"),
+      card: { ...book("m", "").card, title: "Mila", lang: "fr" },
+    };
+    createShelf(parent, [book("a", "Ti Kannot"), french, INVITATION], vi.fn());
+    const buttons = [...parent.querySelectorAll<HTMLButtonElement>("button")];
+    expect(buttons.map((b) => b.lang)).toEqual(["gcf", "fr", "fr"]);
+    expect(buttons[1].getAttribute("aria-label")).toBe("Mila");
+  });
+
   it("is a labelled nav with one button per slot and the Kréyòl label", () => {
     const { parent, buttons } = mount();
     const nav = parent.querySelector("nav");
