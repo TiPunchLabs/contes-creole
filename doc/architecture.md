@@ -97,6 +97,9 @@ controls included, declares `immersive` instead (`BookManifest.immersive`, `Imme
   its scene; it must release everything in `dispose()`.
 - `card.lang` names the language of the card texts (Kréyòl when absent), and `cover` may return a
   promise to be painted again once an image has loaded.
+- `card.poster` (opt-in) shows a 2:3 cover whole in a tall 456×684 window of the 512×720 card,
+  without the tree's theme, title and sub-title (the poster carries its own; the shelf and the label
+  keep them). Ti Kannot's card is the owner's poster this way (ruling TKP-COVER).
 
 `src/books/mila/` is the first such book: a port of the owner's prototype "Le monde de Mila V3"
 (twelve pages, its own night palette, fonts, Three.js scene, sound and controls). Its French text

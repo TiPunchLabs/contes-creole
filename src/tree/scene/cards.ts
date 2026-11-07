@@ -36,19 +36,23 @@ export interface Cards {
 
 const MARGIN = 28;
 const HEADER = 76;
+/** Top and bottom margin of a poster card; its 2:3 window is 456×684 at the 512×720 size. */
+const POSTER_MARGIN = 18;
 const TITLE_SIZE = 50;
 const TITLE_SIZE_LONG = 40;
 
 /**
  * Paints the tree-owned part of every card: a rounded paper card around the cover window, the theme
- * label above it, sub-title and title below. Books get a lamp frame; the invitation an unlit dashed
+ * label above it, sub-title and title below (a poster's window takes the whole card, untitled). Books get a lamp frame; the invitation an unlit dashed
  * frame and a dashed window, so "to write" never rests on colour alone (with the blank page).
  */
 function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, H: number): void {
   const { card } = book;
   const ready = !isInvitation(book);
   const bottom = Math.round(H * 0.66);
-  const win = [MARGIN, HEADER, W - MARGIN * 2, bottom - HEADER] as const;
+  const win: [number, number, number, number] = card.poster
+    ? [MARGIN, POSTER_MARGIN, W - MARGIN * 2, H - POSTER_MARGIN * 2]
+    : [MARGIN, HEADER, W - MARGIN * 2, bottom - HEADER];
   // Round the card's corners with an opaque mask: the cover may leave a translucent fill style.
   c.globalAlpha = 1;
   c.fillStyle = "#000";
@@ -78,6 +82,7 @@ function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, 
     c.stroke();
     c.setLineDash([]);
   }
+  if (card.poster) return;
   c.textAlign = "left";
   c.fillStyle = ready ? CARD.ink : CARD.inkSoft;
   c.font = `700 22px 'Andika', sans-serif`;

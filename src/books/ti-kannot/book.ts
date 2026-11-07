@@ -5,7 +5,12 @@ export default defineBook({
   id: "ti-kannot",
   order: 1,
   ready: true,
-  card: { title: "Ti Kannot é Gwo Rako", sub: "Larivyè-la té swèf", theme: "Dlo · L’eau" },
+  card: {
+    title: "Ti Kannot é Gwo Rako",
+    sub: "Larivyè-la té swèf",
+    theme: "Dlo · L’eau",
+    poster: true,
+  },
   cover: paintCover,
   world: () => import("./world/index"),
 });
