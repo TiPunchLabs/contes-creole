@@ -3,7 +3,7 @@
 import * as THREE from "three";
 import { createRng, type Rng } from "@shared/random";
 import { soften } from "../soft";
-import { faceted, Kit } from "./kit";
+import { Kit, reach } from "./kit";
 
 /** Height layer: trees shade, shrubs fill under them, low plants carpet the ground. */
 export type Stratum = "tree" | "shrub" | "low";
@@ -454,9 +454,19 @@ export const FLORA: Record<Flora, () => Plant> = {
   tuft,
 };
 
-/** River and path stones: a flat slab, a rounded boulder and a tall block. */
+/**
+ * A water-worn stone: a smooth rounded mass of the given proportions, widened or narrowed so its
+ * horizontal reach is `span` (the reach the placement rules were tuned with).
+ */
+function pebble(sx: number, sy: number, sz: number, span: number): THREE.BufferGeometry {
+  const g = soften(new THREE.IcosahedronGeometry(0.5, 1).scale(sx, sy, sz));
+  const k = span / reach(g);
+  return g.scale(k, 1, k);
+}
+
+/** River and path stones, rounded like the poster's: a flat slab, a boulder and a tall block. */
 export const STONES: (() => THREE.BufferGeometry)[] = [
-  () => faceted(new THREE.DodecahedronGeometry(0.5, 0).scale(1.4, 0.45, 1)),
-  () => soften(new THREE.IcosahedronGeometry(0.5, 0).scale(1.1, 0.75, 0.95)),
-  () => faceted(new THREE.DodecahedronGeometry(0.5, 0).scale(0.8, 1.15, 0.9)),
+  () => pebble(1.4, 0.45, 1, 0.678),
+  () => pebble(1.1, 0.75, 0.95, 0.53),
+  () => pebble(0.8, 1.15, 0.9, 0.42),
 ];

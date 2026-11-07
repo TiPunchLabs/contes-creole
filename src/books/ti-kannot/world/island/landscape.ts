@@ -90,21 +90,21 @@ export const STOCK_AREA = {
 const CASES: CaseSpec[] = [
   {
     style: "galerie",
-    colors: { wall: "#f1d9a8", shutter: "#2f7f86", roof: "#b4553b" },
+    colors: { wall: "#f2dcae", shutter: "#3f8a8a", roof: "#c6643f" },
     x: -10.5,
     z: 6.5,
     turn: -0.3,
   },
   {
     style: "katpan",
-    colors: { wall: "#cfe2cf", shutter: "#3d6fa6", roof: "#6f8f6a" },
+    colors: { wall: "#efe0c0", shutter: "#4a78a0", roof: "#7f9a6c" },
     x: -11.5,
     z: -2.3,
     turn: 0.6,
   },
   {
     style: "pignon",
-    colors: { wall: "#b58f69", shutter: "#3a8a5a", roof: "#a0705a" },
+    colors: { wall: "#d2ad82", shutter: "#3a8a5a", roof: "#b8683f" },
     x: -13.5,
     z: 1.5,
     turn: -0.3,
@@ -126,7 +126,7 @@ const gwoRakoZ = HOUSE[1] - Math.cos(GWO_RAKO_YAW) * KATPAN_RIDGE * GWO_RAKO_SCA
  */
 export const GWO_RAKO: CaseSpec = {
   style: "katpan",
-  colors: { wall: "#e8b864", shutter: "#3f8f5a", roof: "#c0432f" },
+  colors: { wall: "#ecc27a", shutter: "#3f8f5a", roof: "#c8553a" },
   x: gwoRakoX,
   z: gwoRakoZ,
   turn: GWO_RAKO_YAW - Math.atan2(YARD.x - gwoRakoX, YARD.z - gwoRakoZ),

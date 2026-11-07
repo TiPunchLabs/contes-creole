@@ -14,7 +14,8 @@ export function paintQuality(coarsePointer: boolean, pixelRatio: number): PaintQ
 const VERTEX = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
 
 // Kuwahara brush (spaced samples for wider strokes), pigment pooling at edges, light granulation,
-// paper grain, a soft ragged vignette and a slight saturation lift.
+// paper grain and a soft ragged vignette. The grade follows the poster: greens leaning to yellow,
+// warm light, no saturation lift, and edges that only fade a little into the paper.
 const FRAGMENT = `uniform sampler2D tDiffuse; uniform vec2 uTexel; uniform float uTime; uniform vec3 uPaper; varying vec2 vUv;
   float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
   float noise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f);
@@ -46,10 +47,12 @@ const FRAGMENT = `uniform sampler2D tDiffuse; uniform vec2 uTexel; uniform float
     c*=.95+.07*fbm(vUv*aspect*40.);
     c=mix(c,c*uPaper,.1);
     c+=(fbm(vUv*aspect*180.)-.5)*.03;
+    float green=clamp((c.g-max(c.r,c.b))*4.,0.,1.);
+    c=mix(c,vec3(c.r*1.08+.015,c.g*.97,c.b*.84),green*.65);
     vec2 q=(vUv-.5)*vec2(1.,.85);
-    float vig=smoothstep(.62,.42-fbm(vUv*8.)*.08,length(q));
-    c=mix(uPaper,c,.5+.5*vig);
-    c=mix(vec3(dot(c,vec3(.299,.587,.114))),c,1.12);
+    float vig=smoothstep(.66,.44-fbm(vUv*8.)*.08,length(q));
+    c=mix(uPaper,c,.74+.26*vig);
+    c=mix(vec3(dot(c,vec3(.299,.587,.114))),c,.97);
     gl_FragColor=vec4(c,1.); }`;
 
 /** Post-processing chain giving the scene its watercolour look; owns its render targets. */
@@ -61,14 +64,14 @@ export function createPaint(
 ): { render(): void; update(time: number): void; dispose(): void } {
   if (quality === "low") renderer.setPixelRatio(1);
   renderer.toneMapping = THREE.NeutralToneMapping;
-  renderer.toneMappingExposure = 1.08;
+  renderer.toneMappingExposure = 1.15;
   const composer = new EffectComposer(renderer);
   const watercolour = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },
       uTexel: { value: new THREE.Vector2(1 / 1024, 1 / 1024) },
       uTime: { value: 0 },
-      uPaper: { value: new THREE.Color("#f4ead6") },
+      uPaper: { value: new THREE.Color("#f7e6cb") },
     },
     defines: { RADIUS: quality === "high" ? 4 : 2, SPREAD: "1.6" },
     vertexShader: VERTEX,

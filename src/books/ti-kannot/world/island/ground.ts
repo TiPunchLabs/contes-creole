@@ -7,15 +7,15 @@ import { islandHeight, riverDistance } from "./terrain";
 const SIZE = 64;
 const SEGMENTS = 128;
 const PALETTE = {
-  bed: new THREE.Color("#cdb88e"),
-  sand: new THREE.Color("#f6e6b8"),
-  lush: new THREE.Color("#8fd27a"),
-  grass: new THREE.Color("#ade07c"),
-  forest: new THREE.Color("#6aae6c"),
-  high: new THREE.Color("#7c9a72"),
-  rock: new THREE.Color("#b3a99c"),
-  earth: new THREE.Color("#d2b88a"),
-  bank: new THREE.Color("#93b071"),
+  bed: new THREE.Color("#d6c49a"),
+  sand: new THREE.Color("#f4dfae"),
+  lush: new THREE.Color("#8cc46a"),
+  grass: new THREE.Color("#a8cf72"),
+  forest: new THREE.Color("#5f9e5c"),
+  high: new THREE.Color("#7a9866"),
+  rock: new THREE.Color("#b6a48e"),
+  earth: new THREE.Color("#d8b98a"),
+  bank: new THREE.Color("#8fb46a"),
 };
 const DRY = new THREE.Color("#e8d39a");
 const WHITE = new THREE.Color("#ffffff");
@@ -42,33 +42,46 @@ export function facePaint(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, 
   return "grass";
 }
 
-/** Softly lit island ground painted in patches; the drought tints it towards dry straw. */
+/**
+ * Softly lit island ground: each face picks its paint, and each vertex blends the paints of the
+ * faces around it, so patches meet in soft washes; the drought tints it towards dry straw.
+ */
 export function createGround(rng: Rng): { mesh: THREE.Mesh; update(env: MixedEnv): void } {
-  const relief = new THREE.PlaneGeometry(SIZE, SIZE, SEGMENTS, SEGMENTS).rotateX(-Math.PI / 2);
-  const heights = relief.getAttribute("position");
-  for (let i = 0; i < heights.count; i++) {
-    heights.setY(i, islandHeight(heights.getX(i), heights.getZ(i)));
-  }
-  relief.computeVertexNormals();
-  // Smooth light over the relief, but one paint colour per face.
-  const geometry = relief.toNonIndexed();
-  relief.dispose();
+  const geometry = new THREE.PlaneGeometry(SIZE, SIZE, SEGMENTS, SEGMENTS).rotateX(-Math.PI / 2);
   const pos = geometry.getAttribute("position");
-  const colors = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    pos.setY(i, islandHeight(pos.getX(i), pos.getZ(i)));
+  }
+  geometry.computeVertexNormals();
+  const index = geometry.getIndex();
+  if (!index) throw new Error("ground: indexed plane expected");
+  const sums = new Float32Array(pos.count * 3);
+  const weights = new Float32Array(pos.count);
   const va = new THREE.Vector3();
   const vb = new THREE.Vector3();
   const vc = new THREE.Vector3();
   const edge = new THREE.Vector3();
   const normal = new THREE.Vector3();
   const tint = new THREE.Color();
-  for (let i = 0; i < pos.count; i += 3) {
-    va.fromBufferAttribute(pos, i);
-    vb.fromBufferAttribute(pos, i + 1);
-    vc.fromBufferAttribute(pos, i + 2);
+  for (let f = 0; f < index.count; f += 3) {
+    const corners = [index.getX(f), index.getX(f + 1), index.getX(f + 2)];
+    va.fromBufferAttribute(pos, corners[0]);
+    vb.fromBufferAttribute(pos, corners[1]);
+    vc.fromBufferAttribute(pos, corners[2]);
     normal.subVectors(vc, vb).cross(edge.subVectors(va, vb)).normalize();
     tint.copy(PALETTE[facePaint(va, vb, vc, Math.abs(normal.y))]);
     tint.offsetHSL(0, 0, (rng() - 0.5) * 0.05);
-    for (let k = 0; k < 3; k++) tint.toArray(colors, (i + k) * 3);
+    for (const v of corners) {
+      sums[v * 3] += tint.r;
+      sums[v * 3 + 1] += tint.g;
+      sums[v * 3 + 2] += tint.b;
+      weights[v] += 1;
+    }
+  }
+  const colors = new Float32Array(pos.count * 3);
+  for (let v = 0; v < pos.count; v++) {
+    const w = Math.max(weights[v], 1);
+    colors.set([sums[v * 3] / w, sums[v * 3 + 1] / w, sums[v * 3 + 2] / w], v * 3);
   }
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
   const material = new THREE.MeshLambertMaterial({ vertexColors: true });
