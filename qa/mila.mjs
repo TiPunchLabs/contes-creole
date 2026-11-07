@@ -4,6 +4,7 @@
 // performance.now), GPU only.
 // Usage: [SITE=url] [OUT=dir] [ONLY=desktop,mobile,landscape,keys,reduced,nogl,kannot] node qa/mila.mjs
 import { chromium } from "@playwright/test";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 const SITE = process.env.SITE ?? "http://localhost:4199/";
@@ -83,6 +84,20 @@ const INSTRUMENT = () => {
     }
   }
 };
+
+/** Share of pixels (0-1) that differ by more than 2 % between two captures (ImageMagick `compare`). */
+function pixelDiff(a, b) {
+  let out;
+  try {
+    out = execFileSync("compare", ["-metric", "AE", "-fuzz", "2%", a, b, "null:"], {
+      stdio: ["ignore", "ignore", "pipe"],
+    }).toString();
+  } catch (err) {
+    out = err.stderr?.toString() ?? "";
+  }
+  const share = /\(([\d.e-]+)\)/.exec(out);
+  return share ? Number(share[1]) : NaN;
+}
 
 /** Live counters: contexts created and lost, audio states, and Mila draw calls per second. */
 async function counters(p, ms = 2000) {
@@ -312,10 +327,22 @@ async function journey(browser, vp) {
       // (compared with ImageMagick).
       await p.waitForTimeout(6000);
       await press(p.locator(".mila-pause"), touch);
-      await p.waitForTimeout(1500);
+      // the motion eases to zero over about two seconds: compare only once it has settled,
+      // with the pointer moving between the captures (parallax must not move either)
+      await p.waitForTimeout(4000);
       await p.screenshot({ path: `${OUT}${run}-p08-paused-a.png` });
-      await p.waitForTimeout(1000);
+      await p.mouse.move(300, 300);
+      await p.mouse.move(1100, 600, { steps: 10 });
+      await p.waitForTimeout(1500);
       await p.screenshot({ path: `${OUT}${run}-p08-paused-b.png` });
+      const still = pixelDiff(`${OUT}${run}-p08-paused-a.png`, `${OUT}${run}-p08-paused-b.png`);
+      results.runs[run].pausedDiff = still;
+      check(
+        run,
+        "pause-holds-the-scene",
+        still < 0.01,
+        `${(still * 100).toFixed(2)} % pixels differ`,
+      );
       await press(p.locator(".mila-pause"), touch);
       await p.waitForTimeout(800);
     }
@@ -493,6 +520,12 @@ async function nogl(browser, vp) {
   const openMs = await openMila(p, run, vp !== "desktop", false);
   check(run, "text-fallback", (await p.locator(".mila.is-nogl").count()) === 1);
   checkArrival(run, await arrival(p), openMs);
+  // the shell's flash fades out after the mount: capture what the reader then sees
+  await p.waitForFunction(
+    () => Number(getComputedStyle(document.querySelector(".app-flash")).opacity) === 0,
+    null,
+    { timeout: 10000 },
+  );
   await p.screenshot({ path: `${OUT}${run}-p01.png` });
   for (let i = 1; i < 12; i++) await press(p.locator(".mila-next"), vp !== "desktop");
   check(run, "reads-to-page-12", (await p.locator(".mila-num").textContent()) === "Page 12");
