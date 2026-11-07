@@ -2,8 +2,15 @@ import { lerp } from "@shared/math";
 
 /** Synthesized night ambience: sea swell, night frogs and the found song (no recording). */
 export interface Ambience {
-  /** Creates the audio graph; call it from a user gesture (browser autoplay rules). */
+  /**
+   * Creates the audio graph. Outside a user gesture the browser may keep it suspended:
+   * `resume()` from the next gesture then lets it play.
+   */
   start(): void;
+  /** Whether the browser keeps the sound suspended until a user gesture. */
+  readonly waiting: boolean;
+  /** Resumes a suspended context; call it from a user gesture. */
+  resume(): void;
   readonly on: boolean;
   /** Mutes or unmutes; returns the new state. */
   toggle(): boolean;
@@ -166,6 +173,12 @@ export function createAmbience(): Ambience {
         o.start();
       }
       master.gain.linearRampToValueAtTime(on ? VOLUME : 0, c.currentTime + 3);
+    },
+    get waiting() {
+      return ctx?.state === "suspended";
+    },
+    resume() {
+      if (ctx?.state === "suspended") void ctx.resume().catch(() => undefined);
     },
     get on() {
       return on;

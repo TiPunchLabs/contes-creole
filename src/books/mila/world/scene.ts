@@ -33,6 +33,8 @@ export interface MilaScene {
   readonly moving: boolean;
   /** Target page, or -1 when the request is refused (busy, out of range). */
   go(to: number): void;
+  /** Lands on a page at once, without the camera flight (the tale opens straight on page 1). */
+  show(to: number): void;
   /** Puts the crab's debris back for a new reading. */
   resetCrab(): void;
   setMotion(on: boolean): void;
@@ -3053,7 +3055,7 @@ void main(){
   let freed = false;
   let mila: MilaRig;
 
-  function go(to: number): void {
+  function go(to: number, instant = false): void {
     if (trans || to < 0 || to > PAGE_COUNT || to === page) return;
     const from = page;
     if (to === CRAB_PAGE + 1 && from === CRAB_PAGE && !freed) {
@@ -3061,14 +3063,15 @@ void main(){
       hooks.later(() => go(to), 1700);
       return;
     }
-    const dur = reduceMotion ? 0 : (DURATIONS[`${from}>${to}`] ?? 5.5);
+    const still = reduceMotion || instant;
+    const dur = still ? 0 : (DURATIONS[`${from}>${to}`] ?? 5.5);
     const end = adaptForAspect(CAMS[to]);
-    const via = reduceMotion ? [] : viaFor(from, to);
+    const via = still ? [] : viaFor(from, to);
     const posPts = [camState.pos.clone(), ...via.map((v) => v[0]), end.pos];
     const tgtPts = [camState.tgt.clone(), ...via.map((v) => v[1]), end.tgt];
     const mFrom = mila.g.position.clone();
     const mTo = MILA_AT[to].p.clone();
-    const mvia = reduceMotion
+    const mvia = still
       ? []
       : (MILA_VIA[`${from}>${to}`] ?? (MILA_VIA[`${to}>${from}`] ?? []).slice().reverse()).map(
           (v) => v.clone(),
@@ -3916,7 +3919,8 @@ void main(){
     get moving() {
       return trans !== null;
     },
-    go,
+    go: (to) => go(to),
+    show: (to) => go(to, true),
     resetCrab() {
       freed = false;
       crab.freedAt = 0;

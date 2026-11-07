@@ -97,6 +97,9 @@ controls included, declares `immersive` instead (`BookManifest.immersive`, `Imme
 (French tale, twelve pages, its own night palette, fonts, Three.js scene, sound and controls).
 Everything is scoped under `.mila`; the world is a lazy chunk (code, CSS, fonts) and only its card
 picture (`assets/cover.webp`) loads with the tree.
+The prototype's cover screen is not ported (ruling MILA-OPEN): the tree's card is the cover and the
+dive lands on page 1 (`MilaScene.show(1)`, no camera flight). The sound starts on opening; where the
+browser holds it until a gesture, the reader's first tap or key in the tale resumes it.
 
 ### Theme and language layers ("Veillée claire" redesign)
 

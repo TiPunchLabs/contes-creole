@@ -24,13 +24,7 @@ const ICON_BACK = `<svg width="20" height="12" viewBox="0 0 20 12" fill="none" s
 const TEMPLATE = `
   <canvas class="mila-gl" aria-hidden="true" tabindex="-1"></canvas>
   <button type="button" class="mila-back" lang="gcf" aria-label="Pyébwa a Konesans">${ICON_BACK}<span>Pyébwa a Konesans</span></button>
-  <section class="mila-cover" aria-labelledby="mila-title">
-    <p class="mila-collection">Contes Créoles · Guadeloupe</p>
-    <h1 class="mila-title" id="mila-title">Mila <span>et le lambi qui avait perdu son chant</span></h1>
-    <p class="mila-chapeau">Un soir, au bord de la mer, une petite fille porte un coquillage à son oreille. Il ne chante plus.</p>
-    <button class="mila-enter" type="button" disabled>Entrer dans le conte</button>
-    <p class="mila-note">Douze pages · lecture à votre rythme · ambiance sonore de mer et de grenouilles de nuit (pas de narration enregistrée)</p>
-  </section>
+  <h1 class="mila-title">Mila <span>et le lambi qui avait perdu son chant</span></h1>
   <article class="mila-story" aria-live="polite">
     <div class="mila-voile"></div>
     <div class="mila-story-scroll">
@@ -40,7 +34,6 @@ const TEMPLATE = `
       <p class="mila-hint" hidden></p>
       <div class="mila-end" hidden>
         <button class="mila-btn is-main mila-reread" type="button">Relire le conte</button>
-        <button class="mila-btn mila-tocover" type="button">Retour à la couverture</button>
       </div>
     </div>
   </article>
@@ -57,7 +50,7 @@ const TEMPLATE = `
   </nav>
   <div class="mila-loader" role="status">Le monde se dessine…</div>`;
 
-/** Fonts the cover needs before it is revealed; never waits longer than `FONT_WAIT_MS`. */
+/** Fonts page 1 needs before it is revealed; never waits longer than `FONT_WAIT_MS`. */
 const FONTS = [
   "600 italic 1em 'Cormorant Garamond'",
   "400 1em 'Spectral'",
@@ -65,12 +58,10 @@ const FONTS = [
   "600 1em 'Karla'",
 ];
 const FONT_WAIT_MS = 1500;
-const COVER_RETURN_MS = 2000;
-const ENTER_FOCUS_MS = 400;
 
 const pad = (n: number): string => String(n).padStart(2, "0");
 
-/** Resolves once the cover's fonts are loaded (or failed); at once without the Font Loading API. */
+/** Resolves once the reading fonts are loaded (or failed); at once without the Font Loading API. */
 function fontsLoaded(): Promise<unknown> {
   if (!("fonts" in document)) return Promise.resolve();
   return Promise.all(FONTS.map((f) => document.fonts.load(f))).catch(() => undefined);
@@ -90,8 +81,6 @@ export default defineImmersive({
       return found;
     };
     const canvas = part<HTMLCanvasElement>(".mila-gl");
-    const cover = part(".mila-cover");
-    const enter = part<HTMLButtonElement>(".mila-enter");
     const story = part(".mila-story");
     const scroll = part(".mila-story-scroll");
     const num = part(".mila-num");
@@ -186,7 +175,7 @@ export default defineImmersive({
       reduceMotion,
       small,
       later,
-      onLeave(to: number) {
+      onLeave() {
         hideText();
         updateCount();
         if (reduceMotion) {
@@ -194,7 +183,6 @@ export default defineImmersive({
           void canvas.offsetWidth;
           canvas.classList.add("is-cut");
         }
-        if (to === 0) lastControl = null;
       },
       onArrive(to: number) {
         if (to >= 1) showText(to);
@@ -218,14 +206,13 @@ export default defineImmersive({
       root.classList.add("is-nogl");
     }
     loader.classList.add("is-gone");
-    enter.disabled = false;
 
-    const onEnter = (): void => {
-      audio.start();
-      cover.classList.add("is-gone");
-      ui.classList.add("is-on");
-      go(1);
-      later(() => next.focus({ preventScroll: true }), ENTER_FOCUS_MS);
+    /** Lets a sound the browser held back play from the reader's first gesture in the tale. */
+    const onGesture = (): void => {
+      audio.resume();
+      if (audio.waiting) return;
+      root.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture, true);
     };
     const onPrev = (): void => {
       lastControl = prev;
@@ -239,20 +226,6 @@ export default defineImmersive({
       lastControl = next;
       resetCrab();
       go(1);
-    };
-    const onToCover = (): void => {
-      hideText();
-      ui.classList.remove("is-on");
-      if (scene) scene.go(0);
-      else textPage = 0;
-      later(
-        () => {
-          cover.classList.remove("is-gone");
-          resetCrab();
-          enter.focus({ preventScroll: true });
-        },
-        scene ? COVER_RETURN_MS : 0,
-      );
     };
     const onSound = (): void => {
       const on = audio.toggle();
@@ -288,22 +261,35 @@ export default defineImmersive({
     const onBack = (): void => ctx.exit();
     const back = part<HTMLButtonElement>(".mila-back");
 
-    enter.addEventListener("click", onEnter);
     prev.addEventListener("click", onPrev);
     next.addEventListener("click", onNext);
     reread.addEventListener("click", onReread);
-    part(".mila-tocover").addEventListener("click", onToCover);
     sound.addEventListener("click", onSound);
     pause.addEventListener("click", onPause);
     back.addEventListener("click", onBack);
     window.addEventListener("keydown", onKey);
     window.addEventListener("resize", syncScrollable);
+
+    // The tale opens straight on page 1: the tree's dive is its only way in.
+    audio.start();
+    if (audio.waiting) {
+      root.addEventListener("pointerdown", onGesture);
+      window.addEventListener("keydown", onGesture, true);
+    }
+    ui.classList.add("is-on");
+    lastControl = next;
+    if (scene) scene.show(1);
+    else go(1);
     updateCount();
-    enter.focus({ preventScroll: true });
+    // The tree's button that opened the book is hidden now: page 1's controls take the focus.
+    const opener = document.activeElement;
+    if (opener instanceof HTMLElement && !root.contains(opener)) opener.blur();
+    restoreFocus();
 
     return {
       dispose() {
         window.removeEventListener("keydown", onKey);
+        window.removeEventListener("keydown", onGesture, true);
         window.removeEventListener("resize", syncScrollable);
         timers.forEach(clearTimeout);
         timers.clear();
