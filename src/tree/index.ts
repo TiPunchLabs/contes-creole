@@ -154,14 +154,15 @@ function buildTree(
   const tales = eligibleTales(slots);
   /**
    * The storyteller's random tale: one of the eligible tales, opened like its own book (the
-   * shell's dive straight to page 1). With none, he says so instead of navigating.
+   * shell's dive straight to page 1). With none, he says so instead of navigating: his bubble
+   * follows the hover or the focus like the hint, and a tap (no hover) holds it for 4.5 s.
    */
-  const openRandom = (): void => {
+  const openRandom = (tapped = false): void => {
     if (!active || diving) return;
     const tale = pickRandomTale(slots, Math.random);
     if (!tale) {
       overlay.announce(RANDOM_TALE_NONE);
-      setSpeaker("teller", true);
+      setSpeaker("teller", tapped);
       return;
     }
     hover = null;
@@ -190,10 +191,11 @@ function buildTree(
     onCardFocus: (focused) => {
       cardFocused = focused;
     },
-    onTeller: openRandom,
+    onTeller: () => openRandom(),
     onTellerFocus: (focused) => {
       tellerFocused = focused;
-      setSpeaker(focused ? "teller" : null);
+      // A pointer still resting on him keeps his bubble when the focus moves on.
+      setSpeaker(focused || tellerHovered ? "teller" : null);
     },
   });
   overlay.setTeller(tales.length ? RANDOM_TALE_ACTION : RANDOM_TALE_NONE, tales.length > 0);
@@ -286,7 +288,7 @@ function buildTree(
     Object.assign(pointer, stage.pointer(e));
     const p = pick();
     if (p?.type === "card") enter(p.index);
-    else if (p?.type === "teller") openRandom();
+    else if (p?.type === "teller") openRandom(e.pointerType !== "mouse");
     else if (p && e.pointerType !== "mouse") setSpeaker(speakerOf(p), true);
     else if (!p && e.pointerType !== "mouse") setSpeaker(null);
   };

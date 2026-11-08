@@ -311,6 +311,21 @@ async function runViewport(browser, vp) {
       /tree-book|tree-teller/.test(after.cls ?? "") && !after.hidden,
       JSON.stringify(after),
     );
+    // Hover and focus together (Codex hover-review R1): the focus moving on keeps the bubble of a
+    // Konteur still under the pointer; the pointer leaving then hides it.
+    await foot(p);
+    await p.locator("body").focus();
+    await tabTo(p, ".tree-teller");
+    const tk = await box(p, ".tree-teller");
+    await p.mouse.move(tk.x + tk.w / 2, tk.y + tk.h * 0.55);
+    await p.waitForTimeout(500);
+    await p.keyboard.press("Tab");
+    await p.waitForTimeout(500);
+    const kept = await said();
+    check(vp, "bubble-kept-on-blur-while-hovered", kept.opacity === "1", JSON.stringify(kept));
+    await p.mouse.move(2, 2);
+    await p.waitForTimeout(800);
+    check(vp, "bubble-hides-when-pointer-then-leaves", (await said()).opacity === "0");
   }
 
   // 6. The invitation still leads to the classes page (shelf: select, then open).
