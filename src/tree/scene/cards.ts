@@ -4,6 +4,7 @@ import { clamp, lerp } from "@shared/math";
 import type { ScreenPoint } from "@shared/three/stage";
 import { cardT, hubCam } from "./camera";
 import { isInvitation } from "../invitation";
+import { fitTitle } from "./card-title";
 import { paintInvitationCover } from "./invitation-cover";
 import { CARD } from "./palette";
 
@@ -36,23 +37,23 @@ export interface Cards {
 
 const MARGIN = 28;
 const HEADER = 76;
-/** Top and bottom margin of a poster card; its 2:3 window is 456×684 at the 512×720 size. */
-const POSTER_MARGIN = 18;
+/** Widest line of text on the card (theme, sub-title, title). */
+const TEXT_MAX = 512 - MARGIN * 2;
+/** Title lines wrap a little short of the text width, as on Mila's card. */
+const TITLE_MAX = 512 - 120;
 const TITLE_SIZE = 50;
-const TITLE_SIZE_LONG = 40;
 
 /**
- * Paints the tree-owned part of every card: a rounded paper card around the cover window, the theme
- * label above it, sub-title and title below (a poster's window takes the whole card, untitled). Books get a lamp frame; the invitation an unlit dashed
- * frame and a dashed window, so "to write" never rests on colour alone (with the blank page).
+ * Paints the tree-owned part of every card, the same for every tale (Mila's layout): a rounded
+ * paper card around the cover window, the theme label above it, sub-title and title below. Books
+ * get a lamp frame; the invitation an unlit dashed frame and a dashed window, so "to write" never
+ * rests on colour alone (with the blank page).
  */
 function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, H: number): void {
   const { card } = book;
   const ready = !isInvitation(book);
   const bottom = Math.round(H * 0.66);
-  const win: [number, number, number, number] = card.poster
-    ? [MARGIN, POSTER_MARGIN, W - MARGIN * 2, H - POSTER_MARGIN * 2]
-    : [MARGIN, HEADER, W - MARGIN * 2, bottom - HEADER];
+  const win = [MARGIN, HEADER, W - MARGIN * 2, bottom - HEADER] as const;
   // Round the card's corners with an opaque mask: the cover may leave a translucent fill style.
   c.globalAlpha = 1;
   c.fillStyle = "#000";
@@ -82,34 +83,21 @@ function paintFrame(c: CanvasRenderingContext2D, book: BookManifest, W: number, 
     c.stroke();
     c.setLineDash([]);
   }
-  if (card.poster) return;
   c.textAlign = "left";
   c.fillStyle = ready ? CARD.ink : CARD.inkSoft;
   c.font = `700 22px 'Andika', sans-serif`;
   c.letterSpacing = "3px";
-  c.fillText(card.theme.toUpperCase(), MARGIN, 50);
+  // fillText's max width narrows an unusually long theme or sub-title instead of cutting it.
+  c.fillText(card.theme.toUpperCase(), MARGIN, 50, TEXT_MAX);
   c.letterSpacing = "0px";
   c.font = `italic 500 28px 'Newsreader', serif`;
-  c.fillText(card.sub, MARGIN, bottom + 50);
-  const wrap = (size: number): string[] => {
-    c.font = `800 ${size}px 'Newsreader', 'Andika', sans-serif`;
-    const lines: string[] = [];
-    let current = "";
-    for (const word of card.title.split(" ")) {
-      if (c.measureText(`${current} ${word}`).width > W - 120 && current) {
-        lines.push(current);
-        current = word;
-      } else {
-        current = current ? `${current} ${word}` : word;
-      }
-    }
-    lines.push(current);
-    return lines;
-  };
-  // A title longer than two lines steps down a size so its third line stays inside the frame.
-  let size = TITLE_SIZE;
-  let lines = wrap(size);
-  if (lines.length > 2) lines = wrap((size = TITLE_SIZE_LONG));
+  c.fillText(card.sub, MARGIN, bottom + 50, TEXT_MAX);
+  const titleFont = (size: number): string => `800 ${size}px 'Newsreader', 'Andika', sans-serif`;
+  const { size, lines } = fitTitle(card.title, TITLE_MAX, (text, at) => {
+    c.font = titleFont(at);
+    return c.measureText(text).width;
+  });
+  c.font = titleFont(size);
   const first = bottom + 112 - (TITLE_SIZE - size) / 2;
   lines.forEach((line, i) => c.fillText(line, MARGIN, first + i * size * 1.08));
 }
