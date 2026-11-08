@@ -24,8 +24,8 @@ export interface Tube {
   stretch?: number;
   /** First normal of the transported frame (the stretch direction at s = 0). */
   normal0?: THREE.Vector3;
-  /** Rounded tip after s = 1. */
-  cap?: boolean;
+  /** Rounded tip after s = 1; a number scales its length (a short dome seals a fork). */
+  cap?: boolean | number;
   /** Vertex shade multiplier along the tube (darker crevices and feet). */
   shade?(s: number): number;
   /** Amplitude of soft bark ridges, as a share of the radius. */
@@ -124,9 +124,10 @@ export function tubesGeometry(
     if (tube.cap) {
       const end = tube.at(1, q).clone();
       const r = tube.radius(1);
-      ring(p.copy(end).addScaledVector(t, r * 0.45), r * 0.72, 1, tube.shade?.(1) ?? 1);
+      const reach = tube.cap === true ? 1 : tube.cap;
+      ring(p.copy(end).addScaledVector(t, r * 0.45 * reach), r * 0.72, 1, tube.shade?.(1) ?? 1);
       count++;
-      const tip = end.addScaledVector(t, r * 0.8);
+      const tip = end.addScaledVector(t, r * 0.8 * reach);
       pos.push(tip.x, tip.y, tip.z);
       const shade = tube.shade?.(1) ?? 1;
       col.push(base.r * shade, base.g * shade, base.b * shade);

@@ -196,6 +196,14 @@ export function createLightTree(
   };
 }
 
+/**
+ * Branch-collar profile: the hidden first ring starts inside the parent, the base swells just past
+ * the fork so it covers the parent's rim, then settles to the plain taper.
+ */
+function collar(s: number): number {
+  return s < 0.2 ? 0.85 + 0.25 * (s / 0.2) : 1.1 - 0.1 * Math.min(1, (s - 0.2) / 0.3);
+}
+
 /** Smooth bark: one curved tapered tube per branch, flat buttress roots, darker forks and feet. */
 function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
   const forks = new Set(branches.map((b) => b.parent));
@@ -242,15 +250,15 @@ function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
       radius:
         b.depth === 0
           ? (s) => b.r * (1 - 0.38 * s) * (1 + 0.5 * Math.exp(-s * 7))
-          : (s) => b.r * (1 - 0.38 * s),
+          : (s) => b.r * (1 - 0.38 * s) * collar(s),
       rings: thick ? 8 : b.r > 0.1 ? 4 : forks.has(i) ? 3 : 2,
       sides: thick ? 12 : b.r > 0.1 ? 7 : 5,
-      cap: !forks.has(i),
+      cap: forks.has(i) ? 0.45 : true,
       ridges: thick ? 0.05 : 0,
       shade:
         b.depth === 0
           ? (s) => 0.82 + 0.18 * Math.min(1, s * 4)
-          : (s) => 0.84 + 0.16 * Math.min(1, s * 5),
+          : (s) => 0.92 + 0.08 * Math.min(1, s * 4),
       seed: i,
     };
   });
