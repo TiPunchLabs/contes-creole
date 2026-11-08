@@ -52,6 +52,22 @@ const DIVE_SECONDS = 1.7;
 const TAP_DISTANCE = 8;
 const TAP_MS = 600;
 const BUBBLE_HOLD_MS = 4500;
+/**
+ * Room kept between the card's under-point (`CardView.y`, already a little below the card) and the
+ * docked fiche, in pixels.
+ */
+const LIFT_GAP = 4;
+/** Room kept above a lifted card, in pixels: the lift never pushes its top edge closer. */
+const LIFT_TOP = 8;
+/**
+ * The lift rises at once to the card's need (plus `LIFT_MARGIN`), but only comes down when the need
+ * drops by more than `LIFT_HOLD` pixels: it settles on the top of the card's gentle sway instead of
+ * rocking the whole view with it.
+ */
+const LIFT_HOLD = 8;
+const LIFT_MARGIN = 2;
+/** Card half-height over the distance from its centre to `CardView.y` (1.05 / 1.25 units). */
+const CARD_HALF = 0.84;
 const CLIMB_KEYS_UP = ["ArrowUp", "ArrowLeft"];
 const CLIMB_KEYS_DOWN = ["ArrowDown", "ArrowRight", " "];
 
@@ -270,8 +286,25 @@ function buildTree(
   const onScreen = (x: number): boolean =>
     x > container.clientWidth * 0.12 && x < container.clientWidth * 0.88;
 
+  /**
+   * Pixels the view is shifted up so the near card clears the docked fiche on short screens
+   * (ruling TKP-R1); zero wherever the card already sits above it.
+   */
+  let lift = 0;
+  let goal = 0;
+  let lifted = 0;
+  let liftedFor = 0;
+
   const frame = (time: number, dt: number): void => {
     t += (target - t) * (1 - Math.exp(-dt * 4.5));
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    if (Math.abs(lift - lifted) > 0.25 || liftedFor !== h) {
+      lifted = lift > 0.5 ? lift : 0;
+      liftedFor = h;
+      if (lifted) camera.setViewOffset(w, h, 0, lifted, w, h);
+      else camera.clearViewOffset();
+    }
     hubCam(t, cam, look);
     konteur.place(camera.aspect);
     const fov = fitFov(50, camera.aspect);
@@ -304,7 +337,7 @@ function buildTree(
       if (v.visible && onScreen(v.x) && v.near > 0.35 && (!best || v.near > best.near)) best = v;
     near = best ? best.index : -1;
     const book = best ? slots[best.index] : undefined;
-    overlay.update(
+    const ficheTop = overlay.update(
       t,
       best && book && !diving
         ? {
@@ -318,6 +351,19 @@ function buildTree(
         : null,
       diving ? -1 : near,
     );
+    if (!diving) {
+      let want = 0;
+      if (best && ficheTop !== null) {
+        const nearness = Math.min(1, (best.near - 0.35) * 3);
+        const cy = best.cy + lifted;
+        const top = cy - (best.y - best.cy) * CARD_HALF;
+        const overlap = best.y + lifted + LIFT_GAP - ficheTop;
+        want = clamp(overlap, 0, Math.max(0, top - LIFT_TOP)) * nearness;
+      }
+      if (want > goal) goal = want + LIFT_MARGIN;
+      else if (want < goal - LIFT_HOLD || want === 0) goal = want;
+      lift += (goal - lift) * (1 - Math.exp(-dt * 4));
+    }
     if (diving && diving.progress >= 1 && diving.resolve) {
       diving.resolve();
       diving.resolve = null;

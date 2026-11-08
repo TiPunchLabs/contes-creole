@@ -18,15 +18,6 @@ export function painted(geometry: THREE.BufferGeometry, color: string): THREE.Bu
   return g;
 }
 
-/** `geometry` with one normal per face, for hard-edged shapes (roofs, stones). */
-export function faceted(geometry: THREE.BufferGeometry): THREE.BufferGeometry {
-  const g = geometry.index ? geometry.toNonIndexed() : geometry.clone();
-  geometry.dispose();
-  g.deleteAttribute("normal");
-  g.computeVertexNormals();
-  return g;
-}
-
 /** Widest horizontal distance from the y axis to any vertex of `geometry`. */
 export function reach(geometry: THREE.BufferGeometry): number {
   const p = geometry.getAttribute("position");

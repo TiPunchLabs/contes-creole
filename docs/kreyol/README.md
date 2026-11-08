@@ -26,7 +26,7 @@
 | Contenu                                         | Fichier                                                                                |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
 | Conte Ti Kannot                                 | `src/books/ti-kannot/story/gcf.md`                                                     |
-| Notes « Lang kréyòl » (exemples cités du conte) | `src/books/ti-kannot/langue/fr.md`                                                     |
+| Notes « Lang kréyòl » (exemples cités du conte) | `docs/explanations/ti-kannot/langue/fr.md`                                             |
 | Cartes des livres                               | `src/books/*/book.ts`                                                                  |
 | Écran de l'arbre                                | `src/tree/overlay/overlay.ts`, `src/tree/index.ts`                                     |
 | Interface                                       | `src/app/` (`app.ts`, `fallback.ts`, `languages.ts`, `reading-ui/`, `language-panel/`) |

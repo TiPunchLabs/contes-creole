@@ -232,13 +232,15 @@ describe("island scenery", () => {
   it("paints beaten earth on the yards, paths and house sites, and bank soil along the river", () => {
     const { mesh } = createGround(createRng(17));
     const pos = mesh.geometry.getAttribute("position");
+    const index = mesh.geometry.getIndex();
+    if (!index) throw new Error("indexed ground expected");
     const [a, b, c] = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
     let earth = 0;
     let bank = 0;
-    for (let i = 0; i < pos.count; i += 3) {
-      a.fromBufferAttribute(pos, i);
-      b.fromBufferAttribute(pos, i + 1);
-      c.fromBufferAttribute(pos, i + 2);
+    for (let i = 0; i < index.count; i += 3) {
+      a.fromBufferAttribute(pos, index.getX(i));
+      b.fromBufferAttribute(pos, index.getX(i + 1));
+      c.fromBufferAttribute(pos, index.getX(i + 2));
       const paint = facePaint(a, b, c, 1);
       const x = (a.x + b.x + c.x) / 3;
       const z = (a.z + b.z + c.z) / 3;

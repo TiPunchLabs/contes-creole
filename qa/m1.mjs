@@ -156,16 +156,10 @@ try {
           e.getAttribute("aria-pressed"),
         )) === "true",
       );
-      const burger = p.locator("button[aria-expanded]").first();
-      await burger.click();
-      await wait(500);
-      check("j2.language-panel-opens", await p.isVisible(".lang-panel"));
-      await p.screenshot({ path: OUT + "d7-language-panel.png" });
-      await p.keyboard.press("Escape");
-      await wait(500);
+      // TKP-EDU: the tale carries no "Lang kréyòl" panel any more.
       check(
-        "j2.escape-closes-panel-only",
-        !(await p.isVisible(".lang-panel")) && (await p.isVisible(".reading")),
+        "j2.no-language-panel",
+        (await p.locator(".lang-burger:visible, .lang-panel:visible").count()) === 0,
       );
       await p.keyboard.press("Escape");
       await wait(3500);

@@ -81,7 +81,8 @@ export default defineWorld({
       const ground = createGround(rng);
       for (let i = 0; i < RETIRED_DRAWS; i++) rng();
       const reservoir = createReservoir();
-      const scenery = createScenery();
+      const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const scenery = createScenery({ calm });
       const source = createSource(rng);
       const stock = createStock(rng);
       const quality = paintQuality(matchMedia("(pointer: coarse)").matches, devicePixelRatio);
@@ -111,7 +112,6 @@ export default defineWorld({
       let story = ctx.story;
       let page = ctx.page;
       let pageF = ctx.page;
-      const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
       /** The camera's shot, gliding to the current page's; never reads `pageF`. */
       const aim: number[] = [];
       const lens = createGlide(shotVector(envs[page].shot, 0, aim));
@@ -175,7 +175,7 @@ export default defineWorld({
         sea.update(env, time, camera.position);
         ground.update(env);
         reservoir.update(env);
-        scenery.update(env);
+        scenery.update(env, time);
         source.update(env, time);
         stock.update(env);
         cast.update(env, time, dt, camera.position);

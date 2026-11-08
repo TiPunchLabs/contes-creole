@@ -91,6 +91,11 @@ export interface BookCard {
   theme: string;
   /** Language of the card texts; Kréyòl when absent. */
   lang?: Lang;
+  /**
+   * The cover is a 2:3 poster that carries its own title: the tree shows it whole in a tall window
+   * and paints no theme, title or sub-title over the card (they stay in the shelf and the label).
+   */
+  poster?: boolean;
 }
 
 export interface BookContext {

@@ -55,7 +55,10 @@ Visual and accessibility checks of the redesign run by hand on a local GPU, neve
 
 ## Language notes
 
-A book may ship `src/books/<id>/langue/fr.md`, shown in the "Lang kréyòl" panel (burger, top right):
+A book may ship `src/books/<id>/langue/fr.md`, shown in the "Lang kréyòl" panel (burger, top right).
+No tale ships one today: the owner's rule TKP-EDU keeps explanations out of the tales, so Ti
+Kannot's notes moved to `docs/explanations/ti-kannot/langue/fr.md`, kept for a future explanatory
+page and still checked against the tale by `books.test.ts`. The format:
 
 ```markdown
 ---
