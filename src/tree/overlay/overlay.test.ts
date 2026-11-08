@@ -1,71 +1,109 @@
-import { describe, expect, it } from "vitest";
-import { placeFiche } from "./overlay";
+// @vitest-environment happy-dom
+import { afterEach, describe, expect, it, vi } from "vitest";
+import type { BookManifest } from "@app/contract";
+import { INVITATION } from "../invitation";
+import { cardBox, createTreeOverlay, tellerBox } from "./overlay";
 
-const FICHE = { width: 380, height: 180 };
-const WIDE = { width: 1440, shelfTop: 808 };
-const NARROW = { width: 390, shelfTop: 752 };
-const TABLET = { width: 768, shelfTop: 930 };
+const mila: BookManifest = {
+  id: "mila",
+  order: 4,
+  ready: true,
+  card: { title: "Mila et le lambi qui avait perdu son chant", sub: "", theme: "", lang: "fr" },
+};
 
-describe("placeFiche, wide", () => {
-  it("puts the fiche right of a card on the left half, with a leader from the card's edge", () => {
-    // card centre y 420, point below it at 520: half-width 60
-    const box = placeFiche({ x: 500, y: 520, cy: 420 }, FICHE, WIDE);
-    expect(box).toEqual({ left: 608, top: 330, line: [560, 420, 608, 420] });
+/** Mounts the overlay with spied handlers. */
+function mount() {
+  const container = document.createElement("div");
+  document.body.append(container);
+  const handlers = {
+    onEnter: vi.fn(),
+    onShelf: vi.fn(),
+    onCardFocus: vi.fn(),
+    onTeller: vi.fn(),
+    onTellerFocus: vi.fn(),
+  };
+  const overlay = createTreeOverlay(container, [mila, INVITATION], handlers);
+  return { container, handlers, overlay };
+}
+
+afterEach(() => {
+  document.body.replaceChildren();
+});
+
+describe("cardBox and tellerBox", () => {
+  it("covers the 1.5 × 2.1 card around its projected centre", () => {
+    // 1.25 units = 125 px: one unit is 100 px
+    expect(cardBox({ x: 500, y: 525, cy: 400 })).toEqual({
+      left: 425,
+      top: 295,
+      width: 150,
+      height: 210,
+    });
   });
 
-  it("puts the fiche left of a card on the right half", () => {
-    const box = placeFiche({ x: 900, y: 520, cy: 420 }, FICHE, WIDE);
-    expect(box.left).toBe(900 - 60 - 48 - 380);
-    expect(box.line).toEqual([840, 420, 792, 420]);
-  });
-
-  it("keeps clear of the climb bar and of the top of the screen", () => {
-    const box = placeFiche({ x: 719, y: 140, cy: 40 }, FICHE, WIDE);
-    expect(box.top).toBe(104);
-    expect(box.left + FICHE.width).toBeLessThanOrEqual(WIDE.width - 48);
-    // leader ends inside the fiche's height even when the card is above it
-    expect(box.line?.[3]).toBe(104 + 20);
-  });
-
-  it("never lets the fiche slide under the shelf", () => {
-    const box = placeFiche({ x: 500, y: 860, cy: 760 }, FICHE, WIDE);
-    expect(box.top + FICHE.height).toBeLessThanOrEqual(WIDE.shelfTop - 14);
-  });
-
-  it("drops the leader when clamping pushes the fiche over the card", () => {
-    const box = placeFiche({ x: 800, y: 1000, cy: 300 }, FICHE, WIDE);
-    expect(box.line).toBeNull();
+  it("covers the storyteller from head to feet", () => {
+    expect(tellerBox({ x: 300, top: 400, bottom: 600 })).toEqual({
+      left: 240,
+      top: 400,
+      width: 120,
+      height: 200,
+    });
   });
 });
 
-describe("placeFiche, narrow", () => {
-  const docked = { width: 358, height: 170 };
+describe("tree overlay", () => {
+  it("has no floating fiche, leader line or duplicated title any more", () => {
+    const { container } = mount();
+    expect(container.querySelector(".tree-label, .tree-filet, .tree-enter")).toBeNull();
+  });
 
-  it("docks the fiche centred above the shelf, whatever the card's position", () => {
-    const a = placeFiche({ x: 120, y: 300, cy: 220 }, docked, NARROW);
-    const b = placeFiche({ x: 260, y: 360, cy: 280 }, docked, NARROW);
-    expect(a.left).toBe(16);
-    expect(placeFiche({ x: 300, y: 300, cy: 220 }, { width: 480, height: 170 }, TABLET).left).toBe(
-      144,
+  it("makes the near book a focusable entry point named after its tale", () => {
+    const { container, handlers, overlay } = mount();
+    overlay.update(0.2, { index: 0, x: 500, y: 525, cy: 400, opacity: 1, book: mila }, 0, null);
+    const card = container.querySelector<HTMLButtonElement>("button.tree-book");
+    expect(card?.hidden).toBe(false);
+    expect(card?.textContent).toContain(mila.card.title);
+    expect(card?.textContent).toContain("Antré adan kont-la");
+    expect(card?.querySelector("[lang=fr]")?.textContent).toBe(mila.card.title);
+    expect(card?.style.width).toBe("150px");
+    card?.focus();
+    expect(handlers.onCardFocus).toHaveBeenLastCalledWith(true);
+    card?.click();
+    expect(handlers.onEnter).toHaveBeenCalledWith("mila");
+  });
+
+  it("makes the invitation's card a link to the classes page", () => {
+    const { container, overlay } = mount();
+    overlay.update(
+      0.9,
+      { index: 1, x: 500, y: 525, cy: 400, opacity: 1, book: INVITATION },
+      1,
+      null,
     );
-    expect(a.top).toBe(752 - 170 - 14);
-    expect(b.top).toBe(a.top);
+    const link = container.querySelector<HTMLAnchorElement>(".tree-book-invite");
+    expect(link?.hidden).toBe(false);
+    expect(link?.getAttribute("href")).toBe("/contes-des-classes/");
+    expect(container.querySelector<HTMLButtonElement>("button.tree-book")?.hidden).toBe(true);
   });
 
-  it("drops a vertical leader from below the card to the fiche", () => {
-    const box = placeFiche({ x: 200, y: 330, cy: 250 }, docked, NARROW);
-    expect(box.line).toEqual([200, 330, 200, 568]);
+  it("hides the card's entry point when no card is near", () => {
+    const { container, overlay } = mount();
+    overlay.update(0.5, null, -1, null);
+    expect(container.querySelector<HTMLButtonElement>("button.tree-book")?.hidden).toBe(true);
+    expect(container.querySelector<HTMLAnchorElement>(".tree-book-invite")?.hidden).toBe(true);
   });
 
-  it("keeps the leader over the fiche", () => {
-    expect(placeFiche({ x: 4, y: 330, cy: 250 }, docked, NARROW).line?.[0]).toBe(40);
-  });
-
-  it("decides on the card's centre, so a card bottom sliding past the fiche top never toggles it", () => {
-    const above = placeFiche({ x: 200, y: 560, cy: 480 }, docked, NARROW);
-    const below = placeFiche({ x: 200, y: 580, cy: 500 }, docked, NARROW);
-    expect(above.line).toEqual([200, 560, 200, 568]);
-    expect(below.line).toEqual([200, 568, 200, 568]);
-    expect(placeFiche({ x: 200, y: 700, cy: 620 }, docked, NARROW).line).toBeNull();
+  it("gives the storyteller a named entry point while he is on screen", () => {
+    const { container, handlers, overlay } = mount();
+    overlay.setTeller("Cliquez ici pour accéder à un conte au hasard.", true);
+    overlay.update(0, null, -1, { x: 300, top: 400, bottom: 600 });
+    const teller = container.querySelector<HTMLButtonElement>(".tree-teller");
+    expect(teller?.hidden).toBe(false);
+    expect(teller?.textContent).toBe("Cliquez ici pour accéder à un conte au hasard.");
+    expect(teller?.getAttribute("aria-disabled")).toBe("false");
+    teller?.click();
+    expect(handlers.onTeller).toHaveBeenCalledTimes(1);
+    overlay.update(0.6, null, -1, null);
+    expect(teller?.hidden).toBe(true);
   });
 });

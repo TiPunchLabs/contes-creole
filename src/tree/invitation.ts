@@ -8,7 +8,7 @@ export const RETURN_HASH = "#invitation";
 
 /**
  * The tree's one "story still to invent" slot, inviting a class to write the next tale. It is not a
- * book: no world, no cover, never entered. Its card, fiche and shelf entry lead to CLASSES_PAGE.
+ * book: no world, no cover, never entered. Its card and shelf entry lead to CLASSES_PAGE.
  */
 export const INVITATION: BookManifest = {
   id: "invitation",
@@ -21,11 +21,13 @@ export const INVITATION: BookManifest = {
   },
 };
 
-/** The near-slot fiche of the invitation (the card keeps the shorter INVITATION.card texts). */
+/**
+ * The invitation's texts beyond its card: the shelf's kicker, and the accessible name of the card's
+ * entry point (title, then action). The card keeps the shorter INVITATION.card texts.
+ */
 export const INVITATION_FICHE = {
   kicker: "Histoire à inventer",
   title: "Et si le prochain conte venait de votre classe ?",
-  sub: "Une invitation aux enseignants du primaire",
   action: "Comment participer",
 } as const;
 
