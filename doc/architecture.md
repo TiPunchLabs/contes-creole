@@ -124,7 +124,10 @@ browser holds it until a gesture, the reader's first tap or key in the tale resu
 
 - **Tokens**: `src/shared/theme/tokens.css` holds the site-wide colours, fonts and the dusk-sky
   gradient. The tree maps them onto `--tree-*` aliases, the reading frame onto `--reading-*`; a book's
-  `theme.css` overrides only those aliases (Ti Kannot keeps its own reading frame until decision A4).
+  `theme.css` overrides only those aliases. Since ruling TKR, Ti Kannot's text reads in the scene as in
+  Mila's book: no parchment, light text with a dark halo over a soft shade on the scene layer
+  (`.app-book::after`), a left column on wide screens and the top on portrait ones; `frameOffset`
+  (`world/env.ts`) slides the subject right of the column, or below the text.
   The inline loader in `index.html` runs before the bundle and repeats the token values literally.
   The 3D scene's colours live in `src/tree/scene/palette.ts` (sRGB twins of the tokens).
 - **Languages**: the page is `lang="fr"`; Kréyòl UI and story text carry `lang="gcf"` explicitly
