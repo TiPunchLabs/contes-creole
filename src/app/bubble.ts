@@ -5,13 +5,15 @@ const EDGE = 12;
 /**
  * Speech bubble following a universe-provided screen anchor each frame, kept inside the screen. Its
  * lang is set by the shell (tree lines open in Kréyòl; a book speaks the language of the story shown)
- * and applies from the next line, so a line already on screen keeps its own.
+ * and applies from the next line, so a line already on screen keeps its own. The bubble is inert
+ * while hidden or off screen, so an action button in it can be neither focused nor pressed then.
  */
 export function createBubble(
   root: HTMLElement,
 ): Bubble & { setLang(lang: Lang): void; dispose(): void } {
   const el = document.createElement("div");
   el.className = "app-bubble";
+  el.inert = true;
   root.append(el);
   let lang: Lang = "gcf";
   let anchor: (() => ScreenAnchor) | null = null;
@@ -29,6 +31,7 @@ export function createBubble(
     } else {
       el.style.opacity = "0";
     }
+    el.inert = !a.visible;
     raf = requestAnimationFrame(follow);
   };
 
@@ -36,10 +39,11 @@ export function createBubble(
     anchor = null;
     cancelAnimationFrame(raf);
     el.style.opacity = "0";
+    el.inert = true;
   };
 
   return {
-    show(text, next) {
+    show(text, next, action) {
       el.lang = lang;
       if (typeof text === "string") el.textContent = text;
       else {
@@ -51,6 +55,18 @@ export function createBubble(
             return span;
           }),
         );
+      }
+      if (action) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "app-bubble-action";
+        button.lang = action.lang;
+        button.textContent = action.text;
+        button.addEventListener("click", (e) => {
+          e.stopPropagation();
+          action.run();
+        });
+        el.append(button);
       }
       anchor = next;
       cancelAnimationFrame(raf);

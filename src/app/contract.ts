@@ -76,12 +76,20 @@ export interface BubbleSegment {
   text: string;
 }
 
+/** A call to action closing a bubble: a button the reader can click, tap or press. */
+export interface BubbleAction {
+  lang: Lang;
+  text: string;
+  run(): void;
+}
+
 /**
  * Shared speech bubble; `anchor` is polled every frame while the bubble is shown. A plain string
- * speaks the shell's current language; segments carry their own (bilingual lines).
+ * speaks the shell's current language; segments carry their own (bilingual lines). An `action`
+ * ends the bubble with a button (the storyteller's random tale).
  */
 export interface Bubble {
-  show(text: string | BubbleSegment[], anchor: () => ScreenAnchor): void;
+  show(text: string | BubbleSegment[], anchor: () => ScreenAnchor, action?: BubbleAction): void;
   hide(): void;
 }
 
@@ -91,11 +99,6 @@ export interface BookCard {
   theme: string;
   /** Language of the card texts; Kréyòl when absent. */
   lang?: Lang;
-  /**
-   * The cover is a 2:3 poster that carries its own title: the tree shows it whole in a tall window
-   * and paints no theme, title or sub-title over the card (they stay in the shelf and the label).
-   */
-  poster?: boolean;
 }
 
 export interface BookContext {

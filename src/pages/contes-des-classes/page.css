@@ -420,6 +420,23 @@ html {
   font-size: 14px;
 }
 
+/* The project's site: an underlined link in the signature's ink, a padded hit area for touch. */
+.cc-sign-link {
+  display: inline-block;
+  padding: 10px 2px;
+  margin: -10px 0;
+  border-radius: 6px;
+  color: var(--color-night-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.cc-sign-link:hover {
+  text-decoration-color: var(--color-ember);
+}
+
 /* ---- Small phones (320 px): a little less margin, the sheet keeps its rhythm. ---- */
 
 @media (max-width: 359px) {

@@ -26,6 +26,20 @@ describe("Les contes des classes page", () => {
     expect(document.querySelectorAll("form, input, textarea")).toHaveLength(0);
   });
 
+  it("signs the footer with a link to TiPunchLabs only, in a new tab, saying so", () => {
+    const sign = document.querySelector(".cc-sign");
+    expect(sign?.textContent?.replace(/\s+/g, " ").trim()).toBe(
+      "Contes Créoles, un projet TiPunchLabs (s'ouvre dans un nouvel onglet)",
+    );
+    const links = sign?.querySelectorAll("a") ?? [];
+    expect(links).toHaveLength(1);
+    const link = links[0];
+    expect(link.getAttribute("href")).toBe("https://xgueret.tipunchlabs.fr/");
+    expect(link.target).toBe("_blank");
+    expect(link.rel).toContain("noopener");
+    expect(link.firstChild?.textContent).toBe("TiPunchLabs");
+  });
+
   it("gives the subject and asks only for school, level, language and a few lines", () => {
     expect(document.querySelector(".cc-subject-text")?.textContent).toBe(SUBJECT);
     const asked = [...document.querySelectorAll(".cc-sheet-list li")].map((li) =>

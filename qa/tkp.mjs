@@ -1,4 +1,4 @@
-// Ti Kannot poster redesign (TKP) on the GPU: the poster card in the tree, no language panel in the
+// Ti Kannot poster redesign (TKP) on the GPU: Ti Kannot's card in the tree (Mila's layout since TREE-COVER), no language panel in the
 // tale, the three languages, all twelve pages, the way back, the foliage wind and its stillness under
 // reduced motion, and Mila still opening on page 1. Real time.
 // Usage: [SITE=url] [OUT=dir] [ONLY=cover,cards,tale,wind,mila] [VPS=desktop,mobile,...] node qa/tkp.mjs
@@ -96,25 +96,22 @@ async function changed(page, a, b, tol = 10) {
 const docked = (vp) => VIEWPORTS[vp].viewport.width < 900;
 
 /**
- * Docked fiche (narrow screens): the leader's dot marks the point just under the near card (clamped
- * to the fiche's top), so the whole card clears the fiche only when the leader is drawn and its dot
- * sits above the fiche.
+ * The near card whole on screen, above the shelf (since TREE-PANEL there is no fiche to clear): its
+ * keyboard entry point covers the card, so its box is the card's.
  */
 async function clears(p, run, name, knownLimit = false) {
   const fit = await p.evaluate(() => {
-    const label = document.querySelector(".tree-label").getBoundingClientRect();
-    const filet = document.querySelector(".tree-filet");
-    const dot = filet.querySelector("circle");
-    return {
-      ficheTop: Math.round(label.top),
-      cardBottom: Number(dot.getAttribute("cy")),
-      leader: Number(getComputedStyle(filet).opacity),
-    };
+    const el = [...document.querySelectorAll(".tree-book")].find((e) => !e.hidden);
+    const r = el?.getBoundingClientRect();
+    const shelf = document.querySelector(".tree-shelf").getBoundingClientRect();
+    return r
+      ? { top: Math.round(r.top), bottom: Math.round(r.bottom), shelfTop: Math.round(shelf.top) }
+      : null;
   });
-  const pass = fit.leader > 0.5 && fit.cardBottom < fit.ficheTop - 1;
+  const pass = fit !== null && fit.top >= 0 && fit.bottom <= fit.shelfTop + 1;
   if (!pass && knownLimit) {
-    // Owner ruling TKP-R2: the invitation's tall fiche leaves no room for its whole card on very
-    // short phones; recorded, not failed, until the tree's book layout is reworked.
+    // Owner ruling TKP-R2: on very short phones the invitation's card may not fit whole; recorded,
+    // not failed, until the tree's book layout is reworked.
     results.checks.push({ run, name, pass: true, known: true, detail: JSON.stringify(fit) });
     console.log(`KNOWN ${run} ${name} — ${JSON.stringify(fit)} (TKP-R2)`);
     return;
@@ -136,7 +133,7 @@ async function cards(browser, vp) {
     await approach(p, index, touch);
     await p.waitForTimeout(2500);
     await p.screenshot({ path: `${OUT}${vp}-${name}-near.png` });
-    await clears(p, run, `${name} card clears the docked fiche`, name === "invitation" && short);
+    await clears(p, run, `${name} card whole above the shelf`, name === "invitation" && short);
   }
   // Back from Mila: the tree comes back on Mila's card.
   const mila = await approach(p, 1, touch);
@@ -152,17 +149,17 @@ async function cards(browser, vp) {
   await p.keyboard.press("Escape");
   await p.waitForTimeout(5000);
   await p.screenshot({ path: `${OUT}${vp}-mila-returned.png` });
-  await clears(p, run, "mila card clears the fiche after the way back");
+  await clears(p, run, "mila card whole after the way back");
   // Back from the classes page: the tree comes back on the invitation.
   await approach(p, 2, touch);
   await p.waitForTimeout(1500);
-  await press(p.locator(".tree-invite-open"), touch);
+  await press(p.locator(".tree-shelf-book.is-invitation"), touch);
   await p.waitForURL("**/contes-des-classes/");
   await press(p.locator(".cc-top .cc-back"), touch);
   await p.waitForSelector(".loader.is-done", { state: "attached", timeout: 20000 });
   await p.waitForTimeout(7000);
   await p.screenshot({ path: `${OUT}${vp}-invitation-returned.png` });
-  await clears(p, run, "invitation card clears the fiche after the way back", short);
+  await clears(p, run, "invitation card whole after the way back", short);
   check(run, "no errors", errors.length === 0, errors.join(" | "));
   await ctx.close();
 }
@@ -173,9 +170,7 @@ async function cover(browser, vp) {
   const shelf = await approach(p, 0, touchOf(vp));
   await p.waitForTimeout(1500);
   await p.screenshot({ path: `${OUT}${vp}-cover.png` });
-  // Docked fiche (narrow screens): the leader's dot marks the point just under the card, so the
-  // whole card clears the fiche only when the leader is drawn and its dot sits above the fiche.
-  if (docked(vp)) await clears(p, `cover.${vp}`, "the whole card clears the docked fiche");
+  if (docked(vp)) await clears(p, `cover.${vp}`, "the whole card above the shelf");
   const name = await shelf.getAttribute("aria-label");
   const text = (await shelf.textContent()) ?? "";
   check(

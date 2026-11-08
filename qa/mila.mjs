@@ -278,7 +278,9 @@ async function journey(browser, vp) {
 
   const openMs = await openMila(p, run, touch, true);
   await p.waitForTimeout(600);
-  const fiche = await p.evaluate(() => ({ lang: document.querySelector(".tree-label")?.lang }));
+  const fiche = await p.evaluate(() => ({
+    lang: document.querySelector("button.tree-book .tree-book-title")?.lang,
+  }));
   results.runs[run] = { fiche, openMs };
   const first1 = await arrival(p);
   checkArrival(run, first1, openMs);

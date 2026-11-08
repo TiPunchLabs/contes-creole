@@ -15,7 +15,8 @@
   font-family: var(--font-read);
 }
 
-.tree-overlay button:focus-visible {
+.tree-overlay button:focus-visible,
+.tree-overlay a:focus-visible {
   /* Transparent outline keeps a ring in forced-colors mode, where box-shadow is dropped. */
   outline: 3px solid transparent;
   outline-offset: 2px;
@@ -106,102 +107,40 @@
   animation: tree-bob 1.8s ease-in-out infinite;
 }
 
-.tree-filet {
+/*
+ * Keyboard entry points over the scene (near card, storyteller): transparent, they let the pointer
+ * through to the 3D scene and only show the focus ring, rounded like the card.
+ */
+.tree-hit {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.tree-filet line {
-  stroke: var(--tree-ink);
-  stroke-width: 1.5;
-}
-
-.tree-filet circle {
-  fill: var(--tree-ink);
-  stroke: var(--tree-paper);
-  stroke-width: 2.5;
-}
-
-/* Near-book fiche (fiche a filet, boards 11 D3/D4 and 12 M3/M4); placed by placeFiche(). */
-.tree-label {
-  position: absolute;
-  left: 0;
-  top: 0;
   box-sizing: border-box;
-  width: min(380px, calc(100vw - 64px));
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 18px 20px 20px;
-  background: var(--tree-paper);
-  border: 1.5px solid var(--tree-ink);
-  border-radius: 14px;
-  box-shadow: var(--tree-shadow-strong);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-/* A story still to write: the dashed edge echoes the invitation card's frame. */
-.tree-label.is-invitation {
-  border-style: dashed;
-  border-color: var(--tree-ink-soft);
-}
-
-.tree-label-kicker {
-  font: 700 12px/1.2 var(--font-read);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--tree-ink-soft);
-}
-
-.tree-label-title {
-  font: 800 30px/1.1 var(--font-display);
-  overflow-wrap: anywhere;
-}
-
-.tree-label-sub {
-  font: italic 500 17px/1.3 var(--font-display);
-  color: var(--tree-ink-soft);
-}
-
-.tree-enter {
-  pointer-events: auto;
-  min-height: 52px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  margin: 0;
+  padding: 0;
   border: 0;
-  background: var(--tree-ink);
-  color: var(--tree-paper);
-  font: 800 19px/1 var(--font-brand);
-  padding: 14px 26px;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
+  border-radius: 7%/5%;
+  background: none;
+  color: inherit;
+  pointer-events: none;
+}
+
+.tree-overlay .tree-hit:focus-visible {
+  outline: 3px solid transparent;
+  outline-offset: 4px;
+  box-shadow: var(--focus-ring);
+}
+
+.tree-teller {
+  border-radius: 40%/30%;
+}
+
+.tree-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
-  box-shadow: 0 8px 20px oklch(0.4 0.06 300 / 0.3);
-  animation: tree-nudge 2.2s ease-in-out infinite;
-}
-
-.tree-enter:hover {
-  box-shadow:
-    0 0 0 4px oklch(0.78 0.14 70 / 0.45),
-    0 8px 22px oklch(0.78 0.14 70 / 0.45);
-}
-
-/* An invitation, not a way into a tale: no nudge, a quieter paper link. */
-.tree-invite-open {
-  animation: none;
-  text-decoration: none;
-  background: var(--tree-paper);
-  color: var(--tree-ink);
-  border: 1.5px solid var(--tree-ink);
-  box-shadow: none;
 }
 
 .tree-climb {
@@ -326,19 +265,6 @@
   white-space: nowrap;
 }
 
-/* Docked fiche, the DOCK width in overlay.ts: centred above the shelf. */
-@media (max-width: 899px) {
-  .tree-label {
-    width: min(480px, calc(100% - 32px));
-    padding: 14px 16px 16px;
-  }
-
-  .tree-enter {
-    align-self: stretch;
-    justify-content: center;
-  }
-}
-
 /* Portrait and narrow screens (board 12 M1): no room beside the canopy, so the column becomes a
    band at the top, on a paper veil that fades into the sky above the tree. */
 @media (min-height: 501px) and (max-width: 899px), (min-height: 501px) and (max-aspect-ratio: 7/5) {
@@ -396,10 +322,6 @@
     font-size: 14px;
   }
 
-  .tree-label-title {
-    font-size: 26px;
-  }
-
   .tree-climb {
     right: 12px;
     height: 140px;
@@ -453,25 +375,6 @@
     font-size: 13px;
   }
 
-  /* Compact fiche so it fits between the top of the screen and the shelf on landscape phones. */
-  .tree-label {
-    gap: 4px;
-    padding: 10px 14px 12px;
-  }
-
-  .tree-label-title {
-    font-size: 22px;
-  }
-
-  .tree-label-sub {
-    display: none;
-  }
-
-  .tree-enter {
-    min-height: 44px;
-    padding: 10px 20px;
-  }
-
   .tree-intro-title {
     font-size: 28px;
   }
@@ -483,13 +386,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .tree-intro-inner,
-  .tree-intro-hint svg,
-  .tree-enter {
+  .tree-intro-hint svg {
     animation: none;
   }
 
-  .tree-label,
-  .tree-filet,
   .tree-shelf-book {
     transition: none;
   }
@@ -513,15 +413,5 @@
   }
   50% {
     transform: translateY(6px);
-  }
-}
-
-@keyframes tree-nudge {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
   }
 }
