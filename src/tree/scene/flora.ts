@@ -2,10 +2,12 @@ import * as THREE from "three";
 import type { Rng } from "@shared/random";
 import type { Obstacle } from "./critters/wander";
 import { groundHeight } from "./ground";
+import { FLAMBOYANT } from "./palette";
 import {
   bendNormals,
   bezier,
   hash,
+  leafSpray,
   lumpyBall,
   tubesGeometry,
   withBark,
@@ -180,13 +182,14 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     put(g, crown, x, z);
   };
 
-  const flamGreen = new THREE.MeshStandardMaterial({ color: "#6a9e46", roughness: 0.85 });
-  const flamRed = new THREE.MeshStandardMaterial({
-    color: "#e5582e",
-    roughness: 0.8,
-    emissive: "#7a2410",
-    emissiveIntensity: 0.15,
+  const flamMat = new THREE.MeshStandardMaterial({
+    color: "#ffffff",
+    roughness: 0.85,
+    vertexColors: true,
+    emissive: "#3a2412",
+    emissiveIntensity: 0.2,
   });
+  const spray = leafSpray(10, 1.3);
   const flamboyant = (x: number, z: number, k: number): void => {
     const g = new THREE.Group();
     const t = new THREE.Mesh(
@@ -228,13 +231,15 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2 + rng() * 0.3;
       const rr = i ? 1.7 * k : 0;
+      const red = rng() < 0.62;
+      const at = new THREE.Vector3(Math.cos(a) * rr, rng() * 0.25 * k, Math.sin(a) * rr);
+      const squash = new THREE.Vector3(1.25, 0.38, 1.25);
       const p = new THREE.Mesh(
-        lumpyBall(1.15 * k, 2, x + i, 0.7),
-        rng() < 0.62 ? flamRed : flamGreen,
+        sprayCluster(spray, at, squash, centre, k, red ? 0.15 : -0.15, x + i),
+        flamMat,
       );
-      p.position.set(Math.cos(a) * rr, rng() * 0.25 * k, Math.sin(a) * rr);
-      p.scale.set(1.25, 0.38, 1.25);
-      bendNormals(p, centre, 0.5, 2.2);
+      p.position.copy(at);
+      p.scale.copy(squash);
       crown.add(p);
     }
     g.add(crown);
@@ -292,7 +297,8 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     emissiveIntensity: 0.15,
   });
   const tipMat = new THREE.MeshStandardMaterial({ color: "#f2c84a", roughness: 0.6 });
-  const tipGeo = new THREE.SphereGeometry(0.035, 6, 4);
+  const tipLeft = flowerGeometry(-1);
+  const tipRight = flowerGeometry(1);
   const bractLeft = bractGeometry(-1);
   const bractRight = bractGeometry(1);
   const balisier = (x: number, z: number): void => {
@@ -303,7 +309,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
       const l = new THREE.Mesh(leafGeo, bananaMat);
       l.rotation.order = "YXZ";
       l.rotation.y = (i / 6) * Math.PI * 2 + rng() * 0.5;
-      l.rotation.x = -0.12 - rng() * 0.2;
+      l.rotation.x = -0.32 - rng() * 0.2;
       l.scale.set(0.55, 0.62 + rng() * 0.2, 0.55);
       crown.add(l);
     }
@@ -319,7 +325,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
         const c = new THREE.Mesh(side > 0 ? bractRight : bractLeft, bractMat);
         c.position.set(side * 0.11, hh - 0.1 - j * 0.17, 0);
         c.rotation.z = side * -1.15;
-        const tp = new THREE.Mesh(tipGeo, tipMat);
+        const tp = new THREE.Mesh(side > 0 ? tipRight : tipLeft, tipMat);
         tp.position.set(side * 0.14, 0.1, 0);
         c.add(tp);
         stalk.add(c);
@@ -535,7 +541,7 @@ function rachisGeometry(hh: number): THREE.BufferGeometry {
           0,
         );
       },
-      radius: (s) => 0.032 - 0.01 * s,
+      radius: (s) => 0.042 - 0.012 * s,
       rings: 14,
       sides: 6,
       cap: true,
@@ -562,6 +568,107 @@ function bractGeometry(side: number): THREE.BufferGeometry {
       stretch: 1.7,
       normal0: new THREE.Vector3(1, 0, 0),
       cap: true,
+    },
+  ]);
+}
+
+/**
+ * A background flamboyant's crown disc as a cluster of leaf sprays (the Pyébwa's foliage), in the
+ * frame of a mesh placed at `at` with the non-uniform scale `s`: sprays are laid out undistorted in
+ * crown space, then brought into the mesh frame, normals included. Blossom sits highest; `bias`
+ * leans the disc towards blossom (positive) or foliage.
+ */
+function sprayCluster(
+  spray: THREE.BufferGeometry,
+  at: THREE.Vector3,
+  s: THREE.Vector3,
+  centre: THREE.Vector3,
+  k: number,
+  bias: number,
+  seed: number,
+): THREE.BufferGeometry {
+  const src = spray.attributes.position;
+  const srcNormal = spray.attributes.normal;
+  const srcShade = spray.attributes.color;
+  const srcIndex = spray.index?.array ?? [];
+  const count = 14;
+  const pos: number[] = [];
+  const nor: number[] = [];
+  const col: number[] = [];
+  const index: number[] = [];
+  const up = new THREE.Vector3(0, 1, 0);
+  const sub = new THREE.Vector3();
+  const facing = new THREE.Vector3();
+  const q = new THREE.Quaternion();
+  const twist = new THREE.Quaternion();
+  const v = new THREE.Vector3();
+  const n = new THREE.Vector3();
+  const radial = new THREE.Vector3();
+  const tint = new THREE.Color();
+  for (let j = 0; j < count; j++) {
+    const u = hash(seed, j, 1) * Math.PI * 2;
+    const w = Math.acos(2 * hash(seed, j, 2) - 1);
+    const reach = Math.cbrt(hash(seed, j, 3));
+    sub.set(
+      at.x + reach * Math.sin(w) * Math.cos(u) * 1.35 * k,
+      at.y + reach * Math.cos(w) * 0.4 * k,
+      at.z + reach * Math.sin(w) * Math.sin(u) * 1.35 * k,
+    );
+    facing.copy(sub).sub(centre);
+    facing.y = facing.y * 2 + 0.8 * k;
+    q.setFromUnitVectors(up, facing.normalize());
+    q.multiply(twist.setFromAxisAngle(up, hash(seed, j, 4) * Math.PI * 2));
+    const size = k * (0.6 + 0.25 * hash(seed, j, 5));
+    const height = (sub.y - centre.y + 0.3 * k) / (0.9 * k);
+    const bloom = hash(seed, j, 7) < 0.3 + 0.6 * height + bias;
+    const pick = (hash(seed, j, 6) * 4) | 0;
+    tint.set(bloom ? FLAMBOYANT.blossom[pick] : FLAMBOYANT.leaves[pick]);
+    const first = pos.length / 3;
+    for (let i = 0; i < src.count; i++) {
+      v.fromBufferAttribute(src, i).multiplyScalar(size).applyQuaternion(q).add(sub);
+      n.fromBufferAttribute(srcNormal, i).applyQuaternion(q);
+      radial.copy(v).sub(centre);
+      radial.y *= 2.2;
+      n.lerp(radial.normalize(), 0.5).normalize();
+      v.sub(at).divide(s);
+      n.multiply(s).normalize();
+      pos.push(v.x, v.y, v.z);
+      nor.push(n.x, n.y, n.z);
+      const shade = srcShade.getX(i);
+      col.push(tint.r * shade, tint.g * shade, tint.b * shade);
+    }
+    for (let i = 0; i < srcIndex.length; i++) index.push(first + srcIndex[i]);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+  geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+  geo.setIndex(index);
+  return geo;
+}
+
+/**
+ * Heliconia flower in its mesh's frame: the mesh sits at the old floating dot (`side` × 0.14, 0.1 in
+ * the bract's frame), so the geometry is shifted back to the bract's mouth, where a short, slightly
+ * curved yellow tube peeks out of the bract's upper side.
+ */
+function flowerGeometry(side: number): THREE.BufferGeometry {
+  const mouth = new THREE.Vector3(-side * 0.075, 0.1, 0).sub(
+    new THREE.Vector3(side * 0.14, 0.1, 0),
+  );
+  return tubesGeometry([
+    {
+      at: bezier(
+        mouth.clone().add(new THREE.Vector3(side * 0.02, -0.03, 0)),
+        mouth.clone().add(new THREE.Vector3(0, 0.02, 0)),
+        mouth.clone().add(new THREE.Vector3(-side * 0.03, 0.06, 0)),
+        mouth.clone().add(new THREE.Vector3(-side * 0.035, 0.1, 0)),
+      ),
+      radius: (s) => 0.018 * (1 - 0.3 * s),
+      rings: 4,
+      sides: 6,
+      cap: true,
+      startCap: true,
     },
   ]);
 }

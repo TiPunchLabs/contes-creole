@@ -3,6 +3,7 @@ import { lerp } from "@shared/math";
 import type { Rng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
 import type { Count } from "../lite";
+import { FLAMBOYANT } from "./palette";
 import {
   bendInstancedNormals,
   bezier,
@@ -23,10 +24,7 @@ interface Branch {
 }
 
 const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
-/** Flamboyant crown: fine, light feathery foliage underneath, scarlet and orange blossom on top. */
-const LEAVES = ["#62a03e", "#78b24a", "#8ec257", "#548f37"];
-const BLOSSOM = ["#e8361f", "#f04a24", "#dc2f1c", "#f25e2c"];
-const BLAZE = "#ff6b2c";
+const { leaves: LEAVES, blossom: BLOSSOM, blaze: BLAZE } = FLAMBOYANT;
 
 /**
  * Pyébwa a Konesans (v14), drawn as a flamboyant: straight trunk, wide flattened umbrella crown made
