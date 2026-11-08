@@ -221,9 +221,14 @@ function bulge(x: number, y: number, z: number, seed: number): number {
  * Leafy clump for an instanced crown: a unit `lumpyBall` for the mass, plus a fringe of small pointed
  * leaves rooted just under its surface and fanning outwards, so the outline breaks into leaf tips
  * instead of a smooth ball. Each leaf is two-faced with outward normals, so it lights like the mass
- * from either side; the bottom stays bare (it is the shaded underside).
+ * from either side; the bottom stays bare (it is the shaded underside). `size` scales the leaves.
  */
-export function leafyClump(detail: number, leaves: number, seed = 0): THREE.BufferGeometry {
+export function leafyClump(
+  detail: number,
+  leaves: number,
+  seed = 0,
+  size = 1,
+): THREE.BufferGeometry {
   const ball = lumpyBall(1, detail, seed);
   const pos = Array.from(ball.attributes.position.array as Float32Array);
   const nor = Array.from(ball.attributes.normal.array as Float32Array);
@@ -247,8 +252,8 @@ export function leafyClump(detail: number, leaves: number, seed = 0): THREE.Buff
     side.crossVectors(d, Math.abs(d.y) > 0.95 ? new THREE.Vector3(1, 0, 0) : up).normalize();
     side.applyAxisAngle(d, (hash(i, seed) - 0.5) * 2.4);
     axis.copy(d).multiplyScalar(0.75).addScaledVector(side.clone().cross(d), 0.65).normalize();
-    const length = 0.42 + 0.18 * hash(i, seed, 1);
-    const width = length * 0.36;
+    const length = (0.42 + 0.18 * hash(i, seed, 1)) * size;
+    const width = length * 0.32;
     const base = d.clone().multiplyScalar(surface * 0.86);
     const mid = base.clone().addScaledVector(axis, length * 0.45);
     const tip = base

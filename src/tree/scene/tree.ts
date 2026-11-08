@@ -23,11 +23,15 @@ interface Branch {
 }
 
 const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
-const GREENS = ["#6fae4a", "#86bf55", "#a2cd62", "#5c9d42"];
+/** Flamboyant crown: fine, light feathery foliage underneath, scarlet and orange blossom on top. */
+const LEAVES = ["#62a03e", "#78b24a", "#8ec257", "#548f37"];
+const BLOSSOM = ["#e8361f", "#f04a24", "#dc2f1c", "#f25e2c"];
+const BLAZE = "#ff6b2c";
 
 /**
- * Pyébwa a Konesans (v14): straight trunk, balanced crown of round puffs that breathes and rustles,
- * buttress roots. The bark is one smooth mesh of curved tapered tubes: each branch leaves along its
+ * Pyébwa a Konesans (v14), drawn as a flamboyant: straight trunk, wide flattened umbrella crown of
+ * feathery foliage crowned with scarlet blossom and hung with long dark pods; it breathes and
+ * rustles; buttress roots. The bark is one smooth mesh of curved tapered tubes: each branch leaves along its
  * parent's direction, so forks blend, and the roots are flat buttresses sinking into the ground.
  */
 export function createLightTree(
@@ -136,22 +140,24 @@ export function createLightTree(
   const puffMaterial = new THREE.MeshStandardMaterial({
     color: "#ffffff",
     roughness: 0.85,
-    emissive: "#3a5a1c",
+    emissive: "#3a2412",
     emissiveIntensity: 0.25,
   });
   const crownCentre = tips
     .reduce((acc, t) => acc.add(t), V())
     .multiplyScalar(1 / tips.length)
     .add(V(0, -0.6, 0));
-  bendInstancedNormals(puffMaterial, crownCentre, 0.62, 1.5);
+  bendInstancedNormals(puffMaterial, crownCentre, 0.62, 2.2);
   const puffs = new THREE.InstancedMesh(
-    leafyClump(opts.lite ? 1 : 2, opts.lite ? 12 : 24, 0.7),
+    leafyClump(opts.lite ? 1 : 2, opts.lite ? 16 : 38, 0.7, 0.62),
     puffMaterial,
     puffCount,
   );
   {
     const colour = new THREE.Color();
     const turn = new THREE.Euler();
+    const low = Math.min(...tips.map((t) => t.y));
+    const high = Math.max(...tips.map((t) => t.y));
     for (let i = 0; i < puffCount; i++) {
       turn.set((hash(i, 1) - 0.5) * 0.5, hash(i, 2) * Math.PI * 2, (hash(i, 3) - 0.5) * 0.5);
       q.setFromEuler(turn);
@@ -163,12 +169,13 @@ export function createLightTree(
         t.y + (extra ? (rng() - 0.3) * 1.2 : 0),
         t.z + (extra ? (rng() - 0.5) * 1.6 : 0),
       );
-      m4.compose(pos, q, s3.set(r * 1.1, r * 0.85, r * 1.1));
+      m4.compose(pos, q, s3.set(r * 1.3, r * 0.6, r * 1.3));
       puffs.setMatrixAt(i, m4);
-      puffs.setColorAt(
-        i,
-        colour.set(rng() < 0.1 ? "#f0793c" : GREENS[(rng() * GREENS.length) | 0]),
-      );
+      const blaze = rng() < 0.1;
+      const pick = blaze ? 0 : rng();
+      const height = (pos.y - low) / Math.max(1e-3, high - low);
+      const bloom = hash(i, 7) < 0.4 + 0.6 * height;
+      puffs.setColorAt(i, colour.set(blaze ? BLAZE : (bloom ? BLOSSOM : LEAVES)[(pick * 4) | 0]));
     }
   }
   canopy.add(puffs);
@@ -229,6 +236,16 @@ function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
   });
   const continued = new Set(next.filter((k) => k >= 0));
   const tubes: Tube[] = [];
+  const ends = branches.filter((b, i) => b.depth > 0 && next[i] < 0).map((b) => b.p1);
+  const low = Math.min(...ends.map((p) => p.y));
+  const high = Math.max(...ends.map((p) => p.y));
+  const reach = Math.max(...ends.map((p) => Math.hypot(p.x, p.z)));
+  branches.forEach((b, i) => {
+    const p = b.p1;
+    const hanging =
+      (p.y - low) / (high - low) < 0.35 && Math.hypot(p.x, p.z) > reach * 0.6 && hash(i, 11) < 0.25;
+    if (b.depth > 0 && next[i] < 0 && hanging) tubes.push(podTube(p, i));
+  });
   branches.forEach((b, i) => {
     if (b.depth < 0) tubes.push(rootTube(b, i));
     else if (!continued.has(i)) {
@@ -301,6 +318,35 @@ function limbTube(branches: readonly Branch[], chain: readonly number[], seed: n
       if (k) return 1;
       return trunk ? 0.82 + 0.18 * Math.min(1, u * 4) : 0.9 + 0.1 * Math.min(1, u * 3);
     },
+    seed,
+  };
+}
+
+/**
+ * A flamboyant pod: long, flat and dark, hanging from a branch tip under the crown and swinging
+ * slightly outwards; its top stays inside the foliage.
+ */
+function podTube(tip: THREE.Vector3, seed: number): Tube {
+  const out = V(tip.x, 0, tip.z)
+    .normalize()
+    .multiplyScalar(0.25 + 0.2 * hash(seed, 12));
+  const length = 1.1 + 0.5 * hash(seed, 13);
+  const top = tip.clone().add(V(0, -0.35, 0));
+  return {
+    at: bezier(
+      top,
+      top.clone().add(V(0, -length * 0.4, 0)),
+      top.clone().add(V(out.x * 0.6, -length * 0.8, out.z * 0.6)),
+      top.clone().add(V(out.x, -length, out.z)),
+    ),
+    radius: (s) => 0.05 * (0.6 + 0.4 * Math.sin(Math.PI * Math.min(1, 0.15 + s))),
+    rings: 5,
+    sides: 5,
+    stretch: 2.4,
+    normal0: V(-out.z, 0, out.x),
+    cap: true,
+    startCap: true,
+    shade: () => 0.42,
     seed,
   };
 }
