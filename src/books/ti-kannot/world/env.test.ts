@@ -152,15 +152,15 @@ describe("shotCamera", () => {
 });
 
 describe("frameOffset", () => {
-  it("moves the subject right of the reading card on wide screens", () => {
+  it("moves the subject right of the text column on wide screens", () => {
     const [x, y] = frameOffset(1440, 900);
     expect(x).toBeLessThan(0);
     expect(y).toBe(0);
   });
 
-  it("moves the subject above the reading card on portrait screens", () => {
+  it("moves the subject below the text on portrait screens (text at the top)", () => {
     const [x, y] = frameOffset(390, 844);
     expect(x).toBe(0);
-    expect(y).toBeGreaterThan(0);
+    expect(y).toBeLessThan(0);
   });
 });

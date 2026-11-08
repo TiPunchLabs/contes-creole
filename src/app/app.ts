@@ -29,6 +29,8 @@ export const TIMING = {
 export const LOAD_ERROR = "Kont-la pa ka chajé";
 const NEXT_KEYS = ["ArrowRight", "ArrowDown", " ", "PageDown"];
 const PREV_KEYS = ["ArrowLeft", "ArrowUp", "PageUp"];
+/** Rest after the wheel scrolled a long passage before the wheel may turn the page. */
+const WHEEL_REST_MS = 400;
 
 export interface AppDeps {
   mountTree: MountTree;
@@ -82,6 +84,10 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   let textHidden = false;
   let scrolled = false;
   let touchY: number | null = null;
+  /** The current swipe has scrolled a long passage: it never turns the page as well. */
+  let swipeScrolled = false;
+  /** Time the wheel last scrolled a long passage; the page turns only once it has rested. */
+  let wheelScrolledAt = -Infinity;
   let retryTimer: ReturnType<typeof setTimeout> | undefined;
   /** The book's bubble stays silent in "scène seule": its lines come from the hidden text. */
   const bookBubble: Bubble = {
@@ -308,19 +314,42 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     const direction = pager.step(dy, Date.now());
     if (direction !== 0) goPage(page + direction);
   };
+  /**
+   * The reading card under `target` when a vertical move of `dy` can still scroll it (a long passage):
+   * the move then scrolls the text, and only turns the page once the text has reached that edge.
+   */
+  const scrollableCard = (target: EventTarget | null, dy: number): HTMLElement | null => {
+    const card = target instanceof Element ? target.closest<HTMLElement>(".reading-card") : null;
+    if (!card || card.scrollHeight <= card.clientHeight + 1) return null;
+    const room =
+      dy > 0 ? card.scrollHeight - card.clientHeight - card.scrollTop > 1 : card.scrollTop > 1;
+    return room ? card : null;
+  };
   const onWheel = (e: WheelEvent): void => {
     if (mode !== "book" || !book || panel.isOpen) return;
+    if (scrollableCard(e.target, e.deltaY)) {
+      wheelScrolledAt = e.timeStamp;
+      return;
+    }
     e.preventDefault();
+    // The wheel that just brought a passage to its end rests before it may turn the page.
+    if (e.timeStamp - wheelScrolledAt < WHEEL_REST_MS) return;
     step(e.deltaY);
   };
   const onPointerDown = (e: PointerEvent): void => {
     touchY = e.pointerType === "mouse" ? null : e.clientY;
+    swipeScrolled = false;
   };
   const onPointerMove = (e: PointerEvent): void => {
     if (mode !== "book" || !book || touchY === null || panel.isOpen) return;
     const dy = touchY - e.clientY;
     touchY = e.clientY;
-    step(dy * 2.2);
+    // The app takes every touch (touch-action: none), so a long passage is scrolled by hand.
+    const card = scrollableCard(e.target, dy);
+    if (card) {
+      card.scrollTop += dy;
+      swipeScrolled = true;
+    } else if (!swipeScrolled) step(dy * 2.2);
   };
   const onPointerUp = (): void => {
     touchY = null;

@@ -49,6 +49,17 @@ const $ = (sel: string): HTMLElement => {
 };
 
 describe("reading UI", () => {
+  it("opens a new page at its top, but keeps the scroll on a language change", () => {
+    const ui = createReadingUI(root, events);
+    ui.open(stories);
+    ui.render({ page: 0, lang: "gcf", showHint: false, textHidden: false });
+    $(".reading-card").scrollTop = 120;
+    ui.render({ page: 0, lang: "fr", showHint: false, textHidden: false });
+    expect($(".reading-card").scrollTop).toBe(120);
+    ui.render({ page: 1, lang: "fr", showHint: false, textHidden: false });
+    expect($(".reading-card").scrollTop).toBe(0);
+  });
+
   it("shows the page label, number, title and escaped body", () => {
     const ui = createReadingUI(root, events);
     ui.open(stories);

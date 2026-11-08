@@ -112,6 +112,36 @@ describe("app", () => {
     expect(handle.dispose).not.toHaveBeenCalled();
   });
 
+  it("scrolls a long passage with the wheel or a swipe before turning the page", async () => {
+    start();
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    const card = $(".reading-card");
+    if (!card) throw new Error("no reading card");
+    Object.defineProperty(card, "scrollHeight", { configurable: true, value: 600 });
+    Object.defineProperty(card, "clientHeight", { configurable: true, value: 400 });
+    const wheel = new WheelEvent("wheel", { deltaY: 120, cancelable: true, bubbles: true });
+    card.dispatchEvent(wheel);
+    expect(wheel.defaultPrevented).toBe(false);
+    const down = new PointerEvent("pointerdown", { bubbles: true, clientY: 300 });
+    Object.defineProperty(down, "pointerType", { value: "touch" });
+    card.dispatchEvent(down);
+    card.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientY: 250 }));
+    expect(card.scrollTop).toBe(50);
+    expect(handle.setPage).not.toHaveBeenCalled();
+    // The same swipe reaching the end does not turn the page; the next swipe does.
+    card.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientY: 100 }));
+    expect(card.scrollTop).toBe(200);
+    card.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientY: -100 }));
+    expect(handle.setPage).not.toHaveBeenCalled();
+    card.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+    const again = new PointerEvent("pointerdown", { bubbles: true, clientY: 300 });
+    Object.defineProperty(again, "pointerType", { value: "touch" });
+    card.dispatchEvent(again);
+    card.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientY: 200 }));
+    expect(handle.setPage).toHaveBeenLastCalledWith(1);
+  });
+
   it("pages with keys and wheel, clamped, one turn per gesture", async () => {
     start();
     treeCtx.onEnter("liv");

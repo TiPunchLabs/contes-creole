@@ -6,60 +6,62 @@
   --reading-card-border: rgba(120, 84, 52, 0.22);
   --reading-font-display: "Caveat", "Cormorant Garamond", cursive;
   --reading-font-body: "Quicksand", sans-serif;
-  --tk-ink-red: #8a3b1e;
-  --tk-paper-fibres: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .3 0 0 0 0 .15 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* The scene steps back on the page's side so the eye lands on the page first. */
+/*
+ * The tale reads in the scene, as in Mila's book (ruling TKR): no page, just light text with a dark
+ * halo over a soft shade of the scene. The shade lives on the scene layer and fades out, so it never
+ * reads as a card; the camera slides the subject away from the text (frameOffset).
+ */
+[data-book="ti-kannot"] {
+  --tk-text: #fff8ea;
+  --tk-gold: #f6cf7d;
+  --tk-halo:
+    0 1px 14px rgba(28, 16, 6, 0.9), 0 0 3px rgba(28, 16, 6, 0.75), 0 0 1px rgba(28, 16, 6, 0.9);
+  /* Room the text leaves for the reader's controls under it. */
+  --tk-bottom: 104px;
+}
+
 [data-book="ti-kannot"] .app-book::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    rgba(40, 28, 14, 0.4) 0%,
-    rgba(40, 28, 14, 0.2) 34%,
-    transparent 60%
+  background: radial-gradient(
+    ellipse 52% 72% at 18% 40%,
+    rgba(36, 22, 10, 0.55) 0%,
+    rgba(36, 22, 10, 0.32) 48%,
+    rgba(36, 22, 10, 0) 100%
   );
-  backdrop-filter: saturate(0.7);
-  mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 62%);
 }
 
-/* An old page set down on the scene: aged parchment, stains, burnt edges. */
 [data-book="ti-kannot"] .reading-card {
-  width: min(580px, 42vw);
-  max-height: 64vh;
-  gap: 12px;
-  padding: 34px 38px 30px;
+  /* Above the scene's shade (z-index 1), like the reader's controls. */
+  z-index: 2;
+  top: clamp(72px, 13vh, 132px);
+  bottom: auto;
+  left: max(24px, calc(env(safe-area-inset-left, 0px) + 6vw));
+  width: min(31rem, 40vw);
+  max-height: calc(100svh - clamp(72px, 13vh, 132px) - var(--tk-bottom));
+  gap: 0;
+  padding: 0 6px 0 0;
   border: 0;
-  border-radius: 5px 9px 4px 11px / 10px 4px 9px 5px;
+  border-radius: 0;
+  background: none;
   backdrop-filter: none;
-  background:
-    var(--tk-paper-fibres),
-    radial-gradient(ellipse at 18% 12%, rgba(160, 110, 50, 0.14), transparent 38%),
-    radial-gradient(ellipse at 88% 78%, rgba(140, 90, 40, 0.16), transparent 42%),
-    radial-gradient(circle at 70% 22%, rgba(150, 100, 45, 0.08), transparent 18%),
-    radial-gradient(ellipse at 50% 45%, #f7eed6 0%, #ecdcb4 68%, #d9c08e 100%);
-  box-shadow:
-    inset 0 0 42px rgba(120, 70, 20, 0.38),
-    inset 0 0 7px rgba(90, 50, 10, 0.45),
-    0 0 0 1px rgba(120, 84, 52, 0.18),
-    0 28px 60px rgba(30, 20, 10, 0.42),
-    0 0 90px rgba(255, 236, 200, 0.25);
-  transform: rotate(-0.5deg);
+  box-shadow: none;
   scrollbar-width: thin;
-  scrollbar-color: rgba(120, 70, 20, 0.4) transparent;
+  scrollbar-color: rgba(246, 207, 125, 0.45) transparent;
   transition:
-    opacity 0.45s ease,
-    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    opacity 0.6s ease,
+    transform 0.6s ease;
 }
 
-/* Page change: the paper lifts away, then settles; the title lands before the text. */
+/* Page change: the text fades and rises a little, then settles (Mila's rhythm). */
 [data-book="ti-kannot"] .reading-card.is-changing {
   opacity: 0;
-  transform: translateY(16px) rotate(-1.8deg);
+  transform: translateY(10px);
 }
 
 [data-book="ti-kannot"] .reading-body,
@@ -73,46 +75,38 @@
   transition-delay: 0s;
 }
 
-[data-book="ti-kannot"] .reading-label {
-  color: var(--tk-ink-red);
-  letter-spacing: 0.2em;
+[data-book="ti-kannot"] .reading-head {
+  margin-bottom: 0.6rem;
+}
+
+[data-book="ti-kannot"] .reading-label,
+[data-book="ti-kannot"] .reading-num {
+  font: 600 12px/1.2 var(--reading-font-body);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--tk-gold);
+  text-shadow: var(--tk-halo);
 }
 
 [data-book="ti-kannot"] .reading-num {
-  font-style: normal;
-  font-size: 17px;
-  color: rgba(59, 42, 26, 0.55);
+  letter-spacing: 0.08em;
 }
 
 [data-book="ti-kannot"] .reading-title {
-  font-style: normal;
-  font-size: clamp(30px, 3.2vw, 42px);
-  color: var(--reading-title);
-}
-
-[data-book="ti-kannot"] .reading-title::after {
-  content: "❦";
-  display: block;
-  margin-top: 6px;
-  font: 400 18px/1 serif;
-  color: rgba(138, 59, 30, 0.55);
+  margin-bottom: 0.9rem;
+  font: 600 clamp(32px, 3vw, 42px)/1.05 var(--reading-font-display);
+  color: var(--tk-text);
+  text-shadow: var(--tk-halo);
 }
 
 [data-book="ti-kannot"] .reading-body {
-  font-size: 18px;
-  line-height: 1.65;
-  color: var(--reading-text);
+  font: 500 clamp(17px, 1.25vw, 19px)/1.6 var(--reading-font-body);
+  color: var(--tk-text);
+  text-shadow: var(--tk-halo);
 }
 
 [data-book="ti-kannot"] .reading-body p + p {
-  margin-top: 4px;
-}
-
-[data-book="ti-kannot"] .reading-body > .reading-text:first-child::first-letter {
-  float: left;
-  padding: 6px 8px 0 0;
-  font: 600 3.4em/0.78 var(--reading-font-display);
-  color: var(--tk-ink-red);
+  margin-top: 0.2rem;
 }
 
 [data-book="ti-kannot"] .reading-dialogue {
@@ -120,87 +114,125 @@
   text-indent: -1.1em;
 }
 
+/* Bileng: the French under the Kréyòl, as in Mila's gloss, with a denser halo. */
 [data-book="ti-kannot"] .reading-gloss {
-  margin-top: 8px;
-  padding-top: 12px;
-  font: italic 500 15px/1.5 var(--reading-font-body);
-  color: rgba(59, 42, 26, 0.72);
-  border-top: 1px dotted rgba(138, 59, 30, 0.4);
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed rgba(255, 248, 234, 0.4);
+  font: italic 500 clamp(16px, 1.15vw, 18px)/1.45 var(--reading-font-body);
+  color: var(--tk-text);
+  text-shadow:
+    0 0 3px rgba(28, 16, 6, 0.95),
+    0 0 8px rgba(28, 16, 6, 0.9),
+    0 1px 16px rgba(28, 16, 6, 0.9);
+}
+
+[data-book="ti-kannot"] .reading-card:focus-visible {
+  outline: 3px solid transparent;
+  box-shadow: var(--focus-ring);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-book="ti-kannot"] .reading-card,
   [data-book="ti-kannot"] .reading-card.is-changing {
-    transform: rotate(-0.5deg);
+    transform: none;
   }
 }
 
-/* Phones in portrait: the page spans the width; the scene steps back from the bottom. */
-@media (max-width: 600px) {
+/*
+ * Phones and portrait screens: the text takes the top, under the back and language buttons, as in
+ * Mila; the shade comes down from the top and the subject slides below the text.
+ */
+@media (max-width: 600px), (min-width: 601px) and (orientation: portrait) {
+  [data-book="ti-kannot"] {
+    --tk-bottom: 92px;
+  }
+
   [data-book="ti-kannot"] .app-book::after {
     background: linear-gradient(
-      0deg,
-      rgba(40, 28, 14, 0.4) 0%,
-      rgba(40, 28, 14, 0.2) 40%,
-      transparent 65%
+      180deg,
+      rgba(36, 22, 10, 0.62) 0%,
+      rgba(36, 22, 10, 0.44) 36%,
+      rgba(36, 22, 10, 0.2) 56%,
+      rgba(36, 22, 10, 0) 72%
     );
-    mask-image: linear-gradient(0deg, #000 0%, #000 35%, transparent 66%);
   }
 
   [data-book="ti-kannot"] .reading-card {
+    top: 70px;
+    left: max(18px, env(safe-area-inset-left, 0px));
+    right: max(18px, env(safe-area-inset-right, 0px));
     width: auto;
-    /* Stops below the sound button (70 + 44 px from the top). */
-    max-height: calc(100svh - 222px);
-    padding: 22px 22px 18px;
-    gap: 8px;
-    transform: none;
+    max-height: calc(100svh - 70px - var(--tk-bottom));
   }
 
-  [data-book="ti-kannot"] .reading-card.is-changing {
-    transform: translateY(16px);
-  }
-
+  /* Mila's heading size on phones (1.5rem). */
   [data-book="ti-kannot"] .reading-title {
-    font-size: 28px;
+    margin-bottom: 0.55rem;
+    font-size: 24px;
   }
 
   [data-book="ti-kannot"] .reading-body {
     font-size: 16px;
-    line-height: 1.55;
+    line-height: 1.5;
+  }
+
+  [data-book="ti-kannot"] .reading-gloss {
+    font-size: 15px;
   }
 }
 
-/* Phones in landscape: the page keeps the left side at full height. */
-@media (max-height: 500px) and (min-width: 601px) {
+/*
+ * Short portrait phones: the text keeps to the top 46 % so the characters below stay clear; a longer
+ * passage scrolls (wheel or swipe over the text, before the page turns).
+ */
+@media (max-width: 600px) and (max-height: 700px) {
   [data-book="ti-kannot"] .reading-card {
-    width: min(460px, 58vw);
-    max-height: calc(100svh - 72px);
-    padding: 18px 22px 16px;
+    max-height: min(calc(100svh - 70px - var(--tk-bottom)), 46svh);
+  }
+}
+
+/*
+ * Where passages may scroll (short phones, phones in landscape), the text fades out over its last
+ * 22 px instead of being cut, hinting at more; the padding there keeps a short page's last line
+ * clear of the fade.
+ */
+@media (max-width: 600px) and (max-height: 700px), (max-height: 500px) and (min-width: 601px) {
+  [data-book="ti-kannot"] .reading-card {
+    padding-bottom: 22px;
+    mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent);
+  }
+}
+
+/* Portrait tablets: a reading column, not the full width. */
+@media (min-width: 601px) and (orientation: portrait) {
+  [data-book="ti-kannot"] .reading-card {
+    top: 84px;
+    left: max(32px, 6vw);
+    right: auto;
+    width: min(36rem, 88vw);
+  }
+}
+
+/* Phones in landscape: the left column at full height, under the back button. */
+@media (max-height: 500px) and (min-width: 601px) {
+  [data-book="ti-kannot"] {
+    --tk-bottom: 68px;
+  }
+
+  [data-book="ti-kannot"] .reading-card {
+    top: 58px;
+    width: min(28rem, 50vw);
+    max-height: calc(100svh - 58px - var(--tk-bottom));
   }
 
   [data-book="ti-kannot"] .reading-title {
+    margin-bottom: 0.4rem;
     font-size: 26px;
   }
 
   [data-book="ti-kannot"] .reading-body {
     font-size: 15px;
-    line-height: 1.5;
-  }
-}
-
-/* Tablets in portrait: the world sits above the page, so the page can take the width (42vw gave
-   about 30 characters a line at 768 px). It stays above the row of page buttons and hint. */
-@media (min-width: 601px) and (orientation: portrait) {
-  [data-book="ti-kannot"] .reading-card {
-    width: min(580px, calc(96vw - 96px));
-    bottom: 88px;
-  }
-}
-
-/* Must follow the phone rule above, which sets its own page-change offset. */
-@media (prefers-reduced-motion: reduce) and (max-width: 600px) {
-  [data-book="ti-kannot"] .reading-card.is-changing {
-    transform: none;
+    line-height: 1.45;
   }
 }
 
@@ -241,10 +273,13 @@
   height: 20px;
 }
 
+/* Phones: in the bottom row, left of the page buttons, so the top stays free for the text. */
 @media (max-width: 600px) {
   .tk-sound {
-    top: 70px;
-    right: 12px;
+    top: auto;
+    right: auto;
+    bottom: 18px;
+    left: 12px;
   }
 }
 

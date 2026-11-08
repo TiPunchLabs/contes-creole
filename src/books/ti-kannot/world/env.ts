@@ -174,12 +174,12 @@ export function sunDirection(env: MixedEnv, out: THREE.Vector3): THREE.Vector3 {
 }
 
 const CARD_SHIFT_WIDE = 0.19;
-const CARD_SHIFT_TALL = 0.16;
+const CARD_SHIFT_TALL = 0.2;
 
 /**
- * View offset (pixels) that slides the framed subject away from the reading card:
- * right of it on landscape screens, above it on portrait ones (card at the bottom).
+ * View offset (pixels) that slides the framed subject away from the tale's text: right of it on
+ * landscape screens (text in the left column), below it on portrait ones (text at the top).
  */
 export function frameOffset(width: number, height: number): [number, number] {
-  return width >= height ? [-width * CARD_SHIFT_WIDE, 0] : [0, height * CARD_SHIFT_TALL];
+  return width >= height ? [-width * CARD_SHIFT_WIDE, 0] : [0, -height * CARD_SHIFT_TALL];
 }
