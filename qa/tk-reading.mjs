@@ -80,6 +80,48 @@ const layout = (p) =>
     };
   });
 
+/**
+ * Scrolls the text of a long passage to its end, one gesture at a time, stopping there: wheel over
+ * it with a mouse, a real touch swipe (CDP touch events) on touch screens. Reports whether its end
+ * was reached and the page counter.
+ */
+async function scrollToEnd(p, touch) {
+  const b = await p.locator(".reading-card").boundingBox();
+  const x = b.x + b.width / 2;
+  const y = b.y + b.height * 0.6;
+  const cdp = touch ? await p.context().newCDPSession(p) : null;
+  for (let k = 0; k < 12; k++) {
+    if (touch) {
+      const pt = (yy) => [{ x, y: yy }];
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: pt(y) });
+      for (let s = 1; s <= 6; s++)
+        await cdp.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: pt(y - s * 12),
+        });
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    } else {
+      await p.mouse.move(x, y);
+      await p.mouse.wheel(0, 80);
+    }
+    await p.waitForTimeout(150);
+    const done = await p.evaluate(() => {
+      const c = document.querySelector(".reading-card");
+      return c.scrollTop + c.clientHeight >= c.scrollHeight - 2;
+    });
+    if (done) break;
+  }
+  await p.waitForTimeout(400);
+  return p.evaluate(() => {
+    const c = document.querySelector(".reading-card");
+    return {
+      atEnd: c.scrollTop + c.clientHeight >= c.scrollHeight - 2,
+      scrollTop: Math.round(c.scrollTop),
+      count: document.querySelector(".reading-count")?.textContent,
+    };
+  });
+}
+
 async function run(browser, vp) {
   const ctx = await browser.newContext(VIEWPORTS[vp]);
   const p = await ctx.newPage();
@@ -115,6 +157,18 @@ async function run(browser, vp) {
       results.pages.push({ vp, lang, page: i, ...l });
       await p.screenshot({ path: `${OUT}${vp}-${lang}-p${String(i).padStart(2, "0")}.png` });
       check(`${vp}.${lang}.p${i}`, "no-panel-behind-text", !l.panel, l.background);
+      if (l.scroll && l.scroll.sh > l.scroll.ch + 2) {
+        const end = await scrollToEnd(p, touch);
+        check(
+          `${vp}.${lang}.p${i}`,
+          "long-passage-reaches-end-without-page-turn",
+          end.atEnd && end.count === l.count,
+          JSON.stringify(end),
+        );
+        await p.screenshot({
+          path: `${OUT}${vp}-${lang}-p${String(i).padStart(2, "0")}-scrolled.png`,
+        });
+      }
       check(`${vp}.${lang}.p${i}`, "text-inside-screen", l.inside, JSON.stringify(l.card));
       check(
         `${vp}.${lang}.p${i}`,

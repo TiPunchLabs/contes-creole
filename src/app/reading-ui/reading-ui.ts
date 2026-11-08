@@ -143,6 +143,8 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
         toggle.title = action;
         toggle.innerHTML = state.textHidden ? TEXT_ON : TEXT_OFF;
       }
+      // A new page starts at its top, even if the last one was scrolled to its end.
+      if (shown !== state.page) card.scrollTop = 0;
       if (shown !== -1 && shown !== state.page) {
         card.classList.add("is-changing");
         clearTimeout(fadeTimer);
