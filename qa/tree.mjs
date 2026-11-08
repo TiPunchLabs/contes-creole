@@ -1,6 +1,6 @@
 // Tree covers, no fiche, the storyteller's random tale and the classes-page footer link, on the GPU:
-// every card in Mila's layout, the book as the only entry point (pointer and keyboard), the bubble's
-// call and the storyteller opening a tale at random straight on page 1, the way back, and the footer.
+// every card in Mila's layout, the book as the only entry point (pointer and keyboard), the bubble
+// on hover only and the storyteller opening a tale at random straight on page 1, the way back, and the footer.
 // Usage: [SITE=url] [OUT=dir] [VPS=desktop,mobile,...] [QA_INJECT_CSS=css] node qa/tree.mjs
 import { chromium } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -149,59 +149,51 @@ async function runViewport(browser, vp) {
     (await p.locator(".tree-label, .tree-filet, .tree-enter, .tree-invite-open").count()) === 0,
   );
 
-  // The storyteller's bubble near the foot of the tree, with the owner's sentence as a button. Where
-  // it would cover the intro (phones), it waits for the first steps of the climb.
-  const shown = () =>
-    p.evaluate(() => getComputedStyle(document.querySelector(".app-bubble")).opacity === "1");
-  let steps = 0;
-  if (!(await shown())) {
-    await p.screenshot({ path: `${OUT}${vp}-foot-intro.png` });
-    for (; steps < 8 && !(await shown()); steps++) {
-      await p.mouse.move(VIEWPORTS[vp].viewport.width / 2, 200);
-      await p.mouse.wheel(0, 60);
-      await p.waitForTimeout(700);
-    }
-  }
-  const overlap = await p.evaluate(() => {
-    const b = document.querySelector(".app-bubble").getBoundingClientRect();
-    const introEl = document.querySelector(".tree-intro");
-    const i = document.querySelector(".tree-intro-inner").getBoundingClientRect();
-    const readable = Number(getComputedStyle(introEl).opacity) >= 0.3;
-    const hit = b.left < i.right && i.left < b.right && b.top < i.bottom && i.top < b.bottom;
-    return { readable, hit, opacity: getComputedStyle(introEl).opacity };
-  });
-  check(
-    vp,
-    "bubble-leaves-intro-readable",
-    !(overlap.readable && overlap.hit),
-    `${JSON.stringify(overlap)} after ${steps} wheel steps`,
-  );
-  const bubble = await p.evaluate(() => {
-    const b = document.querySelector(".app-bubble");
-    const a = b?.querySelector(".app-bubble-action");
-    return {
-      opacity: b ? getComputedStyle(b).opacity : null,
-      inert: b?.inert,
-      action: a?.textContent,
-      lang: a?.lang,
-      kreyol: b?.querySelector("[lang=gcf]")?.textContent,
-    };
-  });
-  check(
-    vp,
-    "bubble-action-shown",
-    bubble.opacity === "1" && !bubble.inert && bubble.action === ACTION && bubble.lang === "fr",
-    JSON.stringify(bubble),
-  );
-  const bb = await box(p, ".app-bubble");
+  // The storyteller's bubble (TREE-HOVER): hidden at rest, shown only while he is hovered or
+  // focused, ending with the owner's hint that a click on him opens a tale at random (no button).
+  const said = () =>
+    p.evaluate(() => {
+      const b = document.querySelector(".app-bubble");
+      const fr = [...b.querySelectorAll("[lang=fr]")].map((e) => e.textContent.trim());
+      return {
+        opacity: getComputedStyle(b).opacity,
+        krik: b.textContent.includes("krik"),
+        hint: fr[fr.length - 1],
+        buttons: b.querySelectorAll("button").length,
+      };
+    });
+  if (!touch) await p.mouse.move(2, 2);
+  await p.waitForTimeout(800);
+  const rest = await said();
+  check(vp, "bubble-hidden-at-rest", rest.opacity === "0", JSON.stringify(rest));
+  const tb0 = await box(p, ".tree-teller");
+  check(vp, "teller-on-screen-at-foot", Boolean(tb0), JSON.stringify(tb0));
   const vpSize = p.viewportSize();
-  check(
-    vp,
-    "bubble-inside-screen",
-    bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.w <= vpSize.width,
-    JSON.stringify(bb),
-  );
-  await p.screenshot({ path: `${OUT}${vp}-storyteller.png` });
+  const at = (b) => ({ x: b.x + b.w / 2, y: b.y + b.h * 0.55 });
+  if (!touch && tb0) {
+    await p.mouse.move(at(tb0).x, at(tb0).y);
+    await p.waitForTimeout(700);
+    const hov = await said();
+    check(
+      vp,
+      "bubble-on-hover-with-hint",
+      hov.opacity === "1" && hov.krik && hov.hint === ACTION && hov.buttons === 0,
+      JSON.stringify(hov),
+    );
+    const bb = await box(p, ".app-bubble");
+    check(
+      vp,
+      "bubble-inside-screen",
+      bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.w <= vpSize.width,
+      JSON.stringify(bb),
+    );
+    await p.screenshot({ path: `${OUT}${vp}-storyteller-hover.png` });
+    await p.mouse.move(2, 2);
+    await p.waitForTimeout(800);
+    check(vp, "bubble-hides-on-leave", (await said()).opacity === "0");
+  } else {
+    await p.screenshot({ path: `${OUT}${vp}-storyteller-rest.png` });
+  }
   const teller = p.locator(".tree-teller");
   check(
     vp,
@@ -209,16 +201,18 @@ async function runViewport(browser, vp) {
     (await teller.isVisible()) && (await teller.textContent()) === ACTION,
   );
 
-  // 1. The bubble's action, random draw pinned to the last tale (Mila).
+  // 1. A click (desktop: double click) or tap on the Konteur, draw pinned to the last tale (Mila):
+  // the tale opens once, straight on page 1.
   await p.evaluate(() => (window.__qaRandom = 0.99));
-  const action = p.locator(".app-bubble-action");
-  if (touch) await action.tap();
-  else await action.dblclick();
+  if (tb0) {
+    if (touch) await p.touchscreen.tap(at(tb0).x, at(tb0).y);
+    else await p.mouse.dblclick(at(tb0).x, at(tb0).y);
+  }
   await waitFirstPage(p, "mila");
   await p.waitForTimeout(800);
   check(
     vp,
-    "action-opens-mila-page-1-once",
+    "konteur-opens-mila-page-1-once",
     (await openings(p)) === 1,
     `openings ${await openings(p)}`,
   );
@@ -292,40 +286,21 @@ async function runViewport(browser, vp) {
     check(vp, "tab-reaches-storyteller", await tabTo(p, ".tree-teller"));
     const tring = await focusIndicator(p, p.locator(".tree-teller"));
     check(vp, "storyteller-focus-ring", tring.visible, JSON.stringify(tring));
+    // The bubble fades in over 0.25 s after the focus measurement's refocus.
+    await p.waitForTimeout(400);
+    const focusedSays = await said();
+    check(
+      vp,
+      "bubble-on-keyboard-focus",
+      focusedSays.opacity === "1" && focusedSays.hint === ACTION,
+      JSON.stringify(focusedSays),
+    );
     await p.evaluate(() => (window.__qaRandom = 0.5));
     await p.keyboard.press("Enter");
     await waitFirstPage(p, "mila");
     check(vp, "enter-on-storyteller-opens-random-tale", true);
     await back(p);
     // The focus comes back to the storyteller while he is still on screen, else to the tale's card.
-    // Keyboard on the bubble's own button: its button is gone on return, the focus goes to the
-    // tale's card (Codex TREE-R1).
-    await foot(p);
-    await p.locator("body").focus();
-    check(vp, "tab-reaches-bubble-action", await tabTo(p, ".app-bubble-action"));
-    await p.evaluate(() => (window.__qaRandom = 0.99));
-    await p.keyboard.press("Enter");
-    await waitFirstPage(p, "mila");
-    await back(p);
-    const fromBubble = await p.evaluate(() => {
-      const a = document.activeElement;
-      return { cls: a?.className, hidden: a?.hidden, name: a?.textContent };
-    });
-    check(
-      vp,
-      "focus-after-bubble-action-on-the-tale-card",
-      /tree-book/.test(fromBubble.cls ?? "") &&
-        !fromBubble.hidden &&
-        fromBubble.name?.includes(TITLES[1]),
-      JSON.stringify(fromBubble),
-    );
-    await foot(p);
-    await p.locator("body").focus();
-    check(vp, "tab-reaches-storyteller-again", await tabTo(p, ".tree-teller"));
-    await p.evaluate(() => (window.__qaRandom = 0.5));
-    await p.keyboard.press("Enter");
-    await waitFirstPage(p, "mila");
-    await back(p);
     const after = await p.evaluate(() => {
       const a = document.activeElement;
       return { cls: a?.className, hidden: a?.hidden };
@@ -336,6 +311,21 @@ async function runViewport(browser, vp) {
       /tree-book|tree-teller/.test(after.cls ?? "") && !after.hidden,
       JSON.stringify(after),
     );
+    // Hover and focus together (Codex hover-review R1): the focus moving on keeps the bubble of a
+    // Konteur still under the pointer; the pointer leaving then hides it.
+    await foot(p);
+    await p.locator("body").focus();
+    await tabTo(p, ".tree-teller");
+    const tk = await box(p, ".tree-teller");
+    await p.mouse.move(tk.x + tk.w / 2, tk.y + tk.h * 0.55);
+    await p.waitForTimeout(500);
+    await p.keyboard.press("Tab");
+    await p.waitForTimeout(500);
+    const kept = await said();
+    check(vp, "bubble-kept-on-blur-while-hovered", kept.opacity === "1", JSON.stringify(kept));
+    await p.mouse.move(2, 2);
+    await p.waitForTimeout(800);
+    check(vp, "bubble-hides-when-pointer-then-leaves", (await said()).opacity === "0");
   }
 
   // 6. The invitation still leads to the classes page (shelf: select, then open).

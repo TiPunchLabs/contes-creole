@@ -37,11 +37,11 @@ sources are in `design/v13/`.
 - **Hub — Pyébwa a Konesans**: a tree of light on a tropical _morne_. Scrolling climbs a camera spiral
   around it; book-cards hang from the branches, each one the way into its tale (click, tap, or
   keyboard focus on a transparent entry point over the near card; no fiche beside it). The Konteur
-  sits at the foot of the tree; near the foot his bubble shows "Yé krik !…" unasked, wherever it
-  leaves the intro readable, ending with the button « Cliquez ici pour accéder à un conte au
-  hasard. ». Clicking, tapping or focusing-and-pressing the Konteur or that button opens one of the
-  eligible tales (`src/tree/random-tale.ts`: ready, with a world, never the invitation) at random,
-  through the same dive as its card.
+  sits at the foot of the tree; hovering him (or focusing his keyboard entry point) lights his
+  lantern and shows his bubble, "Yé krik !…" then the hint « Cliquez ici pour accéder à un conte
+  au hasard. » (ruling TREE-HOVER). Clicking or tapping him, or pressing Enter on his entry point,
+  opens one of the eligible tales (`src/tree/random-tale.ts`: ready, with a world, never the
+  invitation) at random, through the same dive as its card.
 - **World — Larivyè Klè**: a night river. Each page moves the camera along the water and
   interpolates `env`: sky, water level, moon, stars, rain, calabash count, dam / spring / tank.
 - **Invitation to classes** (M2): the tree shows the published books (`ready: true`), then one
@@ -129,8 +129,7 @@ browser holds it until a gesture, the reader's first tap or key in the tale resu
   The 3D scene's colours live in `src/tree/scene/palette.ts` (sRGB twins of the tokens).
 - **Languages**: the page is `lang="fr"`; Kréyòl UI and story text carry `lang="gcf"` explicitly
   (decision A5). The reading card follows the story shown. Bubbles take a plain string (the
-  shell's current language) or `{ lang, text }` segments for bilingual lines (decision T4); an
-  optional `action` ends the bubble with a button (the Konteur's random tale, ruling TREE-RANDOM).
+  shell's current language) or `{ lang, text }` segments for bilingual lines (decision T4).
 - Owner decisions and their wording: `docs/redesign/decisions.md`.
 
 ### Ti Kannot's camera

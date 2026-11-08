@@ -1,7 +1,10 @@
 import type { BookManifest } from "@app/contract";
 import { isInvitation } from "./invitation";
 
-/** The storyteller's call to a tale picked at random (owner's wording, French only). */
+/**
+ * The storyteller's hint, shown in his bubble on hover: a click on him opens a tale at random
+ * (owner's wording, French only).
+ */
 export const RANDOM_TALE_ACTION = "Cliquez ici pour accéder à un conte au hasard.";
 
 /** Said instead when no tale can be opened (proposal, awaiting the owner's wording). */

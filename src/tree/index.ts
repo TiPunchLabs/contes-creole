@@ -1,13 +1,7 @@
 import "./fonts";
 import "./overlay/overlay.css";
 import * as THREE from "three";
-import type {
-  BubbleAction,
-  BubbleSegment,
-  MountTree,
-  TreeContext,
-  TreeHandle,
-} from "@app/contract";
+import type { BubbleSegment, MountTree, TreeContext, TreeHandle } from "@app/contract";
 import { clamp, lerp, smoothstep } from "@shared/math";
 import { createRng } from "@shared/random";
 import { createStage, fitFov, type Stage } from "@shared/three/stage";
@@ -59,13 +53,6 @@ const DIVE_SECONDS = 1.7;
 const TAP_DISTANCE = 8;
 const TAP_MS = 600;
 const BUBBLE_HOLD_MS = 4500;
-/**
- * Below this climb (the first card hangs at 0.2), the storyteller speaks unasked, so his call to a
- * random tale is in view, wherever his bubble leaves the intro readable.
- */
-const IDLE_CLIMB = 0.15;
-/** Room the storyteller's bubble takes above his head, in pixels (280 px wide, about 240 high). */
-const BUBBLE_ROOM = { width: 300, height: 260 };
 const CLIMB_KEYS_UP = ["ArrowUp", "ArrowLeft"];
 const CLIMB_KEYS_DOWN = ["ArrowDown", "ArrowRight", " "];
 
@@ -141,13 +128,6 @@ function buildTree(
   let cardFocused = false;
   let tellerFocused = false;
   let tellerHovered = false;
-  /** The storyteller is on screen and his bubble would not cover the intro. */
-  let tellerFree = false;
-  /**
-   * A tale was opened from outside the tree's own controls (the bubble's button): that button is
-   * gone on return, so the focus goes to the tale's card once it is near again (TREE-R1).
-   */
-  let refocusCard = false;
   let active = true;
   let diving: { index: number; progress: number; resolve: (() => void) | null } | null = null;
   let down: { y: number; t: number; moved: number } | null = null;
@@ -174,28 +154,25 @@ function buildTree(
   const tales = eligibleTales(slots);
   /**
    * The storyteller's random tale: one of the eligible tales, opened like its own book (the
-   * shell's dive straight to page 1). With none, he says so instead of navigating.
+   * shell's dive straight to page 1). With none, he says so instead of navigating: his bubble
+   * follows the hover or the focus like the hint, and a tap (no hover) holds it for 4.5 s.
    */
-  const openRandom = (): void => {
+  const openRandom = (tapped = false): void => {
     if (!active || diving) return;
     const tale = pickRandomTale(slots, Math.random);
     if (!tale) {
       overlay.announce(RANDOM_TALE_NONE);
-      setSpeaker("teller", true);
+      setSpeaker("teller", tapped);
       return;
     }
-    const from = document.activeElement;
-    refocusCard =
-      from instanceof HTMLElement && from !== document.body && !container.contains(from);
     hover = null;
     ctx.onEnter(tale.id);
   };
-  const tellerAction: BubbleAction | undefined = tales.length
-    ? { lang: "fr", text: RANDOM_TALE_ACTION, run: openRandom }
-    : undefined;
-  const tellerLines: BubbleSegment[] = tales.length
-    ? SAY.teller
-    : [...SAY.teller, { lang: "fr", text: `\n${RANDOM_TALE_NONE}` }];
+  /** His lines, then what a click on him does (or that no tale can be opened). */
+  const tellerLines: BubbleSegment[] = [
+    ...SAY.teller,
+    { lang: "fr", text: `\n${tales.length ? RANDOM_TALE_ACTION : RANDOM_TALE_NONE}` },
+  ];
   /** Opens a slot: dives into its book, or goes to the classes page (the invitation never dives). */
   const enter = (index: number): void => {
     const slot = slots[index];
@@ -214,10 +191,11 @@ function buildTree(
     onCardFocus: (focused) => {
       cardFocused = focused;
     },
-    onTeller: openRandom,
+    onTeller: () => openRandom(),
     onTellerFocus: (focused) => {
       tellerFocused = focused;
-      setSpeaker(focused ? "teller" : null);
+      // A pointer still resting on him keeps his bubble when the focus moves on.
+      setSpeaker(focused || tellerHovered ? "teller" : null);
     },
   });
   overlay.setTeller(tales.length ? RANDOM_TALE_ACTION : RANDOM_TALE_NONE, tales.length > 0);
@@ -230,21 +208,15 @@ function buildTree(
     anchor.y += view.top;
     return stage.project(anchor);
   };
-  /** The storyteller speaks unasked at the foot of the tree, while he is on screen. */
-  const idleSpeaker = (): Speaker | null =>
-    active && !diving && t < IDLE_CLIMB && tellerFree ? "teller" : null;
-  /** Shows the bubble of `who`, or hides it; the storyteller's ends with his random-tale call. */
+  /** Shows the bubble of `who`, or hides it; the storyteller's ends with his random-tale hint. */
   const showSpeaker = (who: Speaker | null): void => {
     if (who === speaker) return;
     speaker = who;
     if (!who) ctx.bubble.hide();
-    else if (who === "teller") ctx.bubble.show(tellerLines, anchorOf(who), tellerAction);
+    else if (who === "teller") ctx.bubble.show(tellerLines, anchorOf(who));
     else ctx.bubble.show(SAY[who], anchorOf(who));
   };
-  /**
-   * Asks for the bubble of `who` (and pokes a critter), or for none (the idle storyteller then
-   * speaks if he may); `hold` keeps it for 4.5 s.
-   */
+  /** Asks for the bubble of `who` (and pokes a critter), or for none; `hold` keeps it for 4.5 s. */
   const setSpeaker = (who: Speaker | null, hold = false): void => {
     clearTimeout(holdTimer);
     held = hold;
@@ -259,7 +231,7 @@ function buildTree(
       if (state) poke(state);
     }
     chosen = who;
-    showSpeaker(who ?? idleSpeaker());
+    showSpeaker(who);
   };
   const pick = (): Pick => {
     ndc.set(pointer.x, pointer.y);
@@ -305,8 +277,7 @@ function buildTree(
     tellerHovered = p?.type === "teller";
     container.style.cursor = p ? "pointer" : "default";
     const who = speakerOf(p);
-    // The storyteller's bubble is held a moment, so the pointer can reach its button.
-    if (who) setSpeaker(who, who === "teller");
+    if (who) setSpeaker(who);
     else if (!held && !tellerFocused) setSpeaker(null);
   };
   const onPointerUp = (e: PointerEvent): void => {
@@ -317,7 +288,7 @@ function buildTree(
     Object.assign(pointer, stage.pointer(e));
     const p = pick();
     if (p?.type === "card") enter(p.index);
-    else if (p?.type === "teller") openRandom();
+    else if (p?.type === "teller") openRandom(e.pointerType !== "mouse");
     else if (p && e.pointerType !== "mouse") setSpeaker(speakerOf(p), true);
     else if (!p && e.pointerType !== "mouse") setSpeaker(null);
   };
@@ -349,22 +320,6 @@ function buildTree(
     if (!foot.visible || !top.visible || top.y > h || foot.y < 0 || foot.x < 0 || foot.x > w)
       return null;
     return { x: foot.x, top: top.y, bottom: Math.min(foot.y, h) };
-  };
-
-  /** Whether the storyteller's bubble, above his head, would cover the readable intro. */
-  const coversIntro = (teller: TellerBox): boolean => {
-    const intro = overlay.introBox();
-    if (!intro) return false;
-    const bottom = teller.top;
-    const top = bottom - BUBBLE_ROOM.height;
-    const left = teller.x - BUBBLE_ROOM.width / 2;
-    const right = teller.x + BUBBLE_ROOM.width / 2;
-    return (
-      left < intro.left + intro.width &&
-      intro.left < right &&
-      top < intro.top + intro.height &&
-      intro.top < bottom
-    );
   };
 
   /** Whether a projected x keeps the card and its label clear of the screen edges. */
@@ -410,7 +365,6 @@ function buildTree(
     near = best ? best.index : -1;
     const book = best ? slots[best.index] : undefined;
     const teller = tellerOnStage();
-    tellerFree = teller !== null && t < IDLE_CLIMB && !coversIntro(teller);
     // During the dive the entry points stay as they were, so the shell can hand the focus back to
     // the one that opened the tale on return.
     if (!diving)
@@ -429,11 +383,6 @@ function buildTree(
         near,
         teller,
       );
-    showSpeaker(chosen ?? idleSpeaker());
-    if (refocusCard && !diving && near >= 0) {
-      const lost = !document.activeElement || document.activeElement === document.body;
-      if (!lost || overlay.focusCard()) refocusCard = false;
-    }
     if (diving && diving.progress >= 1 && diving.resolve) {
       diving.resolve();
       diving.resolve = null;
