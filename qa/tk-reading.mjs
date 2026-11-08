@@ -29,6 +29,8 @@ const VIEWPORTS = {
   mobile: touchVp(390, 844),
   narrow: touchVp(320, 568),
   landscape: touchVp(844, 390),
+  /** The short phone layout driven by a mouse: long passages scrolled with the wheel. */
+  narrowMouse: { viewport: { width: 320, height: 568 }, deviceScaleFactor: 2 },
 };
 const VPS = (process.env.VPS ?? "desktop,mobile,narrow").split(",");
 const LANGS = (process.env.LANGS ?? "gcf,fr").split(",");
@@ -168,6 +170,23 @@ async function run(browser, vp) {
         await p.screenshot({
           path: `${OUT}${vp}-${lang}-p${String(i).padStart(2, "0")}-scrolled.png`,
         });
+        // At the end, once the wheel has rested (400 ms), the next turn of it turns the page.
+        if (!touch && i < 12) {
+          await p.waitForTimeout(600);
+          await p.mouse.wheel(0, 200);
+          await p.waitForTimeout(900);
+          const next = await p.evaluate(
+            () => document.querySelector(".reading-count")?.textContent,
+          );
+          check(
+            `${vp}.${lang}.p${i}`,
+            "wheel-turns-page-after-rest",
+            next === `${i + 1} / 12`,
+            next ?? "",
+          );
+          await press(p.locator(".reading-prev"));
+          await p.waitForTimeout(2600);
+        }
       }
       check(`${vp}.${lang}.p${i}`, "text-inside-screen", l.inside, JSON.stringify(l.card));
       check(
