@@ -2,7 +2,15 @@ import * as THREE from "three";
 import type { Rng } from "@shared/random";
 import type { Obstacle } from "./critters/wander";
 import { groundHeight } from "./ground";
-import { bendNormals, bezier, hash, lumpyBall, tubesGeometry, type Tube } from "./organic";
+import {
+  bendNormals,
+  bezier,
+  hash,
+  lumpyBall,
+  tubesGeometry,
+  withBark,
+  type Tube,
+} from "./organic";
 
 const PALMS: readonly (readonly [number, number, number])[] = [
   [-9.5, -10, 6.5],
@@ -103,6 +111,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
   const flat = (color: string, extra: THREE.MeshStandardMaterialParameters = {}) =>
     new THREE.MeshStandardMaterial({ color, roughness: 1, ...extra });
   const trunkMat = flat("#9a7458");
+  const barkMat = withBark(flat("#9a7458"), 0.13);
   const frondMat = flat("#5f9c46", { side: THREE.DoubleSide });
   const frondGeo = frondGeometry(12);
   const crowns: THREE.Object3D[] = [];
@@ -143,7 +152,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
   const fruitMat = new THREE.MeshStandardMaterial({ color: "#b9d05c", roughness: 0.7 });
   const breadfruit = (x: number, z: number, k: number): void => {
     const g = new THREE.Group();
-    const t = new THREE.Mesh(breadfruitTrunkGeometry(k, hash(x, z)), trunkMat);
+    const t = new THREE.Mesh(breadfruitTrunkGeometry(k, hash(x, z)), barkMat);
     t.position.y = 1.3 * k;
     g.add(t);
     const crown = new THREE.Group();
@@ -196,7 +205,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
           seed: x,
         },
       ]),
-      trunkMat,
+      barkMat,
     );
     t.position.y = 1.2 * k;
     g.add(t);
@@ -207,7 +216,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
       const root = new THREE.Vector3(Math.cos(a) * 0.04 * k, 2.1 * k, Math.sin(a) * 0.04 * k);
       const br = new THREE.Mesh(
         limbGeometry(position, rotation, root, 1.15 * k, 0.16 * k),
-        trunkMat,
+        barkMat,
       );
       br.position.copy(position);
       br.rotation.copy(rotation);

@@ -20,6 +20,8 @@ export interface Tube {
   radius(s: number): number;
   rings: number;
   sides: number;
+  /** Explicit ring positions in [0, 1] (ascending, ending at 1); replaces the even `rings` split. */
+  stations?: readonly number[];
   /** Cross-section stretch along the transported normal (flat buttress roots). */
   stretch?: number;
   /** First normal of the transported frame (the stretch direction at s = 0). */
@@ -55,7 +57,8 @@ export function bezier(
 /**
  * Merges tubes into one indexed geometry (rings wrap without a seam vertex, so smooth normals have no
  * crease). Frames are parallel-transported, so a tube never twists. `color` gets a shade attribute
- * for a `vertexColors` material.
+ * for a `vertexColors` material. Every vertex also carries `aBark` (cos and sin of its angle around
+ * the axis, length along the axis, radius) for `withBark`.
  */
 export function tubesGeometry(
   tubes: readonly Tube[],
@@ -63,6 +66,7 @@ export function tubesGeometry(
 ): THREE.BufferGeometry {
   const pos: number[] = [];
   const col: number[] = [];
+  const bark: number[] = [];
   const index: number[] = [];
   const base = new THREE.Color(color ?? "#ffffff");
   const p = new THREE.Vector3();
@@ -75,7 +79,11 @@ export function tubesGeometry(
   const v = new THREE.Vector3();
   for (const tube of tubes) {
     const start = pos.length / 3;
-    const { rings, sides } = tube;
+    const { sides } = tube;
+    const stations =
+      tube.stations ?? Array.from({ length: tube.rings + 1 }, (_, i) => i / tube.rings);
+    let along = (tube.seed ?? 0) * 3.7;
+    const last = new THREE.Vector3();
     const stretch = tube.stretch ?? 1;
     const seed = tube.seed ?? 0;
     const ridges = tube.ridges ?? 0;
@@ -107,10 +115,11 @@ export function tubesGeometry(
           .addScaledVector(b, Math.sin(a) * r * bump);
         pos.push(v.x, v.y, v.z);
         col.push(base.r * shade, base.g * shade, base.b * shade);
+        bark.push(Math.cos(a), Math.sin(a), along, r);
       }
     };
-    for (let i = 0; i <= rings; i++) {
-      const s = i / rings;
+    for (let i = 0; i < stations.length; i++) {
+      const s = stations[i];
       tangent(s);
       const angle = prevT.angleTo(t);
       if (angle > 1e-5) {
@@ -118,9 +127,12 @@ export function tubesGeometry(
         n.applyAxisAngle(axis, angle);
       }
       prevT.copy(t);
-      ring(tube.at(s, p), tube.radius(s), s, tube.shade?.(s) ?? 1);
+      tube.at(s, p);
+      if (i) along += p.distanceTo(last);
+      last.copy(p);
+      ring(p, tube.radius(s), s, tube.shade?.(s) ?? 1);
     }
-    let count = rings + 1;
+    let count = stations.length;
     if (tube.cap) {
       const end = tube.at(1, q).clone();
       const r = tube.radius(1);
@@ -129,6 +141,7 @@ export function tubesGeometry(
       count++;
       const tip = end.addScaledVector(t, r * 0.8 * reach);
       pos.push(tip.x, tip.y, tip.z);
+      bark.push(1, 0, along, r * 0.5);
       const shade = tube.shade?.(1) ?? 1;
       col.push(base.r * shade, base.g * shade, base.b * shade);
       const apex = start + count * sides;
@@ -153,6 +166,7 @@ export function tubesGeometry(
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
   if (color !== undefined) geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+  geo.setAttribute("aBark", new THREE.Float32BufferAttribute(bark, 4));
   geo.setIndex(index);
   geo.computeVertexNormals();
   return geo;
@@ -174,19 +188,77 @@ export function lumpyBall(
     const x = p.getX(i);
     const y = p.getY(i);
     const z = p.getZ(i);
-    const bulge =
-      1 +
-      0.1 * Math.sin(x * 2.6 + seed) * Math.sin(y * 2.3 + seed * 1.3) * Math.sin(z * 2.9 + 1.1) +
-      0.06 * Math.sin(x * 5.1 + 2 + seed) * Math.sin(z * 4.7 + seed * 0.7) +
-      0.05 * Math.sin(y * 4.3 + seed * 2.1);
-    p.setXYZ(
-      i,
-      x * bulge * radius,
-      y * bulge * radius * (y < 0 ? underside : 1),
-      z * bulge * radius,
-    );
+    const k = bulge(x, y, z, seed) * radius;
+    p.setXYZ(i, x * k, y * k * (y < 0 ? underside : 1), z * k);
   }
   return mergeAndSmooth(geo);
+}
+
+/** Radial scale of a `lumpyBall` in the unit direction (x, y, z). */
+function bulge(x: number, y: number, z: number, seed: number): number {
+  return (
+    1 +
+    0.1 * Math.sin(x * 2.6 + seed) * Math.sin(y * 2.3 + seed * 1.3) * Math.sin(z * 2.9 + 1.1) +
+    0.06 * Math.sin(x * 5.1 + 2 + seed) * Math.sin(z * 4.7 + seed * 0.7) +
+    0.05 * Math.sin(y * 4.3 + seed * 2.1)
+  );
+}
+
+/**
+ * Leafy clump for an instanced crown: a unit `lumpyBall` for the mass, plus a fringe of small pointed
+ * leaves rooted just under its surface and fanning outwards, so the outline breaks into leaf tips
+ * instead of a smooth ball. Each leaf is two-faced with outward normals, so it lights like the mass
+ * from either side; the bottom stays bare (it is the shaded underside).
+ */
+export function leafyClump(detail: number, leaves: number, seed = 0): THREE.BufferGeometry {
+  const ball = lumpyBall(1, detail, seed);
+  const pos = Array.from(ball.attributes.position.array as Float32Array);
+  const nor = Array.from(ball.attributes.normal.array as Float32Array);
+  const index = Array.from(ball.index?.array ?? []);
+  ball.dispose();
+  const d = new THREE.Vector3();
+  const side = new THREE.Vector3();
+  const axis = new THREE.Vector3();
+  const up = new THREE.Vector3(0, 1, 0);
+  const point = (v: THREE.Vector3, n: THREE.Vector3): number => {
+    pos.push(v.x, v.y, v.z);
+    nor.push(n.x, n.y, n.z);
+    return pos.length / 3 - 1;
+  };
+  for (let i = 0; i < leaves; i++) {
+    const y = 1 - ((i + 0.5) / leaves) * 1.55;
+    const ring = Math.sqrt(Math.max(0, 1 - y * y));
+    const turn = i * 2.39996 + seed;
+    d.set(Math.cos(turn) * ring, y, Math.sin(turn) * ring).normalize();
+    const surface = bulge(d.x, d.y, d.z, seed) * (d.y < 0 ? 0.88 : 1);
+    side.crossVectors(d, Math.abs(d.y) > 0.95 ? new THREE.Vector3(1, 0, 0) : up).normalize();
+    side.applyAxisAngle(d, (hash(i, seed) - 0.5) * 2.4);
+    axis.copy(d).multiplyScalar(0.75).addScaledVector(side.clone().cross(d), 0.65).normalize();
+    const length = 0.42 + 0.18 * hash(i, seed, 1);
+    const width = length * 0.36;
+    const base = d.clone().multiplyScalar(surface * 0.86);
+    const mid = base.clone().addScaledVector(axis, length * 0.45);
+    const tip = base
+      .clone()
+      .addScaledVector(axis, length)
+      .addScaledVector(d, -length * 0.12);
+    const left = mid.clone().addScaledVector(side, width).addScaledVector(d, 0.04);
+    const right = mid.clone().addScaledVector(side, -width).addScaledVector(d, 0.04);
+    const n = d.clone().lerp(axis, 0.3).normalize();
+    for (const flip of [false, true]) {
+      const a = point(base, n);
+      const l = point(left, n);
+      const t = point(tip, n);
+      const r = point(right, n);
+      if (flip) index.push(a, t, l, a, r, t);
+      else index.push(a, l, t, a, t, r);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+  geo.setIndex(index);
+  return geo;
 }
 
 /** Welds the seams of a non-indexed sphere so its normals are smooth across them. */
@@ -272,4 +344,34 @@ export function bendInstancedNormals(
       );
   };
   material.customProgramCacheKey = () => `bend-${amount}-${squash}`;
+}
+
+/**
+ * Restrained procedural bark on a `tubesGeometry` material: fine wavy vertical fissures and a faint
+ * mottling, only darkening the colour (no texture, no normal change). It fades out on thin branches,
+ * so twigs stay plain. `strength` is the darkest a fissure gets.
+ */
+export function withBark<T extends THREE.MeshStandardMaterial>(material: T, strength = 0.16): T {
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nattribute vec4 aBark;\nvarying vec4 vBark;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvBark = aBark;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying vec4 vBark;")
+      .replace(
+        "#include <color_fragment>",
+        `#include <color_fragment>
+{
+  float a = atan(vBark.y, vBark.x);
+  float v = vBark.z;
+  float grain = smoothstep(0.07, 0.4, vBark.w);
+  float wave = a * 7.0 + 1.3 * sin(v * 1.4 + a * 2.0) + 0.6 * sin(v * 3.9 - a);
+  float fissure = 1.0 - smoothstep(0.0, 0.22, abs(sin(wave)));
+  float mottle = sin(v * 0.8 + a * 1.5) * sin(v * 2.1 - a * 0.7);
+  diffuseColor.rgb *= 1.0 - grain * (${strength.toFixed(3)} * fissure + 0.04 * mottle);
+}`,
+      );
+  };
+  material.customProgramCacheKey = () => `bark-${strength}`;
+  return material;
 }

@@ -3,7 +3,15 @@ import { lerp } from "@shared/math";
 import type { Rng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
 import type { Count } from "../lite";
-import { bendInstancedNormals, bezier, hash, lumpyBall, tubesGeometry, type Tube } from "./organic";
+import {
+  bendInstancedNormals,
+  bezier,
+  hash,
+  leafyClump,
+  tubesGeometry,
+  withBark,
+  type Tube,
+} from "./organic";
 
 interface Branch {
   p0: THREE.Vector3;
@@ -116,7 +124,9 @@ export function createLightTree(
   const s3 = new THREE.Vector3();
   const bark = new THREE.Mesh(
     barkGeometry(branches),
-    new THREE.MeshStandardMaterial({ color: "#9a6a46", roughness: 0.9, vertexColors: true }),
+    withBark(
+      new THREE.MeshStandardMaterial({ color: "#9a6a46", roughness: 0.9, vertexColors: true }),
+    ),
   );
   group.add(bark);
 
@@ -135,7 +145,7 @@ export function createLightTree(
     .add(V(0, -0.6, 0));
   bendInstancedNormals(puffMaterial, crownCentre, 0.62, 1.5);
   const puffs = new THREE.InstancedMesh(
-    lumpyBall(1, opts.lite ? 1 : 2, 0.7),
+    leafyClump(opts.lite ? 1 : 2, opts.lite ? 12 : 24, 0.7),
     puffMaterial,
     puffCount,
   );
@@ -197,70 +207,120 @@ export function createLightTree(
 }
 
 /**
- * Branch-collar profile: the hidden first ring starts inside the parent, the base swells just past
- * the fork so it covers the parent's rim, then settles to the plain taper.
+ * Smooth bark. Each branch continues into its most aligned child as one unbroken tube (continuous
+ * curve, tangent and radius), so a limb never shows a ring where a segment ends; only the other
+ * children leave it as side branches, starting slimmer inside the limb and widening as they emerge.
+ * The roots are flat buttresses sinking into the ground.
  */
-function collar(s: number): number {
-  return s < 0.2 ? 0.85 + 0.25 * (s / 0.2) : 1.1 - 0.1 * Math.min(1, (s - 0.2) / 0.3);
-}
-
-/** Smooth bark: one curved tapered tube per branch, flat buttress roots, darker forks and feet. */
 function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
-  const forks = new Set(branches.map((b) => b.parent));
-  const tubes: Tube[] = branches.map((b, i) => {
-    const d = b.p1.clone().sub(b.p0);
-    const len = d.length();
-    const own = d.clone().normalize();
-    if (b.depth < 0) {
-      const out = V(b.p1.x, 0, b.p1.z).normalize();
-      return {
-        at: bezier(
-          V(out.x * 0.7, 0.55, out.z * 0.7),
-          V(out.x * 1.05, -0.15, out.z * 1.05),
-          V(b.p1.x * 0.6, -0.4, b.p1.z * 0.6),
-          V(b.p1.x * 1.05, -1.05, b.p1.z * 1.05),
-        ),
-        radius: (s) =>
-          0.4 * (0.55 + 0.45 * Math.sin(Math.min(1, s * 2.5) * Math.PI * 0.5)) * (1 - 0.6 * s),
-        rings: 10,
-        sides: 8,
-        stretch: 1.35,
-        normal0: out,
-        shade: (s) => 1 - 0.2 * s,
-        seed: i,
-      };
+  const dir = (b: Branch): THREE.Vector3 => b.p1.clone().sub(b.p0).normalize();
+  const next = branches.map((b, i) => {
+    let best = -1;
+    let dot = -2;
+    branches.forEach((c, k) => {
+      if (c.parent !== i) return;
+      const d = dir(c).dot(dir(b));
+      if (d > dot) {
+        dot = d;
+        best = k;
+      }
+    });
+    return best;
+  });
+  const continued = new Set(next.filter((k) => k >= 0));
+  const tubes: Tube[] = [];
+  branches.forEach((b, i) => {
+    if (b.depth < 0) tubes.push(rootTube(b, i));
+    else if (!continued.has(i)) {
+      const chain = [i];
+      while (next[chain[chain.length - 1]] >= 0) chain.push(next[chain[chain.length - 1]]);
+      tubes.push(limbTube(branches, chain, i));
     }
-    const from = b.parent >= 0 ? branches[b.parent] : null;
-    const lead = from ? from.p1.clone().sub(from.p0).normalize() : own;
-    const thick = b.r > 0.3;
-    const wobble = b.depth === 0 ? 0.12 : 0;
-    return {
-      at: bezier(
-        b.p0.clone().addScaledVector(lead, -Math.min(b.r * 0.6, len * 0.2)),
-        b.p0
-          .clone()
-          .addScaledVector(lead, len * 0.38)
-          .add(V(wobble, 0, -wobble * 0.6)),
-        b.p1
-          .clone()
-          .addScaledVector(own, -len * 0.3)
-          .add(V(-wobble * 0.7, 0, wobble)),
-        b.p1,
-      ),
-      radius:
-        b.depth === 0
-          ? (s) => b.r * (1 - 0.38 * s) * (1 + 0.5 * Math.exp(-s * 7))
-          : (s) => b.r * (1 - 0.38 * s) * collar(s),
-      rings: thick ? 8 : b.r > 0.1 ? 4 : forks.has(i) ? 3 : 2,
-      sides: thick ? 12 : b.r > 0.1 ? 7 : 5,
-      cap: forks.has(i) ? 0.45 : true,
-      ridges: thick ? 0.05 : 0,
-      shade:
-        b.depth === 0
-          ? (s) => 0.82 + 0.18 * Math.min(1, s * 4)
-          : (s) => 0.92 + 0.08 * Math.min(1, s * 4),
-      seed: i,
-    };
   });
   return tubesGeometry(tubes, "#ffffff");
+}
+
+/** One unbroken limb through `chain` (a branch and its successive most aligned children). */
+function limbTube(branches: readonly Branch[], chain: readonly number[], seed: number): Tube {
+  const head = branches[chain[0]];
+  const side = head.parent >= 0;
+  const m = chain.length;
+  const curves = chain.map((index, k) => {
+    const b = branches[index];
+    const len = b.p0.distanceTo(b.p1);
+    const own = b.p1.clone().sub(b.p0).normalize();
+    const from = k > 0 ? branches[chain[k - 1]] : side ? branches[head.parent] : null;
+    const lead = from ? from.p1.clone().sub(from.p0).normalize() : own;
+    const back = k === 0 && side ? Math.min(b.r * 0.9, len * 0.25) : 0;
+    const wobble = b.depth === 0 ? 0.12 : 0;
+    return bezier(
+      b.p0.clone().addScaledVector(lead, -back),
+      b.p0
+        .clone()
+        .addScaledVector(lead, len * 0.38)
+        .add(V(wobble, 0, -wobble * 0.6)),
+      b.p1
+        .clone()
+        .addScaledVector(own, -len * 0.3)
+        .add(V(-wobble * 0.7, 0, wobble)),
+      b.p1,
+    );
+  });
+  const ends = chain.map((index) => branches[index].r * 0.62);
+  const starts = chain.map((index, k) => (k ? ends[k - 1] : branches[index].r * (side ? 0.8 : 1)));
+  const locate = (s: number): [number, number] => {
+    const k = Math.min(m - 1, Math.floor(s * m));
+    return [k, s * m - k];
+  };
+  const stations: number[] = [];
+  chain.forEach((index, k) => {
+    const r = branches[index].r;
+    const n = r > 0.3 ? 8 : r > 0.1 ? 4 : 2;
+    for (let j = 0; j < n; j++) stations.push((k + j / n) / m);
+  });
+  stations.push(1);
+  const trunk = head.depth === 0;
+  return {
+    at: (s, out) => {
+      const [k, u] = locate(s);
+      return curves[k](u, out);
+    },
+    radius: (s) => {
+      const [k, u] = locate(s);
+      const r = starts[k] + (ends[k] - starts[k]) * u;
+      return trunk && k === 0 ? r * (1 + 0.5 * Math.exp(-u * 7)) : r;
+    },
+    rings: stations.length - 1,
+    stations,
+    sides: head.r > 0.3 ? 12 : head.r > 0.1 ? 7 : 5,
+    cap: true,
+    ridges: head.r > 0.3 ? 0.04 : 0,
+    shade: (s) => {
+      const [k, u] = locate(s);
+      if (k) return 1;
+      return trunk ? 0.82 + 0.18 * Math.min(1, u * 4) : 0.9 + 0.1 * Math.min(1, u * 3);
+    },
+    seed,
+  };
+}
+
+/** A flat buttress root from the trunk's foot into the ground. */
+function rootTube(b: Branch, seed: number): Tube {
+  const out = V(b.p1.x, 0, b.p1.z).normalize();
+  return {
+    at: bezier(
+      V(out.x * 0.7, 0.55, out.z * 0.7),
+      V(out.x * 1.05, -0.15, out.z * 1.05),
+      V(b.p1.x * 0.6, -0.4, b.p1.z * 0.6),
+      V(b.p1.x * 1.05, -1.05, b.p1.z * 1.05),
+    ),
+    radius: (s) =>
+      0.4 * (0.55 + 0.45 * Math.sin(Math.min(1, s * 2.5) * Math.PI * 0.5)) * (1 - 0.6 * s),
+    rings: 10,
+    sides: 8,
+    stretch: 1.35,
+    normal0: out,
+    shade: (s) => 1 - 0.2 * s,
+    seed,
+  };
 }
