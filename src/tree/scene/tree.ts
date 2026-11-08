@@ -7,7 +7,7 @@ import {
   bendInstancedNormals,
   bezier,
   hash,
-  leafyClump,
+  leafSpray,
   tubesGeometry,
   withBark,
   type Tube,
@@ -29,9 +29,8 @@ const BLOSSOM = ["#e8361f", "#f04a24", "#dc2f1c", "#f25e2c"];
 const BLAZE = "#ff6b2c";
 
 /**
- * Pyébwa a Konesans (v14), drawn as a flamboyant: straight trunk, wide flattened umbrella crown of
- * feathery foliage crowned with scarlet blossom and hung with long dark pods; it breathes and
- * rustles; buttress roots. The bark is one smooth mesh of curved tapered tubes: each branch leaves along its
+ * Pyébwa a Konesans (v14), drawn as a flamboyant: straight trunk, wide flattened umbrella crown made
+ * of many small sprays of fine leaflets and petals, scarlet on top over feathery green; it breathes and rustles; buttress roots. The bark is one smooth mesh of curved tapered tubes: each branch leaves along its
  * parent's direction, so forks blend, and the roots are flat buttresses sinking into the ground.
  */
 export function createLightTree(
@@ -137,9 +136,11 @@ export function createLightTree(
   const canopy = new THREE.Group();
   group.add(canopy);
   const puffCount = tips.length + 26;
+  const sprays = opts.lite ? 5 : 8;
   const puffMaterial = new THREE.MeshStandardMaterial({
     color: "#ffffff",
     roughness: 0.85,
+    vertexColors: true,
     emissive: "#3a2412",
     emissiveIntensity: 0.25,
   });
@@ -147,20 +148,21 @@ export function createLightTree(
     .reduce((acc, t) => acc.add(t), V())
     .multiplyScalar(1 / tips.length)
     .add(V(0, -0.6, 0));
-  bendInstancedNormals(puffMaterial, crownCentre, 0.62, 2.2);
+  bendInstancedNormals(puffMaterial, crownCentre, 0.55, 2.2);
   const puffs = new THREE.InstancedMesh(
-    leafyClump(opts.lite ? 1 : 2, opts.lite ? 16 : 38, 0.7, 0.62),
+    leafSpray(opts.lite ? 9 : 12, 0.7),
     puffMaterial,
-    puffCount,
+    puffCount * sprays,
   );
   {
     const colour = new THREE.Color();
-    const turn = new THREE.Euler();
+    const up = V(0, 1, 0);
+    const facing = V();
+    const sub = V();
+    const twist = new THREE.Quaternion();
     const low = Math.min(...tips.map((t) => t.y));
     const high = Math.max(...tips.map((t) => t.y));
     for (let i = 0; i < puffCount; i++) {
-      turn.set((hash(i, 1) - 0.5) * 0.5, hash(i, 2) * Math.PI * 2, (hash(i, 3) - 0.5) * 0.5);
-      q.setFromEuler(turn);
       const t = tips[i % tips.length];
       const extra = i >= tips.length;
       const r = (extra ? 0.8 : 1.05) + rng() * 0.55;
@@ -169,13 +171,31 @@ export function createLightTree(
         t.y + (extra ? (rng() - 0.3) * 1.2 : 0),
         t.z + (extra ? (rng() - 0.5) * 1.6 : 0),
       );
-      m4.compose(pos, q, s3.set(r * 1.3, r * 0.6, r * 1.3));
-      puffs.setMatrixAt(i, m4);
       const blaze = rng() < 0.1;
       const pick = blaze ? 0 : rng();
-      const height = (pos.y - low) / Math.max(1e-3, high - low);
-      const bloom = hash(i, 7) < 0.4 + 0.6 * height;
-      puffs.setColorAt(i, colour.set(blaze ? BLAZE : (bloom ? BLOSSOM : LEAVES)[(pick * 4) | 0]));
+      for (let k = 0; k < sprays; k++) {
+        const u = hash(i, k, 1) * Math.PI * 2;
+        const v = Math.acos(2 * hash(i, k, 2) - 1);
+        const reach = Math.cbrt(hash(i, k, 3));
+        sub.set(
+          pos.x + reach * Math.sin(v) * Math.cos(u) * r * 1.2,
+          pos.y + reach * Math.cos(v) * r * 0.5,
+          pos.z + reach * Math.sin(v) * Math.sin(u) * r * 1.2,
+        );
+        facing.copy(sub).sub(crownCentre);
+        facing.y = facing.y * 2 + 0.8;
+        q.setFromUnitVectors(up, facing.normalize());
+        q.multiply(twist.setFromAxisAngle(up, hash(i, k, 4) * Math.PI * 2));
+        m4.compose(sub, q, s3.setScalar(r * (0.55 + 0.25 * hash(i, k, 5))));
+        puffs.setMatrixAt(i * sprays + k, m4);
+        const height = (sub.y - low) / Math.max(1e-3, high - low);
+        const bloom = hash(i, 7) * 0.75 + hash(i, k, 7) * 0.25 < 0.3 + 0.7 * height;
+        const shade = ((pick * 4) | 0) + k;
+        puffs.setColorAt(
+          i * sprays + k,
+          colour.set(bloom ? (blaze ? BLAZE : BLOSSOM[shade % 4]) : LEAVES[shade % 4]),
+        );
+      }
     }
   }
   canopy.add(puffs);
@@ -236,16 +256,6 @@ function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
   });
   const continued = new Set(next.filter((k) => k >= 0));
   const tubes: Tube[] = [];
-  const ends = branches.filter((b, i) => b.depth > 0 && next[i] < 0).map((b) => b.p1);
-  const low = Math.min(...ends.map((p) => p.y));
-  const high = Math.max(...ends.map((p) => p.y));
-  const reach = Math.max(...ends.map((p) => Math.hypot(p.x, p.z)));
-  branches.forEach((b, i) => {
-    const p = b.p1;
-    const hanging =
-      (p.y - low) / (high - low) < 0.35 && Math.hypot(p.x, p.z) > reach * 0.6 && hash(i, 11) < 0.25;
-    if (b.depth > 0 && next[i] < 0 && hanging) tubes.push(podTube(p, i));
-  });
   branches.forEach((b, i) => {
     if (b.depth < 0) tubes.push(rootTube(b, i));
     else if (!continued.has(i)) {
@@ -318,35 +328,6 @@ function limbTube(branches: readonly Branch[], chain: readonly number[], seed: n
       if (k) return 1;
       return trunk ? 0.82 + 0.18 * Math.min(1, u * 4) : 0.9 + 0.1 * Math.min(1, u * 3);
     },
-    seed,
-  };
-}
-
-/**
- * A flamboyant pod: long, flat and dark, hanging from a branch tip under the crown and swinging
- * slightly outwards; its top stays inside the foliage.
- */
-function podTube(tip: THREE.Vector3, seed: number): Tube {
-  const out = V(tip.x, 0, tip.z)
-    .normalize()
-    .multiplyScalar(0.25 + 0.2 * hash(seed, 12));
-  const length = 1.1 + 0.5 * hash(seed, 13);
-  const top = tip.clone().add(V(0, -0.35, 0));
-  return {
-    at: bezier(
-      top,
-      top.clone().add(V(0, -length * 0.4, 0)),
-      top.clone().add(V(out.x * 0.6, -length * 0.8, out.z * 0.6)),
-      top.clone().add(V(out.x, -length, out.z)),
-    ),
-    radius: (s) => 0.05 * (0.6 + 0.4 * Math.sin(Math.PI * Math.min(1, 0.15 + s))),
-    rings: 5,
-    sides: 5,
-    stretch: 2.4,
-    normal0: V(-out.z, 0, out.x),
-    cap: true,
-    startCap: true,
-    shade: () => 0.42,
     seed,
   };
 }

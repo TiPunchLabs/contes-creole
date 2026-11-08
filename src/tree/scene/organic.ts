@@ -218,56 +218,48 @@ function bulge(x: number, y: number, z: number, seed: number): number {
 }
 
 /**
- * Leafy clump for an instanced crown: a unit `lumpyBall` for the mass, plus a fringe of small pointed
- * leaves rooted just under its surface and fanning outwards, so the outline breaks into leaf tips
- * instead of a smooth ball. Each leaf is two-faced with outward normals, so it lights like the mass
- * from either side; the bottom stays bare (it is the shaded underside). `size` scales the leaves.
+ * Foliage spray for an instanced crown: fine pointed leaflets (or petals, by instance colour) fanning
+ * from a small heart over the upper hemisphere and drooping at their tips, darker at the base so a
+ * crown of many sprays reads as feathery depth instead of solid lumps. Each leaflet is two-faced with
+ * outward normals, so it lights the same from either side under a front-sided material.
  */
-export function leafyClump(
-  detail: number,
-  leaves: number,
-  seed = 0,
-  size = 1,
-): THREE.BufferGeometry {
-  const ball = lumpyBall(1, detail, seed);
-  const pos = Array.from(ball.attributes.position.array as Float32Array);
-  const nor = Array.from(ball.attributes.normal.array as Float32Array);
-  const index = Array.from(ball.index?.array ?? []);
-  ball.dispose();
+export function leafSpray(leaves: number, seed = 0): THREE.BufferGeometry {
+  const pos: number[] = [];
+  const nor: number[] = [];
+  const col: number[] = [];
+  const index: number[] = [];
+  const up = new THREE.Vector3(0, 1, 0);
   const d = new THREE.Vector3();
   const side = new THREE.Vector3();
-  const axis = new THREE.Vector3();
-  const up = new THREE.Vector3(0, 1, 0);
-  const point = (v: THREE.Vector3, n: THREE.Vector3): number => {
+  const point = (v: THREE.Vector3, n: THREE.Vector3, shade: number): number => {
     pos.push(v.x, v.y, v.z);
     nor.push(n.x, n.y, n.z);
+    col.push(shade, shade, shade);
     return pos.length / 3 - 1;
   };
   for (let i = 0; i < leaves; i++) {
-    const y = 1 - ((i + 0.5) / leaves) * 1.55;
+    const y = 1 - ((i + 0.5) / leaves) * 1.3;
     const ring = Math.sqrt(Math.max(0, 1 - y * y));
     const turn = i * 2.39996 + seed;
     d.set(Math.cos(turn) * ring, y, Math.sin(turn) * ring).normalize();
-    const surface = bulge(d.x, d.y, d.z, seed) * (d.y < 0 ? 0.88 : 1);
     side.crossVectors(d, Math.abs(d.y) > 0.95 ? new THREE.Vector3(1, 0, 0) : up).normalize();
-    side.applyAxisAngle(d, (hash(i, seed) - 0.5) * 2.4);
-    axis.copy(d).multiplyScalar(0.75).addScaledVector(side.clone().cross(d), 0.65).normalize();
-    const length = (0.42 + 0.18 * hash(i, seed, 1)) * size;
-    const width = length * 0.32;
-    const base = d.clone().multiplyScalar(surface * 0.86);
-    const mid = base.clone().addScaledVector(axis, length * 0.45);
+    side.applyAxisAngle(d, (hash(i, seed) - 0.5) * 2);
+    const length = 0.7 + 0.3 * hash(i, seed, 1);
+    const width = length * (0.18 + 0.08 * hash(i, seed, 2));
+    const base = d.clone().multiplyScalar(0.15);
+    const mid = base.clone().addScaledVector(d, length * 0.5);
     const tip = base
       .clone()
-      .addScaledVector(axis, length)
-      .addScaledVector(d, -length * 0.12);
-    const left = mid.clone().addScaledVector(side, width).addScaledVector(d, 0.04);
-    const right = mid.clone().addScaledVector(side, -width).addScaledVector(d, 0.04);
-    const n = d.clone().lerp(axis, 0.3).normalize();
+      .addScaledVector(d, length)
+      .add(new THREE.Vector3(0, -0.15 * length, 0));
+    const left = mid.clone().addScaledVector(side, width);
+    const right = mid.clone().addScaledVector(side, -width);
+    const n = d.clone().addScaledVector(up, 0.3).normalize();
     for (const flip of [false, true]) {
-      const a = point(base, n);
-      const l = point(left, n);
-      const t = point(tip, n);
-      const r = point(right, n);
+      const a = point(base, n, 0.62);
+      const l = point(left, n, 0.88);
+      const t = point(tip, n, 1.05);
+      const r = point(right, n, 0.88);
       if (flip) index.push(a, t, l, a, r, t);
       else index.push(a, l, t, a, t, r);
     }
@@ -275,6 +267,7 @@ export function leafyClump(
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
   geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+  geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
   geo.setIndex(index);
   return geo;
 }
