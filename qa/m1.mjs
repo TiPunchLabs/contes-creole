@@ -186,27 +186,24 @@ try {
       await wait(30);
     }
     await wait(2000);
-    // Since TREE-RANDOM the Konteur speaks unasked at the foot of the tree, his bubble ending with
-    // the random-tale call; it goes once the climb leaves the foot.
+    // Since TREE-HOVER the Konteur speaks only while hovered: his lines, then the hint that a click
+    // on him opens a tale at random; the bubble goes when the pointer leaves him.
+    await p.mouse.move(W / 2, 80);
+    await wait(800);
+    check("j3.no-bubble-at-rest", (await bubbleShown(p)) === "");
     const k = await findKonteur(p);
     if (k) await p.mouse.move(k.x, k.y);
-    await wait(600);
+    await wait(700);
     const said = await bubbleShown(p);
     check(
-      "j3.konteur-bubble-with-call",
+      "j3.konteur-hover-bubble",
       !!k && said.includes("krik") && said.includes("conte au hasard"),
       k ? `at ${k.x},${k.y}` : "not found",
     );
     if (k) await p.screenshot({ path: OUT + "d4-konteur-bubble.png" });
     await p.mouse.move(W / 2, 80);
-    for (let i = 0; i < 6; i++) await p.mouse.wheel(0, 200);
-    await wait(5600);
-    check("j3.bubble-hides-up-the-tree", (await bubbleShown(p)) === "");
-    for (let i = 0; i < 30; i++) {
-      await p.mouse.wheel(0, -200);
-      await wait(30);
-    }
-    await wait(2000);
+    await wait(800);
+    check("j3.bubble-hides-on-leave", (await bubbleShown(p)) === "");
 
     // J4 accessibility essentials
     await p.mouse.move(W / 2, 60);

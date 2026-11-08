@@ -76,20 +76,12 @@ export interface BubbleSegment {
   text: string;
 }
 
-/** A call to action closing a bubble: a button the reader can click, tap or press. */
-export interface BubbleAction {
-  lang: Lang;
-  text: string;
-  run(): void;
-}
-
 /**
  * Shared speech bubble; `anchor` is polled every frame while the bubble is shown. A plain string
- * speaks the shell's current language; segments carry their own (bilingual lines). An `action`
- * ends the bubble with a button (the storyteller's random tale).
+ * speaks the shell's current language; segments carry their own (bilingual lines).
  */
 export interface Bubble {
-  show(text: string | BubbleSegment[], anchor: () => ScreenAnchor, action?: BubbleAction): void;
+  show(text: string | BubbleSegment[], anchor: () => ScreenAnchor): void;
   hide(): void;
 }
 

@@ -92,10 +92,6 @@ export function createTreeOverlay(
   setTeller(text: string, available: boolean): void;
   /** Reads a short message out to screen readers. */
   announce(text: string): void;
-  /** Focuses the near card's entry point; false when no card is near. */
-  focusCard(): boolean;
-  /** Screen box of the intro column while it is still readable (not faded out), else null. */
-  introBox(): Box | null;
   dispose(): void;
 } {
   const el = document.createElement("div");
@@ -121,7 +117,6 @@ export function createTreeOverlay(
     return found;
   };
   const intro = part(".tree-intro");
-  const introInner = part(".tree-intro-inner");
   const enter = part<HTMLButtonElement>("button.tree-book");
   const enterTitle = part(".tree-book-title");
   const invite = part<HTMLAnchorElement>(".tree-book-invite");
@@ -187,16 +182,6 @@ export function createTreeOverlay(
       requestAnimationFrame(() => {
         status.textContent = text;
       });
-    },
-    focusCard() {
-      const card = [enter, invite].find((el) => !el.hidden);
-      card?.focus({ preventScroll: true });
-      return Boolean(card);
-    },
-    introBox() {
-      if (Number(intro.style.opacity || "1") < 0.3) return null;
-      const r = introInner.getBoundingClientRect();
-      return { left: r.left, top: r.top, width: r.width, height: r.height };
     },
     dispose() {
       shelf.dispose();
