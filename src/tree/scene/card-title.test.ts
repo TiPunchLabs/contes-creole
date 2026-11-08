@@ -40,4 +40,13 @@ describe("fitTitle", () => {
     expect(fit.size).toBe(34);
     expect(fit.lines.every((line) => width(line, fit.size) <= MAX)).toBe(true);
   });
+
+  it("cuts an overwide word on any line and keeps the lines that fit (TREE-R2)", () => {
+    const fit = fitTitle("Anticonstitutionnellement un conte", MAX, width);
+    expect(fit.size).toBe(34);
+    expect(fit.lines).toHaveLength(2);
+    expect(fit.lines[0].endsWith("…")).toBe(true);
+    expect(fit.lines[1]).toBe("un conte");
+    for (const line of fit.lines) expect(width(line, fit.size)).toBeLessThanOrEqual(MAX);
+  });
 });

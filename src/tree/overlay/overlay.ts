@@ -92,6 +92,8 @@ export function createTreeOverlay(
   setTeller(text: string, available: boolean): void;
   /** Reads a short message out to screen readers. */
   announce(text: string): void;
+  /** Focuses the near card's entry point; false when no card is near. */
+  focusCard(): boolean;
   /** Screen box of the intro column while it is still readable (not faded out), else null. */
   introBox(): Box | null;
   dispose(): void;
@@ -185,6 +187,11 @@ export function createTreeOverlay(
       requestAnimationFrame(() => {
         status.textContent = text;
       });
+    },
+    focusCard() {
+      const card = [enter, invite].find((el) => !el.hidden);
+      card?.focus({ preventScroll: true });
+      return Boolean(card);
     },
     introBox() {
       if (Number(intro.style.opacity || "1") < 0.3) return null;

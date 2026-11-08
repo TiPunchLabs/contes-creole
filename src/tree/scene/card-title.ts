@@ -24,8 +24,9 @@ function wrap(title: string, max: number, width: (text: string) => number): stri
 
 /**
  * Lays out a card title on every tale's card: the largest size whose lines all fit, stepping down
- * from 50 px (two lines) to 40 and 34 px (three lines); a title still too long ends its third line
- * with an ellipsis. `width(text, size)` measures text at a size.
+ * from 50 px (two lines) to 40 and 34 px (three lines). A title still too long keeps three lines,
+ * any line wider than the card cut with an ellipsis, and the last one ending with an ellipsis when
+ * words are left out. `width(text, size)` measures text at a size.
  */
 export function fitTitle(
   title: string,
@@ -41,9 +42,17 @@ export function fitTitle(
   }
   const last = STEPS[STEPS.length - 1];
   const measure = (text: string): number => width(text, last.size);
-  const lines = wrap(title, max, measure).slice(0, last.lines);
-  let tail = lines[last.lines - 1] ?? "";
-  while (tail && measure(`${tail}…`) > max) tail = tail.slice(0, -1).trimEnd();
-  lines[lines.length - 1] = `${tail}…`;
+  /** Shortens a line until it fits with a closing ellipsis. */
+  const ellipsize = (line: string): string => {
+    let tail = line;
+    while (tail && measure(`${tail}…`) > max) tail = tail.slice(0, -1).trimEnd();
+    return `${tail}…`;
+  };
+  const all = wrap(title, max, measure);
+  const lines = all
+    .slice(0, last.lines)
+    .map((line) => (measure(line) <= max ? line : ellipsize(line)));
+  const end = lines.length - 1;
+  if (all.length > last.lines && !lines[end].endsWith("…")) lines[end] = ellipsize(lines[end]);
   return { size: last.size, lines };
 }

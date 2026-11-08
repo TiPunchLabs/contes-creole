@@ -298,6 +298,34 @@ async function runViewport(browser, vp) {
     check(vp, "enter-on-storyteller-opens-random-tale", true);
     await back(p);
     // The focus comes back to the storyteller while he is still on screen, else to the tale's card.
+    // Keyboard on the bubble's own button: its button is gone on return, the focus goes to the
+    // tale's card (Codex TREE-R1).
+    await foot(p);
+    await p.locator("body").focus();
+    check(vp, "tab-reaches-bubble-action", await tabTo(p, ".app-bubble-action"));
+    await p.evaluate(() => (window.__qaRandom = 0.99));
+    await p.keyboard.press("Enter");
+    await waitFirstPage(p, "mila");
+    await back(p);
+    const fromBubble = await p.evaluate(() => {
+      const a = document.activeElement;
+      return { cls: a?.className, hidden: a?.hidden, name: a?.textContent };
+    });
+    check(
+      vp,
+      "focus-after-bubble-action-on-the-tale-card",
+      /tree-book/.test(fromBubble.cls ?? "") &&
+        !fromBubble.hidden &&
+        fromBubble.name?.includes(TITLES[1]),
+      JSON.stringify(fromBubble),
+    );
+    await foot(p);
+    await p.locator("body").focus();
+    check(vp, "tab-reaches-storyteller-again", await tabTo(p, ".tree-teller"));
+    await p.evaluate(() => (window.__qaRandom = 0.5));
+    await p.keyboard.press("Enter");
+    await waitFirstPage(p, "mila");
+    await back(p);
     const after = await p.evaluate(() => {
       const a = document.activeElement;
       return { cls: a?.className, hidden: a?.hidden };

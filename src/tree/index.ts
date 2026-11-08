@@ -143,6 +143,11 @@ function buildTree(
   let tellerHovered = false;
   /** The storyteller is on screen and his bubble would not cover the intro. */
   let tellerFree = false;
+  /**
+   * A tale was opened from outside the tree's own controls (the bubble's button): that button is
+   * gone on return, so the focus goes to the tale's card once it is near again (TREE-R1).
+   */
+  let refocusCard = false;
   let active = true;
   let diving: { index: number; progress: number; resolve: (() => void) | null } | null = null;
   let down: { y: number; t: number; moved: number } | null = null;
@@ -179,6 +184,9 @@ function buildTree(
       setSpeaker("teller", true);
       return;
     }
+    const from = document.activeElement;
+    refocusCard =
+      from instanceof HTMLElement && from !== document.body && !container.contains(from);
     hover = null;
     ctx.onEnter(tale.id);
   };
@@ -422,6 +430,10 @@ function buildTree(
         teller,
       );
     showSpeaker(chosen ?? idleSpeaker());
+    if (refocusCard && !diving && near >= 0) {
+      const lost = !document.activeElement || document.activeElement === document.body;
+      if (!lost || overlay.focusCard()) refocusCard = false;
+    }
     if (diving && diving.progress >= 1 && diving.resolve) {
       diving.resolve();
       diving.resolve = null;
