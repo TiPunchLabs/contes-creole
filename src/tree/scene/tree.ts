@@ -267,7 +267,7 @@ function limbTube(branches: readonly Branch[], chain: readonly number[], seed: n
     );
   });
   const ends = chain.map((index) => branches[index].r * 0.62);
-  const starts = chain.map((index, k) => (k ? ends[k - 1] : branches[index].r * (side ? 0.8 : 1)));
+  const starts = chain.map((index, k) => (k ? ends[k - 1] : branches[index].r * (side ? 0.7 : 1)));
   const locate = (s: number): [number, number] => {
     const k = Math.min(m - 1, Math.floor(s * m));
     return [k, s * m - k];
@@ -294,6 +294,7 @@ function limbTube(branches: readonly Branch[], chain: readonly number[], seed: n
     stations,
     sides: head.r > 0.3 ? 12 : head.r > 0.1 ? 7 : 5,
     cap: true,
+    startCap: side,
     ridges: head.r > 0.3 ? 0.04 : 0,
     shade: (s) => {
       const [k, u] = locate(s);
@@ -320,6 +321,8 @@ function rootTube(b: Branch, seed: number): Tube {
     sides: 8,
     stretch: 1.35,
     normal0: out,
+    cap: true,
+    startCap: true,
     shade: (s) => 1 - 0.2 * s,
     seed,
   };

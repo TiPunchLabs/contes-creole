@@ -28,6 +28,8 @@ export interface Tube {
   normal0?: THREE.Vector3;
   /** Rounded tip after s = 1; a number scales its length (a short dome seals a fork). */
   cap?: boolean | number;
+  /** Closes the start with a short dome pointing backwards (a side branch rooted in a limb). */
+  startCap?: boolean;
   /** Vertex shade multiplier along the tube (darker crevices and feet). */
   shade?(s: number): number;
   /** Amplitude of soft bark ridges, as a share of the radius. */
@@ -101,6 +103,7 @@ export function tubesGeometry(
     }
     n.normalize();
     prevT.copy(t);
+    const back = t.clone();
     /** Pushes one ring at `centre` with radius `r` in the current frame. */
     const ring = (centre: THREE.Vector3, r: number, s: number, shade: number): void => {
       b.crossVectors(t, n).normalize();
@@ -161,6 +164,16 @@ export function tubesGeometry(
         const e = c + sides;
         index.push(a, c, d, c, e, d);
       }
+    }
+    if (tube.startCap) {
+      const r = tube.radius(0);
+      const foot = tube.at(0, q).addScaledVector(back, -r * 0.5);
+      pos.push(foot.x, foot.y, foot.z);
+      const shade = tube.shade?.(0) ?? 1;
+      col.push(base.r * shade, base.g * shade, base.b * shade);
+      bark.push(1, 0, (tube.seed ?? 0) * 3.7, r * 0.5);
+      const apex = pos.length / 3 - 1;
+      for (let k = 0; k < sides; k++) index.push(start + ((k + 1) % sides), start + k, apex);
     }
   }
   const geo = new THREE.BufferGeometry();
@@ -368,7 +381,7 @@ export function withBark<T extends THREE.MeshStandardMaterial>(material: T, stre
   float wave = a * 7.0 + 1.3 * sin(v * 1.4 + a * 2.0) + 0.6 * sin(v * 3.9 - a);
   float fissure = 1.0 - smoothstep(0.0, 0.22, abs(sin(wave)));
   float mottle = sin(v * 0.8 + a * 1.5) * sin(v * 2.1 - a * 0.7);
-  diffuseColor.rgb *= 1.0 - grain * (${strength.toFixed(3)} * fissure + 0.04 * mottle);
+  diffuseColor.rgb *= 1.0 - grain * (${strength.toFixed(3)} * fissure + 0.04 * (0.5 + 0.5 * mottle));
 }`,
       );
   };
