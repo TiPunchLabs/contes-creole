@@ -35,13 +35,18 @@ sources are in `design/v13/`.
 ```
 
 - **Hub — Pyébwa a Konesans**: a tree of light on a tropical _morne_. Scrolling climbs a camera spiral
-  around it; book-cards hang from the branches. The Konteur sits at the foot of the tree; hovering
-  lights his lantern and shows "Yé krik !…".
+  around it; book-cards hang from the branches, each one the way into its tale (click, tap, or
+  keyboard focus on a transparent entry point over the near card; no fiche beside it). The Konteur
+  sits at the foot of the tree; near the foot his bubble shows "Yé krik !…" unasked, wherever it
+  leaves the intro readable, ending with the button « Cliquez ici pour accéder à un conte au
+  hasard. ». Clicking, tapping or focusing-and-pressing the Konteur or that button opens one of the
+  eligible tales (`src/tree/random-tale.ts`: ready, with a world, never the invitation) at random,
+  through the same dive as its card.
 - **World — Larivyè Klè**: a night river. Each page moves the camera along the water and
   interpolates `env`: sky, water level, moon, stars, rain, calabash count, dam / spring / tank.
 - **Invitation to classes** (M2): the tree shows the published books (`ready: true`), then one
   invitation slot at the top of the climb (`src/tree/invitation.ts`, `treeSlots`). Pending books
-  stay in `src/books/` but are not shown. The invitation's card, fiche and shelf entry lead to
+  stay in `src/books/` but are not shown. The invitation's card and shelf entry lead to
   the **"Les contes des classes" page** (`/contes-des-classes/`), which explains the collaboration
   and links to the owner's existing contact form; nothing is collected or stored by the site.
 - **Classes page**: a second Vite HTML entry (`contes-des-classes/index.html`, listed in
@@ -97,9 +102,12 @@ controls included, declares `immersive` instead (`BookManifest.immersive`, `Imme
   its scene; it must release everything in `dispose()`.
 - `card.lang` names the language of the card texts (Kréyòl when absent), and `cover` may return a
   promise to be painted again once an image has loaded.
-- `card.poster` (opt-in) shows a 2:3 cover whole in a tall 456×684 window of the 512×720 card,
-  without the tree's theme, title and sub-title (the poster carries its own; the shelf and the label
-  keep them). Ti Kannot's card is the owner's poster this way (ruling TKP-COVER).
+- Every tale's card has Mila's layout (ruling TREE-COVER): theme label, the book's picture in the
+  cover window, sub-title, then a title that steps down from 50 to 40 and 34 px and ends with an
+  ellipsis past three lines (`src/tree/scene/card-title.ts`). A book with a picture builds its
+  `cover` with `imageCover()` from `@shared/cover` (crop as fractions of the source, alignment of
+  the trim, background while loading); Ti Kannot's crop keeps the poster's island and leaves its
+  painted lettering out.
 
 `src/books/mila/` is the first such book: a port of the owner's prototype "Le monde de Mila V3"
 (twelve pages, its own night palette, fonts, Three.js scene, sound and controls). Its French text
@@ -121,7 +129,8 @@ browser holds it until a gesture, the reader's first tap or key in the tale resu
   The 3D scene's colours live in `src/tree/scene/palette.ts` (sRGB twins of the tokens).
 - **Languages**: the page is `lang="fr"`; Kréyòl UI and story text carry `lang="gcf"` explicitly
   (decision A5). The reading card follows the story shown. Bubbles take a plain string (the
-  shell's current language) or `{ lang, text }` segments for bilingual lines (decision T4).
+  shell's current language) or `{ lang, text }` segments for bilingual lines (decision T4); an
+  optional `action` ends the bubble with a button (the Konteur's random tale, ruling TREE-RANDOM).
 - Owner decisions and their wording: `docs/redesign/decisions.md`.
 
 ### Ti Kannot's camera

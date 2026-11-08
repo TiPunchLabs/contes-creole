@@ -34,12 +34,12 @@ src/
     language-panel/            # "Lang kréyòl" burger + dialog, over the tale
     reading-ui/                # text card, language switch, page counter and buttons, back button, bubble
     transition.ts, backdrop.ts, bubble.ts, fallback.ts, languages.ts, notice.ts
-  shared/                      # optional toolbox: random.ts (createRng), math.ts, paging.ts (createPager), three/ helpers
+  shared/                      # optional toolbox: random.ts (createRng), math.ts, paging.ts (createPager), cover.ts (imageCover), three/ helpers
   pages/contes-des-classes/    # script + styles of the static "Les contes des classes" page (no Three.js)
-  tree/                        # tree universe: index.ts (mountTree), invitation.ts (class invitation slot),
+  tree/                        # tree universe: index.ts (mountTree), invitation.ts (class invitation slot), random-tale.ts (Konteur),
                                # scene/, overlay/, assets/konteur.png
   books/
-    ti-kannot/                 # book.ts, cover.ts (owner's poster, assets/cover.webp), staging.ts, theme.css, story/{gcf,fr}.md, world/
+    ti-kannot/                 # book.ts, cover.ts (owner's poster cropped, assets/cover.webp), staging.ts, theme.css, story/{gcf,fr}.md, world/
     mila/                      # immersive book (own reading UI, shell's language switch): book.ts, cover.ts,
                                # assets/cover.webp, story/{gcf,fr}.md, world/ (port of the owner's prototype)
     zanba/, konpe-lapen/       # manifest only (book.ts), ready: false — kept, not shown in the tree

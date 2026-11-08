@@ -45,16 +45,14 @@ const thumbTop = (p) => p.$eval(".tree-climb-thumb", (e) => e.getBoundingClientR
 const bubbleShown = (p) =>
   p.$eval(".app-bubble", (e) => (e.style.opacity === "1" ? e.textContent : ""));
 
-/** Moves the mouse over a grid until the Konteur bubble shows; returns the point. */
-async function findKonteur(p, w, h) {
-  for (let y = Math.round(h * 0.95); y > h * 0.45; y -= 24)
-    for (let x = 8; x < w * 0.98; x += 24) {
-      await p.mouse.move(x, y);
-      await wait(25);
-      const t = await bubbleShown(p);
-      if (t.includes("krik")) return { x, y, text: t };
-    }
-  return null;
+/** Centre of the Konteur on screen (his keyboard entry point's box), or null when out of view. */
+async function findKonteur(p) {
+  return p.evaluate(() => {
+    const el = document.querySelector(".tree-teller");
+    if (!el || el.hidden) return null;
+    const r = el.getBoundingClientRect();
+    return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height * 0.55) };
+  });
 }
 
 try {
@@ -102,23 +100,21 @@ try {
     );
     await p.locator(".tree-shelf-book.is-invitation").click();
     await wait(2600);
+    // No fiche since TREE-PANEL: the near card itself is the entry point (a link for the invitation).
     check(
-      "j1.invitation-fiche",
-      (await p.isVisible(".tree-invite-open")) &&
-        !(await p.isVisible(".tree-enter:not(.tree-invite-open)")) &&
-        (await p.$eval(".tree-label", (e) => e.classList.contains("is-invitation"))),
-      await p.$eval(".tree-label-title", (e) => e.textContent),
+      "j1.invitation-card-entry",
+      (await p.isVisible(".tree-book-invite")) && !(await p.isVisible("button.tree-book")),
+      (await p.$eval(".tree-book-invite", (e) => e.textContent)) ?? "",
     );
     await p.screenshot({ path: OUT + "d3-near-invitation.png" });
     await shelf.nth(0).click();
     await wait(2600);
-    const title = await p.$eval(".tree-label-title", (e) => e.textContent);
-    const labelOp = await p.$eval(".tree-label", (e) => getComputedStyle(e).opacity);
-    const enterVisible = await p.isVisible(".tree-enter");
+    const title = await p.$eval("button.tree-book .tree-book-title", (e) => e.textContent);
+    const enterVisible = await p.isVisible("button.tree-book");
     check(
       "j1.shelf-brings-near-card",
-      Number(labelOp) > 0.5 && title.length > 0 && enterVisible && !(await p.isVisible(".reading")),
-      `title="${title}" opacity=${labelOp}`,
+      title.length > 0 && enterVisible && !(await p.isVisible(".reading")),
+      `title="${title}"`,
     );
     check("j1.shelf-aria-current", (await shelf.nth(0).getAttribute("aria-current")) === "true");
     await p.screenshot({ path: OUT + "d2-near-ready-book.png" });
@@ -190,14 +186,27 @@ try {
       await wait(30);
     }
     await wait(2000);
-    const k = await findKonteur(p, W, H);
-    check("j3.konteur-hover-bubble", !!k, k ? `at ${k.x},${k.y}` : "not found");
-    if (k) {
-      await p.screenshot({ path: OUT + "d4-konteur-bubble.png" });
-      await p.mouse.move(W / 2, 80);
-      await wait(800);
-      check("j3.bubble-hides-on-leave", (await bubbleShown(p)) === "");
+    // Since TREE-RANDOM the Konteur speaks unasked at the foot of the tree, his bubble ending with
+    // the random-tale call; it goes once the climb leaves the foot.
+    const k = await findKonteur(p);
+    if (k) await p.mouse.move(k.x, k.y);
+    await wait(600);
+    const said = await bubbleShown(p);
+    check(
+      "j3.konteur-bubble-with-call",
+      !!k && said.includes("krik") && said.includes("conte au hasard"),
+      k ? `at ${k.x},${k.y}` : "not found",
+    );
+    if (k) await p.screenshot({ path: OUT + "d4-konteur-bubble.png" });
+    await p.mouse.move(W / 2, 80);
+    for (let i = 0; i < 6; i++) await p.mouse.wheel(0, 200);
+    await wait(5600);
+    check("j3.bubble-hides-up-the-tree", (await bubbleShown(p)) === "");
+    for (let i = 0; i < 30; i++) {
+      await p.mouse.wheel(0, -200);
+      await wait(30);
     }
+    await wait(2000);
 
     // J4 accessibility essentials
     await p.mouse.move(W / 2, 60);
@@ -308,7 +317,7 @@ try {
     await wait(2200);
     check(
       "j5.way-back-opens-tree-on-invitation",
-      (await p.isVisible(".tree-invite-open")) && new URL(p.url()).hash === "",
+      (await p.isVisible(".tree-book-invite")) && new URL(p.url()).hash === "",
       p.url(),
     );
     await p.screenshot({ path: OUT + "d8-back-on-invitation.png" });
@@ -327,27 +336,36 @@ try {
       hasTouch: true,
     });
     await p.screenshot({ path: OUT + "m1-home.png" });
-    const k = await findKonteur(p, W, H);
-    if (k) {
-      await p.mouse.move(5, 5);
-      await wait(600);
-      await p.touchscreen.tap(k.x, k.y);
-      await wait(700);
-    }
-    const tapped = k ? await bubbleShown(p) : "";
+    // Since TREE-RANDOM a tap on the Konteur opens a tale at random, straight on its first page.
+    const k = await findKonteur(p);
+    if (k) await p.touchscreen.tap(k.x, k.y);
+    const opened = k
+      ? await p
+          .waitForFunction(() => document.querySelector(".app")?.dataset.book, null, {
+            timeout: 15000,
+          })
+          .then(() => p.evaluate(() => document.querySelector(".app").dataset.book))
+          .catch(() => "")
+      : "";
     check(
-      "j3.konteur-tap-bubble-mobile",
-      tapped.includes("krik"),
-      k ? `at ${k.x},${k.y}` : "not found",
+      "j3.konteur-tap-opens-random-tale-mobile",
+      opened === "ti-kannot" || opened === "mila",
+      k ? `at ${k.x},${k.y}: ${opened}` : "not found",
     );
-    if (tapped) await p.screenshot({ path: OUT + "m2-konteur-bubble.png" });
-    await wait(5000);
-    check("j3.mobile-bubble-auto-hides-after-hold", (await bubbleShown(p)) === "");
+    if (opened) {
+      await wait(2500);
+      await p.screenshot({ path: OUT + "m2-konteur-random-tale.png" });
+      await p.keyboard.press("Escape");
+      await p.waitForFunction(() => !document.querySelector(".app")?.dataset.book, null, {
+        timeout: 15000,
+      });
+      await wait(2200);
+    }
     await p.locator(".tree-shelf-book.is-invitation").tap();
     await wait(2600);
-    check("j5.mobile-invitation-fiche", await p.isVisible(".tree-invite-open"));
+    check("j5.mobile-invitation-card-entry", await p.isVisible(".tree-book-invite"));
     await p.screenshot({ path: OUT + "m5-near-invitation.png" });
-    await p.locator(".tree-invite-open").tap();
+    await p.locator(".tree-shelf-book.is-invitation").tap();
     await p.waitForURL(/\/contes-des-classes\/$/, { timeout: 10000 }).catch(() => {});
     await p.evaluate(() => document.fonts.ready);
     const first = await p.evaluate(() => {
@@ -396,9 +414,10 @@ try {
     await wait(1500);
     await p.locator(".tree-shelf-book").nth(0).tap();
     await wait(2600);
-    check("j1.mobile-shelf-near-card", await p.isVisible(".tree-enter"));
+    check("j1.mobile-shelf-near-card", await p.isVisible("button.tree-book"));
     await p.screenshot({ path: OUT + "m3-near-ready-book.png" });
-    await p.locator(".tree-enter:not(.tree-invite-open)").tap({ force: true });
+    const card = await p.locator("button.tree-book").boundingBox();
+    await p.touchscreen.tap(card.x + card.width / 2, card.y + card.height / 2);
     await p.waitForSelector(".reading:not([hidden])", { timeout: 15000 }).catch(() => {});
     await wait(1800);
     check("j2.mobile-open-book", await p.isVisible(".reading"));
@@ -429,7 +448,7 @@ try {
     );
     await p.click(".tree-shelf-book.is-invitation");
     await wait(2600);
-    await p.click(".tree-invite-open");
+    await p.click(".tree-shelf-book.is-invitation");
     await p.waitForURL(/\/contes-des-classes\/$/, { timeout: 10000 }).catch(() => {});
     const behavior = await p.evaluate(
       () => getComputedStyle(document.documentElement).scrollBehavior,
