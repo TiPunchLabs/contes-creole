@@ -88,7 +88,11 @@ export function createTreeOverlay(
     onEnter(bookId: string): void;
     onShelf(index: number, action: ShelfAction): void;
   },
-): { update(t: number, label: CardLabel | null, near: number): void; dispose(): void } {
+): {
+  /** Returns the docked fiche's top in screen pixels, or null when no fiche is docked. */
+  update(t: number, label: CardLabel | null, near: number): number | null;
+  dispose(): void;
+} {
   const el = document.createElement("div");
   el.className = "tree-overlay";
   el.innerHTML = `
@@ -150,7 +154,7 @@ export function createTreeOverlay(
         enter.hidden = true;
         invite.hidden = true;
         shownBook = null;
-        return;
+        return null;
       }
       if (next.book !== shownBook) {
         shownBook = next.book;
@@ -193,6 +197,7 @@ export function createTreeOverlay(
         dot.setAttribute("cx", String(x1));
         dot.setAttribute("cy", String(y1));
       }
+      return container.clientWidth < DOCK ? box.top : null;
     },
     dispose() {
       shelf.dispose();

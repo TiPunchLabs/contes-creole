@@ -97,7 +97,28 @@ async function changed(page, a, b, tol = 10) {
 async function cover(browser, vp) {
   const { ctx, p, errors } = await newPage(browser, vp);
   const shelf = await approach(p, 0, touchOf(vp));
+  await p.waitForTimeout(1500);
   await p.screenshot({ path: `${OUT}${vp}-cover.png` });
+  // Docked fiche (narrow screens): the leader's dot marks the point just under the card, so the
+  // whole card clears the fiche only when the leader is drawn and its dot sits above the fiche.
+  if (VIEWPORTS[vp].viewport.width < 900) {
+    const fit = await p.evaluate(() => {
+      const label = document.querySelector(".tree-label").getBoundingClientRect();
+      const filet = document.querySelector(".tree-filet");
+      const dot = filet.querySelector("circle");
+      return {
+        ficheTop: Math.round(label.top),
+        cardBottom: Number(dot.getAttribute("cy")),
+        leader: Number(getComputedStyle(filet).opacity),
+      };
+    });
+    check(
+      `cover.${vp}`,
+      "the whole card clears the docked fiche",
+      fit.leader > 0.5 && fit.cardBottom < fit.ficheTop - 1,
+      JSON.stringify(fit),
+    );
+  }
   const name = await shelf.getAttribute("aria-label");
   const text = (await shelf.textContent()) ?? "";
   check(

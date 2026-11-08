@@ -49,6 +49,11 @@ drives where the two characters stand and how the island changes page by page.
 - The poster fits the card window by its width: at most about 1 % of the height is trimmed, above
   the title and below "Un conte créole", where the poster has only sky and sea.
 
+- Short phones (TKP-R1, lifts M2-MOB for this point only): when the docked fiche would cover the
+  near card, the tree shifts its view up (`camera.setViewOffset`) by just what the card needs, eased
+  in as the card comes near. Every card benefits; where the card already clears the fiche (tall
+  phones, tablets) the shift stays at 0 to 3 px, and wide screens are unchanged.
+
 ## Title
 
 The poster reads "Tinnot é Gwo Rako"; the book id, card title and tale text keep

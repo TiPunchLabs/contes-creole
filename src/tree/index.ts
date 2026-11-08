@@ -52,6 +52,13 @@ const DIVE_SECONDS = 1.7;
 const TAP_DISTANCE = 8;
 const TAP_MS = 600;
 const BUBBLE_HOLD_MS = 4500;
+/**
+ * Room kept between the card's under-point (`CardView.y`, already a little below the card) and the
+ * docked fiche, in pixels.
+ */
+const LIFT_GAP = 4;
+/** Largest upward shift of the view, as a share of its height. */
+const MAX_LIFT = 0.3;
 const CLIMB_KEYS_UP = ["ArrowUp", "ArrowLeft"];
 const CLIMB_KEYS_DOWN = ["ArrowDown", "ArrowRight", " "];
 
@@ -270,8 +277,24 @@ function buildTree(
   const onScreen = (x: number): boolean =>
     x > container.clientWidth * 0.12 && x < container.clientWidth * 0.88;
 
+  /**
+   * Pixels the view is shifted up so the near card clears the docked fiche on short screens
+   * (ruling TKP-R1); zero wherever the card already sits above it.
+   */
+  let lift = 0;
+  let lifted = 0;
+  let liftedFor = 0;
+
   const frame = (time: number, dt: number): void => {
     t += (target - t) * (1 - Math.exp(-dt * 4.5));
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    if (Math.abs(lift - lifted) > 0.25 || liftedFor !== h) {
+      lifted = lift > 0.5 ? lift : 0;
+      liftedFor = h;
+      if (lifted) camera.setViewOffset(w, h, 0, lifted, w, h);
+      else camera.clearViewOffset();
+    }
     hubCam(t, cam, look);
     konteur.place(camera.aspect);
     const fov = fitFov(50, camera.aspect);
@@ -304,7 +327,7 @@ function buildTree(
       if (v.visible && onScreen(v.x) && v.near > 0.35 && (!best || v.near > best.near)) best = v;
     near = best ? best.index : -1;
     const book = best ? slots[best.index] : undefined;
-    overlay.update(
+    const ficheTop = overlay.update(
       t,
       best && book && !diving
         ? {
@@ -318,6 +341,15 @@ function buildTree(
         : null,
       diving ? -1 : near,
     );
+    if (!diving) {
+      let want = 0;
+      if (best && ficheTop !== null) {
+        const nearness = Math.min(1, (best.near - 0.35) * 3);
+        const overlap = best.y + lifted + LIFT_GAP - ficheTop;
+        want = clamp(overlap, 0, container.clientHeight * MAX_LIFT) * nearness;
+      }
+      lift += (want - lift) * (1 - Math.exp(-dt * 4));
+    }
     if (diving && diving.progress >= 1 && diving.resolve) {
       diving.resolve();
       diving.resolve = null;
