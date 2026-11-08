@@ -57,8 +57,17 @@ const BUBBLE_HOLD_MS = 4500;
  * docked fiche, in pixels.
  */
 const LIFT_GAP = 4;
-/** Largest upward shift of the view, as a share of its height. */
-const MAX_LIFT = 0.3;
+/** Room kept above a lifted card, in pixels: the lift never pushes its top edge closer. */
+const LIFT_TOP = 8;
+/**
+ * The lift rises at once to the card's need (plus `LIFT_MARGIN`), but only comes down when the need
+ * drops by more than `LIFT_HOLD` pixels: it settles on the top of the card's gentle sway instead of
+ * rocking the whole view with it.
+ */
+const LIFT_HOLD = 8;
+const LIFT_MARGIN = 2;
+/** Card half-height over the distance from its centre to `CardView.y` (1.05 / 1.25 units). */
+const CARD_HALF = 0.84;
 const CLIMB_KEYS_UP = ["ArrowUp", "ArrowLeft"];
 const CLIMB_KEYS_DOWN = ["ArrowDown", "ArrowRight", " "];
 
@@ -282,6 +291,7 @@ function buildTree(
    * (ruling TKP-R1); zero wherever the card already sits above it.
    */
   let lift = 0;
+  let goal = 0;
   let lifted = 0;
   let liftedFor = 0;
 
@@ -345,10 +355,14 @@ function buildTree(
       let want = 0;
       if (best && ficheTop !== null) {
         const nearness = Math.min(1, (best.near - 0.35) * 3);
+        const cy = best.cy + lifted;
+        const top = cy - (best.y - best.cy) * CARD_HALF;
         const overlap = best.y + lifted + LIFT_GAP - ficheTop;
-        want = clamp(overlap, 0, container.clientHeight * MAX_LIFT) * nearness;
+        want = clamp(overlap, 0, Math.max(0, top - LIFT_TOP)) * nearness;
       }
-      lift += (want - lift) * (1 - Math.exp(-dt * 4));
+      if (want > goal) goal = want + LIFT_MARGIN;
+      else if (want < goal - LIFT_HOLD || want === 0) goal = want;
+      lift += (goal - lift) * (1 - Math.exp(-dt * 4));
     }
     if (diving && diving.progress >= 1 && diving.resolve) {
       diving.resolve();

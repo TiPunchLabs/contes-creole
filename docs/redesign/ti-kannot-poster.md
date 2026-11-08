@@ -52,7 +52,12 @@ drives where the two characters stand and how the island changes page by page.
 - Short phones (TKP-R1, lifts M2-MOB for this point only): when the docked fiche would cover the
   near card, the tree shifts its view up (`camera.setViewOffset`) by just what the card needs, eased
   in as the card comes near. Every card benefits; where the card already clears the fiche (tall
-  phones, tablets) the shift stays at 0 to 3 px, and wide screens are unchanged.
+  phones, tablets) the shift stays at 0 to 3 px, and wide screens are unchanged. The lift never
+  pushes a card's top edge above 8 px, and it settles on the top of the card's sway instead of
+  following it (TKP-R2).
+- Known limit (TKP-R2): at 320×568 the invitation's fiche is too tall for its whole card; the card
+  rises to the top edge and its bottom title strip, repeated by the fiche, stays behind it. The
+  tree's book layout is to be reworked in a later mission.
 
 ## Title
 
