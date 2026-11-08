@@ -3,11 +3,15 @@ import { lerp } from "@shared/math";
 import type { Rng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
 import type { Count } from "../lite";
+import { bendInstancedNormals, bezier, hash, lumpyBall, tubesGeometry, type Tube } from "./organic";
 
 interface Branch {
   p0: THREE.Vector3;
   p1: THREE.Vector3;
   r: number;
+  /** Index of the branch this one grows from; -1 for the trunk and the roots. */
+  parent: number;
+  depth: number;
 }
 
 const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
@@ -15,7 +19,8 @@ const GREENS = ["#6fae4a", "#86bf55", "#a2cd62", "#5c9d42"];
 
 /**
  * Pyébwa a Konesans (v14): straight trunk, balanced crown of round puffs that breathes and rustles,
- * buttress roots.
+ * buttress roots. The bark is one smooth mesh of curved tapered tubes: each branch leaves along its
+ * parent's direction, so forks blend, and the roots are flat buttresses sinking into the ground.
  */
 export function createLightTree(
   rng: Rng,
@@ -30,9 +35,11 @@ export function createLightTree(
     len: number,
     rad: number,
     depth: number,
+    parent = -1,
   ): void => {
     const end = p.clone().add(dir.clone().multiplyScalar(len));
-    branches.push({ p0: p, p1: end, r: rad });
+    const self = branches.length;
+    branches.push({ p0: p, p1: end, r: rad, parent, depth });
     if (depth >= 6 || rad < 0.04) {
       tips.push(end);
       return;
@@ -47,9 +54,10 @@ export function createLightTree(
           len * 0.68,
           rad * 0.62,
           1,
+          self,
         );
       }
-      grow(end, V(0, 1, 0), len * 0.55, rad * 0.55, 2);
+      grow(end, V(0, 1, 0), len * 0.55, rad * 0.55, 2, self);
       return;
     }
     const n = depth < 2 ? 3 : rng() < 0.65 ? 2 : 3;
@@ -67,14 +75,20 @@ export function createLightTree(
         d.y = 0.45;
         d.normalize();
       }
-      grow(end, d, len * (0.62 + rng() * 0.14), rad * 0.6, depth + 1);
+      grow(end, d, len * (0.62 + rng() * 0.14), rad * 0.6, depth + 1, self);
     }
   };
   grow(V(0, -0.8, 0), V(0, 1, 0), 4.6, 1.05, 0);
   for (let i = 0; i < 6; i++) {
     const a = (i / 6) * Math.PI * 2 + rng() * 0.3;
     const L = 1.7 + rng() * 0.4;
-    branches.push({ p0: V(0, 0.9, 0), p1: V(Math.cos(a) * L, -0.9, Math.sin(a) * L), r: 0.5 });
+    branches.push({
+      p0: V(0, 0.9, 0),
+      p1: V(Math.cos(a) * L, -0.9, Math.sin(a) * L),
+      r: 0.5,
+      parent: -1,
+      depth: -1,
+    });
   }
   {
     const centre = tips
@@ -100,41 +114,37 @@ export function createLightTree(
   const m4 = new THREE.Matrix4();
   const q = new THREE.Quaternion();
   const s3 = new THREE.Vector3();
-  const up = V(0, 1, 0);
-  const barkGeo = new THREE.CylinderGeometry(0.62, 1, 1, 7, 1);
-  barkGeo.translate(0, 0.5, 0);
-  const bark = new THREE.InstancedMesh(
-    barkGeo,
-    new THREE.MeshStandardMaterial({ color: "#9a6a46", roughness: 0.9, flatShading: true }),
-    branches.length,
+  const bark = new THREE.Mesh(
+    barkGeometry(branches),
+    new THREE.MeshStandardMaterial({ color: "#9a6a46", roughness: 0.9, vertexColors: true }),
   );
-  branches.forEach((b, i) => {
-    const d = b.p1.clone().sub(b.p0);
-    const length = d.length();
-    q.setFromUnitVectors(up, d.normalize());
-    s3.set(b.r, length, b.r);
-    m4.compose(b.p0, q, s3);
-    bark.setMatrixAt(i, m4);
-  });
   group.add(bark);
 
   const canopy = new THREE.Group();
   group.add(canopy);
   const puffCount = tips.length + 26;
+  const puffMaterial = new THREE.MeshStandardMaterial({
+    color: "#ffffff",
+    roughness: 0.85,
+    emissive: "#3a5a1c",
+    emissiveIntensity: 0.25,
+  });
+  const crownCentre = tips
+    .reduce((acc, t) => acc.add(t), V())
+    .multiplyScalar(1 / tips.length)
+    .add(V(0, -0.6, 0));
+  bendInstancedNormals(puffMaterial, crownCentre, 0.62, 1.5);
   const puffs = new THREE.InstancedMesh(
-    new THREE.IcosahedronGeometry(1, opts.lite ? 1 : 2),
-    new THREE.MeshStandardMaterial({
-      color: "#ffffff",
-      roughness: 0.85,
-      emissive: "#3a5a1c",
-      emissiveIntensity: 0.25,
-    }),
+    lumpyBall(1, opts.lite ? 1 : 2, 0.7),
+    puffMaterial,
     puffCount,
   );
   {
     const colour = new THREE.Color();
-    q.identity();
+    const turn = new THREE.Euler();
     for (let i = 0; i < puffCount; i++) {
+      turn.set((hash(i, 1) - 0.5) * 0.5, hash(i, 2) * Math.PI * 2, (hash(i, 3) - 0.5) * 0.5);
+      q.setFromEuler(turn);
       const t = tips[i % tips.length];
       const extra = i >= tips.length;
       const r = (extra ? 0.8 : 1.05) + rng() * 0.55;
@@ -184,4 +194,65 @@ export function createLightTree(
       canopy.rotation.z = Math.sin(time * 0.4) * 0.006 + Math.sin(time * 11) * 0.004 * rustle;
     },
   };
+}
+
+/** Smooth bark: one curved tapered tube per branch, flat buttress roots, darker forks and feet. */
+function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
+  const forks = new Set(branches.map((b) => b.parent));
+  const tubes: Tube[] = branches.map((b, i) => {
+    const d = b.p1.clone().sub(b.p0);
+    const len = d.length();
+    const own = d.clone().normalize();
+    if (b.depth < 0) {
+      const out = V(b.p1.x, 0, b.p1.z).normalize();
+      return {
+        at: bezier(
+          V(out.x * 0.7, 0.55, out.z * 0.7),
+          V(out.x * 1.05, -0.15, out.z * 1.05),
+          V(b.p1.x * 0.6, -0.4, b.p1.z * 0.6),
+          V(b.p1.x * 1.05, -1.05, b.p1.z * 1.05),
+        ),
+        radius: (s) =>
+          0.4 * (0.55 + 0.45 * Math.sin(Math.min(1, s * 2.5) * Math.PI * 0.5)) * (1 - 0.6 * s),
+        rings: 10,
+        sides: 8,
+        stretch: 1.35,
+        normal0: out,
+        shade: (s) => 1 - 0.2 * s,
+        seed: i,
+      };
+    }
+    const from = b.parent >= 0 ? branches[b.parent] : null;
+    const lead = from ? from.p1.clone().sub(from.p0).normalize() : own;
+    const thick = b.r > 0.3;
+    const wobble = b.depth === 0 ? 0.12 : 0;
+    return {
+      at: bezier(
+        b.p0.clone().addScaledVector(lead, -Math.min(b.r * 0.6, len * 0.2)),
+        b.p0
+          .clone()
+          .addScaledVector(lead, len * 0.38)
+          .add(V(wobble, 0, -wobble * 0.6)),
+        b.p1
+          .clone()
+          .addScaledVector(own, -len * 0.3)
+          .add(V(-wobble * 0.7, 0, wobble)),
+        b.p1,
+      ),
+      radius:
+        b.depth === 0
+          ? (s) => b.r * (1 - 0.38 * s) * (1 + 0.5 * Math.exp(-s * 7))
+          : (s) => b.r * (1 - 0.38 * s),
+      rings: thick ? 8 : b.r > 0.1 ? 4 : forks.has(i) ? 3 : 2,
+      sides: thick ? 12 : b.r > 0.1 ? 7 : 5,
+      cap: !forks.has(i),
+      ridges: thick ? 0.05 : 0,
+      shade:
+        b.depth === 0
+          ? (s) => 0.82 + 0.18 * Math.min(1, s * 4)
+          : (s) => 0.84 + 0.16 * Math.min(1, s * 5),
+      seed: i,
+    };
+  });
+  return tubesGeometry(tubes, "#ffffff");
 }
