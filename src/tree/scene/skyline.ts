@@ -79,14 +79,18 @@ function soufriere(s: number): number {
   const bump = (c: number, w: number, h: number, p = 2): number =>
     h * Math.exp(-(Math.abs((s - c) / w) ** p));
   const plateau = bump(0, 80, 19, 2.2);
-  const across = Math.abs(s - 3) / (s > 3 ? 28 : 37);
+  // Steep but concave sides (the distant view from the south), not a level cap: a sharper knob on
+  // the Carmichaël side, a notch, then a rough, slightly lower crest towards L'Échelle.
+  const across = Math.abs(s - 2) / (s > 2 ? 30 : 36);
   const dome =
-    19 * Math.max(0, 1 - across ** 3) ** 0.55 * (1 + 0.05 * Math.sin(s * 0.11 + 0.6)) +
-    bump(-24, 9, 3.5, 2);
-  const notch = -2.6 * Math.exp(-(((s - 10) / 2.4) ** 2)) * (dome > 14 ? 1 : 0);
+    17 * Math.max(0, 1 - across ** 1.7) ** 0.75 +
+    bump(-7, 3.2, 4.2, 2) +
+    bump(9, 2.4, 1.6, 2) +
+    bump(14, 2.2, 1.2, 2);
+  const notch = -2.4 * Math.exp(-(((s - 3) / 2.2) ** 2)) * (dome > 12 ? 1 : 0);
   const echelle = bump(58, 15, 21, 2);
   const citerne = bump(84, 13, 18, 4);
-  const carmichael = bump(-66, 22, 17, 2) + bump(-104, 30, 11, 2);
+  const carmichael = bump(-50, 16, 19, 2) + bump(-92, 30, 12, 2);
   return Math.max(plateau + dome + notch, echelle, citerne, carmichael, plateau);
 }
 
@@ -101,7 +105,10 @@ function bandMesh(band: Band, sides: number): THREE.Mesh {
   const top = new THREE.Color(band.colour.crest);
   const slope = new THREE.Color(band.colour.slope);
   const c = new THREE.Color();
-  for (let i = 0; i <= sides; i++) {
+  // Closed ring: the last column joins the first (no duplicate seam column), and every frequency
+  // below is a whole number of waves per turn, so folds and normals are continuous all round.
+  const wave = (k: number): number => Math.max(1, Math.round(band.radius * k));
+  for (let i = 0; i < sides; i++) {
     const a = (i / sides) * Math.PI * 2;
     const h = crest(band, a);
     for (let j = 0; j <= rows; j++) {
@@ -109,20 +116,19 @@ function bandMesh(band: Band, sides: number): THREE.Mesh {
       const massif = band.extra
         ? Math.exp(-(((delta(a, SOUFRIERE_BEARING) * band.radius) / 90) ** 2))
         : 0;
-      const gully =
-        massif *
-        Math.max(0, Math.sin(a * band.radius * 0.75 + Math.sin(a * band.radius * 0.2) * 2));
+      const gully = massif * Math.max(0, Math.sin(a * wave(0.75) + Math.sin(a * wave(0.2)) * 2));
       const fold =
         band.folds *
         (1 + 1.4 * massif) *
         (1 - v) ** 0.7 *
-        (Math.sin(a * band.radius * 0.11 + band.seed) * 0.6 +
-          Math.sin(a * band.radius * 0.27 + band.seed * 2.1) * 0.4);
+        (Math.sin(a * wave(0.11) + band.seed) * 0.6 +
+          Math.sin(a * wave(0.27) + band.seed * 2.1) * 0.4);
       const r =
         band.radius - band.depth * (1 - v) ** 1.6 + fold - 1.2 * gully ** 3 * v * (1 - v) * 4;
       const y = -3 + (h + 3) * v ** 1.25 + fold * 0.35;
       pos.push(Math.cos(a) * r, y, Math.sin(a) * r);
-      const patch = hash(Math.floor(a * 40), band.seed) * 0.5 + 0.5 * Math.sin(a * 23 + v * 3);
+      const patch =
+        hash(Math.floor((i / sides) * 251), band.seed) * 0.5 + 0.5 * Math.sin(a * 23 + v * 3);
       c.copy(foot)
         .lerp(top, v ** 0.8)
         .lerp(slope, Math.max(0, patch) * 0.35 * v * (1 - v) * 3);
@@ -134,7 +140,7 @@ function bandMesh(band: Band, sides: number): THREE.Mesh {
   for (let i = 0; i < sides; i++) {
     for (let j = 0; j < rows; j++) {
       const a = i * (rows + 1) + j;
-      const b = a + rows + 1;
+      const b = ((i + 1) % sides) * (rows + 1) + j;
       index.push(a, a + 1, b, a + 1, b + 1, b);
     }
   }
