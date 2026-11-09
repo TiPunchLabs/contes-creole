@@ -3,6 +3,14 @@ import { lerp } from "@shared/math";
 import type { Rng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
 import type { Count } from "../lite";
+import {
+  RUSTLE,
+  anchorCrown,
+  phaseAttribute,
+  tubeSupports,
+  withCrownWind,
+  withTreeWind,
+} from "./canopy";
 import { cardMaterial, cardsGeometry, flamboyantCrown, foliageAtlas, type Anchor } from "./foliage";
 import { bezier, tubesGeometry, withBark, type Tube } from "./organic";
 
@@ -19,8 +27,11 @@ const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
 
 /**
  * Pyébwa a Konesans (v14), drawn as a flamboyant: straight trunk, wide flattened umbrella crown made
- * of many small sprays of fine leaflets and petals, scarlet on top over feathery green; it breathes and rustles; buttress roots. The bark is one smooth mesh of curved tapered tubes: each branch leaves along its
- * parent's direction, so forks blend, and the roots are flat buttresses sinking into the ground.
+ * of many small sprays of fine leaflets and petals, scarlet on top over feathery green, each spray
+ * rooted on a branch or on a short twig grown to reach it; one wind bends bark and sprays together
+ * and rustles them on hover; buttress roots. The bark is one smooth mesh of curved tapered tubes:
+ * each branch leaves along its parent's direction, so forks blend, and the roots are flat
+ * buttresses sinking into the ground.
  */
 export function createLightTree(
   rng: Rng,
@@ -111,13 +122,7 @@ export function createLightTree(
     tips.forEach(shift);
   }
 
-  const bark = new THREE.Mesh(
-    barkGeometry(branches),
-    withBark(
-      new THREE.MeshStandardMaterial({ color: "#9a6a46", roughness: 0.9, vertexColors: true }),
-    ),
-  );
-  group.add(bark);
+  const limbs = barkTubes(branches);
 
   const canopy = new THREE.Group();
   group.add(canopy);
@@ -157,11 +162,29 @@ export function createLightTree(
     spread: [1.3, 0.7],
     seed: 3,
   });
+  const supports = limbs.flatMap(({ tube, root }, i) => (root ? [] : tubeSupports(tube, i, 4.5)));
+  const crown = anchorCrown(cards, supports, { cross: !opts.lite, seed: 3 });
+  const puffsGeometry = cardsGeometry(crown.cards, {
+    centre: crownCentre,
+    amount: 0.5,
+    squash: 2.2,
+  });
+  puffsGeometry.setAttribute("aPhase", phaseAttribute(crown.phases));
   const puffs = new THREE.Mesh(
-    cardsGeometry(cards, { centre: crownCentre, amount: 0.5, squash: 2.2 }),
-    cardMaterial(foliageAtlas(opts.lite ? 256 : 512), { sway: 0.08 }),
+    puffsGeometry,
+    withCrownWind(cardMaterial(foliageAtlas(opts.lite ? 256 : 512)), 0.06),
   );
   canopy.add(puffs);
+
+  const bark = new THREE.Mesh(
+    tubesGeometry([...limbs.map((l) => l.tube), ...crown.twigs], "#ffffff"),
+    withTreeWind(
+      withBark(
+        new THREE.MeshStandardMaterial({ color: "#9a6a46", roughness: 0.9, vertexColors: true }),
+      ),
+    ),
+  );
+  group.add(bark);
 
   const leaves = glowPoints(
     rng,
@@ -181,17 +204,12 @@ export function createLightTree(
   );
   canopy.add(leaves);
 
-  let rustle = 0;
   return {
     group,
     tips,
     update(time, stirred) {
       leaves.material.uniforms.uTime.value = time;
-      rustle = lerp(rustle, stirred ? 1 : 0, 0.06);
-      const breath = 1 + Math.sin(time * 0.8) * 0.012;
-      canopy.scale.set(breath, 1 + Math.sin(time * 0.8 + 0.6) * 0.01, breath);
-      canopy.rotation.y = Math.sin(time * 0.25) * 0.015 + Math.sin(time * 9) * 0.006 * rustle;
-      canopy.rotation.z = Math.sin(time * 0.4) * 0.006 + Math.sin(time * 11) * 0.004 * rustle;
+      RUSTLE.value = lerp(RUSTLE.value, stirred ? 1 : 0, 0.06);
     },
   };
 }
@@ -202,7 +220,7 @@ export function createLightTree(
  * children leave it as side branches, starting slimmer inside the limb and widening as they emerge.
  * The roots are flat buttresses sinking into the ground.
  */
-function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
+function barkTubes(branches: readonly Branch[]): { tube: Tube; root: boolean }[] {
   const dir = (b: Branch): THREE.Vector3 => b.p1.clone().sub(b.p0).normalize();
   const next = branches.map((b, i) => {
     let best = -1;
@@ -218,16 +236,16 @@ function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
     return best;
   });
   const continued = new Set(next.filter((k) => k >= 0));
-  const tubes: Tube[] = [];
+  const tubes: { tube: Tube; root: boolean }[] = [];
   branches.forEach((b, i) => {
-    if (b.depth < 0) tubes.push(rootTube(b, i));
+    if (b.depth < 0) tubes.push({ tube: rootTube(b, i), root: true });
     else if (!continued.has(i)) {
       const chain = [i];
       while (next[chain[chain.length - 1]] >= 0) chain.push(next[chain[chain.length - 1]]);
-      tubes.push(limbTube(branches, chain, i));
+      tubes.push({ tube: limbTube(branches, chain, i), root: false });
     }
   });
-  return tubesGeometry(tubes, "#ffffff");
+  return tubes;
 }
 
 /** One unbroken limb through `chain` (a branch and its successive most aligned children). */

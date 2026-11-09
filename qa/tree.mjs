@@ -80,7 +80,8 @@ async function approach(p, index, touch) {
 /** Climbs back down to the foot of the tree, where the storyteller sits. */
 async function foot(p) {
   await p.mouse.move(2, 2);
-  for (let i = 0; i < 12; i++) await p.mouse.wheel(0, -900);
+  // Scrolling down descends the spiral from the opening view to its foot.
+  for (let i = 0; i < 12; i++) await p.mouse.wheel(0, 900);
   await p.waitForTimeout(2500);
 }
 
