@@ -177,6 +177,19 @@ try {
     await ctx.close();
   }
 
+  if (ONLY.includes("opening")) {
+    // The exact opening angle (hub(0)) at desktop and phone sizes, wind paused, for before/after.
+    for (const [tag, size] of [
+      ["desktop", { width: 1920, height: 918 }],
+      ["mobile", { width: 390, height: 844 }],
+    ]) {
+      const { ctx, p } = await viewer(browser, size, `opening-${tag}`);
+      await shot(p, hub(0), 4);
+      await p.screenshot({ path: `${OUT}opening-${tag}.png` });
+      await ctx.close();
+    }
+  }
+
   if (ONLY.includes("facecheck")) {
     // CANOPY-FACE: the t = 1 camera (POSE=top) on the e2df734 build should match the same camera
     // swung by 1.55π (three.js y-rotation) to the opening azimuth (POSE=opening) on the turned tree, wind paused.
@@ -238,6 +251,14 @@ try {
       // Rim close-up in profile at crown height, and a low three-quarter view up into the rim.
       ["profile", [rim(205, 12.5, 9.4), rim(235, 5.5, 9)]],
       ["three-quarter", [rim(160, 10, 6.4), rim(190, 5, 8.8)]],
+      // CANOPY-GRN: the inner sprays above the fork on the opening face (world -z side).
+      [
+        "inner",
+        [
+          [3.5, 5.6, -10.5],
+          [0, 7.6, -1.2],
+        ],
+      ],
     ]) {
       mkdirSync(`${OUT}wind-${name}`, { recursive: true });
       for (let i = 0; i < 48; i++) {

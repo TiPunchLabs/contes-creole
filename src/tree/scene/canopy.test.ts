@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { anchorCrown, phaseAttribute, type Support } from "./canopy";
+import { anchorCrown, innerSprays, phaseAttribute, type Support } from "./canopy";
 import { TILE, type Card } from "./foliage";
 
 const V = (x: number, y: number, z: number): THREE.Vector3 => new THREE.Vector3(x, y, z);
@@ -99,5 +99,62 @@ describe("phaseAttribute", () => {
     expect(a.count).toBe(24);
     expect(a.getX(11)).toBe(0.5);
     expect(a.getX(12)).toBe(2);
+  });
+});
+
+describe("innerSprays", () => {
+  /** Limbs radiating from a fork at y = 5, every 30°, up to y = 9. */
+  const limbs: Support[] = Array.from({ length: 12 }, (_, i) => {
+    const a = (i / 12) * Math.PI * 2;
+    return {
+      a: V(0, 5, 0),
+      b: V(Math.cos(a) * 3, 9, Math.sin(a) * 3),
+      ra: 0.15,
+      rb: 0.08,
+      owner: i,
+    };
+  });
+  const spec = {
+    facing: 0,
+    spread: 1.2,
+    low: 6,
+    high: 9,
+    reach: 3,
+    clusters: 6,
+    per: 5,
+    size: 1,
+    gap: 0.6,
+    seed: 5,
+  };
+
+  it("seeds green clusters only on the dressed side, in the height band", () => {
+    const cards = innerSprays(limbs, spec);
+    expect(cards.length).toBeGreaterThan(0);
+    expect(cards.length).toBeLessThanOrEqual(spec.clusters * (spec.per + 1));
+    for (const c of cards) {
+      expect([TILE.leaf, TILE.shade, TILE.sprig]).toContain(c.tile);
+      expect(c.at.y).toBeGreaterThan(spec.low - 1);
+      expect(c.at.y).toBeLessThan(spec.high + 1);
+      expect(c.at.x).toBeGreaterThan(-0.5);
+    }
+  });
+
+  it("is deterministic and roots every card once anchored", () => {
+    const cards = innerSprays(limbs, spec);
+    expect(innerSprays(limbs, spec)).toEqual(cards);
+    const crown = anchorCrown(cards, limbs, { cross: false, seed: 3 });
+    // A card grows from a limb, a twig's end, or a point on a twig's rendered axis.
+    const axes = crown.twigs.flatMap((t) => {
+      const p = [0, 0.5, 1].map((u) => t.at(u, new THREE.Vector3()));
+      return [
+        [p[0], p[1]],
+        [p[1], p[2]],
+      ];
+    });
+    crown.cards.forEach((c) => {
+      const onLimb = limbs.some((l) => toSegment(l.a, l.b, c.at) <= l.ra);
+      const onTwig = axes.some(([a, b]) => toSegment(a, b, c.at) <= 0.05);
+      expect(onLimb || onTwig).toBe(true);
+    });
   });
 });

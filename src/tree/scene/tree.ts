@@ -6,6 +6,7 @@ import type { Count } from "../lite";
 import {
   RUSTLE,
   anchorCrown,
+  innerSprays,
   phaseAttribute,
   tubeSupports,
   withCrownWind,
@@ -172,7 +173,21 @@ export function createLightTree(
     seed: 3,
   });
   const supports = limbs.flatMap(({ tube, root }, i) => (root ? [] : tubeSupports(tube, i, 4.5)));
-  const crown = anchorCrown(cards, supports, { cross: !opts.lite, seed: 3 });
+  // CANOPY-GRN: more green along the inner limbs above the main fork, on the face the opening
+  // view meets (the top of the spiral's side in the tree's own frame, see FACING).
+  const inner = innerSprays(supports, {
+    facing: hubCam(1, V(), V()),
+    spread: 1.9,
+    low: 5.8,
+    high: low,
+    reach: reach * 0.75,
+    clusters: 26,
+    per: opts.lite ? 4 : 6,
+    size: opts.lite ? 1.25 : 1.1,
+    gap: 0.75,
+    seed: 5,
+  });
+  const crown = anchorCrown([...cards, ...inner], supports, { cross: !opts.lite, seed: 3 });
   const puffsGeometry = cardsGeometry(crown.cards, {
     centre: crownCentre,
     amount: 0.5,
