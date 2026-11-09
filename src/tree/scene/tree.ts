@@ -3,16 +3,8 @@ import { lerp } from "@shared/math";
 import type { Rng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
 import type { Count } from "../lite";
-import { FLAMBOYANT } from "./palette";
-import {
-  bendInstancedNormals,
-  bezier,
-  hash,
-  leafSpray,
-  tubesGeometry,
-  withBark,
-  type Tube,
-} from "./organic";
+import { cardMaterial, cardsGeometry, flamboyantCrown, foliageAtlas, type Anchor } from "./foliage";
+import { bezier, tubesGeometry, withBark, type Tube } from "./organic";
 
 interface Branch {
   p0: THREE.Vector3;
@@ -24,7 +16,6 @@ interface Branch {
 }
 
 const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
-const { leaves: LEAVES, blossom: BLOSSOM, blaze: BLAZE } = FLAMBOYANT;
 
 /**
  * Pyébwa a Konesans (v14), drawn as a flamboyant: straight trunk, wide flattened umbrella crown made
@@ -120,9 +111,6 @@ export function createLightTree(
     tips.forEach(shift);
   }
 
-  const m4 = new THREE.Matrix4();
-  const q = new THREE.Quaternion();
-  const s3 = new THREE.Vector3();
   const bark = new THREE.Mesh(
     barkGeometry(branches),
     withBark(
@@ -134,68 +122,45 @@ export function createLightTree(
   const canopy = new THREE.Group();
   group.add(canopy);
   const puffCount = tips.length + 26;
-  const sprays = opts.lite ? 5 : 8;
-  const puffMaterial = new THREE.MeshStandardMaterial({
-    color: "#ffffff",
-    roughness: 0.85,
-    vertexColors: true,
-    emissive: "#3a2412",
-    emissiveIntensity: 0.25,
-  });
+  const low = Math.min(...tips.map((t) => t.y));
+  const high = Math.max(...tips.map((t) => t.y));
   const crownCentre = tips
     .reduce((acc, t) => acc.add(t), V())
     .multiplyScalar(1 / tips.length)
     .add(V(0, -0.6, 0));
-  bendInstancedNormals(puffMaterial, crownCentre, 0.55, 2.2);
-  const puffs = new THREE.InstancedMesh(
-    leafSpray(opts.lite ? 9 : 12, 0.7),
-    puffMaterial,
-    puffCount * sprays,
-  );
-  {
-    const colour = new THREE.Color();
-    const up = V(0, 1, 0);
-    const facing = V();
-    const sub = V();
-    const twist = new THREE.Quaternion();
-    const low = Math.min(...tips.map((t) => t.y));
-    const high = Math.max(...tips.map((t) => t.y));
-    for (let i = 0; i < puffCount; i++) {
-      const t = tips[i % tips.length];
-      const extra = i >= tips.length;
-      const r = (extra ? 0.8 : 1.05) + rng() * 0.55;
-      const pos = V(
-        t.x + (extra ? (rng() - 0.5) * 1.6 : 0),
-        t.y + (extra ? (rng() - 0.3) * 1.2 : 0),
-        t.z + (extra ? (rng() - 0.5) * 1.6 : 0),
-      );
-      const blaze = rng() < 0.1;
-      const pick = blaze ? 0 : rng();
-      for (let k = 0; k < sprays; k++) {
-        const u = hash(i, k, 1) * Math.PI * 2;
-        const v = Math.acos(2 * hash(i, k, 2) - 1);
-        const reach = Math.cbrt(hash(i, k, 3));
-        sub.set(
-          pos.x + reach * Math.sin(v) * Math.cos(u) * r * 1.2,
-          pos.y + reach * Math.cos(v) * r * 0.5,
-          pos.z + reach * Math.sin(v) * Math.sin(u) * r * 1.2,
-        );
-        facing.copy(sub).sub(crownCentre);
-        facing.y = facing.y * 2 + 0.8;
-        q.setFromUnitVectors(up, facing.normalize());
-        q.multiply(twist.setFromAxisAngle(up, hash(i, k, 4) * Math.PI * 2));
-        m4.compose(sub, q, s3.setScalar(r * (0.55 + 0.25 * hash(i, k, 5))));
-        puffs.setMatrixAt(i * sprays + k, m4);
-        const height = (sub.y - low) / Math.max(1e-3, high - low);
-        const bloom = hash(i, 7) * 0.75 + hash(i, k, 7) * 0.25 < 0.3 + 0.7 * height;
-        const shade = ((pick * 4) | 0) + k;
-        puffs.setColorAt(
-          i * sprays + k,
-          colour.set(bloom ? (blaze ? BLAZE : BLOSSOM[shade % 4]) : LEAVES[shade % 4]),
-        );
-      }
-    }
+  // Same draws as the v14 puffs (radius, extra offset, blaze, pick), so the layout never moves.
+  const anchors: Anchor[] = [];
+  for (let i = 0; i < puffCount; i++) {
+    const t = tips[i % tips.length];
+    const extra = i >= tips.length;
+    const r = (extra ? 0.8 : 1.05) + rng() * 0.55;
+    const at = V(
+      t.x + (extra ? (rng() - 0.5) * 1.6 : 0),
+      t.y + (extra ? (rng() - 0.3) * 1.2 : 0),
+      t.z + (extra ? (rng() - 0.5) * 1.6 : 0),
+    );
+    const blaze = rng() < 0.1;
+    if (!blaze) rng();
+    anchors.push({ at, r, blaze });
   }
+  const reach = Math.max(...tips.map((t) => Math.hypot(t.x - crownCentre.x, t.z - crownCentre.z)));
+  const cards = flamboyantCrown({
+    anchors,
+    centre: crownCentre,
+    radius: reach + 1.2,
+    low,
+    high,
+    per: opts.lite ? 5 : 8,
+    size: opts.lite ? 1.25 : 1.1,
+    lobes: 7,
+    clusters: 22,
+    spread: [1.3, 0.7],
+    seed: 3,
+  });
+  const puffs = new THREE.Mesh(
+    cardsGeometry(cards, { centre: crownCentre, amount: 0.5, squash: 2.2 }),
+    cardMaterial(foliageAtlas(opts.lite ? 256 : 512), { sway: 0.08 }),
+  );
   canopy.add(puffs);
 
   const leaves = glowPoints(

@@ -49,15 +49,5 @@ export const CARD = {
   locked: "#aaa0bd",
 } as const;
 
-/**
- * Flamboyant crowns (the Pyébwa and the background flamboyants): fine, light feathery foliage
- * underneath, scarlet and orange blossom on top.
- */
-export const FLAMBOYANT = {
-  leaves: ["#62a03e", "#78b24a", "#8ec257", "#548f37"],
-  blossom: ["#e8361f", "#f04a24", "#dc2f1c", "#f25e2c"],
-  blaze: "#ff6b2c",
-} as const;
-
 /** Tone-mapping exposure of the tree stage. */
 export const EXPOSURE = 1.05;

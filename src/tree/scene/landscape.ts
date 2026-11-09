@@ -71,7 +71,7 @@ export function createLandscape(
     }
   }
 
-  const flora = createFlora(rng, group);
+  const flora = createFlora(rng, group, count(100) < 100);
 
   const grass = glowPoints(
     rng,

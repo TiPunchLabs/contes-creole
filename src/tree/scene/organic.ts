@@ -217,61 +217,6 @@ function bulge(x: number, y: number, z: number, seed: number): number {
   );
 }
 
-/**
- * Foliage spray for an instanced crown: fine pointed leaflets (or petals, by instance colour) fanning
- * from a small heart over the upper hemisphere and drooping at their tips, darker at the base so a
- * crown of many sprays reads as feathery depth instead of solid lumps. Each leaflet is two-faced with
- * outward normals, so it lights the same from either side under a front-sided material.
- */
-export function leafSpray(leaves: number, seed = 0): THREE.BufferGeometry {
-  const pos: number[] = [];
-  const nor: number[] = [];
-  const col: number[] = [];
-  const index: number[] = [];
-  const up = new THREE.Vector3(0, 1, 0);
-  const d = new THREE.Vector3();
-  const side = new THREE.Vector3();
-  const point = (v: THREE.Vector3, n: THREE.Vector3, shade: number): number => {
-    pos.push(v.x, v.y, v.z);
-    nor.push(n.x, n.y, n.z);
-    col.push(shade, shade, shade);
-    return pos.length / 3 - 1;
-  };
-  for (let i = 0; i < leaves; i++) {
-    const y = 1 - ((i + 0.5) / leaves) * 1.3;
-    const ring = Math.sqrt(Math.max(0, 1 - y * y));
-    const turn = i * 2.39996 + seed;
-    d.set(Math.cos(turn) * ring, y, Math.sin(turn) * ring).normalize();
-    side.crossVectors(d, Math.abs(d.y) > 0.95 ? new THREE.Vector3(1, 0, 0) : up).normalize();
-    side.applyAxisAngle(d, (hash(i, seed) - 0.5) * 2);
-    const length = 0.7 + 0.3 * hash(i, seed, 1);
-    const width = length * (0.18 + 0.08 * hash(i, seed, 2));
-    const base = d.clone().multiplyScalar(0.15);
-    const mid = base.clone().addScaledVector(d, length * 0.5);
-    const tip = base
-      .clone()
-      .addScaledVector(d, length)
-      .add(new THREE.Vector3(0, -0.15 * length, 0));
-    const left = mid.clone().addScaledVector(side, width);
-    const right = mid.clone().addScaledVector(side, -width);
-    const n = d.clone().addScaledVector(up, 0.3).normalize();
-    for (const flip of [false, true]) {
-      const a = point(base, n, 0.62);
-      const l = point(left, n, 0.88);
-      const t = point(tip, n, 1.05);
-      const r = point(right, n, 0.88);
-      if (flip) index.push(a, t, l, a, r, t);
-      else index.push(a, l, t, a, t, r);
-    }
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
-  geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
-  geo.setIndex(index);
-  return geo;
-}
-
 /** Welds the seams of a non-indexed sphere so its normals are smooth across them. */
 function mergeAndSmooth(geo: THREE.BufferGeometry): THREE.BufferGeometry {
   geo.deleteAttribute("normal");
@@ -328,33 +273,6 @@ export function bendNormals(
     nor.setXYZ(i, own.x, own.y, own.z);
   }
   nor.needsUpdate = true;
-}
-
-/**
- * Same bend for an instanced crown, in the vertex shader: each instance's normal leans towards the
- * direction from `centre` (mesh space), squashed vertically by `squash`.
- */
-export function bendInstancedNormals(
-  material: THREE.MeshStandardMaterial,
-  centre: THREE.Vector3,
-  amount: number,
-  squash = 1,
-): void {
-  material.onBeforeCompile = (shader) => {
-    shader.uniforms.uCrown = { value: centre };
-    shader.vertexShader = shader.vertexShader
-      .replace("#include <common>", "#include <common>\nuniform vec3 uCrown;")
-      .replace(
-        "#include <defaultnormal_vertex>",
-        `#include <defaultnormal_vertex>
-#ifdef USE_INSTANCING
-  vec3 crownPos = (instanceMatrix * vec4(position, 1.0)).xyz - uCrown;
-  crownPos.y *= ${squash.toFixed(3)};
-  transformedNormal = normalize(mix(normalize(transformedNormal), normalMatrix * normalize(crownPos), ${amount.toFixed(3)}));
-#endif`,
-      );
-  };
-  material.customProgramCacheKey = () => `bend-${amount}-${squash}`;
 }
 
 /**
