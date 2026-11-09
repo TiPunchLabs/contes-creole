@@ -3,8 +3,18 @@ import { lerp } from "@shared/math";
 import type { Rng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
 import type { Count } from "../lite";
+import {
+  RUSTLE,
+  anchorCrown,
+  innerAnchors,
+  phaseAttribute,
+  tubeSupports,
+  withCrownWind,
+  withTreeWind,
+} from "./canopy";
 import { cardMaterial, cardsGeometry, flamboyantCrown, foliageAtlas, type Anchor } from "./foliage";
-import { bezier, tubesGeometry, withBark, type Tube } from "./organic";
+import { hubCam } from "./camera";
+import { bezier, hash, tubesGeometry, withBark, type Tube } from "./organic";
 
 interface Branch {
   p0: THREE.Vector3;
@@ -18,15 +28,29 @@ interface Branch {
 const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
 
 /**
+ * Turn of the whole tree about the foot of its trunk (ruling CANOPY-FACE): the face that the top of
+ * the climb used to see now faces the opening view at its foot, and the former front shows as the
+ * camera circles round. It is the angle between the two ends of the camera spiral.
+ */
+/** Lowest base of the inner green sprays (CANOPY-GRN): the limbs just above the fork stay bare. */
+const INNER_FLOOR = 8.0;
+
+export const FACING = hubCam(1, V(), V()) - hubCam(0, V(), V());
+
+/**
  * Pyébwa a Konesans (v14), drawn as a flamboyant: straight trunk, wide flattened umbrella crown made
- * of many small sprays of fine leaflets and petals, scarlet on top over feathery green; it breathes and rustles; buttress roots. The bark is one smooth mesh of curved tapered tubes: each branch leaves along its
- * parent's direction, so forks blend, and the roots are flat buttresses sinking into the ground.
+ * of many small sprays of fine leaflets and petals, scarlet on top over feathery green, each spray
+ * rooted on a branch or on a short twig grown to reach it; one wind bends bark and sprays together
+ * and rustles them on hover; buttress roots. The bark is one smooth mesh of curved tapered tubes:
+ * each branch leaves along its parent's direction, so forks blend, and the roots are flat
+ * buttresses sinking into the ground.
  */
 export function createLightTree(
   rng: Rng,
   opts: { lite: boolean; count: Count },
 ): { group: THREE.Group; tips: THREE.Vector3[]; update(time: number, stirred: boolean): void } {
   const group = new THREE.Group();
+  group.rotation.y = FACING;
   const branches: Branch[] = [];
   const tips: THREE.Vector3[] = [];
   const grow = (
@@ -111,13 +135,7 @@ export function createLightTree(
     tips.forEach(shift);
   }
 
-  const bark = new THREE.Mesh(
-    barkGeometry(branches),
-    withBark(
-      new THREE.MeshStandardMaterial({ color: "#9a6a46", roughness: 0.9, vertexColors: true }),
-    ),
-  );
-  group.add(bark);
+  const limbs = barkTubes(branches);
 
   const canopy = new THREE.Group();
   group.add(canopy);
@@ -144,8 +162,21 @@ export function createLightTree(
     anchors.push({ at, r, blaze });
   }
   const reach = Math.max(...tips.map((t) => Math.hypot(t.x - crownCentre.x, t.z - crownCentre.z)));
-  const cards = flamboyantCrown({
-    anchors,
+  const supports = limbs.flatMap(({ tube, root }, i) => (root ? [] : tubeSupports(tube, i, 4.5)));
+  // CANOPY-GRN: the crown reaches down the inner limbs above the main fork, on the face the opening
+  // view meets (the top of the spiral's side in the tree's own frame, see FACING).
+  const inner = innerAnchors(supports, {
+    facing: hubCam(1, V(), V()),
+    spread: 1.9,
+    low: INNER_FLOOR + 0.4,
+    high: low,
+    reach: reach * 0.75,
+    count: 22,
+    gap: 0.8,
+    r: 0.75,
+    seed: 5,
+  });
+  const crownSpec = {
     centre: crownCentre,
     radius: reach + 1.2,
     low,
@@ -154,14 +185,66 @@ export function createLightTree(
     size: opts.lite ? 1.25 : 1.1,
     lobes: 7,
     clusters: 22,
-    spread: [1.3, 0.7],
+    spread: [1.3, 0.7] as const,
     seed: 3,
+  };
+  const cards = flamboyantCrown({ ...crownSpec, anchors });
+  // The inner anchors grow the crown's own green sprays (no flower clusters down there), faces
+  // turned a little outwards for the low opening view; in full mode each card gets a partner turned
+  // about its stem, so a side spray keeps some body in profile instead of thinning to a blade.
+  // Nothing grows in the low part of the inner limbs just above the fork (owner: "enlève les
+  // feuilles de cette zone"): no inner card starts below INNER_FLOOR.
+  const innerCards = flamboyantCrown({ ...crownSpec, anchors: inner, clusters: 0 }).flatMap((c) => {
+    if (c.at.y < INNER_FLOOR) return [];
+    const card = {
+      ...c,
+      normal: c.normal
+        .clone()
+        .lerp(V(c.at.x, 0, c.at.z).normalize(), 0.45)
+        .normalize(),
+    };
+    if (opts.lite) return [card];
+    const stem = card.dir.clone().normalize();
+    const turn = hash(c.at.x, c.at.z, 6) < 0.5 ? 0.3 : -0.3;
+    return [
+      card,
+      {
+        ...card,
+        normal: card.normal.clone().applyAxisAngle(stem, Math.PI * turn),
+        size: card.size * 0.85,
+      },
+    ];
   });
+  // The crown is rooted first, as before CANOPY-GRN, so its cards keep their places; the inner
+  // sprays are rooted after, on the limbs.
+  const own = anchorCrown(cards, supports, { cross: !opts.lite, seed: 3 });
+  const added = anchorCrown(innerCards, supports, { cross: false, seed: 4 });
+  const crown = {
+    cards: [...own.cards, ...added.cards],
+    twigs: [...own.twigs, ...added.twigs],
+    phases: [...own.phases, ...added.phases],
+  };
+  const puffsGeometry = cardsGeometry(crown.cards, {
+    centre: crownCentre,
+    amount: 0.5,
+    squash: 2.2,
+  });
+  puffsGeometry.setAttribute("aPhase", phaseAttribute(crown.phases));
   const puffs = new THREE.Mesh(
-    cardsGeometry(cards, { centre: crownCentre, amount: 0.5, squash: 2.2 }),
-    cardMaterial(foliageAtlas(opts.lite ? 256 : 512), { sway: 0.08 }),
+    puffsGeometry,
+    withCrownWind(cardMaterial(foliageAtlas(opts.lite ? 256 : 512)), 0.06),
   );
   canopy.add(puffs);
+
+  const bark = new THREE.Mesh(
+    tubesGeometry([...limbs.map((l) => l.tube), ...crown.twigs], "#ffffff"),
+    withTreeWind(
+      withBark(
+        new THREE.MeshStandardMaterial({ color: "#9a6a46", roughness: 0.9, vertexColors: true }),
+      ),
+    ),
+  );
+  group.add(bark);
 
   const leaves = glowPoints(
     rng,
@@ -181,17 +264,13 @@ export function createLightTree(
   );
   canopy.add(leaves);
 
-  let rustle = 0;
+  const turn = new THREE.Quaternion().setFromAxisAngle(V(0, 1, 0), FACING);
   return {
     group,
-    tips,
+    tips: tips.map((t) => t.clone().applyQuaternion(turn)),
     update(time, stirred) {
       leaves.material.uniforms.uTime.value = time;
-      rustle = lerp(rustle, stirred ? 1 : 0, 0.06);
-      const breath = 1 + Math.sin(time * 0.8) * 0.012;
-      canopy.scale.set(breath, 1 + Math.sin(time * 0.8 + 0.6) * 0.01, breath);
-      canopy.rotation.y = Math.sin(time * 0.25) * 0.015 + Math.sin(time * 9) * 0.006 * rustle;
-      canopy.rotation.z = Math.sin(time * 0.4) * 0.006 + Math.sin(time * 11) * 0.004 * rustle;
+      RUSTLE.value = lerp(RUSTLE.value, stirred ? 1 : 0, 0.06);
     },
   };
 }
@@ -202,7 +281,7 @@ export function createLightTree(
  * children leave it as side branches, starting slimmer inside the limb and widening as they emerge.
  * The roots are flat buttresses sinking into the ground.
  */
-function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
+function barkTubes(branches: readonly Branch[]): { tube: Tube; root: boolean }[] {
   const dir = (b: Branch): THREE.Vector3 => b.p1.clone().sub(b.p0).normalize();
   const next = branches.map((b, i) => {
     let best = -1;
@@ -218,16 +297,16 @@ function barkGeometry(branches: readonly Branch[]): THREE.BufferGeometry {
     return best;
   });
   const continued = new Set(next.filter((k) => k >= 0));
-  const tubes: Tube[] = [];
+  const tubes: { tube: Tube; root: boolean }[] = [];
   branches.forEach((b, i) => {
-    if (b.depth < 0) tubes.push(rootTube(b, i));
+    if (b.depth < 0) tubes.push({ tube: rootTube(b, i), root: true });
     else if (!continued.has(i)) {
       const chain = [i];
       while (next[chain[chain.length - 1]] >= 0) chain.push(next[chain[chain.length - 1]]);
-      tubes.push(limbTube(branches, chain, i));
+      tubes.push({ tube: limbTube(branches, chain, i), root: false });
     }
   });
-  return tubesGeometry(tubes, "#ffffff");
+  return tubes;
 }
 
 /** One unbroken limb through `chain` (a branch and its successive most aligned children). */

@@ -5,7 +5,7 @@ import { createRng } from "@shared/random";
 import { scaleCount } from "../lite";
 import { createLandscape } from "./landscape";
 import { createSky } from "./sky";
-import { createLightTree } from "./tree";
+import { FACING, createLightTree } from "./tree";
 
 /** Rounds to 1e-4 so the sample survives float noise but not a moved object. */
 const r = (n: number): number => Math.round(n * 1e4) / 1e4;
@@ -34,13 +34,15 @@ function sample(lite: boolean): unknown {
   const skyline = landscape.group.getObjectByName("skyline") as THREE.Group;
   const fireflies = sky.group.children.find((o) => o instanceof THREE.Points) as THREE.Points;
   const ff = fireflies.geometry.attributes.position;
+  // Tips as grown, before the tree's turn about its foot (CANOPY-FACE), so the draws stay checked.
+  const grown = tree.tips.map((t) => t.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), -FACING));
   const sprites = sky.group.children.filter((o) => o instanceof THREE.Sprite);
   return {
     next: r(next),
     tips: {
       count: tree.tips.length,
-      first: tree.tips.slice(0, 3).map(v),
-      last: v(tree.tips[tree.tips.length - 1]),
+      first: grown.slice(0, 3).map(v),
+      last: v(grown[grown.length - 1]),
     },
     flora: { count: flora.length, first: flora.slice(0, 4).map((g) => v(g.position)) },
     skyline: {
@@ -74,6 +76,8 @@ function sample(lite: boolean): unknown {
 // leaf shells, the ground tufts, the contact shadows), hence +7 on each sum; every draw is unchanged.
 // Basse-Terre skyline (BT-SKYLINE): the 16 mornes become one "skyline" group (3 ridge bands, 3 cloud
 // sprites) that consumes the same draws, so `next`, tips, flora and fireflies are unchanged.
+// Flamboyant facing (CANOPY-FACE): the whole tree turns by `FACING` about its foot; tips are compared
+// turned back, so every draw is unchanged. The tree group's digest ignores rotation.
 const FULL = {
   next: 0.7323,
   tips: {
