@@ -403,3 +403,11 @@ Décision éditoriale du propriétaire, graphie validée telle quelle : `Pyébwa
 | `index.html` (`<title>`, `meta description`)       | `Pyébwa a Sav` | `Pyébwa a Konesans` | DÉCISION_ÉDITORIALE | propriétaire du projet | validée   |
 
 Les mentions historiques (`design/`, `docs/superpowers/`, sections précédentes de ce rapport) sont conservées.
+
+## 13. Bulle de Konpè Lapen (2026-11-08, branche `feat/painted-canopy`)
+
+Décision éditoriale du propriétaire : « dans le bulle de kompé lapen à la place de "ti" il faut ecrire "piti" en créole ». `ti` est d'ordinaire prénominal (`on ti lapen`) ; en prédicat, `piti`. Elle clôt le cas #15 de [variants.md](variants.md) § 3. La ligne française et la bulle de Konpè Zanba (#16) ne changent pas.
+
+| Fichier                         | Avant           | Après             | Catégorie           | Source                 | Confiance |
+| ------------------------------- | --------------- | ----------------- | ------------------- | ---------------------- | --------- |
+| `src/tree/index.ts` (bulle gcf) | `Ti, mé malen…` | `Piti, mé malen…` | DÉCISION_ÉDITORIALE | propriétaire du projet | validée   |

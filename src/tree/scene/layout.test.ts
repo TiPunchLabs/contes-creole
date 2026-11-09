@@ -72,6 +72,8 @@ function sample(lite: boolean): unknown {
 // buried their trunks and a banana moved off the climb's line of sight (fixed positions, no rng);
 // fewer fireflies (340 to 110), so the sky's later draws (stars, mists, next) moved. Tips, hills and
 // the flora's own draws are unchanged.
+// Painted vegetation (VEG-PAINT): +7 landscape objects at the origin with unit scale (five breadfruit
+// leaf shells, the ground tufts, the contact shadows), hence +7 on each sum; every draw is unchanged.
 const FULL = {
   next: 0.7323,
   tips: {
@@ -111,7 +113,7 @@ const FULL = {
     [-17.0446, 0.9926, -11.4845],
   ],
   digest: {
-    landscape: { objects: 388, sum: [707.8192, 834.8414, 794.9735] },
+    landscape: { objects: 395, sum: [714.8192, 841.8414, 801.9735] },
     tree: { objects: 5, sum: [5, 5, 5] },
     sky: { objects: 18, sum: [222.1834, 349.9447, 207.2595] },
   },
@@ -155,7 +157,7 @@ const LITE = {
     [9.9932, 0.4195, -17.6744],
   ],
   digest: {
-    landscape: { objects: 388, sum: [707.8192, 834.8414, 794.9735] },
+    landscape: { objects: 395, sum: [714.8192, 841.8414, 801.9735] },
     tree: { objects: 5, sum: [5, 5, 5] },
     sky: { objects: 11, sum: [94.8892, 197.0314, 223.5069] },
   },

@@ -1,13 +1,29 @@
 import * as THREE from "three";
 import type { Rng } from "@shared/random";
 import type { Obstacle } from "./critters/wander";
-import { groundHeight } from "./ground";
-import { FLAMBOYANT } from "./palette";
+import { groundHeight, groundMeshHeight } from "./ground";
+import { KONTEUR_OBSTACLES } from "./konteur";
+import {
+  cardMaterial,
+  cardsGeometry,
+  flamboyantCrown,
+  foliageAtlas,
+  contactShadowTexture,
+  shellCards,
+  SWAY_TIME,
+  TILE,
+  type Card,
+  withGlow,
+  withHaze,
+  withLeafSurface,
+  withSway,
+  type Anchor,
+} from "./foliage";
+import { broadLeaf, pinnateFrond } from "./leaves";
 import {
   bendNormals,
   bezier,
   hash,
-  leafSpray,
   lumpyBall,
   tubesGeometry,
   withBark,
@@ -61,61 +77,54 @@ export const FLORA_OBSTACLES: Obstacle[] = [
 ];
 
 /**
- * Pinnate frond shared by palms, tree ferns and fern blades: a narrow stalk, a blade widest in its
- * lower half with a pointed tip, a sawtooth edge that reads as leaflets, a folded midrib, and an
- * arch that droops towards the tip with a slight sideways sweep.
+ * Double-sided leaf material: per-vertex shade, tips swaying freer than stems, paler undersides
+ * (with painted veins for broad leaves), light through the leaves and distance haze.
  */
-function frondGeometry(segments: number): THREE.PlaneGeometry {
-  const geo = new THREE.PlaneGeometry(0.5, 3.2, 2, segments);
-  geo.translate(0, 1.6, 0);
-  const p = geo.attributes.position;
-  for (let i = 0; i < p.count; i++) {
-    const y = p.getY(i) / 3.2;
-    const row = Math.round(y * segments);
-    const blade = Math.sin(Math.PI * Math.min(1, Math.max(0, (y - 0.06) / 0.98)) ** 0.75);
-    const tooth = row % 2 && row < segments ? 0.68 : 1;
-    const x = p.getX(i) * (0.12 + 0.95 * blade) * tooth;
-    p.setX(i, x + 0.09 * y * y);
-    p.setZ(i, 0.25 * y - 1.65 * y * y - Math.abs(x) * 0.55);
-  }
-  geo.computeVertexNormals();
-  return geo;
-}
-
-/**
- * Broad banana / balisier leaf: narrow stalk, oblong blade with a blunt tip, folded down from a raised
- * midrib and arching backwards.
- */
-function bananaLeafGeometry(): THREE.PlaneGeometry {
-  const geo = new THREE.PlaneGeometry(0.9, 2.6, 4, 14);
-  geo.translate(0, 1.3, 0);
-  const p = geo.attributes.position;
-  for (let i = 0; i < p.count; i++) {
-    const y = p.getY(i) / 2.6;
-    const blade = Math.sqrt(Math.max(0, 1 - ((y - 0.58) / 0.45) ** 2));
-    const x = p.getX(i) * (0.08 + 0.92 * blade ** 0.85);
-    const edge = (Math.abs(x) / 0.45) ** 2;
-    p.setX(i, x + 0.06 * y * y);
-    p.setZ(i, 0.15 * y - y * y * 1.65 - Math.abs(x) * 0.5 + 0.05 * Math.sin(y * 31 + x * 4) * edge);
-  }
-  geo.computeVertexNormals();
-  return geo;
+function leafMaterial(color: string, sway: number, veins: boolean): THREE.MeshStandardMaterial {
+  const material = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.9,
+    side: THREE.DoubleSide,
+    vertexColors: true,
+  });
+  withSway(material, sway);
+  withLeafSurface(material, veins);
+  withGlow(material, 0.22);
+  return withHaze(material);
 }
 
 /**
  * Sober Guadeloupe flora (v14.1): three coconut palms, breadfruits and flamboyants far away, bananas,
  * balisiers and tree ferns near the clearing, fern blades. Adds everything to `group`; every crown sways.
  */
-export function createFlora(rng: Rng, group: THREE.Group): { update(time: number): void } {
+export function createFlora(
+  rng: Rng,
+  group: THREE.Group,
+  lite: boolean,
+): { update(time: number): void } {
   const m4 = new THREE.Matrix4();
   const q = new THREE.Quaternion();
   const s3 = new THREE.Vector3();
   const flat = (color: string, extra: THREE.MeshStandardMaterialParameters = {}) =>
     new THREE.MeshStandardMaterial({ color, roughness: 1, ...extra });
-  const trunkMat = flat("#9a7458");
-  const barkMat = withBark(flat("#9a7458"), 0.13);
-  const frondMat = flat("#5f9c46", { side: THREE.DoubleSide });
-  const frondGeo = frondGeometry(12);
+  const trunkMat = withHaze(flat("#9a7458"));
+  const barkMat = withHaze(withBark(flat("#9a7458"), 0.13));
+  const frondMat = leafMaterial("#5f9c46", 0.22, false);
+  const palmFronds = [0, 1, 2].map((i) =>
+    pinnateFrond({
+      length: 3.2,
+      pairs: 26,
+      leaflet: 0.3 - 0.03 * i,
+      width: 0.12,
+      arch: 1.45 + 0.2 * i,
+      sweep: 0.12 * (i - 1),
+      fold: 0.35 + 0.1 * i,
+      angle: 0.95,
+      segments: 3,
+      gaps: i === 1 ? 0.1 : 0.03,
+      seed: i + 1,
+    }),
+  );
   const crowns: THREE.Object3D[] = [];
 
   /** Places a finished plant on the ground with a random heading. */
@@ -137,7 +146,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     const crown = new THREE.Group();
     crown.position.set(Math.sin(-lean) * h * 0.5, Math.cos(lean) * h, 0);
     for (let i = 0; i < 8; i++) {
-      const f = new THREE.Mesh(frondGeo, frondMat);
+      const f = new THREE.Mesh(palmFronds[Math.floor(hash(x, i) * 3)], frondMat);
       f.rotation.order = "YXZ";
       f.rotation.y = (i / 8) * Math.PI * 2 + rng() * 0.3;
       f.rotation.x = -(i % 2 ? 1.2 : 0.85) - rng() * 0.3;
@@ -150,7 +159,9 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     crowns.push(crown);
   };
 
-  const breadMat = new THREE.MeshStandardMaterial({ color: "#4c8a3a", roughness: 0.75 });
+  const atlas = foliageAtlas(lite ? 256 : 512);
+  const breadMat = withHaze(new THREE.MeshStandardMaterial({ color: "#2f5f28", roughness: 0.9 }));
+  const breadLeafMat = cardMaterial(atlas, { sway: 0.05 });
   const fruitMat = new THREE.MeshStandardMaterial({ color: "#b9d05c", roughness: 0.7 });
   const breadfruit = (x: number, z: number, k: number): void => {
     const g = new THREE.Group();
@@ -161,17 +172,31 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     crown.position.y = 3.3 * k;
     const centre = new THREE.Vector3(0, 0.1 * k, 0);
     for (let i = 0; i < 5; i++) {
-      const p = new THREE.Mesh(lumpyBall((1 + rng() * 0.4) * k, 2, x + i), breadMat);
+      const p = new THREE.Mesh(lumpyBall((1 + rng() * 0.4) * k * 0.78, 2, x + i), breadMat);
       const a = (i / 5) * Math.PI * 2;
       p.position.set(Math.cos(a) * 0.9 * k, (rng() - 0.3) * 0.6 * k, Math.sin(a) * 0.9 * k);
       p.scale.y = 0.8;
       bendNormals(p, centre, 0.55, 1.3);
       crown.add(p);
     }
-    const top = new THREE.Mesh(lumpyBall(1.3 * k, 2, z), breadMat);
+    const top = new THREE.Mesh(lumpyBall(1.3 * k * 0.78, 2, z), breadMat);
     top.position.y = 0.7 * k;
     bendNormals(top, centre, 0.55, 1.3);
     crown.add(top);
+    const lumps = crown.children.map((m) => ({
+      at: m.position.clone(),
+      r: (m === top ? 1.3 : 1.15) * k,
+    }));
+    crown.add(
+      new THREE.Mesh(
+        cardsGeometry(shellCards(lumps, centre, TILE.breadfruit, 1.1 * k, lite ? 26 : 44, x + z), {
+          centre,
+          amount: 0.45,
+          squash: 1.3,
+        }),
+        breadLeafMat,
+      ),
+    );
     for (let i = 0; i < 6; i++) {
       const f = new THREE.Mesh(new THREE.SphereGeometry(0.16 * k, 8, 6), fruitMat);
       const a = rng() * 6.28;
@@ -182,14 +207,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     put(g, crown, x, z);
   };
 
-  const flamMat = new THREE.MeshStandardMaterial({
-    color: "#ffffff",
-    roughness: 0.85,
-    vertexColors: true,
-    emissive: "#3a2412",
-    emissiveIntensity: 0.2,
-  });
-  const spray = leafSpray(10, 1.3);
+  const flamMat = cardMaterial(atlas, { sway: 0.05 });
   const flamboyant = (x: number, z: number, k: number): void => {
     const g = new THREE.Group();
     const t = new THREE.Mesh(
@@ -228,30 +246,68 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     const crown = new THREE.Group();
     crown.position.y = 3.9 * k;
     const centre = new THREE.Vector3(0, -0.15 * k, 0);
+    const discs: { at: THREE.Vector3; squash: THREE.Vector3 }[] = [];
+    const anchors: Anchor[] = [];
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2 + rng() * 0.3;
       const rr = i ? 1.7 * k : 0;
-      const red = rng() < 0.62;
+      rng();
       const at = new THREE.Vector3(Math.cos(a) * rr, rng() * 0.25 * k, Math.sin(a) * rr);
-      const squash = new THREE.Vector3(1.25, 0.38, 1.25);
-      const p = new THREE.Mesh(
-        sprayCluster(spray, at, squash, centre, k, red ? 0.15 : -0.15, x + i),
-        flamMat,
-      );
-      p.position.copy(at);
-      p.scale.copy(squash);
-      crown.add(p);
+      discs.push({ at, squash: new THREE.Vector3(1.25, 0.38, 1.25) });
+      for (let j = 0; j < 3; j++) {
+        const u = hash(x, i, j) * Math.PI * 2;
+        const spread = j ? 0.8 * k * hash(z, i, j) : 0;
+        anchors.push({
+          at: at
+            .clone()
+            .add(new THREE.Vector3(Math.cos(u) * spread, 0.15 * k * j, Math.sin(u) * spread)),
+          r: 0.75 * k,
+        });
+      }
     }
+    const cards = flamboyantCrown({
+      anchors,
+      centre,
+      radius: 2.9 * k,
+      low: -0.1 * k,
+      high: 0.6 * k,
+      per: lite ? 6 : 9,
+      size: 1.2 * k,
+      lobes: 3,
+      clusters: 3,
+      spread: [1, 0.6],
+      openings: [0.15, 0.04],
+      seed: x + z,
+    });
+    const nearest = (p: THREE.Vector3): number => {
+      let best = 0;
+      discs.forEach((d, i) => {
+        if (d.at.distanceToSquared(p) < discs[best].at.distanceToSquared(p)) best = i;
+      });
+      return best;
+    };
+    const field = { centre, amount: 0.5, squash: 2.2 };
+    discs.forEach((disc, i) => {
+      const frame = new THREE.Matrix4()
+        .compose(disc.at, new THREE.Quaternion(), disc.squash)
+        .invert();
+      const own = cards.filter((c) => nearest(c.at) === i);
+      const p = new THREE.Mesh(cardsGeometry(own, field, frame), flamMat);
+      p.position.copy(disc.at);
+      p.scale.copy(disc.squash);
+      crown.add(p);
+    });
     g.add(crown);
     put(g, crown, x, z);
   };
 
-  const leafGeo = bananaLeafGeometry();
-  const bananaMat = new THREE.MeshStandardMaterial({
-    color: "#86b84e",
-    roughness: 0.8,
-    side: THREE.DoubleSide,
-  });
+  const bananaLeaves = [3, 5, 1].map((tears, i) =>
+    broadLeaf({ length: 2.6, width: 0.9, arch: 1.5 + 0.15 * i, fold: 0.5, tears, seed: i + 4 }),
+  );
+  const heliconiaLeaves = [0, 1].map((tears, i) =>
+    broadLeaf({ length: 2.6, width: 0.62, arch: 1.0 + 0.2 * i, fold: 0.35, tears, seed: i + 9 }),
+  );
+  const bananaMat = leafMaterial("#86b84e", 0.18, true);
   const stemMat = new THREE.MeshStandardMaterial({ color: "#8da45a", roughness: 1 });
   const banana = (x: number, z: number, h: number): void => {
     const g = new THREE.Group();
@@ -279,7 +335,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     const crown = new THREE.Group();
     crown.position.y = h;
     for (let i = 0; i < 7; i++) {
-      const l = new THREE.Mesh(leafGeo, bananaMat);
+      const l = new THREE.Mesh(bananaLeaves[Math.floor(hash(x, z, i) * 3)], bananaMat);
       l.rotation.order = "YXZ";
       l.rotation.y = (i / 7) * Math.PI * 2 + rng() * 0.4;
       l.rotation.x = i ? -0.7 - rng() * 0.5 : -0.15 - rng() * 0.1;
@@ -306,7 +362,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     const crown = new THREE.Group();
     g.add(crown);
     for (let i = 0; i < 6; i++) {
-      const l = new THREE.Mesh(leafGeo, bananaMat);
+      const l = new THREE.Mesh(heliconiaLeaves[Math.floor(hash(x, z, i) * 2)], bananaMat);
       l.rotation.order = "YXZ";
       l.rotation.y = (i / 6) * Math.PI * 2 + rng() * 0.5;
       l.rotation.x = -0.32 - rng() * 0.2;
@@ -336,7 +392,22 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
   };
 
   const tfernTrunk = flat("#5a4232");
-  const tfernMat = flat("#6aa848", { side: THREE.DoubleSide });
+  const tfernMat = leafMaterial("#6aa848", 0.16, false);
+  const tfernFronds = [0, 1].map((i) =>
+    pinnateFrond({
+      length: 3.2,
+      pairs: 30,
+      leaflet: 0.17,
+      width: 0.28,
+      arch: 1.2 + 0.25 * i,
+      sweep: 0.1 * (i ? 1 : -1),
+      fold: 0.12,
+      angle: 1.25,
+      segments: 2,
+      gaps: 0.02,
+      seed: i + 20,
+    }),
+  );
   const treeFern = (x: number, z: number, h: number): void => {
     const g = new THREE.Group();
     const t = new THREE.Mesh(
@@ -365,7 +436,7 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     const crown = new THREE.Group();
     crown.position.y = h;
     for (let i = 0; i < 11; i++) {
-      const f = new THREE.Mesh(frondGeo, tfernMat);
+      const f = new THREE.Mesh(tfernFronds[i % 2], tfernMat);
       f.rotation.order = "YXZ";
       f.rotation.y = (i / 11) * Math.PI * 2;
       f.rotation.x = -0.7 - rng() * 0.3;
@@ -383,19 +454,33 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
   for (const [x, z] of BALISIERS) balisier(x, z);
   for (const [x, z, h] of TREE_FERNS) treeFern(x, z, h);
 
-  const bladeGeo = frondGeometry(4);
+  const bladeGeo = pinnateFrond({
+    length: 3.2,
+    pairs: 9,
+    leaflet: 0.22,
+    width: 0.5,
+    arch: 1.65,
+    sweep: 0.05,
+    fold: 0.15,
+    angle: 1.1,
+    segments: 1,
+    gaps: 0,
+    seed: 30,
+  });
   bladeGeo.scale(0.45, 0.3, 0.45);
   const fern = new THREE.InstancedMesh(bladeGeo, frondMat, 64 * 7);
+  const clumps: [number, number, number][] = [];
   {
     let k = 0;
     const e = new THREE.Euler();
     for (let i = 0; i < 64; i++) {
       const a = rng() * Math.PI * 2;
       const r = i < 22 ? 4 + rng() * 8 : 22 + rng() * 28;
-      const x = Math.cos(a) * r,
-        z = Math.sin(a) * r,
-        y = groundHeight(x, z) - 0.04,
+      const [x, z] =
+        i < 22 ? gather(Math.cos(a) * r, Math.sin(a) * r) : [Math.cos(a) * r, Math.sin(a) * r];
+      const y = groundHeight(x, z) - 0.04,
         sc = 0.7 + rng() * 0.8;
+      if (i < 22) clumps.push([x, z, sc]);
       for (let j = 0; j < 7; j++) {
         e.set(-0.5 - rng() * 0.6, (j / 7) * Math.PI * 2 + rng() * 0.5, 0, "YXZ");
         m4.compose(
@@ -408,9 +493,11 @@ export function createFlora(rng: Rng, group: THREE.Group): { update(time: number
     }
   }
   group.add(fern);
+  group.add(groundCover(clumps, lite), contactShadows(clumps));
 
   return {
     update(time) {
+      SWAY_TIME.value = time;
       crowns.forEach((crown, i) => {
         crown.rotation.z = Math.sin(time * 0.7 + i) * 0.04;
         crown.rotation.x = Math.cos(time * 0.5 + i * 1.3) * 0.03;
@@ -573,81 +660,6 @@ function bractGeometry(side: number): THREE.BufferGeometry {
 }
 
 /**
- * A background flamboyant's crown disc as a cluster of leaf sprays (the Pyébwa's foliage), in the
- * frame of a mesh placed at `at` with the non-uniform scale `s`: sprays are laid out undistorted in
- * crown space, then brought into the mesh frame, normals included. Blossom sits highest; `bias`
- * leans the disc towards blossom (positive) or foliage.
- */
-function sprayCluster(
-  spray: THREE.BufferGeometry,
-  at: THREE.Vector3,
-  s: THREE.Vector3,
-  centre: THREE.Vector3,
-  k: number,
-  bias: number,
-  seed: number,
-): THREE.BufferGeometry {
-  const src = spray.attributes.position;
-  const srcNormal = spray.attributes.normal;
-  const srcShade = spray.attributes.color;
-  const srcIndex = spray.index?.array ?? [];
-  const count = 14;
-  const pos: number[] = [];
-  const nor: number[] = [];
-  const col: number[] = [];
-  const index: number[] = [];
-  const up = new THREE.Vector3(0, 1, 0);
-  const sub = new THREE.Vector3();
-  const facing = new THREE.Vector3();
-  const q = new THREE.Quaternion();
-  const twist = new THREE.Quaternion();
-  const v = new THREE.Vector3();
-  const n = new THREE.Vector3();
-  const radial = new THREE.Vector3();
-  const tint = new THREE.Color();
-  for (let j = 0; j < count; j++) {
-    const u = hash(seed, j, 1) * Math.PI * 2;
-    const w = Math.acos(2 * hash(seed, j, 2) - 1);
-    const reach = Math.cbrt(hash(seed, j, 3));
-    sub.set(
-      at.x + reach * Math.sin(w) * Math.cos(u) * 1.35 * k,
-      at.y + reach * Math.cos(w) * 0.4 * k,
-      at.z + reach * Math.sin(w) * Math.sin(u) * 1.35 * k,
-    );
-    facing.copy(sub).sub(centre);
-    facing.y = facing.y * 2 + 0.8 * k;
-    q.setFromUnitVectors(up, facing.normalize());
-    q.multiply(twist.setFromAxisAngle(up, hash(seed, j, 4) * Math.PI * 2));
-    const size = k * (0.6 + 0.25 * hash(seed, j, 5));
-    const height = (sub.y - centre.y + 0.3 * k) / (0.9 * k);
-    const bloom = hash(seed, j, 7) < 0.3 + 0.6 * height + bias;
-    const pick = (hash(seed, j, 6) * 4) | 0;
-    tint.set(bloom ? FLAMBOYANT.blossom[pick] : FLAMBOYANT.leaves[pick]);
-    const first = pos.length / 3;
-    for (let i = 0; i < src.count; i++) {
-      v.fromBufferAttribute(src, i).multiplyScalar(size).applyQuaternion(q).add(sub);
-      n.fromBufferAttribute(srcNormal, i).applyQuaternion(q);
-      radial.copy(v).sub(centre);
-      radial.y *= 2.2;
-      n.lerp(radial.normalize(), 0.5).normalize();
-      v.sub(at).divide(s);
-      n.multiply(s).normalize();
-      pos.push(v.x, v.y, v.z);
-      nor.push(n.x, n.y, n.z);
-      const shade = srcShade.getX(i);
-      col.push(tint.r * shade, tint.g * shade, tint.b * shade);
-    }
-    for (let i = 0; i < srcIndex.length; i++) index.push(first + srcIndex[i]);
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
-  geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
-  geo.setIndex(index);
-  return geo;
-}
-
-/**
  * Heliconia flower in its mesh's frame: the mesh sits at the old floating dot (`side` × 0.14, 0.1 in
  * the bract's frame), so the geometry is shifted back to the bract's mouth, where a short, slightly
  * curved yellow tube peeks out of the bract's upper side.
@@ -671,4 +683,151 @@ function flowerGeometry(side: number): THREE.BufferGeometry {
       startCap: true,
     },
   ]);
+}
+
+/** Where low plants gather: between the Pyébwa's roots and in a ring at the clearing's edge. */
+const ROOT_GROUPS = [0.4, 1.7, 2.9, 4.1, 5.3].map((a, i): [number, number] => [
+  Math.cos(a) * (2.7 + 0.5 * (i % 2)),
+  Math.sin(a) * (2.7 + 0.5 * (i % 2)),
+]);
+const EDGE_GROUPS = [0.2, 1.05, 1.9, 2.6, 3.5, 4.4, 5.5].map((a, i): [number, number] => [
+  Math.cos(a) * (9.5 + 1.5 * (i % 3)),
+  Math.sin(a) * (9.5 + 1.5 * (i % 3)),
+]);
+
+/**
+ * Pulls a near fern clump into the nearest group (roots or the clearing's edge), keeping some of
+ * its own offset so groups stay uneven, and pushes it out of the Konteur's open ground.
+ */
+function gather(x: number, z: number): [number, number] {
+  const groups = Math.hypot(x, z) < 7 ? ROOT_GROUPS : EDGE_GROUPS;
+  let best = groups[0];
+  for (const g of groups) {
+    if (Math.hypot(g[0] - x, g[1] - z) < Math.hypot(best[0] - x, best[1] - z)) best = g;
+  }
+  let gx = best[0] + (x - best[0]) * 0.3;
+  let gz = best[1] + (z - best[1]) * 0.3;
+  for (const [kx, kz, kr] of KONTEUR_OBSTACLES) {
+    const d = Math.hypot(gx - kx, gz - kz);
+    const clear = kr + 0.9;
+    if (d < clear) {
+      const dx = d > 1e-3 ? (gx - kx) / d : 1;
+      const dz = d > 1e-3 ? (gz - kz) / d : 0;
+      gx = kx + dx * clear;
+      gz = kz + dz * clear;
+    }
+  }
+  return [gx, gz];
+}
+
+/**
+ * Painted ground tufts (grass blades, small leaves, tiny pale flowers) in uneven groups: around the
+ * Pyébwa's roots and at the feet of the near fern clumps, as crossed upright cards.
+ */
+function groundCover(clumps: readonly [number, number, number][], lite: boolean): THREE.Mesh {
+  const cards: Card[] = [];
+  const up = new THREE.Vector3(0, 1, 0);
+  const seeds: [number, number, number][] = [
+    ...ROOT_GROUPS.map(([x, z]): [number, number, number] => [x, z, 1.3]),
+    ...clumps.map(([x, z, sc]): [number, number, number] => [x, z, 0.6 + 0.5 * sc]),
+  ];
+  seeds.forEach(([cx, cz, spread], i) => {
+    const count = lite ? 3 : 5;
+    for (let k = 0; k < count; k++) {
+      const a = hash(i, k, 41) * Math.PI * 2;
+      const r = spread * Math.sqrt(hash(i, k, 42));
+      const x = cx + Math.cos(a) * r;
+      const z = cz + Math.sin(a) * r;
+      const size = 0.45 + 0.35 * hash(i, k, 43);
+      const light = 0.85 + 0.25 * hash(i, k, 44);
+      for (let c = 0; c < 2; c++) {
+        const turn = hash(i, k, 45) * Math.PI + (c * Math.PI) / 2;
+        cards.push({
+          at: new THREE.Vector3(x, groundHeight(x, z) - 0.06, z),
+          dir: up.clone(),
+          normal: new THREE.Vector3(Math.cos(turn), 0, Math.sin(turn)),
+          size,
+          aspect: 1.2,
+          tile: TILE.tuft,
+          shade: new THREE.Color(light, light, light * 0.92),
+          droop: 0.05,
+        });
+      }
+    }
+  });
+  const material = cardMaterial(foliageAtlas(lite ? 256 : 512), { sway: 0.06, glow: 0.15 });
+  return new THREE.Mesh(
+    cardsGeometry(cards, { centre: new THREE.Vector3(0, -60, 0), amount: 0.75, squash: 1 }),
+    material,
+  );
+}
+
+/**
+ * Soft contact shadows where plants meet the ground: one multiplied disc per plant and fern clump,
+ * so trunks and stems sit in the grass instead of standing on it. Each disc is a polar mesh whose
+ * vertices follow the rendered ground (`groundMeshHeight`), so slopes never cut into it.
+ */
+function contactShadows(clumps: readonly [number, number, number][]): THREE.Mesh {
+  const spots: [number, number, number][] = [
+    ...PALMS.map(([x, z]): [number, number, number] => [x, z, 1.6]),
+    ...BREADFRUITS.map(([x, z, k]): [number, number, number] => [x, z, 3.2 * k]),
+    ...FLAMBOYANTS.map(([x, z, k]): [number, number, number] => [x, z, 3.4 * k]),
+    ...BANANAS.map(([x, z]): [number, number, number] => [x, z, 1.8]),
+    ...BALISIERS.map(([x, z]): [number, number, number] => [x, z, 1.4]),
+    ...TREE_FERNS.map(([x, z]): [number, number, number] => [x, z, 1.6]),
+    ...clumps.map(([x, z, sc]): [number, number, number] => [x, z, 1.1 * sc]),
+    [0, 0, 7.5],
+  ];
+  const rings = 4;
+  const sides = 16;
+  const pos: number[] = [];
+  const uv: number[] = [];
+  const index: number[] = [];
+  for (const [cx, cz, size] of spots) {
+    const first = pos.length / 3;
+    const radius = size / 2;
+    pos.push(cx, groundMeshHeight(cx, cz) + 0.02, cz);
+    uv.push(0.5, 0.5);
+    for (let r = 1; r <= rings; r++) {
+      const reach = r / rings;
+      for (let k = 0; k < sides; k++) {
+        const a = (k / sides) * Math.PI * 2;
+        const x = cx + Math.cos(a) * radius * reach;
+        const z = cz + Math.sin(a) * radius * reach;
+        pos.push(x, groundMeshHeight(x, z) + 0.02, z);
+        uv.push(0.5 + 0.5 * Math.cos(a) * reach, 0.5 + 0.5 * Math.sin(a) * reach);
+      }
+    }
+    for (let k = 0; k < sides; k++) index.push(first, first + 1 + ((k + 1) % sides), first + 1 + k);
+    for (let r = 1; r < rings; r++) {
+      const inner = first + 1 + (r - 1) * sides;
+      const outer = inner + sides;
+      for (let k = 0; k < sides; k++) {
+        const k1 = (k + 1) % sides;
+        index.push(inner + k, inner + k1, outer + k, inner + k1, outer + k1, outer + k);
+      }
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  geo.setIndex(index);
+  const mesh = new THREE.Mesh(
+    geo,
+    new THREE.MeshBasicMaterial({
+      map: contactShadowTexture(),
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.MultiplyBlending,
+      premultipliedAlpha: true,
+      side: THREE.DoubleSide,
+      fog: false,
+      toneMapped: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
+    }),
+  );
+  mesh.renderOrder = -1;
+  return mesh;
 }

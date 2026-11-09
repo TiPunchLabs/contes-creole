@@ -5,7 +5,7 @@ import { glowPoints } from "@shared/three/glow-points";
 import { softSprite } from "@shared/three/soft-sprite";
 import type { Count } from "../lite";
 import { createFlora } from "./flora";
-import { groundHeight } from "./ground";
+import { GROUND_SEGMENTS, GROUND_SIZE, groundHeight } from "./ground";
 import { LIGHTS } from "./palette";
 
 const MORNES: [number, number, string, number][] = [
@@ -33,7 +33,7 @@ export function createLandscape(
   group.add(canopyLight, baseLight, rim, key);
 
   {
-    const geo = new THREE.PlaneGeometry(200, 200, 90, 90);
+    const geo = new THREE.PlaneGeometry(GROUND_SIZE, GROUND_SIZE, GROUND_SEGMENTS, GROUND_SEGMENTS);
     geo.rotateX(-Math.PI / 2);
     const p = geo.attributes.position;
     const col = new Float32Array(p.count * 3);
@@ -71,7 +71,7 @@ export function createLandscape(
     }
   }
 
-  const flora = createFlora(rng, group);
+  const flora = createFlora(rng, group, count(100) < 100);
 
   const grass = glowPoints(
     rng,
