@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import type { Rng } from "@shared/random";
 import type { Obstacle } from "./critters/wander";
-import { groundHeight } from "./ground";
+import { groundHeight, groundMeshHeight } from "./ground";
 import { KONTEUR_OBSTACLES } from "./konteur";
 import {
   cardMaterial,
@@ -160,7 +160,7 @@ export function createFlora(
   };
 
   const atlas = foliageAtlas(lite ? 256 : 512);
-  const breadMat = withHaze(new THREE.MeshStandardMaterial({ color: "#3a6e2f", roughness: 0.9 }));
+  const breadMat = withHaze(new THREE.MeshStandardMaterial({ color: "#2f5f28", roughness: 0.9 }));
   const breadLeafMat = cardMaterial(atlas, { sway: 0.05 });
   const fruitMat = new THREE.MeshStandardMaterial({ color: "#b9d05c", roughness: 0.7 });
   const breadfruit = (x: number, z: number, k: number): void => {
@@ -189,7 +189,7 @@ export function createFlora(
     }));
     crown.add(
       new THREE.Mesh(
-        cardsGeometry(shellCards(lumps, centre, TILE.breadfruit, 1.0 * k, lite ? 18 : 30, x + z), {
+        cardsGeometry(shellCards(lumps, centre, TILE.breadfruit, 1.1 * k, lite ? 26 : 44, x + z), {
           centre,
           amount: 0.45,
           squash: 1.3,
@@ -764,9 +764,10 @@ function groundCover(clumps: readonly [number, number, number][], lite: boolean)
 
 /**
  * Soft contact shadows where plants meet the ground: one multiplied disc per plant and fern clump,
- * so trunks and stems sit in the grass instead of standing on it.
+ * so trunks and stems sit in the grass instead of standing on it. Each disc is a polar mesh whose
+ * vertices follow the rendered ground (`groundMeshHeight`), so slopes never cut into it.
  */
-function contactShadows(clumps: readonly [number, number, number][]): THREE.InstancedMesh {
+function contactShadows(clumps: readonly [number, number, number][]): THREE.Mesh {
   const spots: [number, number, number][] = [
     ...PALMS.map(([x, z]): [number, number, number] => [x, z, 1.6]),
     ...BREADFRUITS.map(([x, z, k]): [number, number, number] => [x, z, 3.2 * k]),
@@ -777,30 +778,56 @@ function contactShadows(clumps: readonly [number, number, number][]): THREE.Inst
     ...clumps.map(([x, z, sc]): [number, number, number] => [x, z, 1.1 * sc]),
     [0, 0, 7.5],
   ];
-  const geo = new THREE.PlaneGeometry(1, 1);
-  geo.rotateX(-Math.PI / 2);
-  const material = new THREE.MeshBasicMaterial({
-    map: contactShadowTexture(),
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.MultiplyBlending,
-    premultipliedAlpha: true,
-    fog: false,
-    toneMapped: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-  });
-  const mesh = new THREE.InstancedMesh(geo, material, spots.length);
-  const m4 = new THREE.Matrix4();
-  const q = new THREE.Quaternion();
-  spots.forEach(([x, z, size], i) => {
-    m4.compose(
-      new THREE.Vector3(x, groundHeight(x, z) + 0.03, z),
-      q,
-      new THREE.Vector3(size, 1, size),
-    );
-    mesh.setMatrixAt(i, m4);
-  });
+  const rings = 4;
+  const sides = 16;
+  const pos: number[] = [];
+  const uv: number[] = [];
+  const index: number[] = [];
+  for (const [cx, cz, size] of spots) {
+    const first = pos.length / 3;
+    const radius = size / 2;
+    pos.push(cx, groundMeshHeight(cx, cz) + 0.02, cz);
+    uv.push(0.5, 0.5);
+    for (let r = 1; r <= rings; r++) {
+      const reach = r / rings;
+      for (let k = 0; k < sides; k++) {
+        const a = (k / sides) * Math.PI * 2;
+        const x = cx + Math.cos(a) * radius * reach;
+        const z = cz + Math.sin(a) * radius * reach;
+        pos.push(x, groundMeshHeight(x, z) + 0.02, z);
+        uv.push(0.5 + 0.5 * Math.cos(a) * reach, 0.5 + 0.5 * Math.sin(a) * reach);
+      }
+    }
+    for (let k = 0; k < sides; k++) index.push(first, first + 1 + ((k + 1) % sides), first + 1 + k);
+    for (let r = 1; r < rings; r++) {
+      const inner = first + 1 + (r - 1) * sides;
+      const outer = inner + sides;
+      for (let k = 0; k < sides; k++) {
+        const k1 = (k + 1) % sides;
+        index.push(inner + k, inner + k1, outer + k, inner + k1, outer + k1, outer + k);
+      }
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  geo.setIndex(index);
+  const mesh = new THREE.Mesh(
+    geo,
+    new THREE.MeshBasicMaterial({
+      map: contactShadowTexture(),
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.MultiplyBlending,
+      premultipliedAlpha: true,
+      side: THREE.DoubleSide,
+      fog: false,
+      toneMapped: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
+    }),
+  );
   mesh.renderOrder = -1;
   return mesh;
 }

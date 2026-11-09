@@ -15,6 +15,9 @@ const ONLY = (process.env.ONLY ?? "views,app,fps").split(",");
 // PICK=04,05 limits the views to those name prefixes (quick iteration).
 const PICK = process.env.PICK ? process.env.PICK.split(",") : null;
 // ONLY=orbit renders the climb from t = 0 to 1 in the viewer as numbered frames (orbit/), for a video.
+// ONLY=motion renders fixed cameras on the palms and bananas over 4 s of scene time (motion/), to
+// show the leaves sway. ONLY=gesture climbs the real app by wheel (desktop) and by CDP finger
+// swipes (mobile), recording frames and the climb thumb (gesture-<vp>/).
 mkdirSync(OUT, { recursive: true });
 const GPU = ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"];
 const env = {
@@ -207,6 +210,67 @@ try {
       await p.screenshot({ path: `${OUT}orbit/${String(i).padStart(3, "0")}.png` });
     }
     await ctx.close();
+  }
+
+  if (ONLY.includes("motion")) {
+    const ctx = await browser.newContext({ viewport: { width: 960, height: 459 } });
+    const p = await ctx.newPage();
+    watch(p, "viewer-motion");
+    await p.goto(`${SITE}qa/vegetation/index.html`);
+    await p.waitForFunction(() => window.__vegReady, null, { timeout: 30000 });
+    for (const name of ["08-palm-crown", "09-banana", "20-canopy-edge"]) {
+      mkdirSync(`${OUT}motion/${name}`, { recursive: true });
+      const [pos, look] = VIEWS[name];
+      for (let i = 0; i < 48; i++) {
+        await p.evaluate(([a, b, time]) => window.__veg.shot(a, b, time), [pos, look, 4 + i / 12]);
+        await p.screenshot({ path: `${OUT}motion/${name}/${String(i).padStart(3, "0")}.png` });
+      }
+    }
+    await ctx.close();
+  }
+
+  if (ONLY.includes("gesture")) {
+    for (const vp of ["desktop", "mobile"]) {
+      const ctx = await browser.newContext({ ...VIEWPORTS[vp], reducedMotion: "no-preference" });
+      const p = await ctx.newPage();
+      watch(p, `gesture-${vp}`);
+      await p.goto(SITE);
+      await p.waitForSelector(".loader.is-done", { state: "attached", timeout: 30000 });
+      await p.waitForTimeout(2500);
+      const dir = `${OUT}gesture-${vp}/`;
+      mkdirSync(dir, { recursive: true });
+      const { width: w, height: h } = VIEWPORTS[vp].viewport;
+      const thumb = () =>
+        p.$eval(".tree-climb-thumb", (e) => Number(/([\d.e-]+)%/.exec(e.style.top)?.[1] ?? NaN));
+      const cdp = vp === "mobile" ? await ctx.newCDPSession(p) : null;
+      const track = [];
+      for (let i = 0; i < 40; i++) {
+        if (cdp) {
+          const x = w * 0.5;
+          const pt = (y) => [{ x, y, id: 1 }];
+          await cdp.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: pt(h * 0.7),
+          });
+          for (let k = 1; k <= 6; k++) {
+            await cdp.send("Input.dispatchTouchEvent", {
+              type: "touchMove",
+              touchPoints: pt(h * 0.7 - (h * 0.12 * k) / 6),
+            });
+          }
+          await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+        } else {
+          await p.mouse.move(w / 2, h / 2);
+          await p.mouse.wheel(0, 90);
+        }
+        await p.waitForTimeout(120);
+        track.push(await thumb());
+        await p.screenshot({ path: `${dir}${String(i).padStart(3, "0")}.png` });
+      }
+      results.gesture = { ...(results.gesture ?? {}), [vp]: track };
+      console.log("gesture", vp, track[0], "->", track[track.length - 1]);
+      await ctx.close();
+    }
   }
 
   if (ONLY.includes("app")) {

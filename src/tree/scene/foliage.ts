@@ -542,7 +542,7 @@ export function flamboyantCrown(spec: CrownSpec): Card[] {
       dir.normalize();
       if (core) dir.y = -0.05 + 0.3 * hash(i, k, seed + 8);
       // Flowers stand up and lean out, so their clusters also show from under the umbrella.
-      if (bloom) dir.y = 0.45 + 0.45 * hash(i, k, seed + 8);
+      if (bloom) dir.y = 0.2 + 0.45 * hash(i, k, seed + 8);
       const normal = up
         .clone()
         .lerp(out, core ? 0.6 : bloom ? 0.62 : edge ? 0.45 : 0.3)
@@ -559,6 +559,7 @@ export function flamboyantCrown(spec: CrownSpec): Card[] {
           size *
           (0.75 + 0.45 * hash(i, k, seed + 10)) *
           (core ? 1.6 : edge ? 0.82 : 1.1) *
+          (rh > 0.88 ? 0.8 : 1) *
           (bloom ? 0.9 : 1),
         tile,
         shade: new THREE.Color(
