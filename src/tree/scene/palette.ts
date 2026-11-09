@@ -49,5 +49,16 @@ export const CARD = {
   locked: "#aaa0bd",
 } as const;
 
+/**
+ * Distant ridges (BT-SKYLINE): nearest muted green and earth, middle muted mauve, the farthest
+ * massif warm like the low sky. `haze` is what each band melts into, thick at its foot.
+ */
+export const SKYLINE = {
+  near: { foot: "#4f6b46", crest: "#6c7f52", slope: "#7f6a4e", haze: "#e2c3a6" },
+  middle: { foot: "#9a7f98", crest: "#ad90a8", slope: "#8f7a92", haze: "#f0c6b4" },
+  far: { foot: "#c98f86", crest: "#d99a8a", slope: "#bb8584", haze: "#fcd2ae" },
+  cloud: "#fff1e2",
+} as const;
+
 /** Tone-mapping exposure of the tree stage. */
 export const EXPOSURE = 1.05;

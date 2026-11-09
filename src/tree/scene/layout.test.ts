@@ -30,10 +30,8 @@ function sample(lite: boolean): unknown {
   const tree = createLightTree(rng, { lite, count });
   const sky = createSky(rng, count);
   const next = rng();
-  const flora = landscape.group.children.filter((o) => o.type === "Group");
-  const hills = landscape.group.children.filter(
-    (o) => o instanceof THREE.Mesh && o.geometry instanceof THREE.SphereGeometry,
-  );
+  const flora = landscape.group.children.filter((o) => o.type === "Group" && o.name !== "skyline");
+  const skyline = landscape.group.getObjectByName("skyline") as THREE.Group;
   const fireflies = sky.group.children.find((o) => o instanceof THREE.Points) as THREE.Points;
   const ff = fireflies.geometry.attributes.position;
   const sprites = sky.group.children.filter((o) => o instanceof THREE.Sprite);
@@ -45,9 +43,9 @@ function sample(lite: boolean): unknown {
       last: v(tree.tips[tree.tips.length - 1]),
     },
     flora: { count: flora.length, first: flora.slice(0, 4).map((g) => v(g.position)) },
-    hills: {
-      count: hills.length,
-      first: hills.slice(0, 2).map((m) => [...v(m.position), ...v(m.scale)]),
+    skyline: {
+      bands: skyline.children.filter((o) => o instanceof THREE.Mesh).length,
+      clouds: skyline.children.filter((o) => o instanceof THREE.Sprite).map((o) => v(o.position)),
     },
     fireflies: {
       count: ff.count,
@@ -74,6 +72,8 @@ function sample(lite: boolean): unknown {
 // the flora's own draws are unchanged.
 // Painted vegetation (VEG-PAINT): +7 landscape objects at the origin with unit scale (five breadfruit
 // leaf shells, the ground tufts, the contact shadows), hence +7 on each sum; every draw is unchanged.
+// Basse-Terre skyline (BT-SKYLINE): the 16 mornes become one "skyline" group (3 ridge bands, 3 cloud
+// sprites) that consumes the same draws, so `next`, tips, flora and fireflies are unchanged.
 const FULL = {
   next: 0.7323,
   tips: {
@@ -94,11 +94,12 @@ const FULL = {
       [30, -0.4766, 8],
     ],
   },
-  hills: {
-    count: 16,
-    first: [
-      [55.5975, -2, 27.4394, 33.5387, 18.0394, 22.9492],
-      [34.7439, -2, 51.3504, 26.4918, 9.3579, 24.6295],
+  skyline: {
+    bands: 3,
+    clouds: [
+      [-136.9963, 27, -50.4778],
+      [-98.2646, 25, -107.9818],
+      [-145.9919, 21, -1.5418],
     ],
   },
   fireflies: {
@@ -113,7 +114,7 @@ const FULL = {
     [-17.0446, 0.9926, -11.4845],
   ],
   digest: {
-    landscape: { objects: 395, sum: [714.8192, 841.8414, 801.9735] },
+    landscape: { objects: 386, sum: [152.957, 672.4968, 253.9416] },
     tree: { objects: 5, sum: [5, 5, 5] },
     sky: { objects: 18, sum: [222.1834, 349.9447, 207.2595] },
   },
@@ -138,11 +139,12 @@ const LITE = {
       [30, -0.4766, 8],
     ],
   },
-  hills: {
-    count: 16,
-    first: [
-      [55.5975, -2, 27.4394, 33.5387, 18.0394, 22.9492],
-      [34.7439, -2, 51.3504, 26.4918, 9.3579, 24.6295],
+  skyline: {
+    bands: 3,
+    clouds: [
+      [-136.9963, 27, -50.4778],
+      [-98.2646, 25, -107.9818],
+      [-145.9919, 21, -1.5418],
     ],
   },
   fireflies: {
@@ -157,7 +159,7 @@ const LITE = {
     [9.9932, 0.4195, -17.6744],
   ],
   digest: {
-    landscape: { objects: 395, sum: [714.8192, 841.8414, 801.9735] },
+    landscape: { objects: 386, sum: [152.957, 672.4968, 253.9416] },
     tree: { objects: 5, sum: [5, 5, 5] },
     sky: { objects: 11, sum: [94.8892, 197.0314, 223.5069] },
   },

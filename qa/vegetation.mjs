@@ -106,6 +106,12 @@ const VIEWS = {
   ],
   "21-tk-front": hub(0.2),
   "22-mila-front": hub(0.54),
+  "23-massif-climb": hub(0.42),
+  "24-massif-eye": [
+    [3, 1.6, 5],
+    [-48, 9, -27],
+  ],
+  "25-skyline-high": hub(0.75),
 };
 const VIEWPORTS = {
   desktop: { viewport: { width: 1920, height: 918 }, deviceScaleFactor: 1 },
@@ -282,7 +288,7 @@ try {
       await p.waitForSelector(".loader.is-done", { state: "attached", timeout: 30000 });
       await p.waitForTimeout(2500);
       const { width: w, height: h } = opts.viewport;
-      for (const t of vp === "desktop" ? [0, 0.2, 0.54, 0.88] : [0, 0.54]) {
+      for (const t of vp === "desktop" ? [0, 0.2, 0.54, 0.88] : [0, 0.47, 0.54]) {
         if (t) await climbTo(p, t, w, h);
         await p.mouse.move(w / 2, h / 2);
         await p.waitForTimeout(600);
