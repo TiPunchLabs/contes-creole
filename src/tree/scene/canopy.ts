@@ -109,7 +109,7 @@ export function anchorCrown(
       own = owner >= FIRST_TWIG ? owner : owners++;
       const r0 = Math.min(0.04, Math.max(0.018, r * 0.6));
       const rise = (at.y - root.y) * 0.45;
-      twigs.push({
+      const twig: Tube = {
         at: bezier(
           root,
           root
@@ -128,14 +128,19 @@ export function anchorCrown(
         cap: true,
         shade: () => 0.95,
         seed: own,
-      });
-      pool.push({ a: root, b: at, ra: r0, rb: 0.011, owner: own });
+      };
+      twigs.push(twig);
+      // The twig's rendered axis (its ring stations), not its chord, so twigs grown from it root in
+      // its bark.
+      pool.push(...tubeSupports(twig, own, -Infinity));
     }
     const bloom = card.tile !== TILE.leaf && card.tile !== TILE.shade && card.tile !== TILE.sprig;
     if (bloom) {
       const n = card.normal.clone().normalize();
       const grow = card.dir.clone().addScaledVector(n, -n.dot(card.dir));
-      if (grow.lengthSq() > 0.05) at.addScaledVector(grow.normalize(), -BLOOM_FOOT * size);
+      // A copy: the twig's end stays where it is, inside the painted cluster.
+      if (grow.lengthSq() > 0.05)
+        at = at.clone().addScaledVector(grow.normalize(), -BLOOM_FOOT * size);
     }
     const moved: Card = { ...card, at, size };
     const phase = hash(own, opts.seed) * Math.PI * 2;

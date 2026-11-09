@@ -44,15 +44,9 @@ async function open(browser, ctxOpts, query = "", clock = false) {
   return { ctx, p, errors };
 }
 
-/**
- * Current climb value t, from the thumb's `top` (`calc(<100p>% - <24p>px)` once normalized). The bar
- * shows progress p = 1 - t from the opening view at the top of the spiral (anchored-canopy mission).
- */
+/** Current climb value t, from the thumb's `top` (`calc(<100t>% - <24t>px)` once normalized). */
 const climbT = (p) =>
-  p.$eval(
-    ".tree-climb-thumb",
-    (e) => 1 - Number(/([\d.e-]+)%/.exec(e.style.top)?.[1] ?? NaN) / 100,
-  );
+  p.$eval(".tree-climb-thumb", (e) => Number(/([\d.e-]+)%/.exec(e.style.top)?.[1] ?? NaN) / 100);
 
 /** Wheels until the eased climb settles on `goal` (0..1). */
 async function climbTo(p, goal, w, h) {
@@ -60,8 +54,7 @@ async function climbTo(p, goal, w, h) {
   for (let i = 0; i < 40; i++) {
     const now = await climbT(p);
     if (Math.abs(now - goal) < 0.01) break;
-    // Scrolling down descends the spiral (t decreases).
-    await p.mouse.wheel(0, Math.max(-400, Math.min(400, (now - goal) / 0.00055)));
+    await p.mouse.wheel(0, Math.max(-400, Math.min(400, (goal - now) / 0.00055)));
     await p.waitForTimeout(250);
   }
   await p.waitForTimeout(1800);

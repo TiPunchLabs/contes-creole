@@ -87,9 +87,9 @@ async function viewer(browser, size, tag) {
 const shot = (p, [pos, look], time) =>
   p.evaluate(([a, b, s]) => window.__veg.shot(a, b, s), [pos, look, time]);
 
-// The climb bar shows progress from the opening view (top) down the spiral: t = 1 - progress since
-// the anchored-canopy mission; REVERSED=0 reads a build from before it (bar = t).
-const REVERSED = process.env.REVERSED !== "0";
+// The climb bar shows t. REVERSED=1 reads the intermediate 08bd473 build (bar = 1 - t, scrolling
+// down lowered t), superseded by CANOPY-FACE.
+const REVERSED = process.env.REVERSED === "1";
 const barOf = (p) =>
   p.$eval(".tree-climb-thumb", (e) => Number(/([\d.e-]+)%/.exec(e.style.top)?.[1] ?? NaN) / 100);
 const climbT = async (p) => {
@@ -135,9 +135,13 @@ try {
       let flat = 0;
       for (let c = 0; c < cards; c++) {
         const o = c * 36;
-        const x = cp[o + 3],
-          y = cp[o + 4],
-          z = cp[o + 5];
+        // Flower tiles (2, 3, 4) paint their cluster from a fifth of the card: measure there.
+        const uv = crown.geometry.attributes.uv.array;
+        const tile = Math.floor(uv[c * 24 + 2] * 4) + (uv[c * 24 + 3] < 0.5 ? 4 : 0);
+        const k = tile >= 2 && tile <= 4 ? 0.6 : 0;
+        const x = cp[o + 3] + (cp[o + 12] - cp[o + 3]) * k,
+          y = cp[o + 4] + (cp[o + 13] - cp[o + 4]) * k,
+          z = cp[o + 5] + (cp[o + 14] - cp[o + 5]) * k;
         let best = Infinity;
         for (let i = 0; i < thin.length; i += 3) {
           const d = (thin[i] - x) ** 2 + (thin[i + 1] - y) ** 2 + (thin[i + 2] - z) ** 2;
@@ -170,6 +174,20 @@ try {
       };
     });
     console.log("metrics", JSON.stringify(results.metrics));
+    await ctx.close();
+  }
+
+  if (ONLY.includes("facecheck")) {
+    // CANOPY-FACE: the t = 1 camera (POSE=top) on the e2df734 build should match the same camera
+    // swung by 1.55π (three.js y-rotation) to the opening azimuth (POSE=opening) on the turned tree, wind paused.
+    const { ctx, p } = await viewer(browser, { width: 960, height: 640 }, "facecheck");
+    const [pos, look] = hub(1);
+    const turn = process.env.POSE === "opening" ? Math.PI * 1.55 : 0;
+    const c = Math.cos(turn);
+    const sn = Math.sin(turn);
+    const at = [pos[0] * c + pos[2] * sn, pos[1], -pos[0] * sn + pos[2] * c];
+    await shot(p, [at, look], 4);
+    await p.screenshot({ path: `${OUT}facecheck-${process.env.POSE ?? "top"}.png` });
     await ctx.close();
   }
 

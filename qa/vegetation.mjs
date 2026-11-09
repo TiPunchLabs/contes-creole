@@ -139,18 +139,15 @@ function watch(page, tag) {
   );
 }
 
-/** Wheels the real app's climb to `goal`; the bar shows 1 - t and scrolling down lowers t. */
+/** Wheels the real app's climb to `goal`. */
 async function climbTo(p, goal, w, h) {
   const climbT = () =>
-    p.$eval(
-      ".tree-climb-thumb",
-      (e) => 1 - Number(/([\d.e-]+)%/.exec(e.style.top)?.[1] ?? NaN) / 100,
-    );
+    p.$eval(".tree-climb-thumb", (e) => Number(/([\d.e-]+)%/.exec(e.style.top)?.[1] ?? NaN) / 100);
   await p.mouse.move(w / 2, h / 2);
   for (let i = 0; i < 40; i++) {
     const now = await climbT();
     if (Math.abs(now - goal) < 0.01) break;
-    await p.mouse.wheel(0, Math.max(-400, Math.min(400, (now - goal) / 0.00055)));
+    await p.mouse.wheel(0, Math.max(-400, Math.min(400, (goal - now) / 0.00055)));
     await p.waitForTimeout(250);
   }
   await p.waitForTimeout(1800);
@@ -292,7 +289,7 @@ try {
       await p.waitForTimeout(2500);
       const { width: w, height: h } = opts.viewport;
       for (const t of vp === "desktop" ? [0, 0.2, 0.54, 0.88] : [0, 0.47, 0.54]) {
-        await climbTo(p, t, w, h);
+        if (t) await climbTo(p, t, w, h);
         await p.mouse.move(w / 2, h / 2);
         await p.waitForTimeout(600);
         await p.screenshot({ path: `${OUT}app-${vp}-t${String(t).replace(".", "")}.png` });

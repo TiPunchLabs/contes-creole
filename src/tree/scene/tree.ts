@@ -12,6 +12,7 @@ import {
   withTreeWind,
 } from "./canopy";
 import { cardMaterial, cardsGeometry, flamboyantCrown, foliageAtlas, type Anchor } from "./foliage";
+import { hubCam } from "./camera";
 import { bezier, tubesGeometry, withBark, type Tube } from "./organic";
 
 interface Branch {
@@ -26,6 +27,13 @@ interface Branch {
 const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
 
 /**
+ * Turn of the whole tree about the foot of its trunk (ruling CANOPY-FACE): the face that the top of
+ * the climb used to see now faces the opening view at its foot, and the former front shows as the
+ * camera circles round. It is the angle between the two ends of the camera spiral.
+ */
+export const FACING = hubCam(1, V(), V()) - hubCam(0, V(), V());
+
+/**
  * Pyébwa a Konesans (v14), drawn as a flamboyant: straight trunk, wide flattened umbrella crown made
  * of many small sprays of fine leaflets and petals, scarlet on top over feathery green, each spray
  * rooted on a branch or on a short twig grown to reach it; one wind bends bark and sprays together
@@ -38,6 +46,7 @@ export function createLightTree(
   opts: { lite: boolean; count: Count },
 ): { group: THREE.Group; tips: THREE.Vector3[]; update(time: number, stirred: boolean): void } {
   const group = new THREE.Group();
+  group.rotation.y = FACING;
   const branches: Branch[] = [];
   const tips: THREE.Vector3[] = [];
   const grow = (
@@ -204,9 +213,10 @@ export function createLightTree(
   );
   canopy.add(leaves);
 
+  const turn = new THREE.Quaternion().setFromAxisAngle(V(0, 1, 0), FACING);
   return {
     group,
-    tips,
+    tips: tips.map((t) => t.clone().applyQuaternion(turn)),
     update(time, stirred) {
       leaves.material.uniforms.uTime.value = time;
       RUSTLE.value = lerp(RUSTLE.value, stirred ? 1 : 0, 0.06);

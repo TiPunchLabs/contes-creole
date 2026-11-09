@@ -10,7 +10,7 @@ import { detectLite, readLiteEnv, scaleCount } from "./lite";
 import { createTreeOverlay, type TellerBox } from "./overlay/overlay";
 import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { RANDOM_TALE_ACTION, RANDOM_TALE_NONE, eligibleTales, pickRandomTale } from "./random-tale";
-import { OPENING_T, cardT, hubCam, openingBack, openingWeight, progressOf } from "./scene/camera";
+import { cardT, hubCam } from "./scene/camera";
 import { createCards, type CardView } from "./scene/cards";
 import { createLapen } from "./scene/critters/lapen";
 import type { CritterView } from "./scene/critters/parts";
@@ -111,10 +111,9 @@ function buildTree(
   const calm = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   const parallax = calm ? 0.2 : 1;
 
-  // A fresh visit opens on the reference view at the top of the spiral; scrolling down descends it.
-  let t = OPENING_T;
-  let target = OPENING_T;
-  // Back from the classes page: open on the invitation, then drop the hash so a reload starts afresh.
+  let t = 0;
+  let target = 0;
+  // Back from the classes page: open on the invitation, then drop the hash so a reload starts low.
   if (location.hash === RETURN_HASH) {
     t = target = cardT(slots.length - 1, slots.length);
     history.replaceState(null, "", location.pathname + location.search);
@@ -136,7 +135,6 @@ function buildTree(
   const cam = new THREE.Vector3();
   const look = new THREE.Vector3();
   const dest = new THREE.Vector3();
-  const away = new THREE.Vector3();
   const anchor = new THREE.Vector3();
   const feet = new THREE.Vector3();
   const head = new THREE.Vector3();
@@ -144,13 +142,9 @@ function buildTree(
   const ndc = new THREE.Vector2();
   const pickable = [...cards.planes, konteur.plane, views.lapen.group, views.zanba.group];
 
-  /** Scrolling down (or swiping up) leaves the opening view and descends the spiral. */
   const climb = (dy: number): void => {
-    target = clamp(target - dy * 0.00055, 0, 1);
+    target = clamp(target + dy * 0.00055, 0, 1);
   };
-  // Narrow screens see the opening from farther back, so both books' cards fit across them.
-  const books = slots.flatMap((slot, i) => (isInvitation(slot) ? [] : [cards.position(i)]));
-  let backFor = { aspect: 0, fov: 0, back: 0 };
   /** Leaves a quiet tree (no hovered card, no bubble) for the classes page. */
   const invite = (): void => {
     hover = null;
@@ -337,13 +331,6 @@ function buildTree(
     hubCam(t, cam, look);
     konteur.place(camera.aspect);
     const fov = fitFov(50, camera.aspect);
-    if (backFor.aspect !== camera.aspect || backFor.fov !== fov)
-      backFor = { aspect: camera.aspect, fov, back: openingBack(books, fov, camera.aspect) };
-    const back = backFor.back * openingWeight(t);
-    if (back > 0) {
-      away.copy(cam).sub(look);
-      cam.copy(look).addScaledVector(away, 1 + back / away.length());
-    }
     if (diving) {
       diving.progress = Math.min(1, diving.progress + dt / DIVE_SECONDS);
       const d = smoothstep(diving.progress);
@@ -382,7 +369,7 @@ function buildTree(
     // the one that opened the tale on return.
     if (!diving)
       overlay.update(
-        progressOf(t),
+        t,
         best && book
           ? {
               index: best.index,

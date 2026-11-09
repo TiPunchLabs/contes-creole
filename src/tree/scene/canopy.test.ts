@@ -56,6 +56,36 @@ describe("anchorCrown", () => {
     expect(moved.x).toBeLessThan(at.x);
   });
 
+  it("keeps a flower's twig end inside the cluster when the card slides back", () => {
+    const at = V(4, 10, 0);
+    const crown = anchorCrown([card(at, TILE.vermilion)], [branch], { cross: false, seed: 3 });
+    expect(crown.twigs).toHaveLength(1);
+    const end = crown.twigs[0].at(1, new THREE.Vector3());
+    const root = crown.twigs[0].at(0, new THREE.Vector3());
+    const gap = toSegment(branch.a, branch.b, at);
+    expect(end.distanceTo(root)).toBeCloseTo(gap * 0.55, 5);
+    const c = crown.cards[0];
+    const grow = c.dir.clone().addScaledVector(c.normal, -c.normal.dot(c.dir)).normalize();
+    expect(
+      c.at
+        .clone()
+        .addScaledVector(grow, 0.2 * c.size)
+        .distanceTo(end),
+    ).toBeLessThan(1e-6);
+  });
+
+  it("roots a twig grown from a twig on that twig's rendered axis", () => {
+    const cards = [card(V(4.5, 8.6, 1.2)), card(V(5.6, 9.4, 1.9))];
+    const crown = anchorCrown(cards, [branch], { cross: false, seed: 3 });
+    expect(crown.twigs.length).toBe(2);
+    const [first, second] = crown.twigs;
+    const root = second.at(0, new THREE.Vector3());
+    const axis = [0, 0.5, 1].map((s) => first.at(s, new THREE.Vector3()));
+    const onAxis = Math.min(toSegment(axis[0], axis[1], root), toSegment(axis[1], axis[2], root));
+    const onBranch = toSegment(branch.a, branch.b, root);
+    expect(Math.min(onAxis, onBranch)).toBeLessThan(1e-6);
+  });
+
   it("crosses some flower cards only when asked", () => {
     const cards = Array.from({ length: 20 }, (_, i) => card(V(3, 8, i * 0.01), TILE.coral));
     expect(anchorCrown(cards, [branch], { cross: false, seed: 3 }).cards).toHaveLength(20);

@@ -36,13 +36,11 @@ sources are in `design/v13/`.
 
 - **Hub — Pyébwa a Konesans**: a tree of light on a tropical _morne_, drawn as a flamboyant whose
   leaf and flower sprays grow from its branches and twigs and sway with them in one wind
-  (`src/tree/scene/canopy.ts`). A fresh visit opens at the top of a camera spiral around it, under the
-  crown, Ti Kannot's card on the left and Mila's on the right (`OPENING_T`, ruling CANOPY-OPEN);
-  scrolling down or swiping up descends the spiral, and narrow portrait screens see that opening from
-  farther back so both books fit. Book-cards hang from the branches, each one the way into its tale (click, tap, or
-  keyboard focus on a transparent entry point over the near card; no fiche beside it). The Konteur
-  sits at the foot of the tree; hovering him (or focusing his keyboard entry point) lights his
-  lantern and shows his bubble, "Yé krik !…" then the hint « Cliquez ici pour accéder à un conte
+  (`src/tree/scene/canopy.ts`), turned about its foot so its fullest face meets the opening view
+  (`FACING`, ruling CANOPY-FACE). Scrolling climbs a camera spiral around it. Book-cards hang from
+  the branches, each one the way into its tale (click, tap, or keyboard focus on a transparent
+  entry point over the near card; no fiche beside it). The Konteur sits at the foot of the tree;
+  hovering him (or focusing his keyboard entry point) lights his lantern and shows his bubble, "Yé krik !…" then the hint « Cliquez ici pour accéder à un conte
   au hasard. » (ruling TREE-HOVER). Clicking or tapping him, or pressing Enter on his entry point,
   opens one of the eligible tales (`src/tree/random-tale.ts`: ready, with a world, never the
   invitation) at random, through the same dive as its card.
