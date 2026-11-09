@@ -2,7 +2,7 @@
 // the tree scene through the QA viewer (qa/vegetation/, needs the `vite` dev server), the real app
 // at fixed climb values on desktop and phones, triangle and draw-call counts, an uncapped fps sample
 // and console errors. Run it against the baseline and the branch with the same OUT layout.
-// Usage: SITE=http://localhost:5173/ OUT=dir [ONLY=views,app,fps] node qa/vegetation.mjs
+// Usage: SITE=http://localhost:5173/ OUT=dir [ONLY=views,app,fps,orbit] [PICK=04,05] node qa/vegetation.mjs
 import { chromium } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 
@@ -12,6 +12,9 @@ const OUT = (process.env.OUT ?? new URL("./out/vegetation/", import.meta.url).pa
   "/",
 );
 const ONLY = (process.env.ONLY ?? "views,app,fps").split(",");
+// PICK=04,05 limits the views to those name prefixes (quick iteration).
+const PICK = process.env.PICK ? process.env.PICK.split(",") : null;
+// ONLY=orbit renders the climb from t = 0 to 1 in the viewer as numbered frames (orbit/), for a video.
 mkdirSync(OUT, { recursive: true });
 const GPU = ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"];
 const env = {
@@ -94,6 +97,12 @@ const VIEWS = {
     [6, 3, -24],
     [22, 3, -10],
   ],
+  "20-canopy-edge": [
+    [8.5, 8.2, -9],
+    [2, 9.6, -1],
+  ],
+  "21-tk-front": hub(0.2),
+  "22-mila-front": hub(0.54),
 };
 const VIEWPORTS = {
   desktop: { viewport: { width: 1920, height: 918 }, deviceScaleFactor: 1 },
@@ -165,6 +174,7 @@ try {
       if (ONLY.includes("views")) {
         for (const [name, [pos, look]] of Object.entries(VIEWS)) {
           if (mode === "lite" && !name.startsWith("01")) continue;
+          if (PICK && !PICK.some((prefix) => name.startsWith(prefix))) continue;
           const info = await p.evaluate(([a, b]) => window.__veg.shot(a, b, 4), [pos, look]);
           await p.screenshot({ path: `${OUT}view-${mode}-${name}.png` });
           results.views[`${mode}:${name}`] = info;
@@ -181,6 +191,22 @@ try {
       }
       await ctx.close();
     }
+  }
+
+  if (ONLY.includes("orbit")) {
+    const ctx = await browser.newContext({ viewport: { width: 960, height: 459 } });
+    const p = await ctx.newPage();
+    watch(p, "viewer-orbit");
+    await p.goto(`${SITE}qa/vegetation/index.html`);
+    await p.waitForFunction(() => window.__vegReady, null, { timeout: 30000 });
+    mkdirSync(`${OUT}orbit`, { recursive: true });
+    const frames = 120;
+    for (let i = 0; i < frames; i++) {
+      const [pos, look] = hub(i / (frames - 1));
+      await p.evaluate(([a, b, time]) => window.__veg.shot(a, b, time), [pos, look, 4 + i / 24]);
+      await p.screenshot({ path: `${OUT}orbit/${String(i).padStart(3, "0")}.png` });
+    }
+    await ctx.close();
   }
 
   if (ONLY.includes("app")) {

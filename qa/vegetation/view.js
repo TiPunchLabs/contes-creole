@@ -73,6 +73,7 @@ function triangles() {
 
 window.__veg = {
   lite,
+  scene,
   shot(pos, look, time = 4) {
     resize();
     camera.position.set(...pos);
