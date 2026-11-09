@@ -225,7 +225,7 @@
   color: var(--reading-chrome-ink);
 }
 
-/* Next is the main action and points down, the way the wheel and the hint go. */
+/* Next is the main action: it points right, like a page turned forward. */
 .reading-arrows .reading-next {
   border-color: var(--reading-chrome-ink);
   background: var(--reading-chrome-ink);

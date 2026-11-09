@@ -24,7 +24,10 @@ export interface ReadingUI {
   close(): void;
 }
 
-const ARROW = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M3 9l5 5 5-5"/></svg>`;
+/** Page arrow: points right for the next page; the previous one turns it to the left (CSS). */
+const ARROW = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>`;
+/** The hint's arrow points down: it invites scrolling, not a page direction. */
+const SCROLL_ARROW = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M3 9l5 5 5-5"/></svg>`;
 const BACK = `<svg width="20" height="12" viewBox="0 0 20 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M7 1 2 6l5 5M2 6h17"/></svg>`;
 const TEXT_ON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2.5h10v15H5zM8 7h4M8 10h4M8 13h2"/></svg>`;
 const TEXT_OFF = TEXT_ON.replace("M8 13h2", "M8 13h2M2.5 2.5l15 15");
@@ -56,7 +59,7 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       <p class="reading-count" aria-live="polite"></p>
       <button type="button" class="reading-next" aria-label="Page suivante">${ARROW}</button>
     </div>
-    <div class="reading-hint" aria-hidden="true"><span lang="fr">Défilez pour continuer</span>${ARROW}</div>`;
+    <div class="reading-hint" aria-hidden="true"><span lang="fr">Défilez pour continuer</span>${SCROLL_ARROW}</div>`;
   root.append(el);
 
   const part = <T extends HTMLElement>(selector: string): T => {
