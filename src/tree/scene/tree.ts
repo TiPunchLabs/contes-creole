@@ -14,7 +14,7 @@ import {
 } from "./canopy";
 import { cardMaterial, cardsGeometry, flamboyantCrown, foliageAtlas, type Anchor } from "./foliage";
 import { hubCam } from "./camera";
-import { bezier, tubesGeometry, withBark, type Tube } from "./organic";
+import { bezier, hash, tubesGeometry, withBark, type Tube } from "./organic";
 
 interface Branch {
   p0: THREE.Vector3;
@@ -32,6 +32,9 @@ const V = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
  * the climb used to see now faces the opening view at its foot, and the former front shows as the
  * camera circles round. It is the angle between the two ends of the camera spiral.
  */
+/** Lowest base of the inner green sprays (CANOPY-GRN): the limbs just above the fork stay bare. */
+const INNER_FLOOR = 8.0;
+
 export const FACING = hubCam(1, V(), V()) - hubCam(0, V(), V());
 
 /**
@@ -165,7 +168,7 @@ export function createLightTree(
   const inner = innerAnchors(supports, {
     facing: hubCam(1, V(), V()),
     spread: 1.9,
-    low: 6.4,
+    low: INNER_FLOOR + 0.4,
     high: low,
     reach: reach * 0.75,
     count: 22,
@@ -186,16 +189,41 @@ export function createLightTree(
     seed: 3,
   };
   const cards = flamboyantCrown({ ...crownSpec, anchors });
-  // The inner anchors grow the crown's own green sprays (no flower clusters down there); seen from
-  // the low opening view, their faces turn a little outwards so they never stand edge-on as strips.
-  const innerCards = flamboyantCrown({ ...crownSpec, anchors: inner, clusters: 0 }).map((c) => ({
-    ...c,
-    normal: c.normal
-      .clone()
-      .lerp(V(c.at.x, 0, c.at.z).normalize(), 0.45)
-      .normalize(),
-  }));
-  const crown = anchorCrown([...cards, ...innerCards], supports, { cross: !opts.lite, seed: 3 });
+  // The inner anchors grow the crown's own green sprays (no flower clusters down there), faces
+  // turned a little outwards for the low opening view; in full mode each card gets a partner turned
+  // about its stem, so a side spray keeps some body in profile instead of thinning to a blade.
+  // Nothing grows in the low part of the inner limbs just above the fork (owner: "enlève les
+  // feuilles de cette zone"): no inner card starts below INNER_FLOOR.
+  const innerCards = flamboyantCrown({ ...crownSpec, anchors: inner, clusters: 0 }).flatMap((c) => {
+    if (c.at.y < INNER_FLOOR) return [];
+    const card = {
+      ...c,
+      normal: c.normal
+        .clone()
+        .lerp(V(c.at.x, 0, c.at.z).normalize(), 0.45)
+        .normalize(),
+    };
+    if (opts.lite) return [card];
+    const stem = card.dir.clone().normalize();
+    const turn = hash(c.at.x, c.at.z, 6) < 0.5 ? 0.3 : -0.3;
+    return [
+      card,
+      {
+        ...card,
+        normal: card.normal.clone().applyAxisAngle(stem, Math.PI * turn),
+        size: card.size * 0.85,
+      },
+    ];
+  });
+  // The crown is rooted first, as before CANOPY-GRN, so its cards keep their places; the inner
+  // sprays are rooted after, on the limbs.
+  const own = anchorCrown(cards, supports, { cross: !opts.lite, seed: 3 });
+  const added = anchorCrown(innerCards, supports, { cross: false, seed: 4 });
+  const crown = {
+    cards: [...own.cards, ...added.cards],
+    twigs: [...own.twigs, ...added.twigs],
+    phases: [...own.phases, ...added.phases],
+  };
   const puffsGeometry = cardsGeometry(crown.cards, {
     centre: crownCentre,
     amount: 0.5,
