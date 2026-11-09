@@ -6,7 +6,7 @@ import type { Count } from "../lite";
 import {
   RUSTLE,
   anchorCrown,
-  innerSprays,
+  innerAnchors,
   phaseAttribute,
   tubeSupports,
   withCrownWind,
@@ -159,8 +159,21 @@ export function createLightTree(
     anchors.push({ at, r, blaze });
   }
   const reach = Math.max(...tips.map((t) => Math.hypot(t.x - crownCentre.x, t.z - crownCentre.z)));
-  const cards = flamboyantCrown({
-    anchors,
+  const supports = limbs.flatMap(({ tube, root }, i) => (root ? [] : tubeSupports(tube, i, 4.5)));
+  // CANOPY-GRN: the crown reaches down the inner limbs above the main fork, on the face the opening
+  // view meets (the top of the spiral's side in the tree's own frame, see FACING).
+  const inner = innerAnchors(supports, {
+    facing: hubCam(1, V(), V()),
+    spread: 1.9,
+    low: 6.4,
+    high: low,
+    reach: reach * 0.75,
+    count: 22,
+    gap: 0.8,
+    r: 0.75,
+    seed: 5,
+  });
+  const crownSpec = {
     centre: crownCentre,
     radius: reach + 1.2,
     low,
@@ -169,25 +182,20 @@ export function createLightTree(
     size: opts.lite ? 1.25 : 1.1,
     lobes: 7,
     clusters: 22,
-    spread: [1.3, 0.7],
+    spread: [1.3, 0.7] as const,
     seed: 3,
-  });
-  const supports = limbs.flatMap(({ tube, root }, i) => (root ? [] : tubeSupports(tube, i, 4.5)));
-  // CANOPY-GRN: more green along the inner limbs above the main fork, on the face the opening
-  // view meets (the top of the spiral's side in the tree's own frame, see FACING).
-  const inner = innerSprays(supports, {
-    facing: hubCam(1, V(), V()),
-    spread: 1.9,
-    low: 5.8,
-    high: low,
-    reach: reach * 0.75,
-    clusters: 26,
-    per: opts.lite ? 4 : 6,
-    size: opts.lite ? 1.25 : 1.1,
-    gap: 0.75,
-    seed: 5,
-  });
-  const crown = anchorCrown([...cards, ...inner], supports, { cross: !opts.lite, seed: 3 });
+  };
+  const cards = flamboyantCrown({ ...crownSpec, anchors });
+  // The inner anchors grow the crown's own green sprays (no flower clusters down there); seen from
+  // the low opening view, their faces turn a little outwards so they never stand edge-on as strips.
+  const innerCards = flamboyantCrown({ ...crownSpec, anchors: inner, clusters: 0 }).map((c) => ({
+    ...c,
+    normal: c.normal
+      .clone()
+      .lerp(V(c.at.x, 0, c.at.z).normalize(), 0.45)
+      .normalize(),
+  }));
+  const crown = anchorCrown([...cards, ...innerCards], supports, { cross: !opts.lite, seed: 3 });
   const puffsGeometry = cardsGeometry(crown.cards, {
     centre: crownCentre,
     amount: 0.5,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { anchorCrown, innerSprays, phaseAttribute, type Support } from "./canopy";
-import { TILE, type Card } from "./foliage";
+import { anchorCrown, innerAnchors, phaseAttribute, type Support } from "./canopy";
+import { TILE, flamboyantCrown, type Card } from "./foliage";
 
 const V = (x: number, y: number, z: number): THREE.Vector3 => new THREE.Vector3(x, y, z);
 
@@ -102,7 +102,7 @@ describe("phaseAttribute", () => {
   });
 });
 
-describe("innerSprays", () => {
+describe("innerAnchors", () => {
   /** Limbs radiating from a fork at y = 5, every 30°, up to y = 9. */
   const limbs: Support[] = Array.from({ length: 12 }, (_, i) => {
     const a = (i / 12) * Math.PI * 2;
@@ -120,41 +120,45 @@ describe("innerSprays", () => {
     low: 6,
     high: 9,
     reach: 3,
-    clusters: 6,
-    per: 5,
-    size: 1,
+    count: 6,
     gap: 0.6,
+    r: 0.75,
     seed: 5,
   };
 
-  it("seeds green clusters only on the dressed side, in the height band", () => {
-    const cards = innerSprays(limbs, spec);
-    expect(cards.length).toBeGreaterThan(0);
-    expect(cards.length).toBeLessThanOrEqual(spec.clusters * (spec.per + 1));
-    for (const c of cards) {
-      expect([TILE.leaf, TILE.shade, TILE.sprig]).toContain(c.tile);
-      expect(c.at.y).toBeGreaterThan(spec.low - 1);
-      expect(c.at.y).toBeLessThan(spec.high + 1);
-      expect(c.at.x).toBeGreaterThan(-0.5);
-    }
+  it("places spaced anchors only on the dressed side, in the height band, near a limb", () => {
+    const anchors = innerAnchors(limbs, spec);
+    expect(anchors.length).toBeGreaterThan(0);
+    expect(anchors.length).toBeLessThanOrEqual(spec.count);
+    anchors.forEach((a, i) => {
+      expect(a.at.x).toBeGreaterThan(0);
+      expect(a.at.y).toBeGreaterThan(spec.low);
+      expect(a.at.y).toBeLessThan(spec.high + 0.2);
+      expect(Math.min(...limbs.map((l) => toSegment(l.a, l.b, a.at)))).toBeLessThan(0.4);
+      anchors
+        .slice(i + 1)
+        .forEach((b) => expect(b.at.distanceTo(a.at)).toBeGreaterThan(spec.gap - 0.35));
+    });
   });
 
-  it("is deterministic and roots every card once anchored", () => {
-    const cards = innerSprays(limbs, spec);
-    expect(innerSprays(limbs, spec)).toEqual(cards);
-    const crown = anchorCrown(cards, limbs, { cross: false, seed: 3 });
-    // A card grows from a limb, a twig's end, or a point on a twig's rendered axis.
-    const axes = crown.twigs.flatMap((t) => {
-      const p = [0, 0.5, 1].map((u) => t.at(u, new THREE.Vector3()));
-      return [
-        [p[0], p[1]],
-        [p[1], p[2]],
-      ];
+  it("is deterministic", () => {
+    expect(innerAnchors(limbs, spec)).toEqual(innerAnchors(limbs, spec));
+  });
+
+  it("grows only green crown sprays without flower clusters", () => {
+    const more = flamboyantCrown({
+      centre: V(0, 9, 0),
+      radius: 5,
+      low: 9.5,
+      high: 9.8,
+      per: 6,
+      size: 1,
+      lobes: 5,
+      clusters: 0,
+      seed: 3,
+      anchors: innerAnchors(limbs, spec),
     });
-    crown.cards.forEach((c) => {
-      const onLimb = limbs.some((l) => toSegment(l.a, l.b, c.at) <= l.ra);
-      const onTwig = axes.some(([a, b]) => toSegment(a, b, c.at) <= 0.05);
-      expect(onLimb || onTwig).toBe(true);
-    });
+    expect(more.length).toBeGreaterThan(0);
+    more.forEach((c) => expect([TILE.leaf, TILE.shade]).toContain(c.tile));
   });
 });

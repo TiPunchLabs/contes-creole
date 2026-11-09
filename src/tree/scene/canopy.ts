@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { SWAY_TIME, TILE, patchShader, type Card } from "./foliage";
+import { SWAY_TIME, TILE, patchShader, type Anchor, type Card } from "./foliage";
 import { bezier, hash, type Tube } from "./organic";
 
 /** A straight piece of the bark's axis that cards can grow from. */
@@ -181,95 +181,65 @@ function closestOnSegment(
   return u;
 }
 
-/** Where a crown's inner sprays grow (`innerSprays`). */
+/** Where a crown's inner anchors go (`innerAnchors`). */
 export interface InnerSpec {
-  /** Azimuth (radians, about +y from +x) of the side the sprays dress, in the tree's own frame. */
+  /** Azimuth (radians, about +y from +x) of the side to dress, in the tree's own frame. */
   facing: number;
   /** Half-width of that side, in radians. */
   spread: number;
-  /** Height band of the sprays: above the main fork, below the crown's sprays. */
+  /** Height band: above the main fork, up to the crown's lowest tips. */
   low: number;
   high: number;
-  /** Largest horizontal distance from the trunk's axis, so the sprays stay on the inner limbs. */
+  /** Largest horizontal distance from the trunk's axis, so the anchors stay on the inner limbs. */
   reach: number;
-  /** Seeds (clusters) and cards per seed. */
-  clusters: number;
-  per: number;
-  /** Typical card length (the crown's). */
-  size: number;
-  /** Least distance between two seeds, so sky shows between the clusters. */
+  /** Most anchors, and the least distance between two, so sky shows between their sprays. */
+  count: number;
   gap: number;
+  /** Anchor radius (the crown's own anchors use 0.8 to 1.6). */
+  r: number;
   seed: number;
 }
 
 /**
- * Green sprays along the inner limbs above the main fork, on one side of the tree: irregular
- * clusters seeded on the limbs at spaced points, their cards at several distances from the limb
- * (on it, or out on a short twig once `anchorCrown` roots them), leaning out and up towards the
- * light. Mostly feathery leaves, some shaded ones and a few sprigs with buds, like the crown's
- * underside. Deterministic: hashes only, no draw from the scene's RNG.
+ * Extra crown anchors on the inner limbs above the main fork, on one side of the tree, a little out
+ * from each limb. Fed to `flamboyantCrown` like the tip anchors, they grow the crown's own sprays
+ * (same tiles, orientation, underside shading, openings and ragged edges), so the inner foliage
+ * reads as the crown reaching down its limbs, not as separate leaves; `anchorCrown` then roots them
+ * like the rest. Deterministic: hashes only, no draw from the scene's RNG.
  */
-export function innerSprays(supports: readonly Support[], spec: InnerSpec): Card[] {
-  const { facing, spread, low, high, reach, clusters, per, size, gap, seed } = spec;
+export function innerAnchors(supports: readonly Support[], spec: InnerSpec): Anchor[] {
+  const { facing, spread, low, high, reach, count, gap, r, seed } = spec;
   const wrap = (a: number): number => Math.atan2(Math.sin(a), Math.cos(a));
-  const candidates: { at: THREE.Vector3; along: THREE.Vector3; key: number }[] = [];
+  const candidates: { at: THREE.Vector3; key: number }[] = [];
   supports.forEach((s, i) => {
     if (Math.max(s.ra, s.rb) > 0.3) return;
     for (const u of [0.25, 0.75]) {
       const at = s.a.clone().lerp(s.b, u);
-      const r = Math.hypot(at.x, at.z);
-      if (at.y < low || at.y > high || r > reach) continue;
+      const d = Math.hypot(at.x, at.z);
+      if (at.y < low || at.y > high || d > reach) continue;
       if (Math.abs(wrap(Math.atan2(at.z, at.x) - facing)) > spread) continue;
-      candidates.push({ at, along: s.b.clone().sub(s.a).normalize(), key: hash(i, u * 4, seed) });
+      candidates.push({ at, key: hash(i, u * 4, seed) });
     }
   });
   candidates.sort((p, q) => p.key - q.key);
-  const seeds: typeof candidates = [];
+  const picked: THREE.Vector3[] = [];
   for (const c of candidates) {
-    if (seeds.length >= clusters) break;
-    if (seeds.some((o) => o.at.distanceTo(c.at) < gap)) continue;
-    seeds.push(c);
+    if (picked.length >= count) break;
+    if (picked.some((o) => o.distanceTo(c.at) < gap)) continue;
+    picked.push(c.at);
   }
-  const up = new THREE.Vector3(0, 1, 0);
-  const cards: Card[] = [];
-  seeds.forEach((c, k) => {
-    // Out from the limb, towards the dressed side and away from the trunk's axis.
-    const away = new THREE.Vector3(c.at.x, 0, c.at.z);
+  return picked.map((at, k) => {
+    const away = new THREE.Vector3(at.x, 0, at.z);
     if (away.lengthSq() < 1e-4) away.set(Math.cos(facing), 0, Math.sin(facing));
-    away
-      .normalize()
-      .lerp(new THREE.Vector3(Math.cos(facing), 0, Math.sin(facing)), 0.4)
-      .normalize();
-    const n = per - (hash(k, seed, 1) < 0.4 ? 1 : 0) + (hash(k, seed, 2) < 0.3 ? 1 : 0);
-    const h = (c.at.y - low) / Math.max(1e-3, high - low);
-    for (let j = 0; j < n; j++) {
-      const turn = (hash(k, j, seed + 3) - 0.5) * 2.2;
-      const out = away.clone().applyAxisAngle(up, turn);
-      out.y = 0.05 + 0.4 * hash(k, j, seed + 4);
-      out.normalize();
-      // Several depths: some cards on the limb, others out on short twigs.
-      const depth = hash(k, j, seed + 5) < 0.35 ? 0.1 : 0.4 + 0.35 * hash(k, j, seed + 6);
-      const at = c.at
+    away.normalize();
+    return {
+      at: at
         .clone()
-        .addScaledVector(out, depth)
-        .addScaledVector(c.along, (hash(k, j, seed + 7) - 0.5) * 0.4);
-      const roll = (hash(k, j, seed + 8) - 0.5) * 1.4;
-      const normal = up.clone().lerp(out, 0.55).normalize().applyAxisAngle(out, roll);
-      const pick = hash(k, j, seed + 9);
-      const tile = pick < 0.25 ? TILE.leaf : pick < 0.93 ? TILE.shade : TILE.sprig;
-      const light = (0.52 + 0.22 * h) * (tile === TILE.shade ? 0.9 : 1);
-      cards.push({
-        at,
-        dir: out,
-        normal,
-        size: size * (0.75 + 0.4 * hash(k, j, seed + 10)),
-        tile,
-        shade: new THREE.Color(light * 0.8, light * 0.94, light * 1.02),
-        droop: 0.15 + 0.2 * hash(k, j, seed + 11),
-      });
-    }
+        .addScaledVector(away, 0.3)
+        .add(new THREE.Vector3(0, 0.15, 0)),
+      r: r * (0.85 + 0.3 * hash(k, seed, 1)),
+    };
   });
-  return cards;
 }
 
 /** Per-card phase as a vertex attribute (12 vertices per card, as `cardsGeometry` builds them). */
