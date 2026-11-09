@@ -41,7 +41,7 @@ const SAY: Record<Speaker, BubbleSegment[]> = {
     { lang: "fr", text: "Choisis un livre dans l'arbre des contes." },
   ],
   lapen: [
-    { lang: "gcf", text: "Mwen sé Konpè Lapen ! Ti, mé malen…\n" },
+    { lang: "gcf", text: "Mwen sé Konpè Lapen ! Piti, mé malen…\n" },
     { lang: "fr", text: "Je suis Compère Lapin : petit, mais malin !" },
   ],
   zanba: [
