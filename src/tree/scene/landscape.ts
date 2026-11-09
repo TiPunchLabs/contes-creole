@@ -7,13 +7,9 @@ import type { Count } from "../lite";
 import { createFlora } from "./flora";
 import { GROUND_SEGMENTS, GROUND_SIZE, groundHeight } from "./ground";
 import { LIGHTS } from "./palette";
+import { createSkyline } from "./skyline";
 
-const MORNES: [number, number, string, number][] = [
-  [62, 14, "#c9a7b4", 9],
-  [88, 24, "#b9a6cc", 7],
-];
-
-/** Late-afternoon clearing around the tree: low sun, lilac fill, green relief, lavender hills, flora, grass, pool. */
+/** Late-afternoon clearing around the tree: low sun, lilac fill, green relief, Basse-Terre skyline, flora, grass, pool. */
 export function createLandscape(
   rng: Rng,
   count: Count,
@@ -58,18 +54,7 @@ export function createLandscape(
     );
   }
 
-  for (const [r, hh, color, n] of MORNES) {
-    for (let i = 0; i < n; i++) {
-      const a = (i / n) * Math.PI * 2 + rng() * 0.5;
-      const m = new THREE.Mesh(
-        new THREE.SphereGeometry(1, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2),
-        new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true }),
-      );
-      m.position.set(Math.cos(a) * r, -2, Math.sin(a) * r);
-      m.scale.set(18 + rng() * 20, hh * (0.6 + rng() * 0.7), 14 + rng() * 14);
-      group.add(m);
-    }
-  }
+  group.add(createSkyline(rng, count(100) < 100));
 
   const flora = createFlora(rng, group, count(100) < 100);
 
