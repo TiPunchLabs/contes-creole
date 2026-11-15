@@ -10,7 +10,7 @@ import { glowPoints, type GlowPoints } from "@shared/three/glow-points";
 import { clamp, lerp } from "@shared/math";
 import { createRng } from "@shared/random";
 import type { Ambience } from "./audio";
-import { easeIO, easeIO3, fbm, GLSL_NOISE, lerpAngle, smooth, vnoise, walkEase } from "./noise";
+import { easeIO, fbm, GLSL_NOISE, lerpAngle, smooth, vnoise, walkEase } from "./noise";
 import { CRAB_PAGE, PAGE_COUNT } from "./text";
 
 /** What the scene needs from the page around it. */
@@ -191,6 +191,25 @@ interface Trans {
   mRy0: number;
   mRy1: number;
   gold0: number;
+  /** Set when Mila travels: the camera rides with her (see `CamRig`). */
+  rig: CamRig | null;
+}
+
+/**
+ * The camera's place around Mila at both ends of a move she makes, as a bearing, a distance and a
+ * height from her, and what it looks at, as an offset from her. In between, the camera keeps
+ * station on her and swings from one to the other: she never leaves the frame, and the angle only
+ * ever changes gradually.
+ */
+interface CamRig {
+  az0: number;
+  az1: number;
+  r0: number;
+  r1: number;
+  y0: number;
+  y1: number;
+  look0: V3;
+  look1: V3;
 }
 
 interface Leg {
@@ -246,7 +265,12 @@ interface Sign {
   g: THREE.Group;
   ring: THREE.Mesh;
   halo: THREE.SpriteMaterial;
-  core: THREE.MeshBasicMaterial;
+  core: THREE.SpriteMaterial;
+  /** The small drawing at its heart (steps, grass, spiral). */
+  icon: THREE.SpriteMaterial;
+  /** The wake it leaves: its last positions, newest first. */
+  wake: THREE.Points;
+  wakeT: number;
   /** The light's own colour at full strength. */
   tint: THREE.Color;
   /** Eased brightness (1 = full): lower close to the camera and behind the text. */
@@ -829,12 +853,15 @@ uniform vec3 uMoon;uniform float uTime,uUnder,uSong;varying vec3 vDir;
 void main(){
  vec3 d=normalize(vDir);float h=d.y;float az=atan(d.x,-d.z);
  vec3 top=lin(vec3(.035,.17,.2)),mid=lin(vec3(.06,.3,.33)),vio=lin(vec3(.4,.3,.46)),ora=lin(vec3(.95,.5,.34)),pink=lin(vec3(.93,.52,.5));
- float warm=smoothstep(-.9,.5,az);
+ // az wraps behind the beach (towards the land): there, everything that depends on it eases to
+ // a second, unbroken reading of the angle, so no seam shows in the sky
+ float back=smoothstep(1.7,2.7,abs(az));float az2=mod(az+6.2831853,6.2831853);
+ float warm=mix(smoothstep(-.9,.5,az),.5,back);
  vec3 hz=mix(mix(vio,pink,.5),ora,warm);
  vec3 c=mix(hz,vio,smoothstep(.0,.08,h));
  c=mix(c,mid,smoothstep(.06,.26,h));
  c=mix(c,top,smoothstep(.26,.85,h));
- float cl=fbm(vec2(az*3.2+uTime*.004,h*16.));
+ float cl=mix(fbm(vec2(az*3.2+uTime*.004,h*16.)),fbm(vec2(az2*3.2+9.+uTime*.004,h*16.)),back);
  float cloud=smoothstep(.5,.72,cl)*smoothstep(.3,.07,h)*smoothstep(.0,.04,h);
  c=mix(c,mix(lin(vec3(.98,.6,.5)),lin(vec3(.5,.36,.56)),smoothstep(.05,.2,h)),cloud*.8);
  vec3 m=normalize(uMoon);vec3 t1=normalize(cross(m,vec3(0,1,0)));vec3 t2=cross(t1,m);
@@ -844,7 +871,7 @@ void main(){
  float sn=noise(dir*5.+vec2(rr*150.,rr*20.));
  float sm=smoothstep(.25,1.,s1)*smoothstep(.35,.8,sn)*smoothstep(-.02,.12,h);
  c+=mix(lin(vec3(.2,.5,.5)),lin(vec3(1.,.85,.55)),exp(-r*5.))*sm*(.045+exp(-r*3.)*.2)*(1.+uSong*.8);
- float bt=noise(vec2(az*55.,h*150.))*.6+noise(vec2(az*130.,h*40.))*.4;
+ float bt=mix(noise(vec2(az*55.,h*150.))*.6+noise(vec2(az*130.,h*40.))*.4,noise(vec2(az2*55.,h*150.))*.6+noise(vec2(az2*130.,h*40.))*.4,back);
  c*=.9+bt*.18;
  vec2 sg=vec2(az*90.,h*90.);vec2 id=floor(sg);float rs=hash(id);vec2 f=fract(sg)-.5;
  float tw=.55+.45*sin(uTime*(1.5+rs*3.)+rs*40.);
@@ -2975,6 +3002,17 @@ void main(){
     });
   }
   const SIGNS: Sign[] = [];
+  /** A light's heart: bright in the middle, thinning evenly to nothing: no outline, no disc. */
+  const orbTex = canvasTex(128, 128, (g, w, h) => {
+    const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+    gr.addColorStop(0, "rgba(255,255,255,1)");
+    gr.addColorStop(0.18, "rgba(255,255,255,0.9)");
+    gr.addColorStop(0.4, "rgba(255,255,255,0.34)");
+    gr.addColorStop(0.65, "rgba(255,255,255,0.1)");
+    gr.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = gr;
+    g.fillRect(0, 0, w, h);
+  });
   function buildSigns(): void {
     const defs = [
       { k: "pas", c: new THREE.Color(1.6, 0.95, 0.45), ic: "#5a2c08" },
@@ -2993,15 +3031,41 @@ void main(){
       const halo = new THREE.Sprite(haloM);
       halo.scale.setScalar(0.9);
       g.add(halo);
-      const coreM = new THREE.MeshBasicMaterial({ color: d.c.clone().multiplyScalar(0.9) });
-      g.add(new THREE.Mesh(new THREE.SphereGeometry(0.11, 24, 16), coreM));
-      const ic = new THREE.Sprite(
-        new THREE.SpriteMaterial({ map: iconTex(d.k, d.ic), transparent: true, depthWrite: false }),
-      );
+      // The heart of the light is a soft glow that thins towards its edge, not a flat disc.
+      const coreM = new THREE.SpriteMaterial({
+        map: orbTex,
+        color: d.c.clone().multiplyScalar(0.9),
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+      const core = new THREE.Sprite(coreM);
+      core.scale.setScalar(0.4);
+      g.add(core);
+      const iconM = new THREE.SpriteMaterial({
+        map: iconTex(d.k, d.ic),
+        transparent: true,
+        depthWrite: false,
+      });
+      const ic = new THREE.Sprite(iconM);
       ic.scale.setScalar(0.2);
       g.add(ic);
+      // Round it turns the conch's own spiral: each light is a voice come out of the shell.
       const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(0.2, 0.007, 6, 48, 4.2),
+        new THREE.TubeGeometry(
+          new THREE.CatmullRomCurve3(
+            Array.from({ length: 40 }, (_, k) => {
+              const t = k / 39;
+              // a single curl, like the lip of the shell: more turns would read as rings
+              const a = t * Math.PI * 2.4;
+              const r = 0.035 + 0.15 * t;
+              return V3(Math.cos(a) * r, Math.sin(a) * r, 0);
+            }),
+          ),
+          90,
+          0.0055,
+          6,
+        ),
         new THREE.MeshBasicMaterial({
           color: d.c,
           transparent: true,
@@ -3013,7 +3077,42 @@ void main(){
       g.add(ring);
       g.scale.setScalar(0.001);
       scene.add(g);
-      SIGNS.push({ g, ring, halo: haloM, core: coreM, tint: d.c.clone(), dim: 1, sc: 0 });
+      // A wake of fading sparks behind it, so its path through the air or the water can be read.
+      const wakeG = new THREE.BufferGeometry();
+      const wakeN = 16;
+      wakeG.setAttribute("position", new THREE.BufferAttribute(new Float32Array(wakeN * 3), 3));
+      const fade = new Float32Array(wakeN * 3);
+      for (let k = 0; k < wakeN; k++) {
+        const f = (1 - k / wakeN) ** 2;
+        fade.set([d.c.r * f, d.c.g * f, d.c.b * f], k * 3);
+      }
+      wakeG.setAttribute("color", new THREE.BufferAttribute(fade, 3));
+      const wake = new THREE.Points(
+        wakeG,
+        new THREE.PointsMaterial({
+          map: glowTex,
+          size: 0.13,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        }),
+      );
+      wake.frustumCulled = false;
+      scene.add(wake);
+      SIGNS.push({
+        g,
+        ring,
+        halo: haloM,
+        core: coreM,
+        icon: iconM,
+        wake,
+        wakeT: 0,
+        tint: d.c.clone(),
+        dim: 1,
+        sc: 0,
+      });
     });
   }
   const threadMat = (prog: Uniform<number>): THREE.ShaderMaterial =>
@@ -3252,36 +3351,12 @@ void main(){
   };
   /** Intermediate camera stops for a transition (occlusions, dives). */
   function viaFor(from: number, to: number): [V3, V3][] {
+    // Only the moves where Mila stays put need a route: when she travels, the camera rides with
+    // her (see `CamRig`).
     const V: Record<string, [V3, V3][]> = {
       "0>1": [
         [V3(-1, 4.5, 15), V3(2, 4, -30)],
         [V3(2.6, 3.2, 10.3), V3(1, 2.4, -4)],
-      ],
-      // The walks are tracking shots: the camera stays low, clear of the sea grape's leaves and of
-      // the rocks, and swings round on the seaward side so Mila never leaves the frame.
-      "3>4": [[V3(h.x + 0.9, h.y + 0.95, h.z + 2.4), V3(6.4, 0.75, 4.4)]],
-      "4>5": [
-        [V3(7.6, 1.05, 1.5), V3(9.6, 0.7, 3.9)],
-        [V3(11.2, 1.3, 0.1), V3(12.4, 0.6, 4.1)],
-      ],
-      "6>7": [
-        [V3(M6.x + 0.6, 1.0, M6.z + 1.4), V3(M6.x - 0.3, -0.6, M6.z - 3)],
-        [V3(M6.x - 0.4, -0.9, M6.z - 3.4), V3(9, -4, -12)],
-        // the camera goes ahead of her, over the grass, and turns to watch her arrive
-        [V3(8.2, MEADOW.y + 4.6, -12.5), V3(MEADOW.x, MEADOW.y + 1, MEADOW.z)],
-      ],
-      "7>8": [
-        // high enough to clear the grass and the turtle's round
-        [V3(MEADOW.x + 1.2, MEADOW.y + 4.4, MEADOW.z - 3.5), V3(SCHOOL.x, SCHOOL.y + 2, SCHOOL.z)],
-      ],
-      "8>9": [[V3(SCHOOL.x - 1, SCHOOL.y + 4, SCHOOL.z - 3), V3(DEEP.x, DEEP.y, DEEP.z)]],
-      "9>10": [[V3(12, -7, -26), V3(10, -3, -16)]],
-      // the way back: behind her as she swims for the shore, up through the surface with her,
-      // then round to the beach while she walks out of the water
-      "10>11": [
-        [V3(7.6, -1.3, -6.6), V3(5.4, -0.6, -2)],
-        [V3(5.4, 0.95, -2.4), V3(4.2, 0.4, 1.6)],
-        [V3(2.1, 1.25, 1.1), V3(h.x, 1, h.z)],
       ],
       // round her landward side, low, under the sea grape's boughs: she stays in the frame
       "11>12": [[V3(1.5, h.y + 0.95, 6.3), V3(h.x - 0.3, h.y + 0.95, h.z - 0.8)]],
@@ -3310,6 +3385,22 @@ void main(){
   /** The crab's debris are clearing before the walk to the next page: input waits for it. */
   let freeing = false;
   const camState = { pos: V3(), tgt: V3() };
+  /** Stand-in the shot is composed on; the real camera eases towards it. */
+  const aimCam = new THREE.PerspectiveCamera();
+  /** Time constants (seconds) of the camera's ease in position and in angle. */
+  const CAM_EASE = { move: 0.3, turn: 0.45 };
+  const CAM_RIDE = { move: 0.1, turn: 0.16 };
+  /** Sea-floor heights between which Mila goes from swimming to standing on the bottom. */
+  const WADE = { from: -0.95, stand: -0.62 };
+  /**
+   * Her gestures with the light: `reach` holds her open hand out to the pearl's light (page 9),
+   * `fist` closes it on nothing, `hug` folds her arms on the three voices (page 10).
+   */
+  const gesture = { reach: 0, fist: 0, hug: 0 };
+  /** Height either side of the sea's surface the riding camera does not rest in. */
+  const WATERLINE_GAP = 0.22;
+  /** The next frame places the camera at once (first frame, cuts, direct page jumps). */
+  let camSnap = true;
   let pageStart = 0;
   let freed = false;
   let mila: MilaRig;
@@ -3327,6 +3418,7 @@ void main(){
       return;
     }
     const still = reduceMotion || instant;
+    if (still) camSnap = true;
     const dur = still ? 0 : (DURATIONS[`${from}>${to}`] ?? 5.5);
     const end = adaptForAspect(CAMS[to]);
     const via = still ? [] : viaFor(from, to);
@@ -3339,16 +3431,36 @@ void main(){
       : (MILA_VIA[`${from}>${to}`] ?? (MILA_VIA[`${to}>${from}`] ?? []).slice().reverse()).map(
           (v) => v.clone(),
         );
+    const milaC = new THREE.CatmullRomCurve3([mFrom, ...mvia, mTo], false, "centripetal");
+    let rig: CamRig | null = null;
+    if (!still && milaC.getLength() > 0.4) {
+      const o0 = camState.pos.clone().sub(mFrom);
+      const o1 = end.pos.clone().sub(mTo);
+      const az0 = Math.atan2(o0.x, o0.z);
+      const turn = Math.atan2(o1.x, o1.z) - az0;
+      rig = {
+        az0,
+        // the short way round
+        az1: az0 + Math.atan2(Math.sin(turn), Math.cos(turn)),
+        r0: Math.hypot(o0.x, o0.z),
+        r1: Math.hypot(o1.x, o1.z),
+        y0: o0.y,
+        y1: o1.y,
+        look0: camState.tgt.clone().sub(mFrom),
+        look1: end.tgt.clone().sub(mTo),
+      };
+    }
     trans = {
       from,
       to,
       t: 0,
       dur: Math.max(dur, 0.001),
+      rig,
       posC: posPts.length > 2 ? new THREE.CatmullRomCurve3(posPts, false, "centripetal") : null,
       posPts,
       tgtC: tgtPts.length > 2 ? new THREE.CatmullRomCurve3(tgtPts, false, "centripetal") : null,
       tgtPts,
-      milaC: new THREE.CatmullRomCurve3([mFrom, ...mvia, mTo], false, "centripetal"),
+      milaC,
       mRy0: mila.g.rotation.y,
       mRy1: MILA_AT[to].ry,
       gold0: U.gold.value,
@@ -3502,9 +3614,11 @@ void main(){
   function animateMila(rdt: number): void {
     const M = mila;
     const target = trans ? trans.to : page;
-    M.swimW = lerp(M.swimW, M.g.position.y < -0.25 ? 1 : 0, Math.min(1, rdt * 2.4));
+    const afloat =
+      M.g.position.y < -0.25 && groundH(M.g.position.x, M.g.position.z) < WADE.stand ? 1 : 0;
+    M.swimW = lerp(M.swimW, afloat, Math.min(1, rdt * 3.6));
     if (M.snap) {
-      M.swimW = M.g.position.y < -0.25 ? 1 : 0;
+      M.swimW = afloat;
       M.hold = HOLD_PAGES.has(target) && M.swimW < 0.3 ? 1 : 0;
       M.snap = false;
     }
@@ -3576,6 +3690,27 @@ void main(){
       );
     }
     M.inner.position.y = -0.62 - (0.467 - reach) * (1 - M.swimW) - 0.006 * (1 - M.swimW);
+    // what the tale says of her hands
+    const sincePage = timer.getElapsed() - pageStart;
+    const still9 = page === 9 && !trans;
+    gesture.reach = lerp(
+      gesture.reach,
+      still9 ? smooth(1.2, 2.6, sincePage) * (1 - smooth(5.0, 6.2, sincePage)) : 0,
+      Math.min(1, rdt * 4),
+    );
+    gesture.fist = lerp(
+      gesture.fist,
+      still9 ? smooth(4.2, 4.8, sincePage) * (1 - smooth(6.6, 7.6, sincePage)) : 0,
+      Math.min(1, rdt * 6),
+    );
+    const hugging =
+      (page === 10 && !trans) ||
+      (!!trans && trans.to === 10 && trans.from === 9 && trans.t > 0.3) ||
+      (!!trans && trans.from === 10 && trans.to === 11 && trans.t < 0.45);
+    gesture.hug = lerp(gesture.hug, hugging ? 1 : 0, Math.min(1, rdt * 2.5));
+    const lightLocal = M.body.worldToLocal(
+      V3(liveConch.position.x - 0.3, liveConch.position.y + 0.9, liveConch.position.z),
+    );
     // arms
     const wS = M.swimW;
     const wH = (1 - wS) * M.hold;
@@ -3609,6 +3744,22 @@ void main(){
         .addScaledVector(V3(0, -1, 0), wR)
         .addScaledVector(V3(sd * 0.3, 1, 0), wS);
       if (up.lengthSq() < 1e-6) up.set(0, 1, 0);
+      if (sd > 0 && gesture.reach > 0.001) {
+        // page 9: her open hand held out towards the light, as far as her arm goes
+        const out = lightLocal.clone().sub(A.S);
+        out.setLength(Math.min(out.length(), (A.L1 + A.L2) * 0.94));
+        H.lerp(out.add(A.S), gesture.reach);
+        Pp.lerp(A.S.clone().add(V3(sd * 0.25, -0.2, -0.05)), gesture.reach);
+        // the fingers close on nothing
+        A.hand.children.forEach((finger, f) => {
+          if (f > 0) finger.rotation.x = gesture.fist * 1.35;
+        });
+      }
+      if (gesture.hug > 0.001) {
+        // page 10: both hands folded on her chest, the three voices held against her
+        H.lerp(V3(sd * 0.05, 0.8, 0.155), gesture.hug);
+        Pp.lerp(A.S.clone().add(V3(sd * 0.22, -0.18, 0.02)), gesture.hug);
+      }
       solveArm(A, H, Pp, look, up);
     }
   }
@@ -3721,38 +3872,63 @@ void main(){
       trans.t += rdt / trans.dur;
       const k = clamp(trans.t, 0, 1);
       const e = easeIO(k);
-      if (trans.posC) trans.posC.getPoint(e, camState.pos);
+      // by arc length: an even pace along the path, with no surge between two stops
+      if (trans.posC) trans.posC.getPointAt(e, camState.pos);
       else camState.pos.lerpVectors(trans.posPts[0], trans.posPts[1], e);
       if (trans.tgtC) trans.tgtC.getPoint(e, camState.tgt);
       else camState.tgt.lerpVectors(trans.tgtPts[0], trans.tgtPts[1], e);
-      const travels = trans.milaC.getLength() > 0.4;
       // Mila follows her own path
       const onLand =
         trans.milaC.getPoint(0, tmpV2).y > -0.2 && trans.milaC.getPoint(1, tmpV2).y > -0.2;
-      const me = onLand ? walkEase(k) : easeIO3(k);
+      // in the water she glides at an even pace, without the surge of a cubic ease
+      const me = onLand ? walkEase(k) : easeIO(k);
       trans.milaC.getPoint(me, mila.g.position);
       let dr = trans.mRy1 - trans.mRy0;
       while (dr > Math.PI) dr -= Math.PI * 2;
       while (dr < -Math.PI) dr += Math.PI * 2;
-      mila.g.rotation.y = trans.mRy0 + dr * smooth(0.55, 1, k);
+      mila.g.rotation.y = trans.mRy0 + dr * smooth(0.84, 1, k);
       const pathLen = trans.milaC.getLength();
       if (pathLen > 0.4) {
         const tg = trans.milaC.getTangent(me, tmpV);
         mila.g.rotation.y = lerpAngle(
           mila.g.rotation.y,
-          lerpAngle(trans.mRy0, Math.atan2(tg.x, tg.z), smooth(0, 0.18, k)),
-          smooth(0.0, 0.12, k) * smooth(1, 0.6, k),
+          // she turns to face her way as she sets off, keeps to it, and turns to her place only
+          // as she slows: never a step sideways
+          lerpAngle(trans.mRy0, Math.atan2(tg.x, tg.z), smooth(0, 0.1, k)),
+          smooth(0.0, 0.08, k) * smooth(1, 0.86, k),
         );
       }
-      mila.moving = pathLen > 0.4 ? Math.sin(Math.PI * k) : 0;
-      // While she travels, the camera looks her way: the move tells where she goes. The pull is
-      // nil at both ends, so each page keeps its own framing.
-      if (travels) {
-        // (not on the dive, where the camera goes ahead of her and turns to find her)
-        const dive = trans.from === 6 && trans.to === 7;
-        const reach = dive ? 0 : mila.g.position.y > -0.2 ? 0.7 : 0.35;
-        const pull = Math.sin(Math.PI * k) ** 1.5 * reach;
-        camState.tgt.lerp(tmpV2.copy(mila.g.position).setY(mila.g.position.y + 0.7), pull);
+      // The stride is at full swing for as long as she moves at pace (the plateau of `walkEase`),
+      // not only at mid-way: a small step under a body that travels fast reads as sliding.
+      mila.moving =
+        pathLen > 0.4
+          ? onLand
+            ? smooth(0, 0.16, k) * smooth(1, 0.84, k)
+            : Math.sin(Math.PI * k)
+          : 0;
+      // While she travels she is the subject: the camera rides with her, swinging round her from
+      // the page's framing to the next one's, and looks at her most of the way. Nothing here
+      // depends on a fixed route, so it holds for every move, forwards and back.
+      const R = trans.rig;
+      if (R) {
+        const az = lerp(R.az0, R.az1, e);
+        const r = lerp(R.r0, R.r1, e);
+        const mp = mila.g.position;
+        camState.pos.set(
+          mp.x + Math.sin(az) * r,
+          mp.y + lerp(R.y0, R.y1, e),
+          mp.z + Math.cos(az) * r,
+        );
+        // never through the sand or the sea floor
+        camState.pos.y = Math.max(camState.pos.y, groundH(camState.pos.x, camState.pos.z) + 0.3);
+        // nor lingering in the skin of the sea, half in and half out: it crosses at once
+        if (Math.abs(camState.pos.y) < WATERLINE_GAP)
+          camState.pos.y = camState.pos.y >= 0 ? WATERLINE_GAP : -WATERLINE_GAP;
+        // and it stays on her side of the surface: from above, the sea would hide her
+        if (mp.y < -0.75) camState.pos.y = Math.min(camState.pos.y, -WATERLINE_GAP);
+        camState.tgt.copy(mp).add(tmpV2.lerpVectors(R.look0, R.look1, e));
+        const pull = smooth(0, 0.3, k) * smooth(1, 0.7, k) * 0.85;
+        camState.tgt.lerp(tmpV2.copy(mp).setY(mp.y + 0.7), pull);
       }
       {
         const tg = trans.milaC.getTangent(me, tmpV2);
@@ -3777,7 +3953,10 @@ void main(){
     }
     pointer.sx = lerp(pointer.sx, pointer.x, rdt * 2);
     pointer.sy = lerp(pointer.sy, pointer.y, rdt * 2);
-    camera.position.copy(camState.pos);
+    // The move is composed on a stand-in, and the real camera eases onto it: its position and
+    // above all its angle are damped, so a change of direction is a turn of the head, never a cut.
+    const lens = aimCam;
+    lens.position.copy(camState.pos);
     const right = tmpV
       .subVectors(camState.tgt, camState.pos)
       .normalize()
@@ -3785,11 +3964,21 @@ void main(){
       .normalize();
     // pointer parallax eases out with the motion control (and never runs with reduced motion)
     const par = reduceMotion ? 0 : (page === 2 ? 0.05 : 0.16) * motion;
-    camera.position
+    lens.position
       .addScaledVector(right, pointer.sx * par)
       .add(tmpV2.set(0, -pointer.sy * par * 0.5, 0));
-    if (!reduceMotion) camera.position.y += Math.sin(T * 0.4) * 0.015 * motion;
-    camera.lookAt(camState.tgt);
+    if (!reduceMotion) lens.position.y += Math.sin(T * 0.4) * 0.015 * motion;
+    lens.lookAt(camState.tgt);
+    if (camSnap || reduceMotion) {
+      camera.position.copy(lens.position);
+      camera.quaternion.copy(lens.quaternion);
+      camSnap = false;
+    } else {
+      // riding with Mila, the move is smooth by construction: a short ease, or she would outrun it
+      const ease = trans?.rig ? CAM_RIDE : CAM_EASE;
+      camera.position.lerp(lens.position, 1 - Math.exp(-rdt / ease.move));
+      camera.quaternion.slerp(lens.quaternion, 1 - Math.exp(-rdt / ease.turn));
+    }
     U.camPos.value.copy(camera.position);
 
     // under water?
@@ -3829,9 +4018,11 @@ void main(){
     {
       const gp = mila.g.position;
       const gh = groundH(gp.x, gp.z);
-      if (gp.y > -0.2) gp.y = Math.max(gh, -0.05);
-      else gp.y = Math.max(gp.y, gh + 0.35);
-      if (gp.y > -0.2 && gh > -0.05) gp.y = gh;
+      if (gh > WADE.from) {
+        // Where the water is shallow her feet find the bottom: she wades in and out, upright,
+        // instead of swimming over the sand or walking on the water.
+        gp.y = lerp(Math.max(gp.y, gh + 0.35), gh, smooth(WADE.from, WADE.stand, gh));
+      } else gp.y = Math.max(gp.y, gh + 0.35);
     }
     updateGround();
     U.wind.value = lerp(U.wind.value, mila.swimW * 1.2 + mila.walk * 0.4, rdt * 2);
@@ -4004,19 +4195,33 @@ void main(){
     const mp = mila.g.position;
     const up = mila.swimW > 0.5 ? 1.15 : 1.25;
     const rad = mila.swimW > 0.5 ? 0.85 : 0.6;
+    const held = gesture.hug > 0.5;
+    const chest = mila.body.localToWorld(V3(0, 0.84, 0.17));
+    const palm = (mila.arms.find((a) => a.sd > 0) ?? mila.arms[0]).hand.getWorldPosition(V3());
     SIGNS.forEach((s, i) => {
       let tgt: V3;
       let sc: number;
       let spd = 1.6;
-      const follow = V3(
-        mp.x + Math.cos(W * 0.8 + i * 2.09) * rad,
-        mp.y + up + Math.sin(W * 1.3 + i) * 0.1,
-        mp.z + Math.sin(W * 0.8 + i * 2.09) * rad,
-      );
+      // held against her (page 10), the three lights keep close to her chest
+      const follow = held
+        ? chest
+            .clone()
+            .add(
+              V3(
+                Math.cos(W * 0.9 + i * 2.09) * 0.15,
+                Math.sin(W * 1.3 + i) * 0.05,
+                Math.sin(W * 0.9 + i * 2.09) * 0.15,
+              ),
+            )
+        : V3(
+            mp.x + Math.cos(W * 0.8 + i * 2.09) * rad,
+            mp.y + up + Math.sin(W * 1.3 + i) * 0.1,
+            mp.z + Math.sin(W * 0.8 + i * 2.09) * rad,
+          );
       const got = [
         freed && page >= 5,
         page >= 7 && (page > 7 || since > 3.2),
-        page >= 9 && (page > 9 || since > 3.8),
+        page >= 9 && (page > 9 || since > 5.0),
       ][i];
       if (page <= 1) {
         tgt = conch;
@@ -4026,14 +4231,24 @@ void main(){
           tgt = conch;
           sc = 0;
         } else if (since < 3.2) {
-          tgt = conch
-            .clone()
-            .add(V3(-0.35 - 0.25 * i, 0.15 + 0.18 * Math.sin(i * 2.1), 0.25 + i * 0.12));
-          sc = 1;
-          spd = 0.9;
+          // the three voices unwind out of the shell in a widening spiral, growing as they come
+          const u = since / 3.2;
+          const a = since * 2.7 + i * 2.09;
+          const r = 0.04 + 0.26 * u;
+          tgt = conch.clone().add(
+            V3(
+              // up and a little seaward, beside her: clear of the text on the left
+              -0.06 - 0.13 * u * (1 + 0.3 * i) + Math.cos(a) * r * 0.5,
+              0.08 + 0.3 * u + Math.sin(a) * r,
+              0.1 - 0.2 * u - i * 0.06,
+            ),
+          );
+          sc = 0.3 + 0.55 * u;
+          spd = 6;
         } else {
           tgt = homes[i];
-          sc = since < 6 ? 1 : 0;
+          // they leave for the sea smaller and fading, without crossing the text at full glow
+          sc = since < 5 ? 0.6 : 0;
           spd = 2.5;
         }
       } else if (page >= 11) {
@@ -4067,10 +4282,16 @@ void main(){
         );
         sc = 1.15;
         spd = 1.8;
+      } else if (i === 2 && page === 9 && !trans && since > 1.4 && since <= 5.0) {
+        // page 9: the pearl's light rises to her open hand and waits above it; when her hand
+        // closes, empty, the light is free and goes with her
+        tgt = palm.clone().add(V3(0, 0.14, 0));
+        sc = 0.8;
+        spd = 1.3;
       } else if (got) {
         tgt = follow;
-        sc = 1;
-        spd = 2.2;
+        sc = held ? 0.55 : 1;
+        spd = held ? 4 : 2.2;
       } else {
         tgt = homes[i];
         sc = 0;
@@ -4100,8 +4321,22 @@ void main(){
       s.dim = lerp(s.dim, dim, Math.min(1, dt * 3));
       s.halo.opacity = s.dim;
       s.halo.color.copy(s.tint).multiplyScalar(0.45 + 0.55 * s.dim);
-      s.core.color.copy(s.tint).multiplyScalar(0.9 * (0.5 + 0.5 * s.dim));
-      (s.ring.material as THREE.MeshBasicMaterial).opacity = 0.8 * s.dim;
+      s.core.color.copy(s.tint).multiplyScalar(0.9);
+      s.core.opacity = 0.3 + 0.7 * s.dim;
+      // its drawing fades with it: never a dark mark left on a faint glow
+      s.icon.opacity = smooth(0.35, 0.8, s.dim) * 0.85;
+      // the wake: a new spark every few hundredths of a second, the oldest dropped
+      s.wakeT += dt;
+      const wp = s.wake.geometry.attributes.position as THREE.BufferAttribute;
+      if (dist > 30) for (let k = 0; k < wp.count; k++) wp.setXYZ(k, tgt.x, tgt.y, tgt.z);
+      else if (s.wakeT > 0.04) {
+        s.wakeT = 0;
+        (wp.array as Float32Array).copyWithin(3, 0, (wp.count - 1) * 3);
+      }
+      wp.setXYZ(0, s.g.position.x, s.g.position.y, s.g.position.z);
+      wp.needsUpdate = true;
+      (s.wake.material as THREE.PointsMaterial).opacity = 0.55 * s.dim * clamp(s.sc * 1.4, 0, 1);
+      (s.ring.material as THREE.MeshBasicMaterial).opacity = 0.22 * s.dim;
       s.g.scale.setScalar(Math.max(0.001, s.sc * 0.95 * pul * (0.72 + 0.28 * s.dim)));
       s.ring.lookAt(camera.position);
       s.ring.rotateZ(W * (1.2 + i * 0.3));
