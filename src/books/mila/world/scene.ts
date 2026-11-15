@@ -4,6 +4,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 import { disposeObject } from "@shared/three/dispose";
 import { clamp, lerp } from "@shared/math";
 import { createRng } from "@shared/random";
@@ -439,6 +440,11 @@ export function createMilaScene(
     calm: { value: 0 },
     swimD: { value: 0 },
   };
+  /** How wet the sheet is (0..1): it peaks just after a page turn. */
+  const U_wash = { value: 0 };
+  /** Seconds since the last animated page turn. */
+  let sinceTurn = Infinity;
+  const WASH_SECONDS = 1.7;
   const U_bigGlow = { value: 0.08 };
   const U_liveGlow = { value: 0.1 };
 
@@ -1014,7 +1020,7 @@ void main(){
       color: new THREE.Color(color),
       side: THREE.DoubleSide,
     });
-    const tg = new THREE.CylinderGeometry(0.09, 0.16, h, 7, 10, true);
+    const tg = new THREE.CylinderGeometry(0.09, 0.16, h, 14, 16, true);
     const tp = tg.attributes.position;
     for (let i = 0; i < tp.count; i++) {
       const y = tp.getY(i) + h / 2;
@@ -1025,7 +1031,7 @@ void main(){
     g.add(new THREE.Mesh(tg, mat));
     const top = V3(h * 0.18, h, 0);
     for (let k = 0; k < 9; k++) {
-      const fg = new THREE.PlaneGeometry(0.55, 2.8, 1, 8);
+      const fg = new THREE.PlaneGeometry(0.55, 2.8, 2, 14);
       const fp = fg.attributes.position;
       for (let i = 0; i < fp.count; i++) {
         const y = fp.getY(i) + 1.4;
@@ -1154,20 +1160,40 @@ void main(){
   /* =====================================================================
      ROCKS
      ===================================================================== */
-  const rockMat = new THREE.MeshLambertMaterial({
-    color: new THREE.Color("#5a5c68"),
-    flatShading: true,
-  });
+  const rockMat = new THREE.MeshLambertMaterial({ vertexColors: true });
   addCaustics(rockMat);
+  const ROCK_FOOT = new THREE.Color("#3d3f4b");
+  const ROCK_CROWN = new THREE.Color("#73747f");
+  const ROCK_WARM = new THREE.Color("#8a7f7c");
+  const ROCK_ALGAE = new THREE.Color("#46594f");
+  /**
+   * A water-worn rock: the prototype's lumps (same noise, same draws) carried by a fine welded
+   * sphere, so the light rolls over it; painted dark and damp at its foot, paler on its crown,
+   * with worn warm patches and a little algae low down.
+   */
   function rock(x: number, z: number, s: number, sink = 0.25): void {
-    const g = new THREE.IcosahedronGeometry(1, 1);
+    const raw = new THREE.IcosahedronGeometry(1, 3);
+    raw.deleteAttribute("normal");
+    raw.deleteAttribute("uv");
+    const g = mergeVertices(raw);
+    raw.dispose();
     const p = g.attributes.position;
+    const colors = new Float32Array(p.count * 3);
+    const tint = new THREE.Color();
     for (let i = 0; i < p.count; i++) {
       const v = V3(p.getX(i), p.getY(i), p.getZ(i));
+      const up = v.y;
       const n = fbm(v.x * 1.3 + x, v.y * 1.3 + z, 3);
-      v.multiplyScalar(0.75 + n * 0.6);
+      const fine = fbm(v.x * 4.1 + z, v.z * 4.1 + x + v.y * 2.3, 2);
+      tint.copy(ROCK_FOOT).lerp(ROCK_CROWN, smooth(-0.5, 0.75, up));
+      tint.lerp(ROCK_WARM, smooth(0.5, 0.8, fine) * smooth(-0.1, 0.6, up) * 0.6);
+      tint.lerp(ROCK_ALGAE, smooth(0.45, 0.75, n) * smooth(0.2, -0.6, up) * 0.7);
+      tint.multiplyScalar(0.92 + fine * 0.16);
+      tint.toArray(colors, i * 3);
+      v.multiplyScalar(0.75 + n * 0.6 + (fine - 0.5) * 0.05);
       p.setXYZ(i, v.x, v.y * 0.72, v.z);
     }
+    g.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     g.computeVertexNormals();
     const m = new THREE.Mesh(g, rockMat);
     m.scale.set(s * rr(0.9, 1.4), s, s * rr(0.9, 1.3));
@@ -2313,21 +2339,49 @@ void main(){
     const shell = toon("#d0532f");
     const shell2 = toon("#e9844c");
     const dk = toon("#1a1210");
-    const b = new THREE.Mesh(new THREE.SphereGeometry(0.16, 20, 14), shell);
+    // The shell is one painted dome: deeper red in blotches, a warm rim, a pale underside.
+    const deep = new THREE.Color("#a93a22");
+    const rim = new THREE.Color("#f2985a");
+    const pale = new THREE.Color("#f3d9b8");
+    const base = new THREE.Color("#d0532f");
+    const painted = toonSoft("#ffffff", { vertexColors: true });
+    const dome = new THREE.SphereGeometry(0.16, 32, 22);
+    {
+      const P = dome.attributes.position;
+      const N = dome.attributes.normal;
+      const colors = new Float32Array(P.count * 3);
+      const tint = new THREE.Color();
+      for (let i = 0; i < P.count; i++) {
+        const up = N.getY(i);
+        const blotch =
+          Math.sin(P.getX(i) * 38 + P.getZ(i) * 17) * Math.cos(P.getZ(i) * 43 - P.getX(i) * 13);
+        tint.copy(base).lerp(deep, smooth(0.15, 0.7, blotch) * smooth(0.2, 0.8, up) * 0.75);
+        tint.lerp(rim, (1 - smooth(0.05, 0.45, Math.abs(up))) * 0.6);
+        tint.lerp(pale, smooth(0.25, 0.6, -up));
+        tint.toArray(colors, i * 3);
+      }
+      dome.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    }
+    const b = new THREE.Mesh(dome, painted);
     b.scale.set(1.25, 0.5, 0.95);
     b.castShadow = true;
     g.add(b);
-    const top = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 10), shell2);
-    top.scale.set(1.2, 0.35, 0.8);
-    top.position.y = 0.04;
-    g.add(top);
     const legs: { pv: THREE.Group; s: number; i: number }[] = [];
     for (const s of [-1, 1])
       for (let i = 0; i < 4; i++) {
         const pv = new THREE.Group();
         pv.position.set(s * 0.16, 0, (i - 1.5) * 0.07);
-        pv.add(limb(V3(0, 0, 0), V3(s * 0.14, 0.06, 0), 0.017, shell));
-        pv.add(limb(V3(s * 0.14, 0.06, 0), V3(s * 0.22, -0.07, 0), 0.014, shell));
+        pv.rotation.y = s * (0.35 - i * 0.24);
+        // thigh, shin and a pointed foot, each slimmer than the last
+        const knee = V3(s * 0.13, 0.07, 0);
+        const ankle = V3(s * 0.2, -0.02, 0);
+        pv.add(limb(V3(0, 0, 0), knee, 0.019, shell));
+        pv.add(limb(knee, ankle, 0.014, shell));
+        const foot = new THREE.Mesh(new THREE.ConeGeometry(0.012, 0.075, 10), shell2);
+        foot.position.set(s * 0.215, -0.05, 0);
+        foot.rotation.z = Math.PI + s * 0.4;
+        foot.castShadow = true;
+        pv.add(foot);
         g.add(pv);
         legs.push({ pv, s, i });
       }
@@ -2336,22 +2390,40 @@ void main(){
       const pv = new THREE.Group();
       pv.position.set(s * 0.12, 0.03, 0.13);
       pv.add(limb(V3(0, 0, 0), V3(s * 0.08, 0.05, 0.12), 0.022, shell));
-      const c1 = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 8), shell2);
+      const c1 = new THREE.Mesh(new THREE.SphereGeometry(0.055, 20, 14), shell2);
       c1.scale.set(0.8, 0.6, 1.2);
       c1.position.set(s * 0.1, 0.07, 0.19);
+      c1.castShadow = true;
       pv.add(c1);
+      // the fixed finger and the one that snaps, both tapering to a point
+      const finger = (): THREE.Mesh => {
+        const f = new THREE.Mesh(new THREE.ConeGeometry(0.017, 0.085, 12), shell2);
+        f.rotation.x = Math.PI / 2;
+        f.position.z = 0.04;
+        f.castShadow = true;
+        return f;
+      };
+      const fixed = finger();
+      fixed.position.set(s * 0.1, 0.055, 0.275);
+      pv.add(fixed);
       const pin = new THREE.Group();
       pin.position.set(s * 0.1, 0.08, 0.24);
-      pin.add(limb(V3(0, 0, 0), V3(0, 0.02, 0.07), 0.015, shell2));
+      pin.add(finger());
       pv.add(pin);
       g.add(pv);
       claws.push({ pv, pin, s });
     }
+    const eyeWhite = toonSoft("#fbf6ea");
+    const glint = new THREE.MeshBasicMaterial({ color: "#ffffff" });
     for (const s of [-1, 1]) {
       g.add(limb(V3(s * 0.05, 0.05, 0.1), V3(s * 0.07, 0.15, 0.13), 0.01, shell));
-      const e = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 8), dk);
-      e.position.set(s * 0.07, 0.16, 0.13);
-      g.add(e);
+      const e = new THREE.Mesh(new THREE.SphereGeometry(0.026, 16, 12), eyeWhite);
+      e.position.set(s * 0.07, 0.165, 0.13);
+      const pu = new THREE.Mesh(new THREE.SphereGeometry(0.014, 12, 10), dk);
+      pu.position.set(s * 0.072, 0.167, 0.148);
+      const hl = new THREE.Mesh(new THREE.SphereGeometry(0.005, 8, 6), glint);
+      hl.position.set(s * 0.078, 0.175, 0.158);
+      g.add(e, pu, hl);
     }
     g.scale.setScalar(1.8);
     const cx = 14.6;
@@ -2634,9 +2706,9 @@ void main(){
   function makeFishGeo(): THREE.BufferGeometry {
     const parts: [THREE.BufferGeometry, "body" | "fin" | "eye"][] = [];
     const add = (geo: THREE.BufferGeometry, shade: "body" | "fin" | "eye"): void => {
+      // The parts keep their own normals: a turned body is round, not faceted.
       const g = geo.index ? geo.toNonIndexed() : geo;
       if (g !== geo) geo.dispose();
-      g.computeVertexNormals();
       parts.push([g, shade]);
     };
     const prof = (
@@ -2653,7 +2725,7 @@ void main(){
         [0, 0.148],
       ] as const
     ).map(([r, y]) => new THREE.Vector2(r, y));
-    const body = new THREE.LatheGeometry(prof, 18);
+    const body = new THREE.LatheGeometry(new THREE.SplineCurve(prof).getPoints(30), 28);
     body.rotateX(Math.PI / 2);
     body.scale(0.48, 1, 1);
     add(body, "body");
@@ -2697,7 +2769,7 @@ void main(){
       pf.rotateZ(sx * 0.5);
       pf.translate(sx * 0.02, -0.014, 0.04);
       add(pf, "fin");
-      const e = new THREE.SphereGeometry(0.0085, 8, 6);
+      const e = new THREE.SphereGeometry(0.0085, 12, 8);
       e.translate(sx * 0.0205, 0.013, 0.098);
       add(e, "eye");
     }
@@ -2882,6 +2954,7 @@ void main(){
     sc.far = 80;
     moonL.shadow.bias = -0.0006;
     moonL.shadow.normalBias = 0.03;
+    moonL.shadow.radius = 2.5;
     scene.add(moonL, moonL.target);
     rimL.position.set(30, 8, -60);
     scene.add(rimL);
@@ -2924,11 +2997,12 @@ void main(){
         uTime: U.time,
         uKuwa: { value: isSmall ? 0 : 1 },
         uUnder: U.under,
+        uWash: U_wash,
       },
       vertexShader: QUAD_VERTEX,
       fragmentShader:
         GLSL_NOISE +
-        `uniform sampler2D tDiffuse;uniform vec2 uRes;uniform float uTime,uKuwa,uUnder;varying vec2 vUv;
+        `uniform sampler2D tDiffuse;uniform vec2 uRes;uniform float uTime,uKuwa,uUnder,uWash;varying vec2 vUv;
     vec3 kuwa(vec2 uv){vec2 px=1.5/uRes;vec3 m0=vec3(0),m1=vec3(0),m2=vec3(0),m3=vec3(0),s0=vec3(0),s1=vec3(0),s2=vec3(0),s3=vec3(0);
       for(int j=0;j<=2;j++)for(int i=0;i<=2;i++){vec2 o=vec2(float(i),float(j))*px;vec3 c;
         c=texture2D(tDiffuse,uv+vec2(-o.x,-o.y)).rgb;m0+=c;s0+=c*c;
@@ -2940,13 +3014,17 @@ void main(){
       vec3 r=m0;float mv=v0;if(v1<mv){mv=v1;r=m1;}if(v2<mv){mv=v2;r=m2;}if(v3<mv){r=m3;}return r;}
     void main(){vec2 asp=vec2(uRes.x/uRes.y,1.);
       vec2 w=vec2(noise(vUv*asp*90.+uUnder*uTime*.5),noise(vUv*asp*90.+17.+uUnder*uTime*.5))-.5;
-      vec2 uv=vUv+w*(.0016+uUnder*.004);
+      // a page turn (uWash) wets the sheet: the paint runs further before it settles again
+      vec2 uv=vUv+w*(.0016+uUnder*.004+uWash*.014);
       vec3 base=texture2D(tDiffuse,uv).rgb;vec3 c=base;if(!(base.r==base.r))base=vec3(0.);
       if(uKuwa>.5)c=mix(base,kuwa(uv),.85);
       float paper=fbm(vUv*asp*220.)*.6+noise(vUv*asp*vec2(900.,140.))*.4;
       c*=.9+paper*.18;
       float gr=hash(vUv*uRes+fract(uTime*7.)*100.)-.5;c+=gr*.025*(c+.04);
       float vg=smoothstep(1.25,.35,length((vUv-.5)*vec2(1.15,1.)));c*=mix(.62,1.,vg);
+      // the wash blooms from blotches of the paper, lifting the gouache to a pale, even tone
+      float wet=smoothstep(.75-uWash*.75,1.05-uWash*.75,fbm(vUv*asp*3.+11.)+uWash*.25);
+      c=mix(c,mix(c,vec3(dot(c,vec3(.333)))*vec3(1.04,1.,.94)+vec3(.07,.06,.05),.6),wet*uWash*.85);
       gl_FragColor=vec4(max(c,0.),1.);}`,
     });
     comp.addPass(paintPass);
@@ -3159,6 +3237,7 @@ void main(){
       mRy1: MILA_AT[to].ry,
       gold0: U.gold.value,
     };
+    if (!still) sinceTurn = 0;
     page = to;
     hooks.onLeave(to);
     audio.onPage(to);
@@ -3481,6 +3560,10 @@ void main(){
     timer.update();
     const rawDt = timer.getDelta();
     const rdt = Math.min(rawDt, 0.05);
+    sinceTurn += rdt;
+    const turn = clamp(sinceTurn / WASH_SECONDS, 0, 1);
+    // quick to wet, slow to dry, as in Ti Kannot's world
+    U_wash.value = turn < 1 ? 0.8 * Math.sin(Math.PI * Math.pow(turn, 0.6)) ** 2 : 0;
     const { w, h: hh } = size();
     // adaptive quality: drop the Kuwahara pass, then resolution and shadows, on slow devices
     if (!perf.done && page > 0) {
