@@ -3356,15 +3356,13 @@ void main(){
   };
   /** Intermediate camera stops for a transition (occlusions, dives). */
   function viaFor(from: number, to: number): [V3, V3][] {
-    // Only the moves where Mila stays put need a route: when she travels, the camera rides with
-    // her (see `CamRig`).
+    // Only the way in from the cover needs a route: on every other move the camera swings round
+    // Mila (see `CamRig`).
     const V: Record<string, [V3, V3][]> = {
       "0>1": [
         [V3(-1, 4.5, 15), V3(2, 4, -30)],
         [V3(2.6, 3.2, 10.3), V3(1, 2.4, -4)],
       ],
-      // round her landward side, low, under the sea grape's boughs: she stays in the frame
-      "11>12": [[V3(1.5, h.y + 0.95, 6.3), V3(h.x - 0.3, h.y + 0.95, h.z - 0.8)]],
     };
     const fwd = V[`${from}>${to}`];
     if (fwd) return fwd;
@@ -3438,7 +3436,9 @@ void main(){
         );
     const milaC = new THREE.CatmullRomCurve3([mFrom, ...mvia, mTo], false, "centripetal");
     let rig: CamRig | null = null;
-    if (!still && milaC.getLength() > 0.4) {
+    // She is the subject of every page but the cover: the camera swings round her whether she
+    // travels or stays, so no move ever leaves her behind.
+    if (!still && (milaC.getLength() > 0.4 || (from >= 1 && to >= 1))) {
       const o0 = camState.pos.clone().sub(mFrom);
       const o1 = end.pos.clone().sub(mTo);
       const az0 = Math.atan2(o0.x, o0.z);
@@ -3955,6 +3955,15 @@ void main(){
         const tgt = page > th.from ? 1 : 0;
         th.prog.value = lerp(th.prog.value, tgt, Math.min(1, rdt * (tgt ? 2 : 1.5)));
       }
+    }
+    if (!trans && page === 9) {
+      // Page 9 turns on a gesture: the camera draws in on her hand and the light, slowly, so the
+      // open hand and its closing, empty, can be read; it stays close until the page is left.
+      const wide = adaptForAspect(CAMS[9]);
+      const hand = (mila.arms.find((a) => a.sd > 0) ?? mila.arms[0]).hand.getWorldPosition(tmpV);
+      const near = smooth(0.6, 3.6, T - pageStart) * (reduceMotion ? 0 : 1);
+      camState.pos.copy(wide.pos).lerp(hand, 0.5 * near);
+      camState.tgt.copy(wide.tgt).lerp(hand, 0.8 * near);
     }
     pointer.sx = lerp(pointer.sx, pointer.x, rdt * 2);
     pointer.sy = lerp(pointer.sy, pointer.y, rdt * 2);
