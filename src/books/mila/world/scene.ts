@@ -153,20 +153,23 @@ const HOLD_PAGES = new Set([0, 1, 2, 3, 4, 5, 11, 12]);
 const GOLD = [1, 1, 0.5, 0.04, 0.5, 0.35, 0.25, 0.5, 0.5, 0.5, 0.6, 1.3, 1.6];
 /** Inner glow of the held conch, per page. */
 const GLOW = [0.12, 0.15, 0.75, 0.2, 0.35, 0.3, 0.25, 0.3, 0.3, 0.35, 0.4, 0.6, 0.42];
-/** Seconds per transition (prototype values). */
+/**
+ * Seconds per transition: the prototype's proportions, about a tenth shorter so the text returns
+ * sooner; the walks keep a child's stroll (under two steps a second).
+ */
 const DURATIONS: Record<string, number> = {
-  "0>1": 7,
-  "1>2": 5.2,
-  "2>3": 5,
-  "3>4": 10,
-  "4>5": 8.5,
-  "5>6": 6,
-  "6>7": 8.5,
-  "7>8": 6,
-  "8>9": 6,
-  "9>10": 6.5,
-  "10>11": 8.5,
-  "11>12": 6.5,
+  "0>1": 6.2,
+  "1>2": 4.4,
+  "2>3": 4.4,
+  "3>4": 8.6,
+  "4>5": 7.6,
+  "5>6": 5.4,
+  "6>7": 7.6,
+  "7>8": 5.4,
+  "8>9": 5.4,
+  "9>10": 5.8,
+  "10>11": 7.6,
+  "11>12": 5.6,
 };
 
 interface CamDef {
@@ -242,6 +245,12 @@ interface Debris {
 interface Sign {
   g: THREE.Group;
   ring: THREE.Mesh;
+  halo: THREE.SpriteMaterial;
+  core: THREE.MeshBasicMaterial;
+  /** The light's own colour at full strength. */
+  tint: THREE.Color;
+  /** Eased brightness (1 = full): lower close to the camera and behind the text. */
+  dim: number;
   sc: number;
 }
 
@@ -539,7 +548,8 @@ export function createMilaScene(
     },
     22,
   );
-  const TEX_dress = canvasTex(256, 256, (g, w, h) => {
+  // Twice the prototype's resolution, same strokes and draws: the paper's brushwork reads finer.
+  const TEX_dress = canvasTex(512, 512, (g, w, h) => {
     g.fillStyle = "#eaa12a";
     g.fillRect(0, 0, w, h);
     strokes(
@@ -548,12 +558,12 @@ export function createMilaScene(
       h,
       700,
       ["#f7c04d", "#d98a1c", "#ffd877", "#c97716", "#f2ad37"],
-      [10, 40],
-      [1.5, 4],
-      0.55,
+      [18, 72],
+      [2, 5.5],
+      0.5,
       Math.PI / 2,
     );
-    strokes(g, w, h, 120, ["#8a4b0e", "#b5651a"], [8, 26], [0.6, 1.2], 0.45);
+    strokes(g, w, h, 120, ["#8a4b0e", "#b5651a"], [14, 46], [0.8, 1.6], 0.4);
   });
   const TEX_leaf = canvasTex(256, 256, (g, w, h) => {
     const gr = g.createRadialGradient(128, 150, 10, 128, 128, 130);
@@ -636,18 +646,19 @@ export function createMilaScene(
     g.fillText("~ ~", 40, 68);
   });
   const TEX_hair = canvasTex(
-    256,
-    256,
+    512,
+    512,
     (g, w, h) => {
       g.fillStyle = "#160e0b";
       g.fillRect(0, 0, w, h);
       for (let i = 0; i < 1400; i++) {
         const x = rnd() * w;
         const y = rnd() * h;
-        const r = rr(1.5, 4.5);
+        // same draws as the prototype, drawn on a sheet twice as fine
+        const r = rr(1.5, 4.5) * 2;
         g.strokeStyle = ["#3b2519", "#2a1912", "#4d3020", "#0b0605"][(rnd() * 4) | 0];
         g.globalAlpha = rr(0.4, 0.9);
-        g.lineWidth = rr(0.8, 1.8);
+        g.lineWidth = rr(0.8, 1.8) * 1.5;
         g.beginPath();
         for (let a = 0; a < rr(4, 9); a += 0.5) {
           g.lineTo(x + Math.cos(a) * r * (a / 8 + 0.3), y + Math.sin(a) * r * (a / 8 + 0.3));
@@ -776,6 +787,25 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
     geo.computeVertexNormals();
     const mat = new THREE.MeshLambertMaterial({ vertexColors: true, map: TEX_sand });
     addCaustics(mat);
+    // The sand the swash has just left stays dark and takes a little of the sky, then dries: the
+    // beach and the sea meet in a moving wet edge, not on a line.
+    const caustics = mat.onBeforeCompile;
+    mat.onBeforeCompile = (sh, r) => {
+      caustics.call(mat, sh, r);
+      sh.fragmentShader = sh.fragmentShader
+        .replace(
+          "varying vec3 vWP;",
+          "varying vec3 vWP;\nfloat shoreZ(float x){return 1.5+sin(x*.13)*1.+sin(x*.05+.4)*1.2;}",
+        )
+        .replace(
+          "#include <color_fragment>",
+          `#include <color_fragment>
+ float sS=vWP.z-shoreZ(vWP.x);float sW=sin(uTime*.55)*.55+sin(uTime*.9+vWP.x*.2)*.2;
+ float sWet=smoothstep(1.05+sW*.55,.2+sW*.55,sS)*smoothstep(-.6,.0,sS+sW*.2);
+ diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(.66,.64,.68)+vec3(.045,.02,.03),sWet);`,
+        );
+    };
+    mat.customProgramCacheKey = () => "mila-sand";
     const m = new THREE.Mesh(geo, mat);
     m.receiveShadow = true;
     scene.add(m);
@@ -890,7 +920,7 @@ void main(){
    vec3 sky=mix(lin(vec3(.9,.5,.4)),lin(vec3(.06,.26,.3)),smoothstep(0.,.3,hz));
    col=mix(col,sky,fres*.65);
    float md=max(dot(R,normalize(uMoonDir)),0.);
-   col+=lin(vec3(1.,.84,.58))*(pow(md,700.)*7.+pow(md,50.)*.4)*(.6+.4*noise(p*3.+t));
+   col+=lin(vec3(1.,.84,.58))*(pow(md,700.)*4.2+pow(md,50.)*.4)*(.6+.4*noise(p*3.+t));
    float g=p.y*.5+sin(p.x*.11+t*.22)*.9+fbm(p*.07+vec2(t*.02,0.))*2.2;
    float f=abs(fract(g)-.5);float w=fwidth(g)*1.3+.012;
    float line=1.-smoothstep(w*.4,w,f);
@@ -899,7 +929,7 @@ void main(){
    col+=lin(vec3(1.,.78,.36))*gold*(1.6+uSong*1.6);
    float wash=sin(t*.55)*.55+sin(t*.9+p.x*.2)*.2;
    // sparks along the moon's path, and the sea's own light where the swash stirs it
-   col+=lin(vec3(1.,.9,.7))*pow(md,24.)*smoothstep(.78,.97,noise(p*6.+vec2(t*.8,-t*.5)))*.5;
+   col+=lin(vec3(1.,.9,.7))*pow(md,24.)*smoothstep(.78,.97,noise(p*6.+vec2(t*.8,-t*.5)))*.2;
    float bio=smoothstep(.9,.99,noise(p*vec2(19.,27.)+vec2(t*.6,-t*.9)))*smoothstep(-5.,-.4,vShore)*smoothstep(.3,-.3,vShore-wash);
    col+=lin(vec3(.35,.95,.9))*bio*(.4+uSong*.5)*(1.-.4*uCalm);
    float band=smoothstep(-1.7+wash,-.15+wash,vShore);
@@ -907,8 +937,11 @@ void main(){
    float ln=1.-smoothstep(.0,.06,abs(fract(vShore*.8-t*.22)-.5)-.4);
    float foam=band*smoothstep(.35,.7,fl)+ln*smoothstep(-4.,-1.,vShore)*smoothstep(.0,-.6,vShore)*.6;
    col=mix(col,lin(vec3(.93,.95,.88)),clamp(foam,0.,1.)*.6*(1.-.55*uCalm));
-   alpha=mix(1.,.5,smoothstep(-3.,.2,vShore));
-   if(vShore>.25+wash)discard;
+   // the sheet of water thins to nothing on the sand, under a last thread of foam
+   float lip=.25+wash;
+   col=mix(col,lin(vec3(.95,.96,.9)),smoothstep(lip-.42,lip-.08,vShore)*smoothstep(.25,.6,fl)*.55*(1.-.4*uCalm));
+   alpha=mix(1.,.5,smoothstep(-3.,.2,vShore))*smoothstep(lip,lip-.5,vShore);
+   if(vShore>lip)discard;
  }
  gl_FragColor=vec4(col,alpha);
  #include <fog_fragment>
@@ -1864,14 +1897,14 @@ void main(){
     const skin = withRim(toonSoft(SKIN), "#ffb27a", 0.4);
     const skinL = withRim(toonSoft("#7b4630"), "#ffb27a", 0.4);
     const dark = toon("#1c0e09");
-    const lipU = toon("#6e3129");
-    const lipD = toon("#83402f");
+    const lipU = toonSoft("#6e3129");
+    const lipD = toonSoft("#83402f");
     const white = toon("#f2ebe0");
     const hairM = withRim(
       new THREE.MeshToonMaterial({
         color: new THREE.Color("#ffffff"),
         map: TEX_hair,
-        gradientMap: toonRamp,
+        gradientMap: softRamp,
         side: THREE.DoubleSide,
       }),
       "#c98a5a",
@@ -1882,7 +1915,7 @@ void main(){
       new THREE.MeshToonMaterial({
         color: new THREE.Color("#ffffff"),
         map: TEX_dress,
-        gradientMap: toonRamp,
+        gradientMap: softRamp,
         side: THREE.DoubleSide,
       }),
       "#ffd27a",
@@ -2950,23 +2983,18 @@ void main(){
     ] as const;
     defs.forEach((d) => {
       const g = new THREE.Group();
-      const halo = new THREE.Sprite(
-        new THREE.SpriteMaterial({
-          map: glowTex,
-          color: d.c,
-          transparent: true,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-        }),
-      );
+      const haloM = new THREE.SpriteMaterial({
+        map: glowTex,
+        color: d.c,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+      const halo = new THREE.Sprite(haloM);
       halo.scale.setScalar(0.9);
       g.add(halo);
-      g.add(
-        new THREE.Mesh(
-          new THREE.SphereGeometry(0.11, 24, 16),
-          new THREE.MeshBasicMaterial({ color: d.c.clone().multiplyScalar(0.9) }),
-        ),
-      );
+      const coreM = new THREE.MeshBasicMaterial({ color: d.c.clone().multiplyScalar(0.9) });
+      g.add(new THREE.Mesh(new THREE.SphereGeometry(0.11, 24, 16), coreM));
       const ic = new THREE.Sprite(
         new THREE.SpriteMaterial({ map: iconTex(d.k, d.ic), transparent: true, depthWrite: false }),
       );
@@ -2985,7 +3013,7 @@ void main(){
       g.add(ring);
       g.scale.setScalar(0.001);
       scene.add(g);
-      SIGNS.push({ g, ring, sc: 0 });
+      SIGNS.push({ g, ring, halo: haloM, core: coreM, tint: d.c.clone(), dim: 1, sc: 0 });
     });
   }
   const threadMat = (prog: Uniform<number>): THREE.ShaderMaterial =>
@@ -3229,21 +3257,30 @@ void main(){
         [V3(-1, 4.5, 15), V3(2, 4, -30)],
         [V3(2.6, 3.2, 10.3), V3(1, 2.4, -4)],
       ],
-      "3>4": [[V3(h.x + 1.6, h.y + 1.6, h.z + 3.0), V3(7, 0.8, 1.5)]],
-      "4>5": [[V3(10.2, 1.15, 6.6), V3(11.6, 0.6, 4.4)]],
+      // The walks are tracking shots: the camera stays low, clear of the sea grape's leaves and of
+      // the rocks, and swings round on the seaward side so Mila never leaves the frame.
+      "3>4": [[V3(h.x + 0.9, h.y + 0.95, h.z + 2.4), V3(6.4, 0.75, 4.4)]],
+      "4>5": [
+        [V3(7.6, 1.05, 1.5), V3(9.6, 0.7, 3.9)],
+        [V3(11.2, 1.3, 0.1), V3(12.4, 0.6, 4.1)],
+      ],
       "6>7": [
         [V3(M6.x + 0.6, 1.0, M6.z + 1.4), V3(M6.x - 0.3, -0.6, M6.z - 3)],
         [V3(M6.x - 0.4, -0.9, M6.z - 3.4), V3(9, -4, -12)],
-        [V3(8, -3, -9), V3(MEADOW.x, MEADOW.y + 1, MEADOW.z)],
+        // the camera goes ahead of her, over the grass, and turns to watch her arrive
+        [V3(8.2, MEADOW.y + 4.6, -12.5), V3(MEADOW.x, MEADOW.y + 1, MEADOW.z)],
       ],
       "7>8": [
         [V3(MEADOW.x + 1.2, MEADOW.y + 3.2, MEADOW.z - 3.5), V3(SCHOOL.x, SCHOOL.y + 2, SCHOOL.z)],
       ],
       "8>9": [[V3(SCHOOL.x - 1, SCHOOL.y + 4, SCHOOL.z - 3), V3(DEEP.x, DEEP.y, DEEP.z)]],
       "9>10": [[V3(12, -7, -26), V3(10, -3, -16)]],
+      // the way back: behind her as she swims for the shore, up through the surface with her,
+      // then round to the beach while she walks out of the water
       "10>11": [
-        [V3(5.6, -1.2, -5), V3(4.5, 0.5, 1)],
-        [V3(2.4, 0.7, -0.6), V3(h.x, 1, h.z)],
+        [V3(7.6, -1.3, -6.6), V3(5.4, -0.6, -2)],
+        [V3(5.4, 0.95, -2.4), V3(4.2, 0.4, 1.6)],
+        [V3(2.1, 1.25, 1.1), V3(h.x, 1, h.z)],
       ],
       "11>12": [[V3(4.3, 2.85, 7.9), V3(h.x - 1.2, h.y + 1.3, h.z - 4)]],
     };
@@ -3489,7 +3526,9 @@ void main(){
     M.cord.visible = M.hold < 0.6;
     // body: upright on the sand, stretched out when swimming
     const hover = page === 10 && !trans ? 1.15 : 1.0;
-    const tilt = M.swimW * (lerp(hover, 1.3, clamp(M.moving * 1.5, 0, 1)) + M.pitch);
+    // stretched out when she swims; on the sand she leans a little into her stride
+    const tilt =
+      M.swimW * (lerp(hover, 1.3, clamp(M.moving * 1.5, 0, 1)) + M.pitch) + 0.06 * M.walk;
     M.pose.rotation.x = lerp(M.pose.rotation.x, tilt, Math.min(1, rdt * 2.5));
     const breath = smooth(0.15, 0.38, u) * (1 - smooth(0.45, 0.65, u));
     M.head.rotation.x =
@@ -3497,6 +3536,9 @@ void main(){
     // hip sway when walking
     M.pose.rotation.z = Math.sin(M.phase) * 0.045 * M.walk;
     M.body.rotation.y = Math.sin(M.phase) * 0.07 * M.walk;
+    // her head stays level while the hips sway
+    M.head.rotation.y = -Math.sin(M.phase) * 0.05 * M.walk;
+    M.head.rotation.z = -Math.sin(M.phase) * 0.03 * M.walk;
     M.pose.position.y = 0.62;
     M.body.position.z = 0;
     // legs: walk (thigh, knee bending on the pass, flat foot) and breaststroke kick
@@ -3681,6 +3723,7 @@ void main(){
       else camState.pos.lerpVectors(trans.posPts[0], trans.posPts[1], e);
       if (trans.tgtC) trans.tgtC.getPoint(e, camState.tgt);
       else camState.tgt.lerpVectors(trans.tgtPts[0], trans.tgtPts[1], e);
+      const travels = trans.milaC.getLength() > 0.4;
       // Mila follows her own path
       const onLand =
         trans.milaC.getPoint(0, tmpV2).y > -0.2 && trans.milaC.getPoint(1, tmpV2).y > -0.2;
@@ -3700,6 +3743,15 @@ void main(){
         );
       }
       mila.moving = pathLen > 0.4 ? Math.sin(Math.PI * k) : 0;
+      // While she travels, the camera looks her way: the move tells where she goes. The pull is
+      // nil at both ends, so each page keeps its own framing.
+      if (travels) {
+        // (not on the dive, where the camera goes ahead of her and turns to find her)
+        const dive = trans.from === 6 && trans.to === 7;
+        const reach = dive ? 0 : mila.g.position.y > -0.2 ? 0.7 : 0.35;
+        const pull = Math.sin(Math.PI * k) ** 1.5 * reach;
+        camState.tgt.lerp(tmpV2.copy(mila.g.position).setY(mila.g.position.y + 0.7), pull);
+      }
       {
         const tg = trans.milaC.getTangent(me, tmpV2);
         mila.pitch = lerp(mila.pitch, clamp(-tg.y, -1, 1) * 0.7 * mila.moving, 0.2);
@@ -4030,7 +4082,25 @@ void main(){
       s.sc = lerp(s.sc, sc, Math.min(1, dt * 2.2));
       if (!was && s.sc > 0.5 && page >= 5) audio.chime(i);
       const pul = 1 + Math.sin(W * 3 + i) * 0.06;
-      s.g.scale.setScalar(Math.max(0.001, s.sc * 0.95 * pul));
+      // A light is a guide, never a glare: it dims as it nears the camera (where its halo would
+      // flood the frame) and where it drifts behind the text, which must stay readable.
+      const ndc = tmpV.copy(s.g.position).project(camera);
+      const near = smooth(1.1, 5, camera.position.distanceTo(s.g.position));
+      const onText =
+        ndc.z < 1
+          ? camera.aspect >= 1
+            ? smooth(0.2, -0.3, ndc.x) * smooth(-0.35, 0.1, ndc.y)
+            : smooth(0.05, 0.5, ndc.y)
+          : 0;
+      // the three lights gathered on the conch (page 11) add up: each gives less
+      const gathered = page >= 11 ? 0.55 : 1;
+      const dim = (0.2 + 0.8 * near) * (1 - 0.72 * onText) * gathered;
+      s.dim = lerp(s.dim, dim, Math.min(1, dt * 3));
+      s.halo.opacity = s.dim;
+      s.halo.color.copy(s.tint).multiplyScalar(0.45 + 0.55 * s.dim);
+      s.core.color.copy(s.tint).multiplyScalar(0.9 * (0.5 + 0.5 * s.dim));
+      (s.ring.material as THREE.MeshBasicMaterial).opacity = 0.8 * s.dim;
+      s.g.scale.setScalar(Math.max(0.001, s.sc * 0.95 * pul * (0.72 + 0.28 * s.dim)));
       s.ring.lookAt(camera.position);
       s.ring.rotateZ(W * (1.2 + i * 0.3));
     });
