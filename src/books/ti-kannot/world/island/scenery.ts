@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { createRng } from "@shared/random";
+import { glowPoints } from "@shared/three/glow-points";
 import type { MixedEnv } from "../env";
 import { FLORA, STONES, type Flora } from "./flora";
 import { KAZ } from "./kaz";
@@ -57,12 +58,15 @@ export function createScenery({ calm = false }: { calm?: boolean } = {}): {
   group: THREE.Group;
   /** Ti Kannot's resting places among the scenery: the flamboyants and Gwo Rako's roof. */
   perches: THREE.Object3D[];
+  /** Where the flowering bushes grow (x, ground y, z): the butterflies' haunts. */
+  flowers: [number, number, number][];
   update(env: MixedEnv, time?: number): void;
 } {
   const plan = islandPlan();
   const rng = createRng(29);
   const group = new THREE.Group();
   const perches: THREE.Object3D[] = [];
+  const flowers: [number, number, number][] = [];
   const windTime: THREE.IUniform<number> = { value: 0 };
   const foliage = windy(windTime, calm ? 0 : 1);
   // Ti Kannot perches on the flamboyants: their crowns barely move under him.
@@ -73,6 +77,27 @@ export function createScenery({ calm = false }: { calm?: boolean } = {}): {
   const size = new THREE.Vector3();
   const up = new THREE.Vector3(0, 1, 0);
   const tint = new THREE.Color();
+
+  // A lantern under each case's eaves: a flickering glow and a warm light, lit as night falls.
+  const lamps = plan.houses.map((house) => {
+    const x = house.x + (house.door[0] - house.x) * 0.55;
+    const z = house.z + (house.door[1] - house.z) * 0.55;
+    const light = new THREE.PointLight("#ffb163", 0, 11, 1.4);
+    light.position.set(x, house.y + 1.5 * house.scale, z);
+    group.add(light);
+    return light;
+  });
+  const glow = glowPoints(
+    createRng(83),
+    lamps.length * 3,
+    (i) => lamps[Math.floor(i / 3)].position.toArray(),
+    {
+      size: 1.5,
+      a: "#ffd27a",
+      b: "#ff9d45",
+    },
+  );
+  group.add(glow);
 
   for (const house of plan.houses) {
     const mesh = new THREE.Mesh(
@@ -90,11 +115,15 @@ export function createScenery({ calm = false }: { calm?: boolean } = {}): {
   for (const p of plan.plants) bySpecies.set(p.flora, [...(bySpecies.get(p.flora) ?? []), p]);
   for (const [name, list] of bySpecies) {
     const material = name === "flamboyant" ? perchFoliage : foliage;
-    const mesh = new THREE.InstancedMesh(FLORA[name]().geometry, material, list.length);
+    const plant = FLORA[name]();
+    const mesh = new THREE.InstancedMesh(plant.geometry, material, list.length);
+    // Grass and ground plants take the shade of the trees but cast none: too fine to read.
+    mesh.userData.noShadow = plant.stratum === "low";
     const tree = name === "mango" || name === "breadfruit";
     list.forEach((p, i) => {
       const ground = islandHeight(p.x, p.z);
       at.set(p.x, ground - 0.05, p.z);
+      if (name === "hibiscus" || name === "balisier") flowers.push([p.x, ground, p.z]);
       mesh.setMatrixAt(i, m4.compose(at, q.setFromAxisAngle(up, p.yaw), size.setScalar(p.scale)));
       mesh.setColorAt(i, jitter(rng, tint, tree && ground > FOREST_LINE ? FOREST_SHADE : 1));
     });
@@ -135,10 +164,14 @@ export function createScenery({ calm = false }: { calm?: boolean } = {}): {
   return {
     group,
     perches,
+    flowers,
     update(env, time = 0) {
       foliage.color.copy(WHITE).lerp(DRY, env.wilt * 0.6);
       perchFoliage.color.copy(foliage.color);
       windTime.value = time;
+      for (const lamp of lamps) lamp.intensity = env.night * 9;
+      glow.material.uniforms.uTime.value = time;
+      glow.material.uniforms.uOpacity.value = env.night;
     },
   };
 }

@@ -5,6 +5,7 @@ import "@fontsource/quicksand/600.css";
 import "../theme.css";
 import * as THREE from "three";
 import { defineWorld, type Story } from "@app/contract";
+import { clamp } from "@shared/math";
 import { createRng } from "@shared/random";
 import { createStage } from "@shared/three/stage";
 import { STAGING, type PageEnv } from "../staging";
@@ -20,6 +21,7 @@ import {
   type MixedEnv,
   type MixedShot,
 } from "./env";
+import { createFauna } from "./fauna";
 import { createGlide } from "./glide";
 import { createGround } from "./island/ground";
 import { restingPoints } from "./island/perches";
@@ -45,6 +47,24 @@ const TAP_MS = 600;
 const PAGE_EASE = 1.6;
 const CARD_SECONDS = 1.4;
 const PARALLAX_EASE = 3;
+/** Seconds the paper stays wet around a page turn, and how wet it gets (0..1). */
+const WASH_SECONDS = 1.7;
+const WASH_STRENGTH = 0.85;
+/** Shadow map sizes; the light pass drops its shadows if it cannot hold `SLOW_FRAME`. */
+const SHADOW_MAP = { high: 2048, low: 1024 } as const;
+const SLOW_FRAME = 1 / 26;
+const PROBE_SECONDS = [1.5, 5] as const;
+
+/** Lets every solid thing of the island cast and receive the sun's shadows. */
+function shade(...roots: THREE.Object3D[]): void {
+  for (const root of roots) {
+    root.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      object.castShadow = object.userData.noShadow !== true;
+      object.receiveShadow = true;
+    });
+  }
+}
 
 /** Staging of each story page, in reading order. */
 function envsFor(story: Story): PageEnv[] {
@@ -83,15 +103,19 @@ export default defineWorld({
       const reservoir = createReservoir();
       const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
       const scenery = createScenery({ calm });
+      // Under reduced motion nothing flutters: no butterflies, no frigates, no drifting motes.
+      const fauna = calm ? null : createFauna(scenery.flowers);
       const source = createSource(rng);
       const stock = createStock(rng);
       const quality = paintQuality(matchMedia("(pointer: coarse)").matches, devicePixelRatio);
       const sea = createWater({ reflect: quality === "high" });
       water = sea;
-      const sky = createSky(rng);
+      const sky = createSky(rng, { shadows: SHADOW_MAP[quality], motes: !calm });
       const cast = createCharacters(
         restingPoints([...scenery.perches, reservoir.group, source.group]),
       );
+      ground.mesh.receiveShadow = true;
+      shade(reservoir.group, scenery.group, source.group, stock.group, cast.group);
       scene.fog = sky.fog;
       scene.add(
         sky.group,
@@ -103,6 +127,7 @@ export default defineWorld({
         stock.group,
         cast.group,
       );
+      if (fauna) scene.add(fauna.group);
       const painter = createPaint(renderer, scene, camera, quality);
       paint = painter;
       const sound = createAmbience();
@@ -118,6 +143,9 @@ export default defineWorld({
       const shot: MixedShot = { focus: new THREE.Vector3(), azimuth: 0, elevation: 0, distance: 1 };
       /** 1 while the reading card is shown, 0 in "scène seule"; scales the card offset. */
       const cardShift = createGlide([1]);
+      /** Time since the last page turn; the paper is wet for `WASH_SECONDS` after it. */
+      let sinceTurn = Infinity;
+      const probe = { time: 0, frames: 0, done: false };
       let down: { y: number; t: number; moved: number } | null = null;
       const pointer = { x: 0, y: 0 };
       /** Mouse parallax, eased so the camera never follows the cursor in steps. */
@@ -178,9 +206,22 @@ export default defineWorld({
         scenery.update(env, time);
         source.update(env, time);
         stock.update(env);
+        fauna?.update(env, time);
         cast.update(env, time, dt, camera.position);
         sound.update(soundLevels(env));
-        painter.update(time);
+        sinceTurn += dt;
+        const turn = clamp(sinceTurn / WASH_SECONDS, 0, 1);
+        // Quick to wet, slow to dry: the scene re-forms out of the wash as the camera settles.
+        const wash = turn < 1 ? WASH_STRENGTH * Math.sin(Math.PI * Math.pow(turn, 0.6)) ** 2 : 0;
+        painter.update(time, wash);
+        if (!probe.done && time > PROBE_SECONDS[0]) {
+          probe.time += dt;
+          probe.frames++;
+          if (probe.time > PROBE_SECONDS[1] - PROBE_SECONDS[0]) {
+            probe.done = true;
+            if (probe.time / probe.frames > SLOW_FRAME) painter.setShadows(false);
+          }
+        }
       };
 
       const onPointerDown = (e: PointerEvent): void => {
@@ -216,6 +257,7 @@ export default defineWorld({
 
       return {
         setPage(index) {
+          if (!calm && index !== page) sinceTurn = 0;
           page = index;
           clearTimeout(speakTimer);
           frameShot(index);

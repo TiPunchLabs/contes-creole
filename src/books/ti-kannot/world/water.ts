@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { Reflector } from "three/addons/objects/Reflector.js";
 import { clamp } from "@shared/math";
+import { createRng } from "@shared/random";
+import { glowPoints } from "@shared/three/glow-points";
 import { sunDirection, type MixedEnv } from "./env";
 import { ISLAND_RADIUS, islandHeight, riverPoint } from "./island/terrain";
 
@@ -27,13 +29,23 @@ const SEA_FRAGMENT = `uniform float uTime,uRadius; uniform vec3 cShallow,cDeep,c
   uniform sampler2D tDiffuse; uniform vec3 color;
   #endif
   ${NOISE}
+  float swellAt(vec2 p){ return noise(p*.35+vec2(uTime*.05,uTime*.03))+.5*noise(p*1.3-uTime*.08); }
+  // A net of light: bright where two drifting layers of noise cross.
+  float caustic(vec2 p){ float a=noise(p+vec2(uTime*.22,uTime*.15)),b=noise(p*1.7-vec2(uTime*.18,-uTime*.26)+3.1);
+    return pow(clamp(1.-abs(a-b)*2.3,0.,1.),5.); }
   void main(){
     float r=length(vW.xz*vec2(1.,1.1))/uRadius;
-    float n=noise(vW.xz*.35+vec2(uTime*.05,uTime*.03))+.5*noise(vW.xz*1.3-uTime*.08);
+    float n=swellAt(vW.xz);
+    vec2 slope=vec2(swellAt(vW.xz+vec2(.35,0.))-n,swellAt(vW.xz+vec2(0.,.35))-n);
+    vec3 N=normalize(vec3(-slope.x*1.6,1.,-slope.y*1.6));
     vec3 c=mix(cDeep,cShallow,smoothstep(1.6,.85,r));
     c=mix(c,cShallow*1.06+vec3(.04,.03,0.),smoothstep(.99,.87,r)*.55);
+    // Sunlight dancing on the sandy shallows, fading as the bottom drops away.
+    float lagoon=smoothstep(1.35,.9,r);
+    c+=vec3(.95,1.,.86)*caustic(vW.xz*.55)*lagoon*.2;
+    c*=1.+(n-.75)*.07;
     vec3 v=normalize(uCam-vW);
-    float fres=pow(1.-max(v.y,0.),3.);
+    float fres=pow(1.-max(dot(v,N),0.),3.);
     #ifdef REFLECT
     vec4 q=vRefl; q.xy+=(vec2(noise(vW.xz*.8+uTime*.3),noise(vW.zx*.8-uTime*.25))-.5)*q.w*.04;
     // The reflection keeps the water's own hue: a peach sky must not turn the turquoise grey.
@@ -42,35 +54,57 @@ const SEA_FRAGMENT = `uniform float uTime,uRadius; uniform vec3 cShallow,cDeep,c
     #endif
     vec3 haze=mix(cShallow,cHorizon,.4);
     c=mix(c,haze,fres*.35);
-    // Two broken lines of foam that breathe slowly on the shore.
+    // Three broken lines of foam that breathe on the shore, the last one a thin lace.
     float swell=sin(uTime*.55)*.006;
     float f1=smoothstep(.024,0.,abs(r-.865-n*.03-swell))*smoothstep(.3,.62,noise(vW.xz*1.7+uTime*.05));
     float f2=smoothstep(.016,0.,abs(r-.905-n*.04+swell))*smoothstep(.42,.75,noise(vW.xz*1.2-uTime*.04));
-    c=mix(c,vec3(1.,.99,.95),clamp(f1*.75+f2*.45,0.,.8));
+    float f3=smoothstep(.012,0.,abs(r-.95-n*.05-swell*1.5))*smoothstep(.5,.8,noise(vW.xz*.9+uTime*.03));
+    float lace=caustic(vW.xz*1.6)*smoothstep(.93,.87,r)*smoothstep(.8,.85,r);
+    c=mix(c,vec3(1.,.99,.95),clamp(f1*.75+f2*.45+f3*.3+lace*.35,0.,.82));
     c+=cShallow*smoothstep(1.,1.3,n)*.1;
     vec3 h=normalize(v+uSunDir);
-    c+=cSun*pow(max(h.y,0.),400.)*(.25+n*.6);
+    float gloss=max(dot(N,h),0.);
+    // The sun's path: a soft sheen, and sparks where a ripple turns just right.
+    float spark=smoothstep(.72,.95,noise(vW.xz*5.+vec2(uTime*.9,-uTime*.6)));
+    c+=cSun*(pow(gloss,260.)*(.3+n*.5)+pow(gloss,40.)*spark*.55+pow(gloss,10.)*.05);
     c=mix(c,haze,smoothstep(50.,200.,length(vW.xz-uCam.xz)));
     gl_FragColor=vec4(c,1.); }`;
 
-const RIVER_VERTEX = `attribute float aSteep; varying vec2 vUv; varying vec2 vXZ; varying float vSteep;
-  void main(){ vUv=uv; vSteep=aSteep; vXZ=(modelMatrix*vec4(position,1.)).xz; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
-// Deeper in the middle, shallow and see-through over the bed at the edges, with drifting streaks of
-// current. Where the bed drops (vSteep), the water runs faster and breaks white: the cascades.
-const RIVER_FRAGMENT = `uniform float uTime,uFlow; uniform vec3 cWater; varying vec2 vUv; varying vec2 vXZ; varying float vSteep;
+const RIVER_VERTEX = `attribute float aSteep; varying vec2 vUv; varying vec3 vW; varying float vSteep;
+  void main(){ vUv=uv; vSteep=aSteep; vec4 w=modelMatrix*vec4(position,1.); vW=w.xyz; gl_Position=projectionMatrix*viewMatrix*w; }`;
+// Deeper in the middle, shallow and see-through over the bed at the edges. The current carries a
+// net of light, streaks and a lace of foam along the banks; the surface takes the sky at a glancing
+// angle and sparks in the sun. Where the bed drops (vSteep), the water runs faster and breaks white.
+const RIVER_FRAGMENT = `uniform float uTime,uFlow,uLength; uniform vec3 cWater,cSky,cSun,uCam,uSunDir;
+  varying vec2 vUv; varying vec3 vW; varying float vSteep;
   ${NOISE}
   void main(){ float s=abs(vUv.x-.5)*2.;
-    float deep=1.-smoothstep(0.,.8,s);
-    vec3 c=mix(cWater*1.16+vec3(.05,.04,-.03),cWater*vec3(.6,.8,.86),deep*.8);
-    c*=.95+.1*noise(vXZ*1.4);
+    float deep=1.-smoothstep(0.,.85,s);
     float fall=vSteep*uFlow;
-    float streak=smoothstep(.6,.92,noise(vec2(vUv.x*7.,vUv.y*110.-uTime*(2.4+fall*5.))))*(1.-s*.7);
-    c=mix(c,vec3(1.),streak*(.4+fall*.3));
-    float froth=smoothstep(.25,.75,noise(vec2(vUv.x*9.,vUv.y*240.-uTime*7.)))*.6+.4;
-    c=mix(c,vec3(.97,1.,.99),fall*froth*.75);
-    gl_FragColor=vec4(c,mix(.9*(1.-smoothstep(.7,1.,s)*.55),.95,fall)); }`;
+    vec2 f=vec2((vUv.x-.5)*3.,vUv.y*uLength*.5-uTime*(.55+fall*1.9));
+    float w1=noise(f*vec2(2.2,1.1)),w2=noise(f*vec2(4.5,2.3)+7.);
+    vec3 c=mix(cWater*1.18+vec3(.06,.05,-.02),cWater*vec3(.5,.74,.84),deep*.85);
+    c*=.95+.1*noise(vW.xz*1.4);
+    c+=vec3(.9,1.,.85)*pow(clamp(1.-abs(w1-w2)*2.4,0.,1.),5.)*(.1+.18*(1.-deep))*(1.-fall);
+    vec3 n=normalize(vec3((w1-noise((f+vec2(.08,0.))*vec2(2.2,1.1)))*3.,1.,(w1-noise((f+vec2(0.,.08))*vec2(2.2,1.1)))*3.));
+    vec3 v=normalize(uCam-vW);
+    c=mix(c,cSky,pow(1.-max(dot(v,n),0.),3.)*.45);
+    c+=cSun*pow(max(dot(n,normalize(v+uSunDir)),0.),90.)*.6;
+    float streak=smoothstep(.62,.92,noise(vec2(vUv.x*7.,f.y*3.2)))*(1.-s*.7);
+    c=mix(c,vec3(1.),streak*(.2+fall*.4));
+    float froth=smoothstep(.25,.75,noise(vec2(vUv.x*9.,f.y*7.)))*.6+.4;
+    c=mix(c,vec3(.97,1.,.99),fall*froth*.72);
+    float lace=smoothstep(.8,.92,s+(noise(vec2(vUv.x*3.,f.y*2.5))-.5)*.3)*smoothstep(1.,.93,s);
+    c=mix(c,vec3(1.,.99,.96),lace*.32*uFlow*(1.-fall));
+    float alpha=mix(.92*(1.-smoothstep(.7,1.,s)*.7),.96,fall);
+    gl_FragColor=vec4(c,alpha*smoothstep(1.,.93,s)); }`;
 
-const SEGMENTS = 120;
+const SEGMENTS = 200;
+/** Quads across the ribbon. */
+const ACROSS = 6;
+/** The ribbon reaches a little past the water's edge, where it fades into the bank. */
+const MARGIN = 1.12;
+const SPRAY_COUNT = 70;
 const SHALLOW = new THREE.Color("#a6ecd2");
 const DEEP = new THREE.Color("#3bb8bf");
 const RIVER = new THREE.Color("#6fd2cc");
@@ -80,6 +114,16 @@ const MUDDY = new THREE.Color("#a7b48a");
 
 const SEA_SIZE = 500;
 const REFLECTION_SIZE = 768;
+
+/** Length of the river's centre line, in world units. */
+function riverLength(): number {
+  const a = new THREE.Vector2();
+  const b = new THREE.Vector2();
+  let length = 0;
+  for (let i = 0; i < 100; i++)
+    length += riverPoint(i / 100, a).distanceTo(riverPoint((i + 1) / 100, b));
+  return length;
+}
 
 /** Uniforms shared by both sea variants. */
 function seaUniforms(): Record<string, THREE.IUniform> {
@@ -139,19 +183,22 @@ export function createWater({ reflect }: { reflect: boolean }): {
   const seaMaterial = sea.material;
 
   const riverGeometry = new THREE.BufferGeometry();
-  const positions = new Float32Array((SEGMENTS + 1) * 2 * 3);
-  const uvs = new Float32Array((SEGMENTS + 1) * 2 * 2);
+  const row = ACROSS + 1;
+  const positions = new Float32Array((SEGMENTS + 1) * row * 3);
+  const uvs = new Float32Array((SEGMENTS + 1) * row * 2);
   const index: number[] = [];
   for (let i = 0; i <= SEGMENTS; i++) {
-    uvs.set([0, i / SEGMENTS, 1, i / SEGMENTS], i * 4);
-    if (i < SEGMENTS) {
-      const k = i * 2;
-      index.push(k, k + 2, k + 1, k + 1, k + 2, k + 3);
+    for (let j = 0; j < row; j++) {
+      uvs.set([j / ACROSS, i / SEGMENTS], (i * row + j) * 2);
+      if (i < SEGMENTS && j < ACROSS) {
+        const k = i * row + j;
+        index.push(k, k + row, k + 1, k + 1, k + row, k + row + 1);
+      }
     }
   }
   riverGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   riverGeometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
-  const steep = new Float32Array((SEGMENTS + 1) * 2);
+  const steep = new Float32Array((SEGMENTS + 1) * row);
   riverGeometry.setAttribute("aSteep", new THREE.BufferAttribute(steep, 1));
   const heights = new Float32Array(SEGMENTS + 1);
   const centres: THREE.Vector2[] = [];
@@ -160,7 +207,12 @@ export function createWater({ reflect }: { reflect: boolean }): {
     uniforms: {
       uTime: { value: 0 },
       uFlow: { value: 1 },
+      uLength: { value: riverLength() },
       cWater: { value: RIVER.clone() },
+      cSky: { value: new THREE.Color() },
+      cSun: { value: new THREE.Color() },
+      uCam: { value: new THREE.Vector3() },
+      uSunDir: { value: new THREE.Vector3(0, 1, 0) },
     },
     vertexShader: RIVER_VERTEX,
     fragmentShader: RIVER_FRAGMENT,
@@ -182,12 +234,12 @@ export function createWater({ reflect }: { reflect: boolean }): {
       if (t < 1) riverPoint(t + 0.005, q).sub(p);
       else q.copy(p).sub(riverPoint(t - 0.005, q));
       q.normalize();
-      const half = ((1.5 + t * 1.2) / 2) * clamp(1 + water * 0.55, 0.22, 1.2);
+      const half = ((1.5 + t * 1.2) / 2) * clamp(1 + water * 0.55, 0.22, 1.2) * MARGIN;
       const y = Math.max(islandHeight(p.x, p.y) + 0.55 + water * 0.35, 0.02);
-      positions.set(
-        [p.x + q.y * half, y, p.y - q.x * half, p.x - q.y * half, y, p.y + q.x * half],
-        i * 6,
-      );
+      for (let j = 0; j < row; j++) {
+        const k = (1 - (j / ACROSS) * 2) * half;
+        positions.set([p.x + q.y * k, y, p.y - q.x * k], (i * row + j) * 3);
+      }
       heights[i] = y;
       (centres[i] ??= new THREE.Vector2()).copy(p);
     }
@@ -195,14 +247,48 @@ export function createWater({ reflect }: { reflect: boolean }): {
       const a = Math.max(i - 1, 0);
       const b = Math.min(i + 1, SEGMENTS);
       const drop = (heights[a] - heights[b]) / Math.max(centres[a].distanceTo(centres[b]), 1e-3);
-      steep.fill(clamp(drop / CASCADE_SLOPE, 0, 1), i * 2, i * 2 + 2);
+      steep.fill(clamp(drop / CASCADE_SLOPE, 0, 1), i * row, (i + 1) * row);
     }
+    placeSpray();
     riverGeometry.getAttribute("position").needsUpdate = true;
     riverGeometry.getAttribute("aSteep").needsUpdate = true;
   };
 
+  // Spray: droplets hanging in the air over the white water, where the cascades run.
+  const sprayRng = createRng(53);
+  const spray = glowPoints(sprayRng, SPRAY_COUNT, () => [0, 0, 0], {
+    size: 0.3,
+    drift: 0.22,
+    a: "#ffffff",
+    b: "#dff6f2",
+  });
+  const sprayAt = Array.from({ length: SPRAY_COUNT }, () => [
+    sprayRng(),
+    sprayRng() - 0.5,
+    sprayRng(),
+  ]);
+  /** Moves the droplets onto the steepest reaches of the current ribbon. */
+  function placeSpray(): void {
+    const white: number[] = [];
+    for (let i = 0; i <= SEGMENTS; i++) if (steep[i * row] > 0.45) white.push(i);
+    const at = spray.geometry.getAttribute("position");
+    sprayAt.forEach(([along, across, lift], k) => {
+      const i = white.length ? white[Math.floor(along * white.length)] : 0;
+      const a = i * row * 3;
+      const b = a + ACROSS * 3;
+      const u = 0.5 + across * 0.7;
+      at.setXYZ(
+        k,
+        positions[a] + (positions[b] - positions[a]) * u,
+        white.length ? heights[i] + 0.1 + lift * 0.7 : -50,
+        positions[a + 2] + (positions[b + 2] - positions[a + 2]) * u,
+      );
+    });
+    at.needsUpdate = true;
+  }
+
   const group = new THREE.Group();
-  group.add(sea, river);
+  group.add(sea, river, spray);
   const u = seaMaterial.uniforms;
   return {
     group,
@@ -218,6 +304,14 @@ export function createWater({ reflect }: { reflect: boolean }): {
       sunDirection(env, u.uSunDir.value);
       u.cShallow.value.copy(SHALLOW).lerp(env.horizon, env.night * 0.5);
       u.cDeep.value.copy(DEEP).lerp(env.zenith, env.night * 0.6);
+      const ru = riverMaterial.uniforms;
+      ru.uCam.value.copy(camera);
+      ru.uSunDir.value.copy(u.uSunDir.value);
+      ru.cSun.value.copy(u.cSun.value);
+      ru.cSky.value.copy(env.horizon).lerp(env.zenith, 0.35);
+      spray.material.uniforms.uTime.value = time;
+      spray.material.uniforms.uOpacity.value =
+        clamp(1 + env.water * 0.7, 0, 1) * (0.5 - env.night * 0.3);
       riverMaterial.uniforms.uTime.value = time;
       // A thread of water still tumbles, but it no longer breaks white.
       riverMaterial.uniforms.uFlow.value = clamp(1 + env.water * 0.7, 0.25, 1);
