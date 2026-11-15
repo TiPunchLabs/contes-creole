@@ -20,11 +20,16 @@ const NOTE = `<path d="M9 18V5l11-2v13" fill="none" stroke="currentColor" stroke
 const ICON_ON = `<svg viewBox="0 0 24 24" aria-hidden="true">${NOTE}</svg>`;
 const ICON_OFF = `<svg viewBox="0 0 24 24" aria-hidden="true">${NOTE}<path d="M3 3l18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
-/** Per-layer gains for a mixed env: the river follows the water, birds by day, frogs by night. */
-export function soundLevels(env: Pick<MixedEnv, "water" | "night" | "rain" | "wilt">): SoundLevels {
+/**
+ * Per-layer gains for a mixed env: the river follows the water and falls nearly silent behind a
+ * dam, birds by day, frogs by night.
+ */
+export function soundLevels(
+  env: Pick<MixedEnv, "water" | "night" | "rain" | "wilt"> & { dam?: number },
+): SoundLevels {
   const day = 1 - env.night;
   return {
-    river: clamp(0.05 + (0.2 * (env.water + 1.35)) / 1.6, 0.05, 0.3),
+    river: clamp(0.05 + (0.2 * (env.water + 1.35)) / 1.6, 0.05, 0.3) * (1 - 0.7 * (env.dam ?? 0)),
     birds: 0.25 * day * (1 - env.wilt) * (1 - env.rain),
     frogs: 0.2 * env.night,
     rain: 0.3 * env.rain,

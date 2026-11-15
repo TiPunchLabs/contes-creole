@@ -18,7 +18,10 @@ export interface PageEnv {
   sun: [number, number, string, number];
   night: number;
   mist: number;
-  /** River level offset: 0 = full, -1.35 = a thread, 0.25 = swollen by the rain. */
+  /**
+   * River level offset: 0 = full, -0.85 = low (stones show), -1.35 = a thread, 0.25 = swollen by
+   * the rain. It tells the season; `dam` cuts the river below the source whatever the level.
+   */
   water: number;
   rain: number;
   rainbow: number;
@@ -111,7 +114,7 @@ export const STAGING: Record<string, PageEnv> = {
     sky: ["#f3c7a4", "#f9efcc"],
     sun: [-40, 35, "#fff3d2", 1.3],
     mist: 0.5,
-    water: -1,
+    water: -0.7,
     wilt: 0.4,
     kalbas: 50,
     helpers: 1,
@@ -162,7 +165,7 @@ export const STAGING: Record<string, PageEnv> = {
     shot: { focus: "spring", azimuth: 0, elevation: 26, distance: 16 },
     sky: ["#f1c6a6", "#f8eecb"],
     sun: [-20, 45, "#fff4d8", 1.4],
-    water: -0.9,
+    water: -0.7,
     wilt: 0.5,
     kalbas: 50,
     barrels: 8,
@@ -176,7 +179,7 @@ export const STAGING: Record<string, PageEnv> = {
     shot: { focus: "yard", azimuth: 130, elevation: 30, distance: 17 },
     sky: ["#f5e1c0", "#fff6dc"],
     sun: [0, 78, "#fffaf0", 2],
-    water: -1,
+    water: -0.8,
     wilt: 0.7,
     kalbas: 50,
     barrels: 8,
