@@ -1947,11 +1947,16 @@ void main(){
       }),
       "#ffd27a",
       0.35,
-      `float an=atan(transformed.z,transformed.x);float hh=aHem*aHem;float w=1.+uWind*(2.5-uSwim*1.8);
-      transformed.xz*=mix(1.,.6,uSwim*aHem);transformed.y-=uSwim*aHem*.05;
-      transformed.x+=(sin(uTime*2.2+an*3.+transformed.y*9.)*.016+.022+uWind*.05)*hh*w;
-      transformed.z+=cos(uTime*1.8+an*2.)*.012*hh*w;
-      transformed.y+=sin(uTime*3.+an*4.)*.012*hh*uWind;`,
+      // On the sand each flounce flutters at its own hem (aHem). In the water the dress moves as
+      // one garment: what narrows and sways it is the height along the whole dress (whole), the
+      // same for every flounce at a given height, so the tiers stay nested and never part.
+      `float an=atan(transformed.z,transformed.x);float w=1.+uWind*(2.5-uSwim*1.8);
+      float whole=clamp((${DRESS[0][0].toFixed(3)}-position.y)/${(DRESS[0][0] - DRESS[DRESS.length - 1][1]).toFixed(3)},0.,1.);
+      float hem=mix(aHem,whole,uSwim);float hh=hem*hem;
+      transformed.xz*=mix(1.,.72,uSwim*whole);transformed.y-=uSwim*whole*.05;
+      transformed.x+=(sin(uTime*2.2+an*3.*(1.-uSwim)+transformed.y*9.)*.016+.022*(1.-uSwim)+uWind*.05*(1.-uSwim*.7))*hh*w;
+      transformed.z+=cos(uTime*1.8+an*2.*(1.-uSwim))*.012*hh*w;
+      transformed.y+=sin(uTime*3.+an*4.*(1.-uSwim))*.012*hh*uWind;`,
       "attribute float aHem;uniform float uTime;uniform float uWind;uniform float uSwim;\n",
     );
     for (const L of DRESS) {
