@@ -3271,7 +3271,8 @@ void main(){
         [V3(8.2, MEADOW.y + 4.6, -12.5), V3(MEADOW.x, MEADOW.y + 1, MEADOW.z)],
       ],
       "7>8": [
-        [V3(MEADOW.x + 1.2, MEADOW.y + 3.2, MEADOW.z - 3.5), V3(SCHOOL.x, SCHOOL.y + 2, SCHOOL.z)],
+        // high enough to clear the grass and the turtle's round
+        [V3(MEADOW.x + 1.2, MEADOW.y + 4.4, MEADOW.z - 3.5), V3(SCHOOL.x, SCHOOL.y + 2, SCHOOL.z)],
       ],
       "8>9": [[V3(SCHOOL.x - 1, SCHOOL.y + 4, SCHOOL.z - 3), V3(DEEP.x, DEEP.y, DEEP.z)]],
       "9>10": [[V3(12, -7, -26), V3(10, -3, -16)]],
@@ -3282,7 +3283,8 @@ void main(){
         [V3(5.4, 0.95, -2.4), V3(4.2, 0.4, 1.6)],
         [V3(2.1, 1.25, 1.1), V3(h.x, 1, h.z)],
       ],
-      "11>12": [[V3(4.3, 2.85, 7.9), V3(h.x - 1.2, h.y + 1.3, h.z - 4)]],
+      // round her landward side, low, under the sea grape's boughs: she stays in the frame
+      "11>12": [[V3(1.5, h.y + 0.95, 6.3), V3(h.x - 0.3, h.y + 0.95, h.z - 0.8)]],
     };
     const fwd = V[`${from}>${to}`];
     if (fwd) return fwd;
