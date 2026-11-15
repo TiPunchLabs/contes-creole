@@ -33,13 +33,20 @@ const TEXT_ON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" str
 const TEXT_OFF = TEXT_ON.replace("M8 13h2", "M8 13h2M2.5 2.5l15 15");
 /** Proposed wording, pending the owner's approval (M1); no Kréyòl equivalent yet. */
 const TOGGLE_LABELS = { hide: "Masquer le texte", show: "Afficher le texte" } as const;
+/** Circular arrow: back to the first page. */
+const REREAD = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.8-4.1M2.5 2v3h3"/></svg>`;
+/** Same wording as Mila's last page; French, like the other reading controls. */
+const REREAD_LABEL = "Relire le conte";
 const FADE_MS = 320;
 
 /** Page blocks as paragraphs; block HTML is already escaped by the story parser. */
 const blocksHtml = (page: StoryPage): string =>
   page.blocks.map((b) => `<p class="reading-${b.kind}">${b.html}</p>`).join("");
 
-/** Shared reading overlay: text card, language switch, page counter and buttons, text toggle, back button, hint. */
+/**
+ * Shared reading overlay: text card, language switch, page counter and buttons (the last page
+ * offers to read the tale again), text toggle, back button, hint.
+ */
 export function createReadingUI(root: HTMLElement, events: ReadingEvents): ReadingUI {
   const el = document.createElement("div");
   el.className = "reading";
@@ -58,6 +65,7 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       <button type="button" class="reading-prev" aria-label="Page précédente">${ARROW}</button>
       <p class="reading-count" aria-live="polite"></p>
       <button type="button" class="reading-next" aria-label="Page suivante">${ARROW}</button>
+      <button type="button" class="reading-reread" lang="fr" aria-label="${REREAD_LABEL}" title="${REREAD_LABEL}" hidden>${REREAD}<span>${REREAD_LABEL}</span></button>
     </div>
     <div class="reading-hint" aria-hidden="true"><span lang="fr">Défilez pour continuer</span>${SCROLL_ARROW}</div>`;
   root.append(el);
@@ -77,6 +85,8 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
   const count = part(".reading-count");
   const hint = part(".reading-hint");
   const toggle = part(".reading-toggle");
+  const next = part(".reading-next");
+  const reread = part(".reading-reread");
 
   let stories: Stories | null = null;
   let current: ReadingState = { page: 0, lang: "gcf", showHint: false, textHidden: false };
@@ -85,7 +95,8 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
 
   part(".reading-back").addEventListener("click", () => events.onBack());
   part(".reading-prev").addEventListener("click", () => events.onPage(current.page - 1));
-  part(".reading-next").addEventListener("click", () => events.onPage(current.page + 1));
+  next.addEventListener("click", () => events.onPage(current.page + 1));
+  reread.addEventListener("click", () => events.onPage(0));
   toggle.addEventListener("click", () => events.onToggleText());
 
   const button = (className: string, text: string, onClick: () => void): HTMLButtonElement => {
@@ -136,6 +147,13 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       for (const b of langs.children) {
         b.setAttribute("aria-pressed", String((b as HTMLElement).dataset.lang === state.lang));
       }
+      // On the last page there is no next page: the main action becomes reading the tale again.
+      const last = state.page === story.pages.length - 1 && story.pages.length > 1;
+      const swap = last ? next : reread;
+      const focused = document.activeElement === swap;
+      next.hidden = last;
+      reread.hidden = !last;
+      if (focused) (last ? reread : next).focus();
       hint.hidden = !state.showHint;
       card.hidden = state.textHidden;
       // The card's live region already says "3 / 12"; the counter speaks only when the card is hidden.
