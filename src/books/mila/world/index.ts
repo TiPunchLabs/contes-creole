@@ -21,6 +21,9 @@ const ICON_PLAY = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 /** The shell's back arrow (reading UI), so the way back to the tree reads the same in every book. */
 const ICON_BACK = `<svg width="20" height="12" viewBox="0 0 20 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M7 1 2 6l5 5M2 6h17"/></svg>`;
 
+/** The shell's "read again" arrow: the last page's main action, as in Ti Kannot's reading row. */
+const ICON_REREAD = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.8-4.1M2.5 2v3h3"/></svg>`;
+
 /** The prototype's page, with classes instead of global ids and the shell's way back added. */
 const TEMPLATE = `
   <canvas class="mila-gl" aria-hidden="true" tabindex="-1"></canvas>
@@ -34,9 +37,6 @@ const TEMPLATE = `
       <div class="mila-text"></div>
       <div class="mila-gloss" lang="fr" hidden></div>
       <p class="mila-hint" lang="fr" hidden></p>
-      <div class="mila-end" lang="fr" hidden>
-        <button class="mila-btn is-main mila-reread" type="button">Relire le conte</button>
-      </div>
     </div>
   </article>
   <nav class="mila-ui" aria-label="Lecture du conte">
@@ -48,6 +48,7 @@ const TEMPLATE = `
       <button class="mila-btn is-icon mila-prev" type="button" aria-label="Page précédente">${ICON_ARROW}</button>
       <span class="mila-count"></span>
       <button class="mila-btn is-icon is-main mila-next" type="button" aria-label="Page suivante">${ICON_ARROW}</button>
+      <button class="mila-btn is-main mila-reread" type="button" lang="fr" aria-label="Relire le conte" title="Relire le conte" hidden>${ICON_REREAD}<span>Relire le conte</span></button>
     </div>
   </nav>
   <div class="mila-loader" role="status">Le monde se dessine…</div>`;
@@ -110,7 +111,6 @@ export default defineImmersive({
     const body = part(".mila-text");
     const gloss = part(".mila-gloss");
     const hint = part(".mila-hint");
-    const end = part(".mila-end");
     const reread = part<HTMLButtonElement>(".mila-reread");
     const ui = part(".mila-ui");
     const prev = part<HTMLButtonElement>(".mila-prev");
@@ -156,7 +156,6 @@ export default defineImmersive({
       gloss.hidden = !french;
       gloss.innerHTML = french ? paragraphs(french) : "";
       hint.hidden = !(i === CRAB_PAGE && !freed && scene);
-      end.hidden = i !== PAGE_COUNT;
       scroll.scrollTop = 0;
       syncScrollable();
     }
@@ -172,7 +171,15 @@ export default defineImmersive({
     function updateCount(): void {
       count.textContent = `${Math.max(page(), 1)} / ${PAGE_COUNT}`;
       prev.disabled = page() <= 1 || moving();
-      next.disabled = page() >= PAGE_COUNT || moving();
+      // On the last page the next button gives way to "Relire le conte", in the same place.
+      const last = page() >= PAGE_COUNT;
+      const swap = last ? next : reread;
+      const focused = document.activeElement === swap;
+      next.disabled = last || moving();
+      reread.disabled = !last || moving();
+      next.hidden = last;
+      reread.hidden = !last;
+      if (focused && !moving()) (last ? reread : next).focus({ preventScroll: true });
     }
     /** Gives the focus back to the page controls when a button disabled during the move dropped it. */
     function restoreFocus(): void {

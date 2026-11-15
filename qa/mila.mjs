@@ -362,7 +362,7 @@ async function journey(browser, vp) {
   }
   results.runs[run].transitionMs = times;
   results.runs[run].layouts = layouts;
-  const endShown = await p.locator(".mila-end").isVisible();
+  const endShown = await p.locator(".mila-reread").isVisible();
   check(run, "ending-buttons", endShown);
   check(run, "next-disabled-on-12", await p.locator(".mila-next").isDisabled());
 
