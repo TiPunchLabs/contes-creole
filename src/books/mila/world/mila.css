@@ -99,8 +99,7 @@
 }
 
 /* Taps go through the text to the scene (on short screens the crab's debris sit under it); only
-   the ending buttons, and the text when it has to scroll, take the pointer. */
-.mila-story.is-on .mila-end,
+   the text when it has to scroll takes the pointer. */
 .mila-story.is-on .mila-story-scroll.is-scrollable {
   pointer-events: auto;
 }
@@ -334,15 +333,38 @@
   gap: 0.5rem;
 }
 
-.mila-end {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: 1.3rem;
+/* The last page's main action, in the next button's place: a labelled pill, as in the shell's
+   reading row (Ti Kannot). */
+.mila-nav {
+  position: relative;
 }
 
-.mila-end[hidden] {
+.mila-nav .mila-btn.mila-reread {
+  width: auto;
+  padding: 0 18px 0 15px;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.mila-nav .mila-reread svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mila-nav [hidden] {
   display: none !important;
+}
+
+/* Narrow phones have no room for the words beside the counter: the pill sits just above the row,
+   right-aligned with it, and keeps its words. */
+@media (max-width: 400px) {
+  .mila-nav .mila-btn.mila-reread {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+  }
 }
 
 @media (hover: hover) {
@@ -358,8 +380,8 @@
 
 /* ---------- Shell chips ---------- */
 /* The way back and the reading row take the shell's paper chips (--reading-chrome-*, the tree's
-   HUD and Ti Kannot's controls), so they read the same in every book; the tale's own buttons
-   ("Relire le conte") keep Mila's palette. */
+   HUD and Ti Kannot's controls), so they read the same in every book, "Relire le conte" on the
+   last page included. */
 .mila-back,
 .mila-ui .mila-btn,
 .mila-count {
@@ -537,10 +559,6 @@
 
   .mila-num {
     margin-bottom: 0.35rem;
-  }
-
-  .mila-end {
-    margin-top: 0.5rem;
   }
 
   .mila-heading {

@@ -74,7 +74,7 @@ describe("Mila's world", () => {
     expect($(".mila-story").lang).toBe("gcf");
     expect($(".mila-text").innerHTML).toBe("<p>Paj &amp; 5.</p>");
     expect($(".mila-num").lang).toBe("fr");
-    expect($(".mila-end").lang).toBe("fr");
+    expect($(".mila-reread").lang).toBe("fr");
     handle?.setText({ story: GCF, gloss: FR });
     expect(heading()).toBe("Paj 5");
     expect($(".mila-gloss").hidden).toBe(false);
@@ -124,7 +124,10 @@ describe("Mila's world", () => {
     expect($(".mila-num").textContent).toBe("Page 12");
     expect($(".mila-count").textContent).toBe("12 / 12");
     expect($<HTMLButtonElement>(".mila-next").disabled).toBe(true);
-    expect($(".mila-end").hidden).toBe(false);
+    expect($(".mila-reread").hidden).toBe(false);
+    expect($(".mila-next").hidden).toBe(true);
+    expect($(".mila-reread").parentElement).toBe($(".mila-nav"));
+    expect($(".mila-reread").textContent).toBe("Relire le conte");
     expect($(".mila-text").textContent).toBe("Page & 12.");
     click(".mila-prev");
     expect($(".mila-heading").textContent).toBe(title(11));
@@ -132,7 +135,8 @@ describe("Mila's world", () => {
     expect($(".mila-heading").textContent).toBe(title(12));
     click(".mila-reread");
     expect($(".mila-heading").textContent).toBe(title(1));
-    expect($(".mila-end").hidden).toBe(true);
+    expect($(".mila-reread").hidden).toBe(true);
+    expect($(".mila-next").hidden).toBe(false);
     expect(document.activeElement).toBe($(".mila-next"));
   });
 
@@ -146,7 +150,10 @@ describe("Mila's world", () => {
       "Mettre les mouvements en pause",
       "Page précédente",
       "Page suivante",
+      "Relire le conte",
     ]);
+    // Like the shell's row: "Relire le conte" waits, hidden, for the last page.
+    expect($(".mila-reread").hidden).toBe(true);
     expect($(".mila-next").textContent?.trim()).toBe("");
     expect($(".mila-count").textContent).toBe("1 / 12");
     click(".mila-next");

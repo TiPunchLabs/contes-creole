@@ -209,7 +209,7 @@ async function journey(browser, vp) {
     prev: document.querySelector(".mila-prev").disabled,
     next: document.querySelector(".mila-next").disabled,
     count: document.querySelector(".mila-count").textContent,
-    reread: !document.querySelector(".mila-end").hidden,
+    reread: !document.querySelector(".mila-reread").hidden,
     focus: document.activeElement?.className,
   }));
   check(

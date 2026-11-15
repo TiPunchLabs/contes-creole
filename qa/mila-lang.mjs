@@ -194,8 +194,8 @@ async function text(browser) {
     }
   }
   const end = await p.evaluate(() => ({
-    reread: document.querySelector(".mila-end").hidden === false,
-    lang: document.querySelector(".mila-end").lang,
+    reread: document.querySelector(".mila-reread").hidden === false,
+    lang: document.querySelector(".mila-reread").lang,
   }));
   check(run, "replay-shown-french", end.reread && end.lang === "fr", JSON.stringify(end));
   check(run, "no-errors", errors.length === 0, errors.join(" | "));
@@ -567,7 +567,11 @@ async function guarded(run, fn) {
   }
 }
 
-const browser = await chromium.launch({ args: GPU, env: GPU_ENV });
+const browser = await chromium.launch({
+  args: GPU,
+  env: GPU_ENV,
+  channel: process.env.QA_CHANNEL || undefined,
+});
 try {
   const probe = await browser.newPage();
   const renderer = await probe.evaluate(() => {

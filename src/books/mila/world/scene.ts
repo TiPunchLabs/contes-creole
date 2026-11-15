@@ -4,11 +4,13 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { mergeGeometries, mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 import { disposeObject } from "@shared/three/dispose";
+import { glowPoints, type GlowPoints } from "@shared/three/glow-points";
 import { clamp, lerp } from "@shared/math";
 import { createRng } from "@shared/random";
 import type { Ambience } from "./audio";
-import { easeIO, easeIO3, fbm, GLSL_NOISE, lerpAngle, smooth, vnoise, walkEase } from "./noise";
+import { easeIO, fbm, GLSL_NOISE, lerpAngle, smooth, vnoise, walkEase } from "./noise";
 import { CRAB_PAGE, PAGE_COUNT } from "./text";
 
 /** What the scene needs from the page around it. */
@@ -151,20 +153,23 @@ const HOLD_PAGES = new Set([0, 1, 2, 3, 4, 5, 11, 12]);
 const GOLD = [1, 1, 0.5, 0.04, 0.5, 0.35, 0.25, 0.5, 0.5, 0.5, 0.6, 1.3, 1.6];
 /** Inner glow of the held conch, per page. */
 const GLOW = [0.12, 0.15, 0.75, 0.2, 0.35, 0.3, 0.25, 0.3, 0.3, 0.35, 0.4, 0.6, 0.42];
-/** Seconds per transition (prototype values). */
+/**
+ * Seconds per transition: the prototype's proportions, about a tenth shorter so the text returns
+ * sooner; the walks keep a child's stroll (under two steps a second).
+ */
 const DURATIONS: Record<string, number> = {
-  "0>1": 7,
-  "1>2": 5.2,
-  "2>3": 5,
-  "3>4": 10,
-  "4>5": 8.5,
-  "5>6": 6,
-  "6>7": 8.5,
-  "7>8": 6,
-  "8>9": 6,
-  "9>10": 6.5,
-  "10>11": 8.5,
-  "11>12": 6.5,
+  "0>1": 6.2,
+  "1>2": 4.4,
+  "2>3": 4.4,
+  "3>4": 8.6,
+  "4>5": 7.6,
+  "5>6": 5.4,
+  "6>7": 7.6,
+  "7>8": 5.4,
+  "8>9": 5.4,
+  "9>10": 5.8,
+  "10>11": 7.6,
+  "11>12": 5.6,
 };
 
 interface CamDef {
@@ -186,6 +191,25 @@ interface Trans {
   mRy0: number;
   mRy1: number;
   gold0: number;
+  /** Set when Mila travels: the camera rides with her (see `CamRig`). */
+  rig: CamRig | null;
+}
+
+/**
+ * The camera's place around Mila at both ends of a move she makes, as a bearing, a distance and a
+ * height from her, and what it looks at, as an offset from her. In between, the camera keeps
+ * station on her and swings from one to the other: she never leaves the frame, and the angle only
+ * ever changes gradually.
+ */
+interface CamRig {
+  az0: number;
+  az1: number;
+  r0: number;
+  r1: number;
+  y0: number;
+  y1: number;
+  look0: V3;
+  look1: V3;
 }
 
 interface Leg {
@@ -240,6 +264,17 @@ interface Debris {
 interface Sign {
   g: THREE.Group;
   ring: THREE.Mesh;
+  halo: THREE.SpriteMaterial;
+  core: THREE.SpriteMaterial;
+  /** The small drawing at its heart (steps, grass, spiral). */
+  icon: THREE.SpriteMaterial;
+  /** The wake it leaves: its last positions, newest first. */
+  wake: THREE.Points;
+  wakeT: number;
+  /** The light's own colour at full strength. */
+  tint: THREE.Color;
+  /** Eased brightness (1 = full): lower close to the camera and behind the text. */
+  dim: number;
   sc: number;
 }
 
@@ -439,6 +474,11 @@ export function createMilaScene(
     calm: { value: 0 },
     swimD: { value: 0 },
   };
+  /** How wet the sheet is (0..1): it peaks just after a page turn. */
+  const U_wash = { value: 0 };
+  /** Seconds since the last animated page turn. */
+  let sinceTurn = Infinity;
+  const WASH_SECONDS = 1.7;
   const U_bigGlow = { value: 0.08 };
   const U_liveGlow = { value: 0.1 };
 
@@ -532,7 +572,8 @@ export function createMilaScene(
     },
     22,
   );
-  const TEX_dress = canvasTex(256, 256, (g, w, h) => {
+  // Twice the prototype's resolution, same strokes and draws: the paper's brushwork reads finer.
+  const TEX_dress = canvasTex(512, 512, (g, w, h) => {
     g.fillStyle = "#eaa12a";
     g.fillRect(0, 0, w, h);
     strokes(
@@ -541,12 +582,12 @@ export function createMilaScene(
       h,
       700,
       ["#f7c04d", "#d98a1c", "#ffd877", "#c97716", "#f2ad37"],
-      [10, 40],
-      [1.5, 4],
-      0.55,
+      [18, 72],
+      [2, 5.5],
+      0.5,
       Math.PI / 2,
     );
-    strokes(g, w, h, 120, ["#8a4b0e", "#b5651a"], [8, 26], [0.6, 1.2], 0.45);
+    strokes(g, w, h, 120, ["#8a4b0e", "#b5651a"], [14, 46], [0.8, 1.6], 0.4);
   });
   const TEX_leaf = canvasTex(256, 256, (g, w, h) => {
     const gr = g.createRadialGradient(128, 150, 10, 128, 128, 130);
@@ -629,18 +670,19 @@ export function createMilaScene(
     g.fillText("~ ~", 40, 68);
   });
   const TEX_hair = canvasTex(
-    256,
-    256,
+    512,
+    512,
     (g, w, h) => {
       g.fillStyle = "#160e0b";
       g.fillRect(0, 0, w, h);
       for (let i = 0; i < 1400; i++) {
         const x = rnd() * w;
         const y = rnd() * h;
-        const r = rr(1.5, 4.5);
+        // same draws as the prototype, drawn on a sheet twice as fine
+        const r = rr(1.5, 4.5) * 2;
         g.strokeStyle = ["#3b2519", "#2a1912", "#4d3020", "#0b0605"][(rnd() * 4) | 0];
         g.globalAlpha = rr(0.4, 0.9);
-        g.lineWidth = rr(0.8, 1.8);
+        g.lineWidth = rr(0.8, 1.8) * 1.5;
         g.beginPath();
         for (let a = 0; a < rr(4, 9); a += 0.5) {
           g.lineTo(x + Math.cos(a) * r * (a / 8 + 0.3), y + Math.sin(a) * r * (a / 8 + 0.3));
@@ -738,6 +780,8 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
     const mid = new THREE.Color("#2f7470");
     const deep = new THREE.Color("#1b4658");
     const olive = new THREE.Color("#58683a");
+    /** The sunset the wet sand mirrors along the waterline. */
+    const sheen = new THREE.Color("#c98f88");
     for (let i = 0; i < p.count; i++) {
       const x = p.getX(i);
       const z = p.getZ(i);
@@ -750,6 +794,7 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
           .lerp(dry2, smooth(0.35, 0.7, n))
           .lerp(dry3, smooth(0.55, 0.85, fbm(x * 0.08 + 9, z * 0.08, 2)) * 0.6);
         c.lerp(wet, smooth(1.4, 0, s) * 0.85);
+        c.lerp(sheen, smooth(0.75, 0.05, s) * 0.32);
       } else {
         c.copy(sh)
           .lerp(mid, smooth(-0.2, -4, h))
@@ -766,6 +811,25 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
     geo.computeVertexNormals();
     const mat = new THREE.MeshLambertMaterial({ vertexColors: true, map: TEX_sand });
     addCaustics(mat);
+    // The sand the swash has just left stays dark and takes a little of the sky, then dries: the
+    // beach and the sea meet in a moving wet edge, not on a line.
+    const caustics = mat.onBeforeCompile;
+    mat.onBeforeCompile = (sh, r) => {
+      caustics.call(mat, sh, r);
+      sh.fragmentShader = sh.fragmentShader
+        .replace(
+          "varying vec3 vWP;",
+          "varying vec3 vWP;\nfloat shoreZ(float x){return 1.5+sin(x*.13)*1.+sin(x*.05+.4)*1.2;}",
+        )
+        .replace(
+          "#include <color_fragment>",
+          `#include <color_fragment>
+ float sS=vWP.z-shoreZ(vWP.x);float sW=sin(uTime*.55)*.55+sin(uTime*.9+vWP.x*.2)*.2;
+ float sWet=smoothstep(1.05+sW*.55,.2+sW*.55,sS)*smoothstep(-.6,.0,sS+sW*.2);
+ diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(.66,.64,.68)+vec3(.045,.02,.03),sWet);`,
+        );
+    };
+    mat.customProgramCacheKey = () => "mila-sand";
     const m = new THREE.Mesh(geo, mat);
     m.receiveShadow = true;
     scene.add(m);
@@ -789,12 +853,15 @@ uniform vec3 uMoon;uniform float uTime,uUnder,uSong;varying vec3 vDir;
 void main(){
  vec3 d=normalize(vDir);float h=d.y;float az=atan(d.x,-d.z);
  vec3 top=lin(vec3(.035,.17,.2)),mid=lin(vec3(.06,.3,.33)),vio=lin(vec3(.4,.3,.46)),ora=lin(vec3(.95,.5,.34)),pink=lin(vec3(.93,.52,.5));
- float warm=smoothstep(-.9,.5,az);
+ // az wraps behind the beach (towards the land): there, everything that depends on it eases to
+ // a second, unbroken reading of the angle, so no seam shows in the sky
+ float back=smoothstep(1.7,2.7,abs(az));float az2=mod(az+6.2831853,6.2831853);
+ float warm=mix(smoothstep(-.9,.5,az),.5,back);
  vec3 hz=mix(mix(vio,pink,.5),ora,warm);
  vec3 c=mix(hz,vio,smoothstep(.0,.08,h));
  c=mix(c,mid,smoothstep(.06,.26,h));
  c=mix(c,top,smoothstep(.26,.85,h));
- float cl=fbm(vec2(az*3.2+uTime*.004,h*16.));
+ float cl=mix(fbm(vec2(az*3.2+uTime*.004,h*16.)),fbm(vec2(az2*3.2+9.+uTime*.004,h*16.)),back);
  float cloud=smoothstep(.5,.72,cl)*smoothstep(.3,.07,h)*smoothstep(.0,.04,h);
  c=mix(c,mix(lin(vec3(.98,.6,.5)),lin(vec3(.5,.36,.56)),smoothstep(.05,.2,h)),cloud*.8);
  vec3 m=normalize(uMoon);vec3 t1=normalize(cross(m,vec3(0,1,0)));vec3 t2=cross(t1,m);
@@ -804,7 +871,7 @@ void main(){
  float sn=noise(dir*5.+vec2(rr*150.,rr*20.));
  float sm=smoothstep(.25,1.,s1)*smoothstep(.35,.8,sn)*smoothstep(-.02,.12,h);
  c+=mix(lin(vec3(.2,.5,.5)),lin(vec3(1.,.85,.55)),exp(-r*5.))*sm*(.045+exp(-r*3.)*.2)*(1.+uSong*.8);
- float bt=noise(vec2(az*55.,h*150.))*.6+noise(vec2(az*130.,h*40.))*.4;
+ float bt=mix(noise(vec2(az*55.,h*150.))*.6+noise(vec2(az*130.,h*40.))*.4,noise(vec2(az2*55.,h*150.))*.6+noise(vec2(az2*130.,h*40.))*.4,back);
  c*=.9+bt*.18;
  vec2 sg=vec2(az*90.,h*90.);vec2 id=floor(sg);float rs=hash(id);vec2 f=fract(sg)-.5;
  float tw=.55+.45*sin(uTime*(1.5+rs*3.)+rs*40.);
@@ -880,7 +947,7 @@ void main(){
    vec3 sky=mix(lin(vec3(.9,.5,.4)),lin(vec3(.06,.26,.3)),smoothstep(0.,.3,hz));
    col=mix(col,sky,fres*.65);
    float md=max(dot(R,normalize(uMoonDir)),0.);
-   col+=lin(vec3(1.,.84,.58))*(pow(md,700.)*7.+pow(md,50.)*.4)*(.6+.4*noise(p*3.+t));
+   col+=lin(vec3(1.,.84,.58))*(pow(md,700.)*4.2+pow(md,50.)*.4)*(.6+.4*noise(p*3.+t));
    float g=p.y*.5+sin(p.x*.11+t*.22)*.9+fbm(p*.07+vec2(t*.02,0.))*2.2;
    float f=abs(fract(g)-.5);float w=fwidth(g)*1.3+.012;
    float line=1.-smoothstep(w*.4,w,f);
@@ -888,13 +955,20 @@ void main(){
    float gold=line*frag*smoothstep(80.,15.,dist)*uGold;
    col+=lin(vec3(1.,.78,.36))*gold*(1.6+uSong*1.6);
    float wash=sin(t*.55)*.55+sin(t*.9+p.x*.2)*.2;
+   // sparks along the moon's path, and the sea's own light where the swash stirs it
+   col+=lin(vec3(1.,.9,.7))*pow(md,24.)*smoothstep(.78,.97,noise(p*6.+vec2(t*.8,-t*.5)))*.2;
+   float bio=smoothstep(.9,.99,noise(p*vec2(19.,27.)+vec2(t*.6,-t*.9)))*smoothstep(-5.,-.4,vShore)*smoothstep(.3,-.3,vShore-wash);
+   col+=lin(vec3(.35,.95,.9))*bio*(.4+uSong*.5)*(1.-.4*uCalm);
    float band=smoothstep(-1.7+wash,-.15+wash,vShore);
    float fl=noise(p*vec2(2.2,6.)+vec2(t*.3,-t*.2));
    float ln=1.-smoothstep(.0,.06,abs(fract(vShore*.8-t*.22)-.5)-.4);
    float foam=band*smoothstep(.35,.7,fl)+ln*smoothstep(-4.,-1.,vShore)*smoothstep(.0,-.6,vShore)*.6;
    col=mix(col,lin(vec3(.93,.95,.88)),clamp(foam,0.,1.)*.6*(1.-.55*uCalm));
-   alpha=mix(1.,.5,smoothstep(-3.,.2,vShore));
-   if(vShore>.25+wash)discard;
+   // the sheet of water thins to nothing on the sand, under a last thread of foam
+   float lip=.25+wash;
+   col=mix(col,lin(vec3(.95,.96,.9)),smoothstep(lip-.42,lip-.08,vShore)*smoothstep(.25,.6,fl)*.55*(1.-.4*uCalm));
+   alpha=mix(1.,.5,smoothstep(-3.,.2,vShore))*smoothstep(lip,lip-.5,vShore);
+   if(vShore>lip)discard;
  }
  gl_FragColor=vec4(col,alpha);
  #include <fog_fragment>
@@ -1014,7 +1088,7 @@ void main(){
       color: new THREE.Color(color),
       side: THREE.DoubleSide,
     });
-    const tg = new THREE.CylinderGeometry(0.09, 0.16, h, 7, 10, true);
+    const tg = new THREE.CylinderGeometry(0.09, 0.16, h, 14, 16, true);
     const tp = tg.attributes.position;
     for (let i = 0; i < tp.count; i++) {
       const y = tp.getY(i) + h / 2;
@@ -1025,7 +1099,7 @@ void main(){
     g.add(new THREE.Mesh(tg, mat));
     const top = V3(h * 0.18, h, 0);
     for (let k = 0; k < 9; k++) {
-      const fg = new THREE.PlaneGeometry(0.55, 2.8, 1, 8);
+      const fg = new THREE.PlaneGeometry(0.55, 2.8, 2, 14);
       const fp = fg.attributes.position;
       for (let i = 0; i < fp.count; i++) {
         const y = fp.getY(i) + 1.4;
@@ -1063,7 +1137,7 @@ void main(){
     const tips: V3[] = [];
     branches.forEach((pts, i) => {
       const curve = new THREE.CatmullRomCurve3(pts);
-      const geo = new THREE.TubeGeometry(curve, 30, i === 0 ? 0.17 : 0.075, 7, false);
+      const geo = new THREE.TubeGeometry(curve, 40, i === 0 ? 0.17 : 0.075, 12, false);
       const m = new THREE.Mesh(geo, bark);
       m.castShadow = true;
       g.add(m);
@@ -1154,20 +1228,40 @@ void main(){
   /* =====================================================================
      ROCKS
      ===================================================================== */
-  const rockMat = new THREE.MeshLambertMaterial({
-    color: new THREE.Color("#5a5c68"),
-    flatShading: true,
-  });
+  const rockMat = new THREE.MeshLambertMaterial({ vertexColors: true });
   addCaustics(rockMat);
+  const ROCK_FOOT = new THREE.Color("#3d3f4b");
+  const ROCK_CROWN = new THREE.Color("#73747f");
+  const ROCK_WARM = new THREE.Color("#8a7f7c");
+  const ROCK_ALGAE = new THREE.Color("#46594f");
+  /**
+   * A water-worn rock: the prototype's lumps (same noise, same draws) carried by a fine welded
+   * sphere, so the light rolls over it; painted dark and damp at its foot, paler on its crown,
+   * with worn warm patches and a little algae low down.
+   */
   function rock(x: number, z: number, s: number, sink = 0.25): void {
-    const g = new THREE.IcosahedronGeometry(1, 1);
+    const raw = new THREE.IcosahedronGeometry(1, 3);
+    raw.deleteAttribute("normal");
+    raw.deleteAttribute("uv");
+    const g = mergeVertices(raw);
+    raw.dispose();
     const p = g.attributes.position;
+    const colors = new Float32Array(p.count * 3);
+    const tint = new THREE.Color();
     for (let i = 0; i < p.count; i++) {
       const v = V3(p.getX(i), p.getY(i), p.getZ(i));
+      const up = v.y;
       const n = fbm(v.x * 1.3 + x, v.y * 1.3 + z, 3);
-      v.multiplyScalar(0.75 + n * 0.6);
+      const fine = fbm(v.x * 4.1 + z, v.z * 4.1 + x + v.y * 2.3, 2);
+      tint.copy(ROCK_FOOT).lerp(ROCK_CROWN, smooth(-0.5, 0.75, up));
+      tint.lerp(ROCK_WARM, smooth(0.5, 0.8, fine) * smooth(-0.1, 0.6, up) * 0.6);
+      tint.lerp(ROCK_ALGAE, smooth(0.45, 0.75, n) * smooth(0.2, -0.6, up) * 0.7);
+      tint.multiplyScalar(0.92 + fine * 0.16);
+      tint.toArray(colors, i * 3);
+      v.multiplyScalar(0.75 + n * 0.6 + (fine - 0.5) * 0.05);
       p.setXYZ(i, v.x, v.y * 0.72, v.z);
     }
+    g.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     g.computeVertexNormals();
     const m = new THREE.Mesh(g, rockMat);
     m.scale.set(s * rr(0.9, 1.4), s, s * rr(0.9, 1.3));
@@ -1176,6 +1270,188 @@ void main(){
     m.castShadow = true;
     m.receiveShadow = true;
     scene.add(m);
+    if (groundH(x, z) > 0.05) beachRocks.push([x, z, s]);
+  }
+  const beachRocks: [number, number, number][] = [];
+  /**
+   * Tufts of beach grass in the lee of the rocks on the sand, and fireflies under the sea grape and
+   * the palms. Their own RNG: the prototype's draws, and so its layout, are untouched.
+   */
+  function buildBeachLife(): void {
+    const own = createRng(97);
+    const blades: THREE.BufferGeometry[] = [];
+    for (let k = 0; k < 7; k++) {
+      const h = 0.2 + own() * 0.16;
+      const blade = new THREE.PlaneGeometry(0.035, h, 1, 4);
+      const bp = blade.attributes.position;
+      const lean = 0.25 + own() * 0.5;
+      for (let i = 0; i < bp.count; i++) {
+        const t = bp.getY(i) / h + 0.5;
+        bp.setXYZ(i, bp.getX(i) * (1 - t * 0.85), t * h, t * t * h * lean);
+      }
+      blade.rotateY(k * 2.4 + own());
+      blade.translate((own() - 0.5) * 0.08, 0, (own() - 0.5) * 0.08);
+      blade.computeVertexNormals();
+      blades.push(blade);
+    }
+    const tuftGeo = mergeGeometries(blades);
+    for (const blade of blades) blade.dispose();
+    const perRock = 2;
+    const grass = new THREE.InstancedMesh(
+      tuftGeo,
+      new THREE.MeshLambertMaterial({ side: THREE.DoubleSide }),
+      beachRocks.length * perRock,
+    );
+    const tint = new THREE.Color();
+    let n = 0;
+    for (const [x, z, sz] of beachRocks) {
+      for (let k = 0; k < perRock; k++) {
+        // one tuft at each flank of the rock, a little to landward: beside it, never across it
+        const a = (k ? Math.PI : 0) + (k ? -1 : 1) * (0.25 + own() * 0.45);
+        const r = sz * (1.25 + own() * 0.3);
+        const gx = x + Math.cos(a) * r;
+        const gz = z + Math.sin(a) * r;
+        dummy.position.set(gx, groundH(gx, gz) - 0.01, gz);
+        dummy.rotation.set(0, own() * 6.28, 0);
+        dummy.scale.setScalar(0.55 + own() * 0.45);
+        dummy.updateMatrix();
+        grass.setMatrixAt(n, dummy.matrix);
+        grass.setColorAt(n, tint.set(own() < 0.5 ? "#8f9a52" : "#a39a58"));
+        n++;
+      }
+    }
+    grass.receiveShadow = true;
+    scene.add(grass);
+    const haunts: [number, number, number, number][] = [
+      [5.6, 2.2, 4.6, 2.6],
+      [7.2, 1.6, 6.4, 1.6],
+      [12.5, 1.8, 10, 1.8],
+      [17, 1.6, 8.5, 1.6],
+    ];
+    fireflies = glowPoints(
+      own,
+      44,
+      (i) => {
+        const [x, y, z, r] = haunts[i % haunts.length];
+        return [x + (own() - 0.5) * 2 * r, y + (own() - 0.5) * 1.6, z + (own() - 0.5) * 2 * r];
+      },
+      { size: 0.3, drift: reduceMotion ? 0 : 0.6, a: "#fff0a0", b: "#d2ff9c" },
+    );
+    scene.add(fireflies);
+  }
+  let fireflies: GlowPoints;
+
+  /* =====================================================================
+     A FISHERMAN'S CANOE far out, towards the horizon of page 4
+     ===================================================================== */
+  /** Where the canoe lies at anchor: seen from page 4 between the headland and Mila. */
+  const BOAT_AT = V3(45, 0, -15);
+  let boat: { g: THREE.Group; rod: THREE.Group; glow: THREE.Sprite } | null = null;
+  /**
+   * A painted canoe with one fisherman, a line out and a lantern at the bow: it rides the swell,
+   * swings a little on its anchor, and the man lifts his rod now and then.
+   */
+  function buildBoat(): void {
+    const g = new THREE.Group();
+    // hull: the lower half of a stretched sphere, pinched to a point at both ends, with sheer
+    const hull = new THREE.SphereGeometry(1, 36, 14, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+    const hp = hull.attributes.position;
+    const colors = new Float32Array(hp.count * 3);
+    const paint = [
+      new THREE.Color("#f3ead8"),
+      new THREE.Color("#c8463a"),
+      new THREE.Color("#2c6f96"),
+    ];
+    for (let i = 0; i < hp.count; i++) {
+      const xn = hp.getX(i);
+      const y = hp.getY(i);
+      const pinch = 0.3 + 0.7 * (1 - Math.abs(xn) ** 1.6);
+      hp.setXYZ(i, xn * 2.3, y * 0.5 + 0.2 * xn * xn, hp.getZ(i) * 0.58 * pinch);
+      // white gunwale, a red stripe, then the blue of the hull
+      paint[y > -0.14 ? 0 : y > -0.3 ? 1 : 2].toArray(colors, i * 3);
+    }
+    hull.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    hull.computeVertexNormals();
+    const wood = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
+    g.add(new THREE.Mesh(hull, wood));
+    const plain = (color: string): THREE.MeshLambertMaterial =>
+      new THREE.MeshLambertMaterial({ color: new THREE.Color(color) });
+    // thwarts
+    for (const x of [-0.9, 0.2, 1.1]) {
+      const bench = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.04, 0.85), plain("#8a6a44"));
+      bench.position.set(x, -0.08, 0);
+      g.add(bench);
+    }
+    // the fisherman, seated aft, under a wide straw hat
+    const man = new THREE.Group();
+    man.position.set(-0.9, 0, 0);
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.17, 0.34, 4, 10), plain("#31475a"));
+    body.position.y = 0.3;
+    body.rotation.z = -0.12;
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 14, 10), plain("#5a3323"));
+    head.position.set(0.05, 0.72, 0);
+    const hat = new THREE.Mesh(new THREE.ConeGeometry(0.36, 0.16, 18), plain("#d9b871"));
+    hat.position.set(0.05, 0.86, 0);
+    man.add(body, head, hat);
+    // his rod, hinged at his hands, and the line that drops from its tip
+    const rod = new THREE.Group();
+    rod.position.set(0.2, 0.42, 0.12);
+    const cane = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.022, 2.2, 6), plain("#6b4b2c"));
+    cane.position.y = 1.1;
+    const line = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 1.5, 4), plain("#e8e2d0"));
+    line.position.set(0.7, 1.95, 0);
+    line.rotation.z = Math.PI / 2 - 0.25;
+    rod.add(cane, line);
+    rod.rotation.z = -1.0;
+    man.add(rod);
+    g.add(man);
+    // the lantern at the bow: a small flame the dusk picks up from the shore
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.7, 6), plain("#6b4b2c"));
+    post.position.set(1.85, 0.42, 0);
+    const flame = new THREE.Mesh(
+      new THREE.SphereGeometry(0.075, 10, 8),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.5, 0.7) }),
+    );
+    flame.position.set(1.85, 0.82, 0);
+    const glow = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: glowTex,
+        color: new THREE.Color(1.5, 0.95, 0.45),
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+    glow.position.copy(flame.position);
+    glow.scale.setScalar(1.6);
+    g.add(post, flame, glow);
+    g.position.copy(BOAT_AT);
+    g.rotation.y = 0.5;
+    // a little larger than life, so it reads as a canoe from the beach
+    g.scale.setScalar(1.4);
+    scene.add(g);
+    boat = { g, rod, glow };
+  }
+  /** The canoe on the swell (the sea shader's two long waves), swinging at anchor. */
+  function updateBoat(t: number): void {
+    if (!boat) return;
+    const calm = 1 - 0.72 * U.calm.value;
+    const x = BOAT_AT.x + Math.sin(t * 0.05) * 1.4;
+    const z = BOAT_AT.z + Math.cos(t * 0.037) * 1.1;
+    const swell =
+      (Math.sin(x * 0.17 + z * 0.52 + t * 0.9) * 0.09 +
+        Math.sin(-x * 0.31 + z * 0.86 + t * 1.35) * 0.05) *
+      calm;
+    boat.g.position.set(x, swell + 0.12, z);
+    boat.g.rotation.set(
+      Math.sin(t * 1.1) * 0.05 * calm,
+      0.5 + Math.sin(t * 0.06) * 0.25,
+      Math.cos(x * 0.17 + z * 0.52 + t * 0.9) * 0.06 * calm,
+    );
+    // now and then he lifts the rod, then lets it down again
+    const lift = Math.max(0, Math.sin(t * 0.45)) ** 6;
+    boat.rod.rotation.z = -1.0 + lift * 0.45;
+    boat.glow.scale.setScalar(1.6 + Math.sin(t * 7.3) * 0.08 + Math.sin(t * 3.1) * 0.06);
   }
   function buildRocks(): void {
     for (const [x, z, sz] of SHORE_ROCKS) rock(x, z, sz);
@@ -1761,14 +2037,14 @@ void main(){
     const skin = withRim(toonSoft(SKIN), "#ffb27a", 0.4);
     const skinL = withRim(toonSoft("#7b4630"), "#ffb27a", 0.4);
     const dark = toon("#1c0e09");
-    const lipU = toon("#6e3129");
-    const lipD = toon("#83402f");
+    const lipU = toonSoft("#6e3129");
+    const lipD = toonSoft("#83402f");
     const white = toon("#f2ebe0");
     const hairM = withRim(
       new THREE.MeshToonMaterial({
         color: new THREE.Color("#ffffff"),
         map: TEX_hair,
-        gradientMap: toonRamp,
+        gradientMap: softRamp,
         side: THREE.DoubleSide,
       }),
       "#c98a5a",
@@ -1779,16 +2055,21 @@ void main(){
       new THREE.MeshToonMaterial({
         color: new THREE.Color("#ffffff"),
         map: TEX_dress,
-        gradientMap: toonRamp,
+        gradientMap: softRamp,
         side: THREE.DoubleSide,
       }),
       "#ffd27a",
       0.35,
-      `float an=atan(transformed.z,transformed.x);float hh=aHem*aHem;float w=1.+uWind*(2.5-uSwim*1.8);
-      transformed.xz*=mix(1.,.6,uSwim*aHem);transformed.y-=uSwim*aHem*.05;
-      transformed.x+=(sin(uTime*2.2+an*3.+transformed.y*9.)*.016+.022+uWind*.05)*hh*w;
-      transformed.z+=cos(uTime*1.8+an*2.)*.012*hh*w;
-      transformed.y+=sin(uTime*3.+an*4.)*.012*hh*uWind;`,
+      // On the sand each flounce flutters at its own hem (aHem). In the water the dress moves as
+      // one garment: what narrows and sways it is the height along the whole dress (whole), the
+      // same for every flounce at a given height, so the tiers stay nested and never part.
+      `float an=atan(transformed.z,transformed.x);float w=1.+uWind*(2.5-uSwim*1.8);
+      float whole=clamp((${DRESS[0][0].toFixed(3)}-position.y)/${(DRESS[0][0] - DRESS[DRESS.length - 1][1]).toFixed(3)},0.,1.);
+      float hem=mix(aHem,whole,uSwim);float hh=hem*hem;
+      transformed.xz*=mix(1.,.72,uSwim*whole);transformed.y-=uSwim*whole*.05;
+      transformed.x+=(sin(uTime*2.2+an*3.*(1.-uSwim)+transformed.y*9.)*.016+.022*(1.-uSwim)+uWind*.05*(1.-uSwim*.7))*hh*w;
+      transformed.z+=cos(uTime*1.8+an*2.*(1.-uSwim))*.012*hh*w;
+      transformed.y+=sin(uTime*3.+an*4.*(1.-uSwim))*.012*hh*uWind;`,
       "attribute float aHem;uniform float uTime;uniform float uWind;uniform float uSwim;\n",
     );
     for (const L of DRESS) {
@@ -2215,15 +2496,20 @@ void main(){
      BIG FOREGROUND CONCH, LIVING CONCH, PEARL
      ===================================================================== */
   let bigConch: THREE.Mesh;
+  /** Size of the conch lying on the beach (the prototype's was 0.95, nearly Mila's height). */
+  const CONCH_ON_SAND = 0.42;
   let liveConch: THREE.Group;
   let pearl: THREE.Group;
   let pearlHalo: THREE.Sprite;
   function buildConches(): void {
     bigConch = new THREE.Mesh(conchGeometry({ rows: 90, segs: 90 }), conchMaterial(U_bigGlow));
-    bigConch.scale.setScalar(0.95);
-    const bx = 3.35;
-    const bz = 6.75;
-    bigConch.position.set(bx, groundH(bx, bz) + 0.2, bz);
+    // A lambi beside a child: large enough to read in the sand, not a shell her own size.
+    bigConch.scale.setScalar(CONCH_ON_SAND);
+    // nearer Mila than the prototype's, so the smaller shell still sits in the opening and closing
+    // frames; clear of her walk towards the rocks
+    const bx = 3.55;
+    const bz = 6.0;
+    bigConch.position.set(bx, groundH(bx, bz) + 0.21 * CONCH_ON_SAND, bz);
     bigConch.rotation.set(0.65, -0.55, Math.PI / 2);
     bigConch.castShadow = true;
     bigConch.receiveShadow = true;
@@ -2313,21 +2599,49 @@ void main(){
     const shell = toon("#d0532f");
     const shell2 = toon("#e9844c");
     const dk = toon("#1a1210");
-    const b = new THREE.Mesh(new THREE.SphereGeometry(0.16, 20, 14), shell);
+    // The shell is one painted dome: deeper red in blotches, a warm rim, a pale underside.
+    const deep = new THREE.Color("#a93a22");
+    const rim = new THREE.Color("#f2985a");
+    const pale = new THREE.Color("#f3d9b8");
+    const base = new THREE.Color("#d0532f");
+    const painted = toonSoft("#ffffff", { vertexColors: true });
+    const dome = new THREE.SphereGeometry(0.16, 32, 22);
+    {
+      const P = dome.attributes.position;
+      const N = dome.attributes.normal;
+      const colors = new Float32Array(P.count * 3);
+      const tint = new THREE.Color();
+      for (let i = 0; i < P.count; i++) {
+        const up = N.getY(i);
+        const blotch =
+          Math.sin(P.getX(i) * 38 + P.getZ(i) * 17) * Math.cos(P.getZ(i) * 43 - P.getX(i) * 13);
+        tint.copy(base).lerp(deep, smooth(0.15, 0.7, blotch) * smooth(0.2, 0.8, up) * 0.75);
+        tint.lerp(rim, (1 - smooth(0.05, 0.45, Math.abs(up))) * 0.6);
+        tint.lerp(pale, smooth(0.25, 0.6, -up));
+        tint.toArray(colors, i * 3);
+      }
+      dome.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    }
+    const b = new THREE.Mesh(dome, painted);
     b.scale.set(1.25, 0.5, 0.95);
     b.castShadow = true;
     g.add(b);
-    const top = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 10), shell2);
-    top.scale.set(1.2, 0.35, 0.8);
-    top.position.y = 0.04;
-    g.add(top);
     const legs: { pv: THREE.Group; s: number; i: number }[] = [];
     for (const s of [-1, 1])
       for (let i = 0; i < 4; i++) {
         const pv = new THREE.Group();
         pv.position.set(s * 0.16, 0, (i - 1.5) * 0.07);
-        pv.add(limb(V3(0, 0, 0), V3(s * 0.14, 0.06, 0), 0.017, shell));
-        pv.add(limb(V3(s * 0.14, 0.06, 0), V3(s * 0.22, -0.07, 0), 0.014, shell));
+        pv.rotation.y = s * (0.35 - i * 0.24);
+        // thigh, shin and a pointed foot, each slimmer than the last
+        const knee = V3(s * 0.13, 0.07, 0);
+        const ankle = V3(s * 0.2, -0.02, 0);
+        pv.add(limb(V3(0, 0, 0), knee, 0.019, shell));
+        pv.add(limb(knee, ankle, 0.014, shell));
+        const foot = new THREE.Mesh(new THREE.ConeGeometry(0.012, 0.075, 10), shell2);
+        foot.position.set(s * 0.215, -0.05, 0);
+        foot.rotation.z = Math.PI + s * 0.4;
+        foot.castShadow = true;
+        pv.add(foot);
         g.add(pv);
         legs.push({ pv, s, i });
       }
@@ -2336,22 +2650,40 @@ void main(){
       const pv = new THREE.Group();
       pv.position.set(s * 0.12, 0.03, 0.13);
       pv.add(limb(V3(0, 0, 0), V3(s * 0.08, 0.05, 0.12), 0.022, shell));
-      const c1 = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 8), shell2);
+      const c1 = new THREE.Mesh(new THREE.SphereGeometry(0.055, 20, 14), shell2);
       c1.scale.set(0.8, 0.6, 1.2);
       c1.position.set(s * 0.1, 0.07, 0.19);
+      c1.castShadow = true;
       pv.add(c1);
+      // the fixed finger and the one that snaps, both tapering to a point
+      const finger = (): THREE.Mesh => {
+        const f = new THREE.Mesh(new THREE.ConeGeometry(0.017, 0.085, 12), shell2);
+        f.rotation.x = Math.PI / 2;
+        f.position.z = 0.04;
+        f.castShadow = true;
+        return f;
+      };
+      const fixed = finger();
+      fixed.position.set(s * 0.1, 0.055, 0.275);
+      pv.add(fixed);
       const pin = new THREE.Group();
       pin.position.set(s * 0.1, 0.08, 0.24);
-      pin.add(limb(V3(0, 0, 0), V3(0, 0.02, 0.07), 0.015, shell2));
+      pin.add(finger());
       pv.add(pin);
       g.add(pv);
       claws.push({ pv, pin, s });
     }
+    const eyeWhite = toonSoft("#fbf6ea");
+    const glint = new THREE.MeshBasicMaterial({ color: "#ffffff" });
     for (const s of [-1, 1]) {
       g.add(limb(V3(s * 0.05, 0.05, 0.1), V3(s * 0.07, 0.15, 0.13), 0.01, shell));
-      const e = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 8), dk);
-      e.position.set(s * 0.07, 0.16, 0.13);
-      g.add(e);
+      const e = new THREE.Mesh(new THREE.SphereGeometry(0.026, 16, 12), eyeWhite);
+      e.position.set(s * 0.07, 0.165, 0.13);
+      const pu = new THREE.Mesh(new THREE.SphereGeometry(0.014, 12, 10), dk);
+      pu.position.set(s * 0.072, 0.167, 0.148);
+      const hl = new THREE.Mesh(new THREE.SphereGeometry(0.005, 8, 6), glint);
+      hl.position.set(s * 0.078, 0.175, 0.158);
+      g.add(e, pu, hl);
     }
     g.scale.setScalar(1.8);
     const cx = 14.6;
@@ -2634,9 +2966,9 @@ void main(){
   function makeFishGeo(): THREE.BufferGeometry {
     const parts: [THREE.BufferGeometry, "body" | "fin" | "eye"][] = [];
     const add = (geo: THREE.BufferGeometry, shade: "body" | "fin" | "eye"): void => {
+      // The parts keep their own normals: a turned body is round, not faceted.
       const g = geo.index ? geo.toNonIndexed() : geo;
       if (g !== geo) geo.dispose();
-      g.computeVertexNormals();
       parts.push([g, shade]);
     };
     const prof = (
@@ -2653,7 +2985,7 @@ void main(){
         [0, 0.148],
       ] as const
     ).map(([r, y]) => new THREE.Vector2(r, y));
-    const body = new THREE.LatheGeometry(prof, 18);
+    const body = new THREE.LatheGeometry(new THREE.SplineCurve(prof).getPoints(30), 28);
     body.rotateX(Math.PI / 2);
     body.scale(0.48, 1, 1);
     add(body, "body");
@@ -2697,7 +3029,7 @@ void main(){
       pf.rotateZ(sx * 0.5);
       pf.translate(sx * 0.02, -0.014, 0.04);
       add(pf, "fin");
-      const e = new THREE.SphereGeometry(0.0085, 8, 6);
+      const e = new THREE.SphereGeometry(0.0085, 12, 8);
       e.translate(sx * 0.0205, 0.013, 0.098);
       add(e, "eye");
     }
@@ -2793,6 +3125,17 @@ void main(){
     });
   }
   const SIGNS: Sign[] = [];
+  /** A light's heart: bright in the middle, thinning evenly to nothing: no outline, no disc. */
+  const orbTex = canvasTex(128, 128, (g, w, h) => {
+    const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+    gr.addColorStop(0, "rgba(255,255,255,1)");
+    gr.addColorStop(0.18, "rgba(255,255,255,0.9)");
+    gr.addColorStop(0.4, "rgba(255,255,255,0.34)");
+    gr.addColorStop(0.65, "rgba(255,255,255,0.1)");
+    gr.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = gr;
+    g.fillRect(0, 0, w, h);
+  });
   function buildSigns(): void {
     const defs = [
       { k: "pas", c: new THREE.Color(1.6, 0.95, 0.45), ic: "#5a2c08" },
@@ -2801,30 +3144,51 @@ void main(){
     ] as const;
     defs.forEach((d) => {
       const g = new THREE.Group();
-      const halo = new THREE.Sprite(
-        new THREE.SpriteMaterial({
-          map: glowTex,
-          color: d.c,
-          transparent: true,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-        }),
-      );
+      const haloM = new THREE.SpriteMaterial({
+        map: glowTex,
+        color: d.c,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+      const halo = new THREE.Sprite(haloM);
       halo.scale.setScalar(0.9);
       g.add(halo);
-      g.add(
-        new THREE.Mesh(
-          new THREE.SphereGeometry(0.11, 24, 16),
-          new THREE.MeshBasicMaterial({ color: d.c.clone().multiplyScalar(0.9) }),
-        ),
-      );
-      const ic = new THREE.Sprite(
-        new THREE.SpriteMaterial({ map: iconTex(d.k, d.ic), transparent: true, depthWrite: false }),
-      );
+      // The heart of the light is a soft glow that thins towards its edge, not a flat disc.
+      const coreM = new THREE.SpriteMaterial({
+        map: orbTex,
+        color: d.c.clone().multiplyScalar(0.9),
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+      const core = new THREE.Sprite(coreM);
+      core.scale.setScalar(0.4);
+      g.add(core);
+      const iconM = new THREE.SpriteMaterial({
+        map: iconTex(d.k, d.ic),
+        transparent: true,
+        depthWrite: false,
+      });
+      const ic = new THREE.Sprite(iconM);
       ic.scale.setScalar(0.2);
       g.add(ic);
+      // Round it turns the conch's own spiral: each light is a voice come out of the shell.
       const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(0.2, 0.007, 6, 48, 4.2),
+        new THREE.TubeGeometry(
+          new THREE.CatmullRomCurve3(
+            Array.from({ length: 40 }, (_, k) => {
+              const t = k / 39;
+              // a single curl, like the lip of the shell: more turns would read as rings
+              const a = t * Math.PI * 2.4;
+              const r = 0.035 + 0.15 * t;
+              return V3(Math.cos(a) * r, Math.sin(a) * r, 0);
+            }),
+          ),
+          90,
+          0.0055,
+          6,
+        ),
         new THREE.MeshBasicMaterial({
           color: d.c,
           transparent: true,
@@ -2836,7 +3200,42 @@ void main(){
       g.add(ring);
       g.scale.setScalar(0.001);
       scene.add(g);
-      SIGNS.push({ g, ring, sc: 0 });
+      // A wake of fading sparks behind it, so its path through the air or the water can be read.
+      const wakeG = new THREE.BufferGeometry();
+      const wakeN = 16;
+      wakeG.setAttribute("position", new THREE.BufferAttribute(new Float32Array(wakeN * 3), 3));
+      const fade = new Float32Array(wakeN * 3);
+      for (let k = 0; k < wakeN; k++) {
+        const f = (1 - k / wakeN) ** 2;
+        fade.set([d.c.r * f, d.c.g * f, d.c.b * f], k * 3);
+      }
+      wakeG.setAttribute("color", new THREE.BufferAttribute(fade, 3));
+      const wake = new THREE.Points(
+        wakeG,
+        new THREE.PointsMaterial({
+          map: glowTex,
+          size: 0.13,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        }),
+      );
+      wake.frustumCulled = false;
+      scene.add(wake);
+      SIGNS.push({
+        g,
+        ring,
+        halo: haloM,
+        core: coreM,
+        icon: iconM,
+        wake,
+        wakeT: 0,
+        tint: d.c.clone(),
+        dim: 1,
+        sc: 0,
+      });
     });
   }
   const threadMat = (prog: Uniform<number>): THREE.ShaderMaterial =>
@@ -2882,6 +3281,7 @@ void main(){
     sc.far = 80;
     moonL.shadow.bias = -0.0006;
     moonL.shadow.normalBias = 0.03;
+    moonL.shadow.radius = 2.5;
     scene.add(moonL, moonL.target);
     rimL.position.set(30, 8, -60);
     scene.add(rimL);
@@ -2924,11 +3324,12 @@ void main(){
         uTime: U.time,
         uKuwa: { value: isSmall ? 0 : 1 },
         uUnder: U.under,
+        uWash: U_wash,
       },
       vertexShader: QUAD_VERTEX,
       fragmentShader:
         GLSL_NOISE +
-        `uniform sampler2D tDiffuse;uniform vec2 uRes;uniform float uTime,uKuwa,uUnder;varying vec2 vUv;
+        `uniform sampler2D tDiffuse;uniform vec2 uRes;uniform float uTime,uKuwa,uUnder,uWash;varying vec2 vUv;
     vec3 kuwa(vec2 uv){vec2 px=1.5/uRes;vec3 m0=vec3(0),m1=vec3(0),m2=vec3(0),m3=vec3(0),s0=vec3(0),s1=vec3(0),s2=vec3(0),s3=vec3(0);
       for(int j=0;j<=2;j++)for(int i=0;i<=2;i++){vec2 o=vec2(float(i),float(j))*px;vec3 c;
         c=texture2D(tDiffuse,uv+vec2(-o.x,-o.y)).rgb;m0+=c;s0+=c*c;
@@ -2940,13 +3341,17 @@ void main(){
       vec3 r=m0;float mv=v0;if(v1<mv){mv=v1;r=m1;}if(v2<mv){mv=v2;r=m2;}if(v3<mv){r=m3;}return r;}
     void main(){vec2 asp=vec2(uRes.x/uRes.y,1.);
       vec2 w=vec2(noise(vUv*asp*90.+uUnder*uTime*.5),noise(vUv*asp*90.+17.+uUnder*uTime*.5))-.5;
-      vec2 uv=vUv+w*(.0016+uUnder*.004);
+      // a page turn (uWash) wets the sheet: the paint runs further before it settles again
+      vec2 uv=vUv+w*(.0016+uUnder*.004+uWash*.014);
       vec3 base=texture2D(tDiffuse,uv).rgb;vec3 c=base;if(!(base.r==base.r))base=vec3(0.);
       if(uKuwa>.5)c=mix(base,kuwa(uv),.85);
       float paper=fbm(vUv*asp*220.)*.6+noise(vUv*asp*vec2(900.,140.))*.4;
       c*=.9+paper*.18;
       float gr=hash(vUv*uRes+fract(uTime*7.)*100.)-.5;c+=gr*.025*(c+.04);
       float vg=smoothstep(1.25,.35,length((vUv-.5)*vec2(1.15,1.)));c*=mix(.62,1.,vg);
+      // the wash blooms from blotches of the paper, lifting the gouache to a pale, even tone
+      float wet=smoothstep(.75-uWash*.75,1.05-uWash*.75,fbm(vUv*asp*3.+11.)+uWash*.25);
+      c=mix(c,mix(c,vec3(dot(c,vec3(.333)))*vec3(1.04,1.,.94)+vec3(.07,.06,.05),.6),wet*uWash*.85);
       gl_FragColor=vec4(max(c,0.),1.);}`,
     });
     comp.addPass(paintPass);
@@ -3069,28 +3474,13 @@ void main(){
   };
   /** Intermediate camera stops for a transition (occlusions, dives). */
   function viaFor(from: number, to: number): [V3, V3][] {
+    // Only the way in from the cover needs a route: on every other move the camera swings round
+    // Mila (see `CamRig`).
     const V: Record<string, [V3, V3][]> = {
       "0>1": [
         [V3(-1, 4.5, 15), V3(2, 4, -30)],
         [V3(2.6, 3.2, 10.3), V3(1, 2.4, -4)],
       ],
-      "3>4": [[V3(h.x + 1.6, h.y + 1.6, h.z + 3.0), V3(7, 0.8, 1.5)]],
-      "4>5": [[V3(10.2, 1.15, 6.6), V3(11.6, 0.6, 4.4)]],
-      "6>7": [
-        [V3(M6.x + 0.6, 1.0, M6.z + 1.4), V3(M6.x - 0.3, -0.6, M6.z - 3)],
-        [V3(M6.x - 0.4, -0.9, M6.z - 3.4), V3(9, -4, -12)],
-        [V3(8, -3, -9), V3(MEADOW.x, MEADOW.y + 1, MEADOW.z)],
-      ],
-      "7>8": [
-        [V3(MEADOW.x + 1.2, MEADOW.y + 3.2, MEADOW.z - 3.5), V3(SCHOOL.x, SCHOOL.y + 2, SCHOOL.z)],
-      ],
-      "8>9": [[V3(SCHOOL.x - 1, SCHOOL.y + 4, SCHOOL.z - 3), V3(DEEP.x, DEEP.y, DEEP.z)]],
-      "9>10": [[V3(12, -7, -26), V3(10, -3, -16)]],
-      "10>11": [
-        [V3(5.6, -1.2, -5), V3(4.5, 0.5, 1)],
-        [V3(2.4, 0.7, -0.6), V3(h.x, 1, h.z)],
-      ],
-      "11>12": [[V3(4.3, 2.85, 7.9), V3(h.x - 1.2, h.y + 1.3, h.z - 4)]],
     };
     const fwd = V[`${from}>${to}`];
     if (fwd) return fwd;
@@ -3116,6 +3506,22 @@ void main(){
   /** The crab's debris are clearing before the walk to the next page: input waits for it. */
   let freeing = false;
   const camState = { pos: V3(), tgt: V3() };
+  /** Stand-in the shot is composed on; the real camera eases towards it. */
+  const aimCam = new THREE.PerspectiveCamera();
+  /** Time constants (seconds) of the camera's ease in position and in angle. */
+  const CAM_EASE = { move: 0.3, turn: 0.45 };
+  const CAM_RIDE = { move: 0.1, turn: 0.16 };
+  /** Sea-floor heights between which Mila goes from swimming to standing on the bottom. */
+  const WADE = { from: -0.95, stand: -0.62 };
+  /**
+   * Her gestures with the light: `reach` holds her open hand out to the pearl's light (page 9),
+   * `fist` closes it on nothing, `hug` folds her arms on the three voices (page 10).
+   */
+  const gesture = { reach: 0, fist: 0, hug: 0 };
+  /** Height either side of the sea's surface the riding camera does not rest in. */
+  const WATERLINE_GAP = 0.22;
+  /** The next frame places the camera at once (first frame, cuts, direct page jumps). */
+  let camSnap = true;
   let pageStart = 0;
   let freed = false;
   let mila: MilaRig;
@@ -3133,6 +3539,7 @@ void main(){
       return;
     }
     const still = reduceMotion || instant;
+    if (still) camSnap = true;
     const dur = still ? 0 : (DURATIONS[`${from}>${to}`] ?? 5.5);
     const end = adaptForAspect(CAMS[to]);
     const via = still ? [] : viaFor(from, to);
@@ -3145,20 +3552,43 @@ void main(){
       : (MILA_VIA[`${from}>${to}`] ?? (MILA_VIA[`${to}>${from}`] ?? []).slice().reverse()).map(
           (v) => v.clone(),
         );
+    const milaC = new THREE.CatmullRomCurve3([mFrom, ...mvia, mTo], false, "centripetal");
+    let rig: CamRig | null = null;
+    // She is the subject of every page but the cover: the camera swings round her whether she
+    // travels or stays, so no move ever leaves her behind.
+    if (!still && (milaC.getLength() > 0.4 || (from >= 1 && to >= 1))) {
+      const o0 = camState.pos.clone().sub(mFrom);
+      const o1 = end.pos.clone().sub(mTo);
+      const az0 = Math.atan2(o0.x, o0.z);
+      const turn = Math.atan2(o1.x, o1.z) - az0;
+      rig = {
+        az0,
+        // the short way round
+        az1: az0 + Math.atan2(Math.sin(turn), Math.cos(turn)),
+        r0: Math.hypot(o0.x, o0.z),
+        r1: Math.hypot(o1.x, o1.z),
+        y0: o0.y,
+        y1: o1.y,
+        look0: camState.tgt.clone().sub(mFrom),
+        look1: end.tgt.clone().sub(mTo),
+      };
+    }
     trans = {
       from,
       to,
       t: 0,
       dur: Math.max(dur, 0.001),
+      rig,
       posC: posPts.length > 2 ? new THREE.CatmullRomCurve3(posPts, false, "centripetal") : null,
       posPts,
       tgtC: tgtPts.length > 2 ? new THREE.CatmullRomCurve3(tgtPts, false, "centripetal") : null,
       tgtPts,
-      milaC: new THREE.CatmullRomCurve3([mFrom, ...mvia, mTo], false, "centripetal"),
+      milaC,
       mRy0: mila.g.rotation.y,
       mRy1: MILA_AT[to].ry,
       gold0: U.gold.value,
     };
+    if (!still) sinceTurn = 0;
     page = to;
     hooks.onLeave(to);
     audio.onPage(to);
@@ -3307,9 +3737,11 @@ void main(){
   function animateMila(rdt: number): void {
     const M = mila;
     const target = trans ? trans.to : page;
-    M.swimW = lerp(M.swimW, M.g.position.y < -0.25 ? 1 : 0, Math.min(1, rdt * 2.4));
+    const afloat =
+      M.g.position.y < -0.25 && groundH(M.g.position.x, M.g.position.z) < WADE.stand ? 1 : 0;
+    M.swimW = lerp(M.swimW, afloat, Math.min(1, rdt * 3.6));
     if (M.snap) {
-      M.swimW = M.g.position.y < -0.25 ? 1 : 0;
+      M.swimW = afloat;
       M.hold = HOLD_PAGES.has(target) && M.swimW < 0.3 ? 1 : 0;
       M.snap = false;
     }
@@ -3333,7 +3765,9 @@ void main(){
     M.cord.visible = M.hold < 0.6;
     // body: upright on the sand, stretched out when swimming
     const hover = page === 10 && !trans ? 1.15 : 1.0;
-    const tilt = M.swimW * (lerp(hover, 1.3, clamp(M.moving * 1.5, 0, 1)) + M.pitch);
+    // stretched out when she swims; on the sand she leans a little into her stride
+    const tilt =
+      M.swimW * (lerp(hover, 1.3, clamp(M.moving * 1.5, 0, 1)) + M.pitch) + 0.06 * M.walk;
     M.pose.rotation.x = lerp(M.pose.rotation.x, tilt, Math.min(1, rdt * 2.5));
     const breath = smooth(0.15, 0.38, u) * (1 - smooth(0.45, 0.65, u));
     M.head.rotation.x =
@@ -3341,6 +3775,9 @@ void main(){
     // hip sway when walking
     M.pose.rotation.z = Math.sin(M.phase) * 0.045 * M.walk;
     M.body.rotation.y = Math.sin(M.phase) * 0.07 * M.walk;
+    // her head stays level while the hips sway
+    M.head.rotation.y = -Math.sin(M.phase) * 0.05 * M.walk;
+    M.head.rotation.z = -Math.sin(M.phase) * 0.03 * M.walk;
     M.pose.position.y = 0.62;
     M.body.position.z = 0;
     // legs: walk (thigh, knee bending on the pass, flat foot) and breaststroke kick
@@ -3376,6 +3813,27 @@ void main(){
       );
     }
     M.inner.position.y = -0.62 - (0.467 - reach) * (1 - M.swimW) - 0.006 * (1 - M.swimW);
+    // what the tale says of her hands
+    const sincePage = timer.getElapsed() - pageStart;
+    const still9 = page === 9 && !trans;
+    gesture.reach = lerp(
+      gesture.reach,
+      still9 ? smooth(1.2, 2.6, sincePage) * (1 - smooth(5.0, 6.2, sincePage)) : 0,
+      Math.min(1, rdt * 4),
+    );
+    gesture.fist = lerp(
+      gesture.fist,
+      still9 ? smooth(4.2, 4.8, sincePage) * (1 - smooth(6.6, 7.6, sincePage)) : 0,
+      Math.min(1, rdt * 6),
+    );
+    const hugging =
+      (page === 10 && !trans) ||
+      (!!trans && trans.to === 10 && trans.from === 9 && trans.t > 0.3) ||
+      (!!trans && trans.from === 10 && trans.to === 11 && trans.t < 0.45);
+    gesture.hug = lerp(gesture.hug, hugging ? 1 : 0, Math.min(1, rdt * 2.5));
+    const lightLocal = M.body.worldToLocal(
+      V3(liveConch.position.x - 0.3, liveConch.position.y + 0.9, liveConch.position.z),
+    );
     // arms
     const wS = M.swimW;
     const wH = (1 - wS) * M.hold;
@@ -3409,6 +3867,22 @@ void main(){
         .addScaledVector(V3(0, -1, 0), wR)
         .addScaledVector(V3(sd * 0.3, 1, 0), wS);
       if (up.lengthSq() < 1e-6) up.set(0, 1, 0);
+      if (sd > 0 && gesture.reach > 0.001) {
+        // page 9: her open hand held out towards the light, as far as her arm goes
+        const out = lightLocal.clone().sub(A.S);
+        out.setLength(Math.min(out.length(), (A.L1 + A.L2) * 0.94));
+        H.lerp(out.add(A.S), gesture.reach);
+        Pp.lerp(A.S.clone().add(V3(sd * 0.25, -0.2, -0.05)), gesture.reach);
+        // the fingers close on nothing
+        A.hand.children.forEach((finger, f) => {
+          if (f > 0) finger.rotation.x = gesture.fist * 1.35;
+        });
+      }
+      if (gesture.hug > 0.001) {
+        // page 10: both hands folded on her chest, the three voices held against her
+        H.lerp(V3(sd * 0.05, 0.8, 0.155), gesture.hug);
+        Pp.lerp(A.S.clone().add(V3(sd * 0.22, -0.18, 0.02)), gesture.hug);
+      }
       solveArm(A, H, Pp, look, up);
     }
   }
@@ -3481,6 +3955,10 @@ void main(){
     timer.update();
     const rawDt = timer.getDelta();
     const rdt = Math.min(rawDt, 0.05);
+    sinceTurn += rdt;
+    const turn = clamp(sinceTurn / WASH_SECONDS, 0, 1);
+    // quick to wet, slow to dry, as in Ti Kannot's world
+    U_wash.value = turn < 1 ? 0.8 * Math.sin(Math.PI * Math.pow(turn, 0.6)) ** 2 : 0;
     const { w, h: hh } = size();
     // adaptive quality: drop the Kuwahara pass, then resolution and shadows, on slow devices
     if (!perf.done && page > 0) {
@@ -3517,29 +3995,64 @@ void main(){
       trans.t += rdt / trans.dur;
       const k = clamp(trans.t, 0, 1);
       const e = easeIO(k);
-      if (trans.posC) trans.posC.getPoint(e, camState.pos);
+      // by arc length: an even pace along the path, with no surge between two stops
+      if (trans.posC) trans.posC.getPointAt(e, camState.pos);
       else camState.pos.lerpVectors(trans.posPts[0], trans.posPts[1], e);
       if (trans.tgtC) trans.tgtC.getPoint(e, camState.tgt);
       else camState.tgt.lerpVectors(trans.tgtPts[0], trans.tgtPts[1], e);
       // Mila follows her own path
       const onLand =
         trans.milaC.getPoint(0, tmpV2).y > -0.2 && trans.milaC.getPoint(1, tmpV2).y > -0.2;
-      const me = onLand ? walkEase(k) : easeIO3(k);
+      // in the water she glides at an even pace, without the surge of a cubic ease
+      const me = onLand ? walkEase(k) : easeIO(k);
       trans.milaC.getPoint(me, mila.g.position);
       let dr = trans.mRy1 - trans.mRy0;
       while (dr > Math.PI) dr -= Math.PI * 2;
       while (dr < -Math.PI) dr += Math.PI * 2;
-      mila.g.rotation.y = trans.mRy0 + dr * smooth(0.55, 1, k);
+      mila.g.rotation.y = trans.mRy0 + dr * smooth(0.84, 1, k);
       const pathLen = trans.milaC.getLength();
       if (pathLen > 0.4) {
         const tg = trans.milaC.getTangent(me, tmpV);
         mila.g.rotation.y = lerpAngle(
           mila.g.rotation.y,
-          lerpAngle(trans.mRy0, Math.atan2(tg.x, tg.z), smooth(0, 0.18, k)),
-          smooth(0.0, 0.12, k) * smooth(1, 0.6, k),
+          // she turns to face her way as she sets off, keeps to it, and turns to her place only
+          // as she slows: never a step sideways
+          lerpAngle(trans.mRy0, Math.atan2(tg.x, tg.z), smooth(0, 0.1, k)),
+          smooth(0.0, 0.08, k) * smooth(1, 0.86, k),
         );
       }
-      mila.moving = pathLen > 0.4 ? Math.sin(Math.PI * k) : 0;
+      // The stride is at full swing for as long as she moves at pace (the plateau of `walkEase`),
+      // not only at mid-way: a small step under a body that travels fast reads as sliding.
+      mila.moving =
+        pathLen > 0.4
+          ? onLand
+            ? smooth(0, 0.16, k) * smooth(1, 0.84, k)
+            : Math.sin(Math.PI * k)
+          : 0;
+      // While she travels she is the subject: the camera rides with her, swinging round her from
+      // the page's framing to the next one's, and looks at her most of the way. Nothing here
+      // depends on a fixed route, so it holds for every move, forwards and back.
+      const R = trans.rig;
+      if (R) {
+        const az = lerp(R.az0, R.az1, e);
+        const r = lerp(R.r0, R.r1, e);
+        const mp = mila.g.position;
+        camState.pos.set(
+          mp.x + Math.sin(az) * r,
+          mp.y + lerp(R.y0, R.y1, e),
+          mp.z + Math.cos(az) * r,
+        );
+        // never through the sand or the sea floor
+        camState.pos.y = Math.max(camState.pos.y, groundH(camState.pos.x, camState.pos.z) + 0.3);
+        // nor lingering in the skin of the sea, half in and half out: it crosses at once
+        if (Math.abs(camState.pos.y) < WATERLINE_GAP)
+          camState.pos.y = camState.pos.y >= 0 ? WATERLINE_GAP : -WATERLINE_GAP;
+        // and it stays on her side of the surface: from above, the sea would hide her
+        if (mp.y < -0.75) camState.pos.y = Math.min(camState.pos.y, -WATERLINE_GAP);
+        camState.tgt.copy(mp).add(tmpV2.lerpVectors(R.look0, R.look1, e));
+        const pull = smooth(0, 0.3, k) * smooth(1, 0.7, k) * 0.85;
+        camState.tgt.lerp(tmpV2.copy(mp).setY(mp.y + 0.7), pull);
+      }
       {
         const tg = trans.milaC.getTangent(me, tmpV2);
         mila.pitch = lerp(mila.pitch, clamp(-tg.y, -1, 1) * 0.7 * mila.moving, 0.2);
@@ -3561,9 +4074,21 @@ void main(){
         th.prog.value = lerp(th.prog.value, tgt, Math.min(1, rdt * (tgt ? 2 : 1.5)));
       }
     }
+    if (!trans && page === 9) {
+      // Page 9 turns on a gesture: the camera draws in on her hand and the light, slowly, so the
+      // open hand and its closing, empty, can be read; it stays close until the page is left.
+      const wide = adaptForAspect(CAMS[9]);
+      const hand = (mila.arms.find((a) => a.sd > 0) ?? mila.arms[0]).hand.getWorldPosition(tmpV);
+      const near = smooth(0.6, 3.6, T - pageStart) * (reduceMotion ? 0 : 1);
+      camState.pos.copy(wide.pos).lerp(hand, 0.5 * near);
+      camState.tgt.copy(wide.tgt).lerp(hand, 0.8 * near);
+    }
     pointer.sx = lerp(pointer.sx, pointer.x, rdt * 2);
     pointer.sy = lerp(pointer.sy, pointer.y, rdt * 2);
-    camera.position.copy(camState.pos);
+    // The move is composed on a stand-in, and the real camera eases onto it: its position and
+    // above all its angle are damped, so a change of direction is a turn of the head, never a cut.
+    const lens = aimCam;
+    lens.position.copy(camState.pos);
     const right = tmpV
       .subVectors(camState.tgt, camState.pos)
       .normalize()
@@ -3571,11 +4096,21 @@ void main(){
       .normalize();
     // pointer parallax eases out with the motion control (and never runs with reduced motion)
     const par = reduceMotion ? 0 : (page === 2 ? 0.05 : 0.16) * motion;
-    camera.position
+    lens.position
       .addScaledVector(right, pointer.sx * par)
       .add(tmpV2.set(0, -pointer.sy * par * 0.5, 0));
-    if (!reduceMotion) camera.position.y += Math.sin(T * 0.4) * 0.015 * motion;
-    camera.lookAt(camState.tgt);
+    if (!reduceMotion) lens.position.y += Math.sin(T * 0.4) * 0.015 * motion;
+    lens.lookAt(camState.tgt);
+    if (camSnap || reduceMotion) {
+      camera.position.copy(lens.position);
+      camera.quaternion.copy(lens.quaternion);
+      camSnap = false;
+    } else {
+      // riding with Mila, the move is smooth by construction: a short ease, or she would outrun it
+      const ease = trans?.rig ? CAM_RIDE : CAM_EASE;
+      camera.position.lerp(lens.position, 1 - Math.exp(-rdt / ease.move));
+      camera.quaternion.slerp(lens.quaternion, 1 - Math.exp(-rdt / ease.turn));
+    }
     U.camPos.value.copy(camera.position);
 
     // under water?
@@ -3589,6 +4124,9 @@ void main(){
     fillL.intensity = lerp(0.85, 0.2, under);
     moonL.intensity = lerp(2.3, 1.2, under);
     (plankton.material as THREE.PointsMaterial).opacity = under * 0.8;
+    fireflies.material.uniforms.uTime.value = wtime;
+    fireflies.material.uniforms.uOpacity.value = (1 - under) * 0.85;
+    updateBoat(wtime);
     sky.position.copy(camera.position);
 
     // the shadow follows the action
@@ -3613,9 +4151,11 @@ void main(){
     {
       const gp = mila.g.position;
       const gh = groundH(gp.x, gp.z);
-      if (gp.y > -0.2) gp.y = Math.max(gh, -0.05);
-      else gp.y = Math.max(gp.y, gh + 0.35);
-      if (gp.y > -0.2 && gh > -0.05) gp.y = gh;
+      if (gh > WADE.from) {
+        // Where the water is shallow her feet find the bottom: she wades in and out, upright,
+        // instead of swimming over the sand or walking on the water.
+        gp.y = lerp(Math.max(gp.y, gh + 0.35), gh, smooth(WADE.from, WADE.stand, gh));
+      } else gp.y = Math.max(gp.y, gh + 0.35);
     }
     updateGround();
     U.wind.value = lerp(U.wind.value, mila.swimW * 1.2 + mila.walk * 0.4, rdt * 2);
@@ -3788,19 +4328,40 @@ void main(){
     const mp = mila.g.position;
     const up = mila.swimW > 0.5 ? 1.15 : 1.25;
     const rad = mila.swimW > 0.5 ? 0.85 : 0.6;
+    const held = gesture.hug > 0.5;
+    const chest = mila.body.localToWorld(V3(0, 0.84, 0.17));
+    const palm = (mila.arms.find((a) => a.sd > 0) ?? mila.arms[0]).hand.getWorldPosition(V3());
     SIGNS.forEach((s, i) => {
       let tgt: V3;
       let sc: number;
       let spd = 1.6;
-      const follow = V3(
-        mp.x + Math.cos(W * 0.8 + i * 2.09) * rad,
-        mp.y + up + Math.sin(W * 1.3 + i) * 0.1,
-        mp.z + Math.sin(W * 0.8 + i * 2.09) * rad,
-      );
+      // held against her (page 10), the three lights keep close to her chest
+      const follow = held
+        ? chest
+            .clone()
+            .add(
+              V3(
+                Math.cos(W * 0.9 + i * 2.09) * 0.15,
+                Math.sin(W * 1.3 + i) * 0.05,
+                Math.sin(W * 0.9 + i * 2.09) * 0.15,
+              ),
+            )
+        : page === 9 && !trans
+          ? // page 9: the lights she already has wait above and behind her, clear of her face
+            V3(
+              mp.x + 0.5 + Math.cos(W * 0.6 + i * 3.1) * 0.35,
+              mp.y + 1.75 + Math.sin(W * 1.1 + i) * 0.08,
+              mp.z + 0.9 + Math.sin(W * 0.6 + i * 3.1) * 0.35,
+            )
+          : V3(
+              mp.x + Math.cos(W * 0.8 + i * 2.09) * rad,
+              mp.y + up + Math.sin(W * 1.3 + i) * 0.1,
+              mp.z + Math.sin(W * 0.8 + i * 2.09) * rad,
+            );
       const got = [
         freed && page >= 5,
         page >= 7 && (page > 7 || since > 3.2),
-        page >= 9 && (page > 9 || since > 3.8),
+        page >= 9 && (page > 9 || since > 5.0),
       ][i];
       if (page <= 1) {
         tgt = conch;
@@ -3810,14 +4371,24 @@ void main(){
           tgt = conch;
           sc = 0;
         } else if (since < 3.2) {
-          tgt = conch
-            .clone()
-            .add(V3(-0.35 - 0.25 * i, 0.15 + 0.18 * Math.sin(i * 2.1), 0.25 + i * 0.12));
-          sc = 1;
-          spd = 0.9;
+          // the three voices unwind out of the shell in a widening spiral, growing as they come
+          const u = since / 3.2;
+          const a = since * 2.7 + i * 2.09;
+          const r = 0.04 + 0.26 * u;
+          tgt = conch.clone().add(
+            V3(
+              // up and a little seaward, beside her: clear of the text on the left
+              -0.06 - 0.13 * u * (1 + 0.3 * i) + Math.cos(a) * r * 0.5,
+              0.08 + 0.3 * u + Math.sin(a) * r,
+              0.1 - 0.2 * u - i * 0.06,
+            ),
+          );
+          sc = 0.3 + 0.55 * u;
+          spd = 6;
         } else {
           tgt = homes[i];
-          sc = since < 6 ? 1 : 0;
+          // they leave for the sea smaller and fading, without crossing the text at full glow
+          sc = since < 5 ? 0.6 : 0;
           spd = 2.5;
         }
       } else if (page >= 11) {
@@ -3851,10 +4422,16 @@ void main(){
         );
         sc = 1.15;
         spd = 1.8;
+      } else if (i === 2 && page === 9 && !trans && since > 1.4 && since <= 5.0) {
+        // page 9: the pearl's light rises to her open hand and waits above it; when her hand
+        // closes, empty, the light is free and goes with her
+        tgt = palm.clone().add(V3(0, 0.16, 0));
+        sc = 0.42;
+        spd = 1.3;
       } else if (got) {
         tgt = follow;
-        sc = 1;
-        spd = 2.2;
+        sc = held ? 0.55 : page === 9 && !trans ? 0.55 : 1;
+        spd = held ? 4 : 2.2;
       } else {
         tgt = homes[i];
         sc = 0;
@@ -3868,7 +4445,40 @@ void main(){
       s.sc = lerp(s.sc, sc, Math.min(1, dt * 2.2));
       if (!was && s.sc > 0.5 && page >= 5) audio.chime(i);
       const pul = 1 + Math.sin(W * 3 + i) * 0.06;
-      s.g.scale.setScalar(Math.max(0.001, s.sc * 0.95 * pul));
+      // A light is a guide, never a glare: it dims as it nears the camera (where its halo would
+      // flood the frame) and where it drifts behind the text, which must stay readable.
+      const ndc = tmpV.copy(s.g.position).project(camera);
+      const near = smooth(1.1, 5, camera.position.distanceTo(s.g.position));
+      const onText =
+        ndc.z < 1
+          ? camera.aspect >= 1
+            ? smooth(0.2, -0.3, ndc.x) * smooth(-0.35, 0.1, ndc.y)
+            : smooth(0.05, 0.5, ndc.y)
+          : 0;
+      // the three lights gathered on the conch (page 11) add up: each gives less
+      // (and on page 9 they stand back: the hand she holds out must be seen)
+      const gathered = page >= 11 ? 0.55 : page === 9 && !trans ? 0.5 : 1;
+      const dim = (0.2 + 0.8 * near) * (1 - 0.72 * onText) * gathered;
+      s.dim = lerp(s.dim, dim, Math.min(1, dt * 3));
+      s.halo.opacity = s.dim;
+      s.halo.color.copy(s.tint).multiplyScalar(0.45 + 0.55 * s.dim);
+      s.core.color.copy(s.tint).multiplyScalar(0.9);
+      s.core.opacity = 0.3 + 0.7 * s.dim;
+      // its drawing fades with it: never a dark mark left on a faint glow
+      s.icon.opacity = smooth(0.35, 0.8, s.dim) * 0.85;
+      // the wake: a new spark every few hundredths of a second, the oldest dropped
+      s.wakeT += dt;
+      const wp = s.wake.geometry.attributes.position as THREE.BufferAttribute;
+      if (dist > 30) for (let k = 0; k < wp.count; k++) wp.setXYZ(k, tgt.x, tgt.y, tgt.z);
+      else if (s.wakeT > 0.04) {
+        s.wakeT = 0;
+        (wp.array as Float32Array).copyWithin(3, 0, (wp.count - 1) * 3);
+      }
+      wp.setXYZ(0, s.g.position.x, s.g.position.y, s.g.position.z);
+      wp.needsUpdate = true;
+      (s.wake.material as THREE.PointsMaterial).opacity = 0.55 * s.dim * clamp(s.sc * 1.4, 0, 1);
+      (s.ring.material as THREE.MeshBasicMaterial).opacity = 0.22 * s.dim;
+      s.g.scale.setScalar(Math.max(0.001, s.sc * 0.95 * pul * (0.72 + 0.28 * s.dim)));
       s.ring.lookAt(camera.position);
       s.ring.rotateZ(W * (1.2 + i * 0.3));
     });
@@ -3906,6 +4516,8 @@ void main(){
     buildDistance();
     buildSeaGrape();
     buildRocks();
+    buildBeachLife();
+    buildBoat();
     mila = buildMila();
     buildConches();
     buildCrab();
