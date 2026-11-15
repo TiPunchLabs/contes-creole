@@ -1,9 +1,10 @@
 // Stylised Guadeloupean plants, each merged into one vertex-coloured geometry (one draw call per
 // species once instanced). Sizes are at scale 1; `crown` and `height` feed the placement rules.
 import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { createRng, type Rng } from "@shared/random";
 import { soften } from "../soft";
-import { Kit, reach } from "./kit";
+import { Kit, painted, reach } from "./kit";
 
 /** Height layer: trees shade, shrubs fill under them, low plants carpet the ground. */
 export type Stratum = "tree" | "shrub" | "low";
@@ -36,15 +37,18 @@ const GOLDEN = 2.39996;
 
 /** Soft round mass of foliage. */
 const blob = (r: number, sx = 1, sy = 1, sz = 1): THREE.BufferGeometry =>
+  soften(new THREE.IcosahedronGeometry(r, 2).scale(sx, sy, sz));
+
+/** Small round thing (flower, fruit, nut): a quarter of a blob's triangles. */
+const bead = (r: number, sx = 1, sy = 1, sz = 1): THREE.BufferGeometry =>
   soften(new THREE.IcosahedronGeometry(r, 1).scale(sx, sy, sz));
 
-/** Small round thing (flower, fruit, nut): a fifth of a blob's triangles. */
-const bead = (r: number, sx = 1, sy = 1, sz = 1): THREE.BufferGeometry =>
-  soften(new THREE.IcosahedronGeometry(r, 0).scale(sx, sy, sz));
+/** Sides of a trunk drawn round: thin stalks keep the few sides they were given. */
+const roundSides = (sides: number): number => (sides >= 5 ? sides * 2 : sides);
 
 /** Tapered trunk segment from the origin up `h`. */
 const trunk = (h: number, top: number, bottom: number, sides = 6): THREE.BufferGeometry =>
-  new THREE.CylinderGeometry(top, bottom, h, sides).translate(0, h / 2, 0);
+  new THREE.CylinderGeometry(top, bottom, h, roundSides(sides)).translate(0, h / 2, 0);
 
 /**
  * A leaf blade along +z from the origin: `w` wide, `len` long, folded along its midrib and
@@ -57,7 +61,7 @@ function blade(
   segments = 4,
   taper = 0.25,
 ): THREE.BufferGeometry {
-  const g = new THREE.PlaneGeometry(w, len, 2, segments)
+  const g = new THREE.PlaneGeometry(w, len, 2, segments * 2)
     .rotateX(-Math.PI / 2)
     .translate(0, 0, len / 2);
   const p = g.getAttribute("position");
@@ -72,6 +76,29 @@ function blade(
     p.setY(i, Math.abs(x) * 0.35 - droop * t * t);
   }
   g.computeVertexNormals();
+  return g;
+}
+
+/**
+ * A palm frond along +z from the origin: a drooping midrib (`droop` at the tip) carrying pairs of
+ * slender leaflets that hang from it, longest at mid-length, `w` across at its widest.
+ */
+function frond(len: number, w: number, droop: number, pairs = 11): THREE.BufferGeometry {
+  const parts = [blade(len, 0.045, droop, 5, 0.6)];
+  for (let i = 0; i < pairs; i++) {
+    const t = 0.14 + (i / (pairs - 1)) * 0.84;
+    const size = (w / 2) * (0.45 + 0.55 * Math.sin(Math.PI * Math.min(t * 1.15, 1)) ** 0.7);
+    for (const side of [-1, 1]) {
+      const leaflet = blade(size, 0.085, size * 0.55, 1, 0.12)
+        .rotateZ(side * 0.25)
+        .rotateY(side * (Math.PI / 2 - 0.45 - t * 0.35))
+        .rotateX(2 * droop * t * (1 / len))
+        .translate(0, -droop * t * t, len * t);
+      parts.push(leaflet);
+    }
+  }
+  const g = mergeGeometries(parts);
+  for (const part of parts) part.dispose();
   return g;
 }
 
@@ -110,13 +137,55 @@ function lump(
   sz: number,
   rough = 0.28,
 ): THREE.BufferGeometry {
-  const g = soften(new THREE.IcosahedronGeometry(r, 1));
+  // The outline is drawn by a few control bumps (one RNG draw each, on a coarse sphere) and
+  // carried by a finer sphere that blends them, so the mass is uneven yet smooth, never faceted.
+  const coarse = soften(new THREE.IcosahedronGeometry(1, 1));
+  const cp = coarse.getAttribute("position");
+  const bumps: [THREE.Vector3, number][] = [];
+  for (let i = 0; i < cp.count; i++) {
+    bumps.push([new THREE.Vector3().fromBufferAttribute(cp, i).normalize(), (rng() - 0.5) * rough]);
+  }
+  coarse.dispose();
+  const g = soften(new THREE.IcosahedronGeometry(r, LUMP_DETAIL));
   const p = g.getAttribute("position");
+  const dir = new THREE.Vector3();
   for (let i = 0; i < p.count; i++) {
-    const k = 1 + (rng() - 0.5) * rough;
+    dir.fromBufferAttribute(p, i).normalize();
+    let sum = 0;
+    let weight = 0;
+    for (const [at, bump] of bumps) {
+      const w = Math.exp((dir.dot(at) - 1) / LUMP_BLEND);
+      sum += w * bump;
+      weight += w;
+    }
+    const k = 1 + sum / weight;
     p.setXYZ(i, p.getX(i) * k * sx, p.getY(i) * k * sy, p.getZ(i) * k * sz);
   }
   g.computeVertexNormals();
+  return g;
+}
+
+const LUMP_DETAIL = 2;
+/** How far a control bump spreads over the mass (in 1 - cosine of the angle). */
+const LUMP_BLEND = 0.045;
+const SKY_SIDE = new THREE.Color("#fff3c4");
+const UNDER_SIDE = new THREE.Color("#2f5560");
+const dye = new THREE.Color();
+
+/**
+ * Models a painted mass in its own colour: its top catches a warm light, its underside sinks into a
+ * cool shade. Works on the vertex colours of a part still at the origin, from its normals.
+ */
+function modelled(g: THREE.BufferGeometry, light = 0.2, shade = 0.34): THREE.BufferGeometry {
+  const n = g.getAttribute("normal");
+  const c = g.getAttribute("color");
+  for (let i = 0; i < c.count; i++) {
+    const up = n.getY(i);
+    dye.fromBufferAttribute(c, i);
+    if (up > 0) dye.lerp(SKY_SIDE, up * up * light);
+    else dye.lerp(UNDER_SIDE, up * up * shade);
+    c.setXYZ(i, dye.r, dye.g, dye.b);
+  }
   return g;
 }
 
@@ -138,7 +207,9 @@ type Mass = [number, number, number, number, number, string];
 /** Adds crown masses, each turned at random so no two share an outline. */
 function crown(kit: Kit, rng: Rng, masses: Mass[], spread = 1.15): void {
   for (const [x, y, z, r, flat, color] of masses) {
-    kit.add(lump(rng, r, spread, flat, spread), color, [x, y, z], [0, rng() * 6.28, 0]);
+    const yaw = rng() * 6.28;
+    const part = modelled(painted(lump(rng, r, spread, flat, spread), color));
+    kit.parts.push(part.rotateY(yaw).translate(x, y, z));
   }
 }
 
@@ -176,14 +247,22 @@ function flamboyant(): Plant {
   // Blossom: clusters riding on most masses and a wide one under the perch, never a lid.
   const bloom: Mass[] = masses
     .filter(() => rng() < 0.7)
-    .map(([x, y, z, r]) => [
-      x * 1.02,
-      y + r * 0.3,
-      z * 1.02,
-      r * (0.58 + rng() * 0.2),
-      0.45,
-      rng() < 0.3 ? "#ee7a42" : "#e5543a",
-    ]);
+    .flatMap(([x, y, z, r]) => {
+      // Each mass carries a few rounded sprays of flowers, not one flat sheet.
+      const turn = rng() * 6.28;
+      return [0, 1, 2, 3].map((k): Mass => {
+        const a = turn + k * 1.75;
+        const out = k ? r * (0.42 + rng() * 0.16) : 0;
+        return [
+          x * 1.02 + Math.cos(a) * out,
+          y + r * (k ? 0.24 : 0.33),
+          z * 1.02 + Math.sin(a) * out,
+          r * (0.3 + rng() * 0.12),
+          0.62,
+          rng() < 0.3 ? "#f08040" : "#e5503a",
+        ];
+      });
+    });
   bloom.push([px, top - 0.28, pz, 0.6, 0.42, "#e5543a"]);
   // Small clusters on the outer side of the edge masses, set into the foliage so none floats.
   for (const [x, y, z, r] of masses.slice(0, 7)) {
@@ -257,11 +336,11 @@ function coconut(): Plant {
   const rng = createRng(43);
   const top = new THREE.Vector3();
   let lean = 0;
-  for (let i = 0; i < 5; i++) {
-    const seg = trunk(1.05, 0.11 - i * 0.008, 0.14 - i * 0.008, 6);
+  for (let i = 0; i < 10; i++) {
+    const seg = trunk(0.54, 0.11 - i * 0.004, 0.14 - i * 0.004, 6);
     kit.add(seg, i % 2 ? "#a08668" : "#8f7759", [top.x, top.y, top.z], [0, 0, -lean]);
-    top.add(new THREE.Vector3(Math.sin(lean) * 1.0, Math.cos(lean) * 1.0, 0));
-    lean += 0.07;
+    top.add(new THREE.Vector3(Math.sin(lean) * 0.5, Math.cos(lean) * 0.5, 0));
+    lean += 0.035;
   }
   const crown = kit.parts.length;
   rosette(
@@ -269,7 +348,7 @@ function coconut(): Plant {
     rng,
     10,
     0,
-    () => blade(2, 0.5, 1.1, 5, 0.15),
+    () => frond(2.05, 1.05, 1.1),
     (i) => (i % 3 ? "#6fb35b" : "#5c9e4c"),
     [-0.45, 0.1],
   );
@@ -300,7 +379,7 @@ function papaya(): Plant {
       [0, y - 0.05, 0],
       [out.z * 0.95, 0, -out.x * 0.95],
     );
-    const leaf = soften(new THREE.DodecahedronGeometry(0.55, 0)).scale(1, 0.1, 1);
+    const leaf = soften(new THREE.IcosahedronGeometry(0.55, 2)).scale(1, 0.1, 1);
     kit.add(
       leaf,
       i % 2 ? "#6fb058" : "#5e9f4c",
@@ -360,7 +439,7 @@ function balisier(): Plant {
   ]) {
     for (let k = 0; k < 4; k++) {
       const side = k % 2 ? 1 : -1;
-      const bract = new THREE.ConeGeometry(0.07, 0.3, 4).rotateZ(side * 1.1);
+      const bract = new THREE.ConeGeometry(0.07, 0.3, 8).rotateZ(side * 1.1);
       kit.add(bract, k === 3 ? "#f2c14a" : "#e2483a", [x + side * 0.09, h + k * 0.11, z]);
     }
   }
@@ -411,7 +490,7 @@ function malanga(): Plant {
     const h = 0.55 + rng() * 0.35;
     const out = new THREE.Vector3(Math.cos(a), 0, Math.sin(a)).multiplyScalar(0.22);
     kit.add(trunk(h, 0.015, 0.025, 3), "#7fa860", [0, 0, 0], [out.z, 0, -out.x]);
-    const leaf = soften(new THREE.IcosahedronGeometry(0.34, 1))
+    const leaf = soften(new THREE.IcosahedronGeometry(0.34, 2))
       .scale(1, 0.08, 1.25)
       .translate(0, 0, 0.2);
     kit.add(
@@ -459,7 +538,7 @@ export const FLORA: Record<Flora, () => Plant> = {
  * horizontal reach is `span` (the reach the placement rules were tuned with).
  */
 function pebble(sx: number, sy: number, sz: number, span: number): THREE.BufferGeometry {
-  const g = soften(new THREE.IcosahedronGeometry(0.5, 1).scale(sx, sy, sz));
+  const g = soften(new THREE.IcosahedronGeometry(0.5, 2).scale(sx, sy, sz));
   const k = span / reach(g);
   return g.scale(k, 1, k);
 }

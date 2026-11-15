@@ -3,7 +3,7 @@ import type { MixedEnv } from "../env";
 import { SPOTS } from "./spots";
 import { islandHeight } from "./terrain";
 
-/** Flat-shaded mesh at a local position. */
+/** Smoothly lit mesh at a local position. */
 function part(
   geometry: THREE.BufferGeometry,
   color: string,
@@ -11,10 +11,7 @@ function part(
   y: number,
   z: number,
 ): THREE.Mesh {
-  const mesh = new THREE.Mesh(
-    geometry,
-    new THREE.MeshLambertMaterial({ color, flatShading: true }),
-  );
+  const mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color }));
   mesh.position.set(x, y, z);
   return mesh;
 }
@@ -30,12 +27,14 @@ function settle<T extends THREE.Object3D>(object: T, x: number, z: number, yaw: 
 function reservoir(): THREE.Group {
   const tank = new THREE.Group();
   tank.add(
-    part(new THREE.CylinderGeometry(1.3, 1.4, 1.4, 10), "#b9b2a4", 0, 0.7, 0),
-    part(new THREE.CylinderGeometry(1.15, 1.15, 0.05, 10), "#7fd6cf", 0, 1.42, 0),
+    part(new THREE.CylinderGeometry(1.3, 1.4, 1.4, 40), "#b9b2a4", 0, 0.7, 0),
+    part(new THREE.TorusGeometry(1.24, 0.08, 10, 40).rotateX(Math.PI / 2), "#cfc8b8", 0, 1.4, 0),
+    part(new THREE.CylinderGeometry(1.4, 1.5, 0.22, 40), "#a39a8a", 0, 0.11, 0),
+    part(new THREE.CylinderGeometry(1.17, 1.17, 0.05, 40), "#7fd6cf", 0, 1.42, 0),
   );
   for (const angle of [-0.5, 0, 0.5]) {
     const tap = part(
-      new THREE.CylinderGeometry(0.06, 0.06, 0.45, 6).rotateX(Math.PI / 2),
+      new THREE.CylinderGeometry(0.06, 0.06, 0.45, 12).rotateX(Math.PI / 2),
       "#c9a24a",
       Math.sin(angle) * 1.45,
       0.45,

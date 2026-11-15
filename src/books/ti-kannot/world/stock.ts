@@ -14,10 +14,26 @@ export function pileSlot(i: number, cols: number, rows: number): [number, number
 }
 
 const PALE = new THREE.Color("#c9bfa9");
+
+/** A turned shape (gourd, barrel, jar) from its profile: [radius, height] from foot to top. */
+function lathe(profile: [number, number][]): THREE.BufferGeometry {
+  const curve = new THREE.SplineCurve(profile.map(([r, y]) => new THREE.Vector2(r, y)));
+  return new THREE.LatheGeometry(curve.getPoints(profile.length * 3), 20);
+}
 const KINDS = [
   {
     key: "kalbas",
-    geometry: new THREE.SphereGeometry(0.3, 7, 5).scale(1, 1.15, 1),
+    geometry: lathe([
+      [0, -0.345],
+      [0.14, -0.33],
+      [0.27, -0.2],
+      [0.3, 0],
+      [0.25, 0.2],
+      [0.12, 0.31],
+      [0.05, 0.335],
+      [0.045, 0.37],
+      [0, 0.375],
+    ]),
     color: "#c99f55",
     cols: 10,
     rows: 3,
@@ -27,7 +43,15 @@ const KINDS = [
   },
   {
     key: "barrels",
-    geometry: new THREE.CylinderGeometry(0.32, 0.32, 0.75, 8),
+    geometry: lathe([
+      [0, -0.375],
+      [0.26, -0.375],
+      [0.3, -0.25],
+      [0.325, 0],
+      [0.3, 0.25],
+      [0.26, 0.375],
+      [0, 0.375],
+    ]),
     color: "#8a5a36",
     cols: 4,
     rows: 2,
@@ -37,7 +61,17 @@ const KINDS = [
   },
   {
     key: "jars",
-    geometry: new THREE.CylinderGeometry(0.18, 0.32, 0.75, 7),
+    geometry: lathe([
+      [0, -0.375],
+      [0.15, -0.375],
+      [0.28, -0.15],
+      [0.31, 0.05],
+      [0.24, 0.24],
+      [0.15, 0.31],
+      [0.19, 0.375],
+      [0.13, 0.36],
+      [0, 0.36],
+    ]),
     color: "#c26b43",
     cols: 5,
     rows: 2,
@@ -51,7 +85,7 @@ const KINDS = [
 export function createStock(rng: Rng): { group: THREE.Group; update(env: MixedEnv): void } {
   const group = new THREE.Group();
   const piles = KINDS.map((kind) => {
-    const material = new THREE.MeshLambertMaterial({ color: kind.color, flatShading: true });
+    const material = new THREE.MeshLambertMaterial({ color: kind.color });
     const max = MAX_STOCK[kind.key];
     const mesh = new THREE.InstancedMesh(kind.geometry, material, max);
     mesh.count = 0;

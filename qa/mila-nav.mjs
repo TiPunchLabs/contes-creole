@@ -511,7 +511,11 @@ async function guarded(run, fn) {
   }
 }
 
-const browser = await chromium.launch({ args: GPU, env: GPU_ENV });
+const browser = await chromium.launch({
+  args: GPU,
+  env: GPU_ENV,
+  channel: process.env.QA_CHANNEL || undefined,
+});
 try {
   const renderer = await (async () => {
     const p = await browser.newPage();

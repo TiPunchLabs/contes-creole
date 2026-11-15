@@ -22,6 +22,18 @@ const WHITE = new THREE.Color("#ffffff");
 
 export type Paint = keyof typeof PALETTE;
 
+// The paper's tooth under the washes: broad drifts of warm and cool, finer mottling, and the sand
+// darkened where the sea has just wet it.
+const GRAIN = `varying vec3 vGround;
+  float tkHash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+  float tkNoise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f);
+    return mix(mix(tkHash(i),tkHash(i+vec2(1.,0.)),f.x),mix(tkHash(i+vec2(0.,1.)),tkHash(i+vec2(1.,1.)),f.x),f.y); }`;
+const GRAIN_TINT = `  float tkBroad=tkNoise(vGround.xz*.55),tkFine=tkNoise(vGround.xz*3.1+9.),tkTooth=tkNoise(vGround.xz*13.);
+  diffuseColor.rgb*=1.+(tkBroad-.5)*.2+(tkFine-.5)*.12+(tkTooth-.5)*.06;
+  diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(1.07,1.,.88),smoothstep(.45,.8,tkBroad)*.6);
+  diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(.9,1.,1.06),smoothstep(.5,.15,tkBroad)*.5);
+  diffuseColor.rgb*=1.-smoothstep(.4,-.05,vGround.y+(tkFine-.5)*.2)*.2;`;
+
 /**
  * Paint of the ground face a–b–c from its centre, height, steepness (normal y) and river distance;
  * the scenery's yards, paths and banks first.
@@ -85,6 +97,15 @@ export function createGround(rng: Rng): { mesh: THREE.Mesh; update(env: MixedEnv
   }
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
   const material = new THREE.MeshLambertMaterial({ vertexColors: true });
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace("void main() {", "varying vec3 vGround;\nvoid main() {")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\n  vGround = transformed;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("void main() {", `${GRAIN}\nvoid main() {`)
+      .replace("#include <color_fragment>", `#include <color_fragment>\n${GRAIN_TINT}`);
+  };
+  material.customProgramCacheKey = () => "tk-ground";
   return {
     mesh: new THREE.Mesh(geometry, material),
     update(env) {

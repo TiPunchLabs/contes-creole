@@ -11,7 +11,12 @@ const stage = vi.hoisted(() => ({
   start: vi.fn(),
   camera: null as THREE.PerspectiveCamera | null,
 }));
-const paint = vi.hoisted(() => ({ render: vi.fn(), update: vi.fn(), dispose: vi.fn() }));
+const paint = vi.hoisted(() => ({
+  render: vi.fn(),
+  update: vi.fn(),
+  setShadows: vi.fn(),
+  dispose: vi.fn(),
+}));
 
 vi.mock("@shared/three/stage", async () => {
   const THREE = await import("three");
@@ -139,6 +144,46 @@ describe("Ti Kannot world mount", () => {
     expect(camera.view?.offsetX).toBeCloseTo(0);
     expect(offset).toBeLessThan(0);
     handle.dispose();
+  });
+
+  it("wets the paper around a page turn, and lets it dry", async () => {
+    const { handle, run } = await mountAt(1, false);
+    /** Wetness handed to the watercolour pass on the last frame. */
+    const wash = (): number => (paint.update.mock.calls.at(-1) as [number, number])[1];
+    run(0.5);
+    expect(wash()).toBe(0);
+    handle.setPage(2);
+    run(0.4);
+    expect(wash()).toBeGreaterThan(0.4);
+    run(3);
+    expect(wash()).toBeCloseTo(0, 5);
+    handle.dispose();
+  });
+
+  it("keeps the paper dry under reduced motion and on a turn to the same page", async () => {
+    const calm = await mountAt(1, true);
+    calm.handle.setPage(2);
+    calm.run(0.4);
+    expect((paint.update.mock.calls.at(-1) as [number, number])[1]).toBe(0);
+    calm.handle.dispose();
+    const { handle, run } = await mountAt(1, false);
+    handle.setPage(1);
+    run(0.4);
+    expect((paint.update.mock.calls.at(-1) as [number, number])[1]).toBe(0);
+    handle.dispose();
+  });
+
+  it("drops the cast shadows on a device that cannot hold the frame rate", async () => {
+    const { handle } = await mountAt(1, false);
+    const [frame] = stage.start.mock.calls.at(-1) as [(time: number, dt: number) => void];
+    for (let t = 0; t < 6; t += 0.05) frame(t, 0.05);
+    expect(paint.setShadows).toHaveBeenCalledWith(false);
+    handle.dispose();
+    paint.setShadows.mockClear();
+    const smooth = await mountAt(1, false);
+    smooth.run(6);
+    expect(paint.setShadows).not.toHaveBeenCalled();
+    smooth.handle.dispose();
   });
 
   it("leaves the island RNG where the retired vegetation and village left it", async () => {

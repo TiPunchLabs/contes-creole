@@ -57,6 +57,16 @@ function boulder(r: number, detail: number): THREE.BufferGeometry {
   return g;
 }
 
+const POOL_VERTEX = `varying vec2 vP; void main(){ vP=position.xz; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
+// Clear water welling up: rings spread from the middle and die at a soft, foamy rim.
+const POOL_FRAGMENT = `uniform float uTime,uLife; varying vec2 vP;
+  void main(){ float r=length(vP)/.95;
+    vec3 c=mix(vec3(.36,.78,.8),vec3(.62,.93,.86),smoothstep(.15,.95,r));
+    float ring=sin(r*17.-uTime*2.6+sin(atan(vP.y,vP.x)*3.)*.5);
+    c+=vec3(.95,1.,.9)*smoothstep(.55,1.,ring)*(1.-r)*.45*uLife;
+    c=mix(c,vec3(1.),smoothstep(.8,.95,r+ring*.03)*.5);
+    gl_FragColor=vec4(c,(.9-smoothstep(.82,1.,r)*.9)); }`;
+
 /** The source behind the big rock: pool, dead branches choking it and Gwo Rako's dam. */
 export function createSource(rng: Rng): {
   group: THREE.Group;
@@ -64,20 +74,22 @@ export function createSource(rng: Rng): {
 } {
   const [rx, rz] = SPOTS.rock;
   const rock = new THREE.Mesh(
-    mottled(boulder(1.6, 2).scale(1.3, 1.1, 1)),
+    mottled(boulder(1.6, 4).scale(1.3, 1.1, 1)),
     new THREE.MeshLambertMaterial({ vertexColors: true }),
   );
   rock.position.set(rx, islandHeight(rx, rz) + 0.8, rz);
   rock.rotation.set(0.2, 0.7, 0.1);
 
   const head = riverPoint(0);
-  const poolMaterial = new THREE.MeshBasicMaterial({
-    color: "#7fd6cf",
+  const poolMaterial = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uLife: { value: 1 } },
+    vertexShader: POOL_VERTEX,
+    fragmentShader: POOL_FRAGMENT,
     transparent: true,
-    opacity: 0.9,
+    depthWrite: false,
   });
   const pool = new THREE.Mesh(
-    new THREE.CircleGeometry(0.8, 12).rotateX(-Math.PI / 2),
+    new THREE.CircleGeometry(0.95, 40).rotateX(-Math.PI / 2),
     poolMaterial,
   );
   pool.position.set(head.x, islandHeight(head.x, head.y) + 0.2, head.y);
@@ -97,7 +109,7 @@ export function createSource(rng: Rng): {
   const stone = stoneMaterial("#a69885");
   const dam = new THREE.Group();
   for (let i = 0; i < 5; i++) {
-    const s = new THREE.Mesh(boulder(0.35, 1), stone);
+    const s = new THREE.Mesh(boulder(0.35, 2), stone);
     s.position.set((i - 2) * 0.55, 0.2, 0);
     dam.add(s);
   }
@@ -119,7 +131,8 @@ export function createSource(rng: Rng): {
       dam.visible = env.dam > 0.01;
       dam.scale.set(1, Math.max(0.001, env.dam), 1);
       pool.scale.setScalar(1 - env.branches * 0.6);
-      poolMaterial.opacity = 0.8 + Math.sin(time * 1.7) * 0.08;
+      poolMaterial.uniforms.uTime.value = time;
+      poolMaterial.uniforms.uLife.value = 1 - env.branches * 0.5;
     },
   };
 }

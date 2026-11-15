@@ -49,6 +49,24 @@ const $ = (sel: string): HTMLElement => {
 };
 
 describe("reading UI", () => {
+  it("offers to read the tale again on the last page, in place of the next button", () => {
+    const ui = createReadingUI(root, events);
+    ui.open(stories);
+    ui.render({ page: 0, lang: "gcf", showHint: false, textHidden: false });
+    expect($(".reading-reread").hidden).toBe(true);
+    expect($(".reading-next").hidden).toBe(false);
+    $(".reading-next").focus();
+    ui.render({ page: 1, lang: "gcf", showHint: false, textHidden: false });
+    expect($(".reading-next").hidden).toBe(true);
+    expect($(".reading-reread").hidden).toBe(false);
+    expect($(".reading-reread").textContent).toBe("Relire le conte");
+    expect(document.activeElement).toBe($(".reading-reread"));
+    $(".reading-reread").click();
+    expect(events.onPage).toHaveBeenCalledWith(0);
+    ui.render({ page: 0, lang: "gcf", showHint: false, textHidden: false });
+    expect(document.activeElement).toBe($(".reading-next"));
+  });
+
   it("opens a new page at its top, but keeps the scroll on a language change", () => {
     const ui = createReadingUI(root, events);
     ui.open(stories);

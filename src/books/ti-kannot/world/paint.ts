@@ -16,7 +16,7 @@ const VERTEX = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMat
 // Kuwahara brush (spaced samples for wider strokes), pigment pooling at edges, light granulation,
 // paper grain and a soft ragged vignette. The grade follows the poster: greens leaning to yellow,
 // warm light, no saturation lift, and edges that only fade a little into the paper.
-const FRAGMENT = `uniform sampler2D tDiffuse; uniform vec2 uTexel; uniform float uTime; uniform vec3 uPaper; varying vec2 vUv;
+const FRAGMENT = `uniform sampler2D tDiffuse; uniform vec2 uTexel; uniform float uTime,uWash; uniform vec3 uPaper; varying vec2 vUv;
   float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
   float noise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f);
     return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y); }
@@ -38,7 +38,8 @@ const FRAGMENT = `uniform sampler2D tDiffuse; uniform vec2 uTexel; uniform float
     return best; }
   void main(){
     vec2 aspect=vec2(uTexel.y/uTexel.x,1.);
-    vec2 bleed=(vec2(fbm(vUv*6.+uTime*.02),fbm(vUv*6.+7.3))-.5)*uTexel*9.;
+    // A page turn (uWash) wets the paper: the pigment runs further before it settles again.
+    vec2 bleed=(vec2(fbm(vUv*6.+uTime*.02),fbm(vUv*6.+7.3))-.5)*uTexel*(9.+uWash*70.);
     vec3 c=kuwahara(vUv+bleed);
     vec3 lx=texture2D(tDiffuse,vUv+vec2(uTexel.x*2.,0.)).rgb-texture2D(tDiffuse,vUv-vec2(uTexel.x*2.,0.)).rgb;
     vec3 ly=texture2D(tDiffuse,vUv+vec2(0.,uTexel.y*2.)).rgb-texture2D(tDiffuse,vUv-vec2(0.,uTexel.y*2.)).rgb;
@@ -53,6 +54,9 @@ const FRAGMENT = `uniform sampler2D tDiffuse; uniform vec2 uTexel; uniform float
     float vig=smoothstep(.66,.44-fbm(vUv*8.)*.08,length(q));
     c=mix(uPaper,c,.74+.26*vig);
     c=mix(vec3(dot(c,vec3(.299,.587,.114))),c,.97);
+    // The wash: water blooms from blotches of the sheet, lifting the paint to the paper's tone.
+    float wet=smoothstep(.75-uWash*.75,1.05-uWash*.75,fbm(vUv*aspect*3.+11.)+uWash*.25);
+    c=mix(c,mix(uPaper,c,.55),wet*uWash*.9);
     gl_FragColor=vec4(c,1.); }`;
 
 /** Post-processing chain giving the scene its watercolour look; owns its render targets. */
@@ -61,19 +65,34 @@ export function createPaint(
   scene: THREE.Scene,
   camera: THREE.Camera,
   quality: PaintQuality,
-): { render(): void; update(time: number): void; dispose(): void } {
+): {
+  render(): void;
+  /** `wash` in 0..1 is how wet the sheet is: it peaks while a page turns. */
+  update(time: number, wash?: number): void;
+  /** Turns the cast shadows on or off (off when the device cannot keep up). */
+  setShadows(on: boolean): void;
+  dispose(): void;
+} {
   if (quality === "low") renderer.setPixelRatio(1);
   renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 1.15;
-  const composer = new EffectComposer(renderer);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+  // Multisampled on capable screens: the brush then works on clean edges, not on stair-steps.
+  const target = new THREE.WebGLRenderTarget(1, 1, {
+    type: THREE.HalfFloatType,
+    samples: quality === "high" ? 4 : 0,
+  });
+  const composer = new EffectComposer(renderer, target);
   const watercolour = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },
       uTexel: { value: new THREE.Vector2(1 / 1024, 1 / 1024) },
       uTime: { value: 0 },
+      uWash: { value: 0 },
       uPaper: { value: new THREE.Color("#f7e6cb") },
     },
-    defines: { RADIUS: quality === "high" ? 4 : 2, SPREAD: "1.6" },
+    defines: { RADIUS: quality === "high" ? 4 : 2, SPREAD: quality === "high" ? "1.15" : "1.6" },
     vertexShader: VERTEX,
     fragmentShader: FRAGMENT,
   });
@@ -96,12 +115,24 @@ export function createPaint(
       }
       composer.render();
     },
-    update(time) {
+    update(time, wash = 0) {
       watercolour.uniforms.uTime.value = time;
+      watercolour.uniforms.uWash.value = wash;
+    },
+    setShadows(on) {
+      if (renderer.shadowMap.enabled === on) return;
+      renderer.shadowMap.enabled = on;
+      scene.traverse((object) => {
+        const material = (object as THREE.Mesh).material;
+        for (const m of Array.isArray(material) ? material : material ? [material] : []) {
+          m.needsUpdate = true;
+        }
+      });
     },
     dispose() {
       for (const pass of composer.passes) pass.dispose();
       composer.dispose();
+      target.dispose();
     },
   };
 }

@@ -77,6 +77,19 @@ function hipRoof(a: number, b: number, h: number): THREE.BufferGeometry {
   return g;
 }
 
+/** A thin round rod from `a` to `b` (a hip cap, a rail). */
+function rod(kit: Kit, color: string, a: number[], b: number[], radius = 0.045): void {
+  const from = new THREE.Vector3(a[0], a[1], a[2]);
+  const dir = new THREE.Vector3(b[0], b[1], b[2]).sub(from);
+  const length = dir.length();
+  const g = new THREE.CylinderGeometry(radius, radius, length, 8)
+    .translate(0, length / 2, 0)
+    .applyQuaternion(
+      new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize()),
+    );
+  kit.add(g, color, a);
+}
+
 /** Window with two closed louvred shutters on a wall facing +z at (x, y, z). */
 function shuttered(kit: Kit, color: string, x: number, y: number, z: number, ry = 0): void {
   const at = (dx: number, dy: number, dz: number): number[] => [
@@ -154,6 +167,34 @@ function steps(kit: Kit, z: number, x = 0): void {
   kit.box(0.84, FLOOR + 0.3, 0.32, STONE, [x, (FLOOR - 0.2 - 0.5) / 2, z + 0.47]);
 }
 
+/**
+ * The seams of a tin roof: thin raised ribs running down a slope `width` wide and `length` long,
+ * centred at `centre` and pitched by `pitch` around x.
+ */
+function ribs(
+  kit: Kit,
+  roof: string,
+  width: number,
+  length: number,
+  centre: number[],
+  pitch: number,
+): void {
+  const color = shade(roof, 0.84);
+  const count = Math.max(2, Math.round(width / 0.3));
+  const lift = 0.04;
+  for (let k = 0; k <= count; k++) {
+    const x = (k / count - 0.5) * (width - 0.06);
+    kit.box(
+      0.03,
+      0.025,
+      length - 0.02,
+      color,
+      [centre[0] + x, centre[1] + Math.cos(pitch) * lift, centre[2] + Math.sin(pitch) * lift],
+      [pitch, 0, 0],
+    );
+  }
+}
+
 /** Gable roof over w × d (ridge along x) with an overhang `over`; the front eave can stop short. */
 function gableRoof(
   kit: Kit,
@@ -184,14 +225,10 @@ function gableRoof(
     [-1, over],
   ] as const) {
     const reach = run + extra;
-    kit.box(
-      w + over * 2,
-      0.06,
-      reach / Math.cos(pitch) + 0.04,
-      c.roof,
-      [0, top - (reach / 2) * Math.tan(pitch) + 0.04, (side * reach) / 2],
-      [side * pitch, 0, 0],
-    );
+    const length = reach / Math.cos(pitch) + 0.04;
+    const centre = [0, top - (reach / 2) * Math.tan(pitch) + 0.04, (side * reach) / 2];
+    kit.box(w + over * 2, 0.06, length, c.roof, centre, [side * pitch, 0, 0]);
+    ribs(kit, c.roof, w + over * 2, length, centre, side * pitch);
   }
   kit.box(w + over * 2 + 0.04, 0.08, 0.16, RIDGE, [0, top + 0.07, 0]);
 }
@@ -223,14 +260,9 @@ function galerie(c: KazColors): Kaz {
   }
   const slope = Math.atan2(eave - low, g + 0.25);
   const len = Math.hypot(g + 0.25, eave - low);
-  kit.box(
-    w + 0.5,
-    0.05,
-    len,
-    c.roof,
-    [0, (eave + low) / 2 + 0.06, front + (g + 0.25) / 2],
-    [slope, 0, 0],
-  );
+  const lean = [0, (eave + low) / 2 + 0.06, front + (g + 0.25) / 2];
+  kit.box(w + 0.5, 0.05, len, c.roof, lean, [slope, 0, 0]);
+  ribs(kit, c.roof, w + 0.5, len, lean, slope);
   door(kit, c, front + 0.02);
   shuttered(kit, c.shutter, -0.85, FLOOR + 0.82, front + 0.02);
   shuttered(kit, c.shutter, 0.85, FLOOR + 0.82, front + 0.02);
@@ -258,6 +290,13 @@ function katpan(c: KazColors): Kaz {
   const b = d / 2 + 0.85;
   kit.add(hipRoof(a, b, 1.15), c.roof, [0, FLOOR + WALL - 0.02, 0.45]);
   kit.box(0.16, 0.08, (b - a) * 2 + 0.1, RIDGE, [0, FLOOR + WALL + 1.17, 0.45]);
+  // Tin caps along the four hips, from each corner of the eaves up to the ridge.
+  const eaveY = FLOOR + WALL - 0.02;
+  for (const x of [-1, 1]) {
+    for (const z of [-1, 1]) {
+      rod(kit, RIDGE, [x * a, eaveY + 0.02, 0.45 + z * b], [0, eaveY + 1.17, 0.45 + z * (b - a)]);
+    }
+  }
   const front = d / 2;
   kit.box(w + 0.1, 0.08, 0.95, DECK, [0, FLOOR, front + 0.47]);
   for (const x of [-1.2, 1.2]) {

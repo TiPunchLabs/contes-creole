@@ -232,6 +232,36 @@
   color: var(--color-paper);
 }
 
+/* The last page's main action, in the next button's place: a labelled pill, not a bare icon. */
+.reading-arrows .reading-reread {
+  width: auto;
+  padding: 0 18px 0 15px;
+  border-radius: var(--radius-pill);
+  border-color: var(--reading-chrome-ink);
+  background: var(--reading-chrome-ink);
+  color: var(--color-paper);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 14px/1 var(--font-ui);
+  white-space: nowrap;
+}
+
+.reading-arrows [hidden] {
+  display: none;
+}
+
+/* Narrow phones have no room for the words beside the counter: the pill sits just above the row,
+   right-aligned with it, and keeps its words. */
+@media (max-width: 400px) {
+  .reading-arrows .reading-reread {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    height: 46px;
+  }
+}
+
 /* Hover only where it exists: on touch screens it would stick after a tap. */
 @media (hover: hover) {
   .reading-back:hover,
@@ -243,7 +273,8 @@
     color: var(--reading-chrome-ink);
   }
 
-  .reading-arrows .reading-next:hover {
+  .reading-arrows .reading-next:hover,
+  .reading-arrows .reading-reread:hover {
     background: var(--reading-chrome-ink-soft);
   }
 }
