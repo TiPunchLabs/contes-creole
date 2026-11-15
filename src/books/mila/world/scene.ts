@@ -1340,6 +1340,119 @@ void main(){
     scene.add(fireflies);
   }
   let fireflies: GlowPoints;
+
+  /* =====================================================================
+     A FISHERMAN'S CANOE far out, towards the horizon of page 4
+     ===================================================================== */
+  /** Where the canoe lies at anchor: seen from page 4 between the headland and Mila. */
+  const BOAT_AT = V3(45, 0, -15);
+  let boat: { g: THREE.Group; rod: THREE.Group; glow: THREE.Sprite } | null = null;
+  /**
+   * A painted canoe with one fisherman, a line out and a lantern at the bow: it rides the swell,
+   * swings a little on its anchor, and the man lifts his rod now and then.
+   */
+  function buildBoat(): void {
+    const g = new THREE.Group();
+    // hull: the lower half of a stretched sphere, pinched to a point at both ends, with sheer
+    const hull = new THREE.SphereGeometry(1, 36, 14, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+    const hp = hull.attributes.position;
+    const colors = new Float32Array(hp.count * 3);
+    const paint = [
+      new THREE.Color("#f3ead8"),
+      new THREE.Color("#c8463a"),
+      new THREE.Color("#2c6f96"),
+    ];
+    for (let i = 0; i < hp.count; i++) {
+      const xn = hp.getX(i);
+      const y = hp.getY(i);
+      const pinch = 0.3 + 0.7 * (1 - Math.abs(xn) ** 1.6);
+      hp.setXYZ(i, xn * 2.3, y * 0.5 + 0.2 * xn * xn, hp.getZ(i) * 0.58 * pinch);
+      // white gunwale, a red stripe, then the blue of the hull
+      paint[y > -0.14 ? 0 : y > -0.3 ? 1 : 2].toArray(colors, i * 3);
+    }
+    hull.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    hull.computeVertexNormals();
+    const wood = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
+    g.add(new THREE.Mesh(hull, wood));
+    const plain = (color: string): THREE.MeshLambertMaterial =>
+      new THREE.MeshLambertMaterial({ color: new THREE.Color(color) });
+    // thwarts
+    for (const x of [-0.9, 0.2, 1.1]) {
+      const bench = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.04, 0.85), plain("#8a6a44"));
+      bench.position.set(x, -0.08, 0);
+      g.add(bench);
+    }
+    // the fisherman, seated aft, under a wide straw hat
+    const man = new THREE.Group();
+    man.position.set(-0.9, 0, 0);
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.17, 0.34, 4, 10), plain("#31475a"));
+    body.position.y = 0.3;
+    body.rotation.z = -0.12;
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 14, 10), plain("#5a3323"));
+    head.position.set(0.05, 0.72, 0);
+    const hat = new THREE.Mesh(new THREE.ConeGeometry(0.36, 0.16, 18), plain("#d9b871"));
+    hat.position.set(0.05, 0.86, 0);
+    man.add(body, head, hat);
+    // his rod, hinged at his hands, and the line that drops from its tip
+    const rod = new THREE.Group();
+    rod.position.set(0.2, 0.42, 0.12);
+    const cane = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.022, 2.2, 6), plain("#6b4b2c"));
+    cane.position.y = 1.1;
+    const line = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 1.5, 4), plain("#e8e2d0"));
+    line.position.set(0.7, 1.95, 0);
+    line.rotation.z = Math.PI / 2 - 0.25;
+    rod.add(cane, line);
+    rod.rotation.z = -1.0;
+    man.add(rod);
+    g.add(man);
+    // the lantern at the bow: a small flame the dusk picks up from the shore
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.7, 6), plain("#6b4b2c"));
+    post.position.set(1.85, 0.42, 0);
+    const flame = new THREE.Mesh(
+      new THREE.SphereGeometry(0.075, 10, 8),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.5, 0.7) }),
+    );
+    flame.position.set(1.85, 0.82, 0);
+    const glow = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: glowTex,
+        color: new THREE.Color(1.5, 0.95, 0.45),
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+    glow.position.copy(flame.position);
+    glow.scale.setScalar(1.6);
+    g.add(post, flame, glow);
+    g.position.copy(BOAT_AT);
+    g.rotation.y = 0.5;
+    // a little larger than life, so it reads as a canoe from the beach
+    g.scale.setScalar(1.4);
+    scene.add(g);
+    boat = { g, rod, glow };
+  }
+  /** The canoe on the swell (the sea shader's two long waves), swinging at anchor. */
+  function updateBoat(t: number): void {
+    if (!boat) return;
+    const calm = 1 - 0.72 * U.calm.value;
+    const x = BOAT_AT.x + Math.sin(t * 0.05) * 1.4;
+    const z = BOAT_AT.z + Math.cos(t * 0.037) * 1.1;
+    const swell =
+      (Math.sin(x * 0.17 + z * 0.52 + t * 0.9) * 0.09 +
+        Math.sin(-x * 0.31 + z * 0.86 + t * 1.35) * 0.05) *
+      calm;
+    boat.g.position.set(x, swell + 0.12, z);
+    boat.g.rotation.set(
+      Math.sin(t * 1.1) * 0.05 * calm,
+      0.5 + Math.sin(t * 0.06) * 0.25,
+      Math.cos(x * 0.17 + z * 0.52 + t * 0.9) * 0.06 * calm,
+    );
+    // now and then he lifts the rod, then lets it down again
+    const lift = Math.max(0, Math.sin(t * 0.45)) ** 6;
+    boat.rod.rotation.z = -1.0 + lift * 0.45;
+    boat.glow.scale.setScalar(1.6 + Math.sin(t * 7.3) * 0.08 + Math.sin(t * 3.1) * 0.06);
+  }
   function buildRocks(): void {
     for (const [x, z, sz] of SHORE_ROCKS) rock(x, z, sz);
     rock(1.2, 3.9, 0.28);
@@ -4013,6 +4126,7 @@ void main(){
     (plankton.material as THREE.PointsMaterial).opacity = under * 0.8;
     fireflies.material.uniforms.uTime.value = wtime;
     fireflies.material.uniforms.uOpacity.value = (1 - under) * 0.85;
+    updateBoat(wtime);
     sky.position.copy(camera.position);
 
     // the shadow follows the action
@@ -4403,6 +4517,7 @@ void main(){
     buildSeaGrape();
     buildRocks();
     buildBeachLife();
+    buildBoat();
     mila = buildMila();
     buildConches();
     buildCrab();
