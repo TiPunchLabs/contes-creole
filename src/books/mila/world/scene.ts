@@ -4227,11 +4227,18 @@ void main(){
                 Math.sin(W * 0.9 + i * 2.09) * 0.15,
               ),
             )
-        : V3(
-            mp.x + Math.cos(W * 0.8 + i * 2.09) * rad,
-            mp.y + up + Math.sin(W * 1.3 + i) * 0.1,
-            mp.z + Math.sin(W * 0.8 + i * 2.09) * rad,
-          );
+        : page === 9 && !trans
+          ? // page 9: the lights she already has wait above and behind her, clear of her face
+            V3(
+              mp.x + 0.5 + Math.cos(W * 0.6 + i * 3.1) * 0.35,
+              mp.y + 1.75 + Math.sin(W * 1.1 + i) * 0.08,
+              mp.z + 0.9 + Math.sin(W * 0.6 + i * 3.1) * 0.35,
+            )
+          : V3(
+              mp.x + Math.cos(W * 0.8 + i * 2.09) * rad,
+              mp.y + up + Math.sin(W * 1.3 + i) * 0.1,
+              mp.z + Math.sin(W * 0.8 + i * 2.09) * rad,
+            );
       const got = [
         freed && page >= 5,
         page >= 7 && (page > 7 || since > 3.2),
@@ -4299,12 +4306,12 @@ void main(){
       } else if (i === 2 && page === 9 && !trans && since > 1.4 && since <= 5.0) {
         // page 9: the pearl's light rises to her open hand and waits above it; when her hand
         // closes, empty, the light is free and goes with her
-        tgt = palm.clone().add(V3(0, 0.14, 0));
-        sc = 0.8;
+        tgt = palm.clone().add(V3(0, 0.16, 0));
+        sc = 0.42;
         spd = 1.3;
       } else if (got) {
         tgt = follow;
-        sc = held ? 0.55 : 1;
+        sc = held ? 0.55 : page === 9 && !trans ? 0.55 : 1;
         spd = held ? 4 : 2.2;
       } else {
         tgt = homes[i];
@@ -4330,7 +4337,8 @@ void main(){
             : smooth(0.05, 0.5, ndc.y)
           : 0;
       // the three lights gathered on the conch (page 11) add up: each gives less
-      const gathered = page >= 11 ? 0.55 : 1;
+      // (and on page 9 they stand back: the hand she holds out must be seen)
+      const gathered = page >= 11 ? 0.55 : page === 9 && !trans ? 0.5 : 1;
       const dim = (0.2 + 0.8 * near) * (1 - 0.72 * onText) * gathered;
       s.dim = lerp(s.dim, dim, Math.min(1, dt * 3));
       s.halo.opacity = s.dim;
