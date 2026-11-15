@@ -2,7 +2,8 @@
 // every page once settled, the walks 3 -> 4 and 4 -> 5 (Mila around the rock, her arms while
 // walking) and the turtle on page 7 over one full lap (heading on its turns). Sheets are assembled
 // with ImageMagick `montage` when it is installed.
-// Usage: [SITE=url] [OUT=dir] [VP=desktop,mobile] [LAP=40] node qa/mila-motion.mjs
+// Usage: [SITE=url] [OUT=dir] [VP=desktop,mobile] [LAP=40] [TURNS=3,4] [QA_CHANNEL=chrome]
+//        node qa/mila-motion.mjs   (LAP=0 skips the turtle lap, TURNS lists the pages turned from)
 import { chromium } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -14,6 +15,8 @@ const OUT = (process.env.OUT ?? new URL("./out/mila-motion/", import.meta.url).p
 );
 const VPS = (process.env.VP ?? "desktop,mobile").split(",");
 const LAP_S = Number(process.env.LAP ?? 40);
+/** Pages whose turn to the next page is captured frame by frame (default: the two walks). */
+const TURNS = (process.env.TURNS ?? "3,4").split(",").map(Number);
 mkdirSync(OUT, { recursive: true });
 // same launch as qa/mila.mjs: ANGLE on EGL with the NVIDIA EGL vendor pinned (never llvmpipe)
 const GPU = ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"];
@@ -135,37 +138,33 @@ async function run(browser, vp) {
     settled.push(f);
   };
   await shoot(1);
-  await next(p, touch);
-  await shoot(2);
-  // 3 -> 4 and 4 -> 5: Mila walks (8.5 s and 10 s flights)
-  await next(p, touch);
-  await shoot(3);
-  await press(p.locator(".mila-next"), touch);
-  const walk34 = await frames(p, `${vp}-t34`, 20, 500);
-  await p.waitForFunction(() => document.querySelector(".mila-num")?.textContent === "Page 04");
-  await shoot(4);
-  await press(p.locator(".mila-next"), touch);
-  const walk45 = await frames(p, `${vp}-t45`, 20, 400);
-  await p.waitForFunction(() => document.querySelector(".mila-num")?.textContent === "Page 05");
-  await shoot(5);
-  const freed = await freeCrab(p, touch);
-  await p.waitForTimeout(2500);
-  await p.screenshot({ path: `${OUT}${vp}-p05-freed.png` });
-  await next(p, touch);
-  await shoot(6);
-  await next(p, touch);
-  await shoot(7);
-  // one turtle lap on page 7 (it circles the meadow in about 39 s)
-  const n = Math.max(2, Math.round(LAP_S / 2));
-  const turtle = await frames(p, `${vp}-p07-turtle`, n, 2000);
-  for (let i = 8; i <= 12; i++) {
-    await next(p, touch);
+  let freed = false;
+  for (let i = 2; i <= 12; i++) {
+    const from = i - 1;
+    if (TURNS.includes(from)) {
+      // a page turn frame by frame: the camera move, Mila's walk or swim, the guiding lights
+      await press(p.locator(".mila-next"), touch);
+      const files = await frames(p, `${vp}-t${from}${i}`, 20, from === 3 ? 500 : 400);
+      await p.waitForFunction(
+        (n) => document.querySelector(".mila-num")?.textContent === n,
+        `Page ${pad(i)}`,
+        { timeout: 25000 },
+      );
+      sheet(files, `${OUT}${vp}-sheet-t${from}${i}.png`, "5x");
+    } else await next(p, touch);
     await shoot(i);
+    if (i === 5) {
+      freed = await freeCrab(p, touch);
+      await p.waitForTimeout(2500);
+      await p.screenshot({ path: `${OUT}${vp}-p05-freed.png` });
+    }
+    if (i === 7 && LAP_S > 0) {
+      // one turtle lap on page 7 (it circles the meadow in about 39 s)
+      const n = Math.max(2, Math.round(LAP_S / 2));
+      sheet(await frames(p, `${vp}-p07-turtle`, n, 2000), `${OUT}${vp}-sheet-turtle.png`, "5x");
+    }
   }
   sheet(settled, `${OUT}${vp}-sheet-pages.png`, "4x");
-  sheet(walk34, `${OUT}${vp}-sheet-t34.png`, "5x");
-  sheet(walk45, `${OUT}${vp}-sheet-t45.png`, "5x");
-  sheet(turtle, `${OUT}${vp}-sheet-turtle.png`, "5x");
   log.runs[vp] = { renderer, crabFreed: freed, errors };
   await ctx.close();
 }
