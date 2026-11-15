@@ -1,6 +1,7 @@
 // Ti Kannot world captures from the tale's own cameras, with a fake clock so every run renders the
 // same frame, plus an uncapped fps and draw-call sample on one page (page 2 by default).
-// Usage: [SITE=url] [OUT=dir] [PAGES=1,2,3,4] [PERF_PAGE=2] [ONLY=shots|perf] node qa/world.mjs
+// Usage: [SITE=url] [OUT=dir] [PAGES=1,2,3,4] [PERF_PAGE=2] [ONLY=shots|perf] [VPS=desktop]
+//        [QA_CHANNEL=chrome] node qa/world.mjs
 // Shots: <vp>-p<N>.png with the reading card, <vp>-p<N>-scene.png in "scène seule".
 import { chromium } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -14,6 +15,8 @@ const PAGES = (process.env.PAGES ?? "1,2,3,4").split(",").map(Number);
 const PERF_PAGE = Number(process.env.PERF_PAGE ?? 2);
 mkdirSync(OUT, { recursive: true });
 // ANGLE on EGL: since the 580.178 driver, the Vulkan flags of the other scripts give no WebGL here.
+// QA_CHANNEL=chrome drives the system Chrome when the pinned Chromium cannot be installed.
+const CHANNEL = process.env.QA_CHANNEL || undefined;
 const GPU = ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"];
 const VIEWPORTS = {
   desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 },
@@ -24,6 +27,10 @@ const VIEWPORTS = {
     hasTouch: true,
   },
 };
+// VPS=desktop limits the run to some viewports.
+const ONLY_VPS = process.env.VPS?.split(",");
+if (ONLY_VPS)
+  for (const vp of Object.keys(VIEWPORTS)) if (!ONLY_VPS.includes(vp)) delete VIEWPORTS[vp];
 const results = {};
 
 /** Counts WebGL draw calls and drawn triangles per animation frame (installed before load). */
@@ -79,7 +86,7 @@ async function openTale(browser, vp, clock) {
   return { ctx, p, errors, wait };
 }
 
-const browser = await chromium.launch({ args: GPU });
+const browser = await chromium.launch({ args: GPU, channel: CHANNEL });
 try {
   const probe = await browser.newPage();
   const renderer = await probe.evaluate(() => {
@@ -119,6 +126,7 @@ try {
 
   if (process.env.ONLY !== "shots") {
     const free = await chromium.launch({
+      channel: CHANNEL,
       args: [...GPU, "--disable-gpu-vsync", "--disable-frame-rate-limit"],
     });
     for (const vp of Object.keys(VIEWPORTS)) {

@@ -612,7 +612,11 @@ async function guarded(run, fn) {
   }
 }
 
-const browser = await chromium.launch({ args: GPU, env: GPU_ENV });
+const browser = await chromium.launch({
+  args: GPU,
+  env: GPU_ENV,
+  channel: process.env.QA_CHANNEL || undefined,
+});
 try {
   for (const vp of ["desktop", "mobile", "landscape"])
     if (ONLY.includes(vp)) await guarded(vp, () => journey(browser, vp));
