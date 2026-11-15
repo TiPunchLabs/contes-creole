@@ -2378,15 +2378,20 @@ void main(){
      BIG FOREGROUND CONCH, LIVING CONCH, PEARL
      ===================================================================== */
   let bigConch: THREE.Mesh;
+  /** Size of the conch lying on the beach (the prototype's was 0.95, nearly Mila's height). */
+  const CONCH_ON_SAND = 0.42;
   let liveConch: THREE.Group;
   let pearl: THREE.Group;
   let pearlHalo: THREE.Sprite;
   function buildConches(): void {
     bigConch = new THREE.Mesh(conchGeometry({ rows: 90, segs: 90 }), conchMaterial(U_bigGlow));
-    bigConch.scale.setScalar(0.95);
-    const bx = 3.35;
-    const bz = 6.75;
-    bigConch.position.set(bx, groundH(bx, bz) + 0.2, bz);
+    // A lambi beside a child: large enough to read in the sand, not a shell her own size.
+    bigConch.scale.setScalar(CONCH_ON_SAND);
+    // nearer Mila than the prototype's, so the smaller shell still sits in the opening and closing
+    // frames; clear of her walk towards the rocks
+    const bx = 3.55;
+    const bz = 6.0;
+    bigConch.position.set(bx, groundH(bx, bz) + 0.21 * CONCH_ON_SAND, bz);
     bigConch.rotation.set(0.65, -0.55, Math.PI / 2);
     bigConch.castShadow = true;
     bigConch.receiveShadow = true;
