@@ -4,8 +4,9 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
+import { mergeGeometries, mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 import { disposeObject } from "@shared/three/dispose";
+import { glowPoints, type GlowPoints } from "@shared/three/glow-points";
 import { clamp, lerp } from "@shared/math";
 import { createRng } from "@shared/random";
 import type { Ambience } from "./audio";
@@ -744,6 +745,8 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
     const mid = new THREE.Color("#2f7470");
     const deep = new THREE.Color("#1b4658");
     const olive = new THREE.Color("#58683a");
+    /** The sunset the wet sand mirrors along the waterline. */
+    const sheen = new THREE.Color("#c98f88");
     for (let i = 0; i < p.count; i++) {
       const x = p.getX(i);
       const z = p.getZ(i);
@@ -756,6 +759,7 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
           .lerp(dry2, smooth(0.35, 0.7, n))
           .lerp(dry3, smooth(0.55, 0.85, fbm(x * 0.08 + 9, z * 0.08, 2)) * 0.6);
         c.lerp(wet, smooth(1.4, 0, s) * 0.85);
+        c.lerp(sheen, smooth(0.75, 0.05, s) * 0.32);
       } else {
         c.copy(sh)
           .lerp(mid, smooth(-0.2, -4, h))
@@ -894,6 +898,10 @@ void main(){
    float gold=line*frag*smoothstep(80.,15.,dist)*uGold;
    col+=lin(vec3(1.,.78,.36))*gold*(1.6+uSong*1.6);
    float wash=sin(t*.55)*.55+sin(t*.9+p.x*.2)*.2;
+   // sparks along the moon's path, and the sea's own light where the swash stirs it
+   col+=lin(vec3(1.,.9,.7))*pow(md,24.)*smoothstep(.78,.97,noise(p*6.+vec2(t*.8,-t*.5)))*.5;
+   float bio=smoothstep(.9,.99,noise(p*vec2(19.,27.)+vec2(t*.6,-t*.9)))*smoothstep(-5.,-.4,vShore)*smoothstep(.3,-.3,vShore-wash);
+   col+=lin(vec3(.35,.95,.9))*bio*(.4+uSong*.5)*(1.-.4*uCalm);
    float band=smoothstep(-1.7+wash,-.15+wash,vShore);
    float fl=noise(p*vec2(2.2,6.)+vec2(t*.3,-t*.2));
    float ln=1.-smoothstep(.0,.06,abs(fract(vShore*.8-t*.22)-.5)-.4);
@@ -1069,7 +1077,7 @@ void main(){
     const tips: V3[] = [];
     branches.forEach((pts, i) => {
       const curve = new THREE.CatmullRomCurve3(pts);
-      const geo = new THREE.TubeGeometry(curve, 30, i === 0 ? 0.17 : 0.075, 7, false);
+      const geo = new THREE.TubeGeometry(curve, 40, i === 0 ? 0.17 : 0.075, 12, false);
       const m = new THREE.Mesh(geo, bark);
       m.castShadow = true;
       g.add(m);
@@ -1202,7 +1210,76 @@ void main(){
     m.castShadow = true;
     m.receiveShadow = true;
     scene.add(m);
+    if (groundH(x, z) > 0.05) beachRocks.push([x, z, s]);
   }
+  const beachRocks: [number, number, number][] = [];
+  /**
+   * Tufts of beach grass in the lee of the rocks on the sand, and fireflies under the sea grape and
+   * the palms. Their own RNG: the prototype's draws, and so its layout, are untouched.
+   */
+  function buildBeachLife(): void {
+    const own = createRng(97);
+    const blades: THREE.BufferGeometry[] = [];
+    for (let k = 0; k < 7; k++) {
+      const h = 0.2 + own() * 0.16;
+      const blade = new THREE.PlaneGeometry(0.035, h, 1, 4);
+      const bp = blade.attributes.position;
+      const lean = 0.25 + own() * 0.5;
+      for (let i = 0; i < bp.count; i++) {
+        const t = bp.getY(i) / h + 0.5;
+        bp.setXYZ(i, bp.getX(i) * (1 - t * 0.85), t * h, t * t * h * lean);
+      }
+      blade.rotateY(k * 2.4 + own());
+      blade.translate((own() - 0.5) * 0.08, 0, (own() - 0.5) * 0.08);
+      blade.computeVertexNormals();
+      blades.push(blade);
+    }
+    const tuftGeo = mergeGeometries(blades);
+    for (const blade of blades) blade.dispose();
+    const perRock = 2;
+    const grass = new THREE.InstancedMesh(
+      tuftGeo,
+      new THREE.MeshLambertMaterial({ side: THREE.DoubleSide }),
+      beachRocks.length * perRock,
+    );
+    const tint = new THREE.Color();
+    let n = 0;
+    for (const [x, z, sz] of beachRocks) {
+      for (let k = 0; k < perRock; k++) {
+        // one tuft at each flank of the rock, a little to landward: beside it, never across it
+        const a = (k ? Math.PI : 0) + (k ? -1 : 1) * (0.25 + own() * 0.45);
+        const r = sz * (1.25 + own() * 0.3);
+        const gx = x + Math.cos(a) * r;
+        const gz = z + Math.sin(a) * r;
+        dummy.position.set(gx, groundH(gx, gz) - 0.01, gz);
+        dummy.rotation.set(0, own() * 6.28, 0);
+        dummy.scale.setScalar(0.55 + own() * 0.45);
+        dummy.updateMatrix();
+        grass.setMatrixAt(n, dummy.matrix);
+        grass.setColorAt(n, tint.set(own() < 0.5 ? "#8f9a52" : "#a39a58"));
+        n++;
+      }
+    }
+    grass.receiveShadow = true;
+    scene.add(grass);
+    const haunts: [number, number, number, number][] = [
+      [5.6, 2.2, 4.6, 2.6],
+      [7.2, 1.6, 6.4, 1.6],
+      [12.5, 1.8, 10, 1.8],
+      [17, 1.6, 8.5, 1.6],
+    ];
+    fireflies = glowPoints(
+      own,
+      44,
+      (i) => {
+        const [x, y, z, r] = haunts[i % haunts.length];
+        return [x + (own() - 0.5) * 2 * r, y + (own() - 0.5) * 1.6, z + (own() - 0.5) * 2 * r];
+      },
+      { size: 0.3, drift: reduceMotion ? 0 : 0.6, a: "#fff0a0", b: "#d2ff9c" },
+    );
+    scene.add(fireflies);
+  }
+  let fireflies: GlowPoints;
   function buildRocks(): void {
     for (const [x, z, sz] of SHORE_ROCKS) rock(x, z, sz);
     rock(1.2, 3.9, 0.28);
@@ -3672,6 +3749,8 @@ void main(){
     fillL.intensity = lerp(0.85, 0.2, under);
     moonL.intensity = lerp(2.3, 1.2, under);
     (plankton.material as THREE.PointsMaterial).opacity = under * 0.8;
+    fireflies.material.uniforms.uTime.value = wtime;
+    fireflies.material.uniforms.uOpacity.value = (1 - under) * 0.85;
     sky.position.copy(camera.position);
 
     // the shadow follows the action
@@ -3989,6 +4068,7 @@ void main(){
     buildDistance();
     buildSeaGrape();
     buildRocks();
+    buildBeachLife();
     mila = buildMila();
     buildConches();
     buildCrab();
