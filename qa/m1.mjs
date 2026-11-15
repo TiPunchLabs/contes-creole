@@ -15,13 +15,21 @@ const check = (id, ok, detail = "") => {
   results.push({ id, status: ok ? "PASS" : "FAIL", detail });
   console.log(ok ? "PASS" : "FAIL", id, detail);
 };
+// QA_CHANNEL=chrome drives the system Chrome (on ANGLE/EGL, NVIDIA vendor pinned) where the pinned
+// Chromium cannot be installed; without it, the pinned Chromium on Vulkan as before.
+const CHANNEL = process.env.QA_CHANNEL || undefined;
 const browser = await chromium.launch({
-  args: [
-    "--enable-gpu",
-    "--ignore-gpu-blocklist",
-    "--use-angle=vulkan",
-    "--enable-features=Vulkan",
-  ],
+  channel: CHANNEL,
+  env: CHANNEL
+    ? {
+        ...process.env,
+        __EGL_VENDOR_LIBRARY_FILENAMES:
+          process.env.QA_EGL_VENDOR ?? "/usr/share/glvnd/egl_vendor.d/10_nvidia.json",
+      }
+    : process.env,
+  args: CHANNEL
+    ? ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"]
+    : ["--enable-gpu", "--ignore-gpu-blocklist", "--use-angle=vulkan", "--enable-features=Vulkan"],
 });
 
 async function open(ctxOpts, query = "") {

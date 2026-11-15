@@ -170,7 +170,11 @@ async function run(browser, vp) {
   await ctx.close();
 }
 
-const browser = await chromium.launch({ args: GPU, env: GPU_ENV });
+const browser = await chromium.launch({
+  args: GPU,
+  env: GPU_ENV,
+  channel: process.env.QA_CHANNEL || undefined,
+});
 try {
   for (const vp of VPS) await run(browser, vp);
 } finally {
