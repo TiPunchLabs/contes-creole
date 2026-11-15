@@ -4,6 +4,7 @@ import { clamp } from "@shared/math";
 import { createRng } from "@shared/random";
 import { glowPoints } from "@shared/three/glow-points";
 import { sunDirection, type MixedEnv } from "./env";
+import { DAM } from "./island/source";
 import { ISLAND_RADIUS, islandHeight, riverPoint } from "./island/terrain";
 
 const NOISE = `float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
@@ -70,17 +71,19 @@ const SEA_FRAGMENT = `uniform float uTime,uRadius; uniform vec3 cShallow,cDeep,c
     c=mix(c,haze,smoothstep(50.,200.,length(vW.xz-uCam.xz)));
     gl_FragColor=vec4(c,1.); }`;
 
-const RIVER_VERTEX = `attribute float aSteep; varying vec2 vUv; varying vec3 vW; varying float vSteep;
-  void main(){ vUv=uv; vSteep=aSteep; vec4 w=modelMatrix*vec4(position,1.); vW=w.xyz; gl_Position=projectionMatrix*viewMatrix*w; }`;
+const RIVER_VERTEX = `attribute float aSteep,aFlow,aDry; varying vec2 vUv; varying vec3 vW; varying float vSteep,vFlow,vDry;
+  void main(){ vUv=uv; vSteep=aSteep; vFlow=aFlow; vDry=aDry; vec4 w=modelMatrix*vec4(position,1.); vW=w.xyz; gl_Position=projectionMatrix*viewMatrix*w; }`;
 // Deeper in the middle, shallow and see-through over the bed at the edges. The current carries a
 // net of light, streaks and a lace of foam along the banks; the surface takes the sky at a glancing
 // angle and sparks in the sun. Where the bed drops (vSteep), the water runs faster and breaks white.
 const RIVER_FRAGMENT = `uniform float uTime,uFlow,uLength; uniform vec3 cWater,cSky,cSun,uCam,uSunDir;
-  varying vec2 vUv; varying vec3 vW; varying float vSteep;
+  varying vec2 vUv; varying vec3 vW; varying float vSteep,vFlow,vDry;
   ${NOISE}
   void main(){ float s=abs(vUv.x-.5)*2.;
     float deep=1.-smoothstep(0.,.85,s);
-    float fall=vSteep*uFlow;
+    // vFlow is how much of the current is left here (held back by the dam, spent by the drought):
+    // without it the water neither breaks white nor draws streaks, it lies still.
+    float fall=vSteep*uFlow*vFlow;
     vec2 f=vec2((vUv.x-.5)*3.,vUv.y*uLength*.5-uTime*(.55+fall*1.9));
     float w1=noise(f*vec2(2.2,1.1)),w2=noise(f*vec2(4.5,2.3)+7.);
     vec3 c=mix(cWater*1.18+vec3(.06,.05,-.02),cWater*vec3(.5,.74,.84),deep*.85);
@@ -91,13 +94,15 @@ const RIVER_FRAGMENT = `uniform float uTime,uFlow,uLength; uniform vec3 cWater,c
     c=mix(c,cSky,pow(1.-max(dot(v,n),0.),3.)*.45);
     c+=cSun*pow(max(dot(n,normalize(v+uSunDir)),0.),90.)*.6;
     float streak=smoothstep(.62,.92,noise(vec2(vUv.x*7.,f.y*3.2)))*(1.-s*.7);
-    c=mix(c,vec3(1.),streak*(.2+fall*.4));
+    c=mix(c,vec3(1.),streak*(.2+fall*.4)*vFlow);
     float froth=smoothstep(.25,.75,noise(vec2(vUv.x*9.,f.y*7.)))*.6+.4;
     c=mix(c,vec3(.97,1.,.99),fall*froth*.72);
     float lace=smoothstep(.8,.92,s+(noise(vec2(vUv.x*3.,f.y*2.5))-.5)*.3)*smoothstep(1.,.93,s);
-    c=mix(c,vec3(1.,.99,.96),lace*.32*uFlow*(1.-fall));
+    c=mix(c,vec3(1.,.99,.96),lace*.32*uFlow*(1.-fall)*vFlow);
     float alpha=mix(.92*(1.-smoothstep(.7,1.,s)*.7),.96,fall);
-    gl_FragColor=vec4(c,alpha*smoothstep(1.,.93,s)); }`;
+    // Where the river runs dry (vDry) the thread breaks into puddles with bare bed between them.
+    float puddle=smoothstep(.34,.58,noise(vec2(3.7,vUv.y*uLength*.5)));
+    gl_FragColor=vec4(c,alpha*smoothstep(1.,.93,s)*mix(1.,puddle,vDry)); }`;
 
 const SEGMENTS = 200;
 /** Quads across the ribbon. */
@@ -123,6 +128,42 @@ function riverLength(): number {
   for (let i = 0; i < 100; i++)
     length += riverPoint(i / 100, a).distanceTo(riverPoint((i + 1) / 100, b));
   return length;
+}
+
+/** 0 below `a`, 1 above `b`, eased in between. */
+const ramp = (v: number, a: number, b: number): number => {
+  const t = clamp((v - a) / (b - a), 0, 1);
+  return t * t * (3 - 2 * t);
+};
+
+export interface Reach {
+  /** Width of the water as a share of the full river's. */
+  width: number;
+  /** Height of the surface above the bed's lowest line. */
+  level: number;
+  /** How much of the current is left (1 = running freely, 0 = still). */
+  flow: number;
+  /** How broken the water is (0 = one ribbon, 1 = scattered puddles). */
+  dry: number;
+}
+
+/**
+ * The river at `t` along its course (0 = source, 1 = mouth) for a water level and a dam weight.
+ * The level tells the season: full, low after weeks without rain, a thread in the drought. The
+ * dam tells who holds the water: above it the river is held back in a still pond, below it the bed
+ * is all but dry, a broken trickle, whatever the season.
+ */
+export function riverReach(t: number, water: number, dam: number): Reach {
+  const below = dam * ramp(t, DAM.t - 0.012, DAM.t + 0.012);
+  const pond = dam * (1 - ramp(t, DAM.t - 0.012, DAM.t + 0.012));
+  const season = clamp(1 + water * 0.62, 0.1, 1.2);
+  const drought = ramp(-water, 1.0, 1.35);
+  return {
+    width: season * (1 - 0.82 * below) * (1 + 0.5 * pond),
+    level: (0.55 + water * 0.35) * (1 - 0.86 * below) + 0.22 * pond,
+    flow: clamp(1 + water * 0.7, 0.12, 1) * (1 - 0.88 * below) * (1 - 0.75 * pond),
+    dry: Math.max(drought * 0.85, below * 0.9),
+  };
 }
 
 /** Uniforms shared by both sea variants. */
@@ -200,6 +241,10 @@ export function createWater({ reflect }: { reflect: boolean }): {
   riverGeometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
   const steep = new Float32Array((SEGMENTS + 1) * row);
   riverGeometry.setAttribute("aSteep", new THREE.BufferAttribute(steep, 1));
+  const flow = new Float32Array((SEGMENTS + 1) * row);
+  const dry = new Float32Array((SEGMENTS + 1) * row);
+  riverGeometry.setAttribute("aFlow", new THREE.BufferAttribute(flow, 1));
+  riverGeometry.setAttribute("aDry", new THREE.BufferAttribute(dry, 1));
   const heights = new Float32Array(SEGMENTS + 1);
   const centres: THREE.Vector2[] = [];
   riverGeometry.setIndex(index);
@@ -225,17 +270,24 @@ export function createWater({ reflect }: { reflect: boolean }): {
   const p = new THREE.Vector2();
   const q = new THREE.Vector2();
   let lastWater = Infinity;
+  let lastDam = Infinity;
 
-  /** Rebuilds the ribbon for a water level: narrower and lower as the river dries. */
-  const shape = (water: number): void => {
+  /**
+   * Rebuilds the ribbon for a water level and a dam: narrower and lower as the river dries, held
+   * back above the dam and all but cut below it.
+   */
+  const shape = (water: number, dam: number): void => {
     for (let i = 0; i <= SEGMENTS; i++) {
       const t = i / SEGMENTS;
       riverPoint(t, p);
       if (t < 1) riverPoint(t + 0.005, q).sub(p);
       else q.copy(p).sub(riverPoint(t - 0.005, q));
       q.normalize();
-      const half = ((1.5 + t * 1.2) / 2) * clamp(1 + water * 0.55, 0.22, 1.2) * MARGIN;
-      const y = Math.max(islandHeight(p.x, p.y) + 0.55 + water * 0.35, 0.02);
+      const reach = riverReach(t, water, dam);
+      const half = Math.max(((1.5 + t * 1.2) / 2) * reach.width * MARGIN, 0.06);
+      const y = Math.max(islandHeight(p.x, p.y) + reach.level, 0.02);
+      flow.fill(reach.flow, i * row, (i + 1) * row);
+      dry.fill(reach.dry, i * row, (i + 1) * row);
       for (let j = 0; j < row; j++) {
         const k = (1 - (j / ACROSS) * 2) * half;
         positions.set([p.x + q.y * k, y, p.y - q.x * k], (i * row + j) * 3);
@@ -247,11 +299,15 @@ export function createWater({ reflect }: { reflect: boolean }): {
       const a = Math.max(i - 1, 0);
       const b = Math.min(i + 1, SEGMENTS);
       const drop = (heights[a] - heights[b]) / Math.max(centres[a].distanceTo(centres[b]), 1e-3);
-      steep.fill(clamp(drop / CASCADE_SLOPE, 0, 1), i * row, (i + 1) * row);
+      // a cascade needs a current: where the water is held back or spent, it does not break
+      const run = clamp(flow[i * row] * 1.6, 0, 1);
+      steep.fill(clamp(drop / CASCADE_SLOPE, 0, 1) * run, i * row, (i + 1) * row);
     }
     placeSpray();
     riverGeometry.getAttribute("position").needsUpdate = true;
     riverGeometry.getAttribute("aSteep").needsUpdate = true;
+    riverGeometry.getAttribute("aFlow").needsUpdate = true;
+    riverGeometry.getAttribute("aDry").needsUpdate = true;
   };
 
   // Spray: droplets hanging in the air over the white water, where the cascades run.
@@ -293,9 +349,10 @@ export function createWater({ reflect }: { reflect: boolean }): {
   return {
     group,
     update(env, time, camera) {
-      if (Math.abs(env.water - lastWater) > 0.004) {
+      if (Math.abs(env.water - lastWater) > 0.004 || Math.abs(env.dam - lastDam) > 0.004) {
         lastWater = env.water;
-        shape(env.water);
+        lastDam = env.dam;
+        shape(env.water, env.dam);
       }
       u.uTime.value = time;
       u.uCam.value.copy(camera);
@@ -314,7 +371,9 @@ export function createWater({ reflect }: { reflect: boolean }): {
         clamp(1 + env.water * 0.7, 0, 1) * (0.5 - env.night * 0.3);
       riverMaterial.uniforms.uTime.value = time;
       // A thread of water still tumbles, but it no longer breaks white.
-      riverMaterial.uniforms.uFlow.value = clamp(1 + env.water * 0.7, 0.25, 1);
+      // the pace of the whole river: slower as it dries, and slower still once the dam is up
+      riverMaterial.uniforms.uFlow.value =
+        clamp(1 + env.water * 0.7, 0.25, 1) * (1 - env.dam * 0.5);
       riverMaterial.uniforms.cWater.value.copy(RIVER).lerp(MUDDY, clamp(-env.water, 0, 1) * 0.5);
     },
     dispose() {
