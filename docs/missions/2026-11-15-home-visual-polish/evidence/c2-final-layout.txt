@@ -1,0 +1,27 @@
+laptop             1024x768   ok
+tablet             768x1024  ok
+small              360x640   ok
+tall               430x932   ok
+w1920              1920x1080  ok
+w1280              1280x720   ok
+w1100x1000         1100x1000  ok
+w900sq             900x900   ok
+w800               800x600   ok
+phone-landscape    844x390   ok
+phone-landscape-l  932x430   ok
+phone-landscape-s  667x375   ok
+w1200x1000         1200x1000  ok
+w1201x1000         1201x1000  ok
+w1250x1000         1250x1000  ok
+w1280x1024         1280x1024  ok
+w1024x540          1024x540   ok
+climb phone-landscape    844x390   31 states: 21 whole, 1 grazed, 71 absent; ok
+climb phone-landscape-l  932x430   31 states: 23 whole, 1 grazed, 69 absent; ok
+climb phone-landscape-s  667x375   31 states: 15 whole, 2 grazed, 76 absent; ok
+climb desktop            1440x900   31 states: 62 whole, 3 grazed, 28 absent; ok
+climb laptop             1024x768   31 states: 51 whole, 0 grazed, 42 absent; ok
+climb w1280              1280x720   31 states: 51 whole, 2 grazed, 40 absent; ok
+climb w1920              1920x1080  31 states: 68 whole, 4 grazed, 21 absent; ok
+climb mobile             390x844   31 states: 26 whole, 2 grazed, 65 absent; ok
+climb tablet             768x1024  31 states: 57 whole, 2 grazed, 34 absent; ok
+climb small              360x640   31 states: 39 whole, 0 grazed, 54 absent; ok

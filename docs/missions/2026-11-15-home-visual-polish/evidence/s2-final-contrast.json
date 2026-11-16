@@ -1,0 +1,237 @@
+{
+  "desktop": {
+    ".tree-intro-title": {
+      "ratio": 8.67,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-kicker": {
+      "ratio": 5.2,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-motto": {
+      "ratio": 12.26,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-gloss": {
+      "ratio": 6.41,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-text": {
+      "ratio": 11.68,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-hint span": {
+      "ratio": 6.07,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-label": {
+      "ratio": 6.56,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-title": {
+      "ratio": 13.71,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-sub": {
+      "ratio": 7.01,
+      "needs": 4.5,
+      "ok": true
+    }
+  },
+  "laptop": {
+    ".tree-intro-title": {
+      "ratio": 9.8,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-kicker": {
+      "ratio": 5.33,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-motto": {
+      "ratio": 10.46,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-gloss": {
+      "ratio": 5.62,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-text": {
+      "ratio": 11.01,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-hint span": {
+      "ratio": 5.14,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-label": {
+      "ratio": 6.45,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-title": {
+      "ratio": 13.59,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-sub": {
+      "ratio": 6.95,
+      "needs": 4.5,
+      "ok": true
+    }
+  },
+  "mobile": {
+    ".tree-intro-title": {
+      "ratio": 12.34,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-kicker": {
+      "ratio": 6.3,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-motto": {
+      "ratio": 12.34,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-gloss": {
+      "ratio": 6.39,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-text": {
+      "ratio": 12.4,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-hint span": {
+      "ratio": 6.32,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-label": {
+      "ratio": 6.43,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-title": {
+      "ratio": 13.51,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-sub": {
+      "ratio": 7.11,
+      "needs": 4.5,
+      "ok": true
+    }
+  },
+  "tablet": {
+    ".tree-intro-title": {
+      "ratio": 12.35,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-kicker": {
+      "ratio": 6.39,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-motto": {
+      "ratio": 12.43,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-gloss": {
+      "ratio": 6.4,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-text": {
+      "ratio": 12.44,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-hint span": {
+      "ratio": 6.21,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-label": {
+      "ratio": 6.45,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-title": {
+      "ratio": 13.62,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-sub": {
+      "ratio": 7.01,
+      "needs": 4.5,
+      "ok": true
+    }
+  },
+  "w800": {
+    ".tree-intro-title": {
+      "ratio": 8.03,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-kicker": {
+      "ratio": 4.68,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-motto": {
+      "ratio": 8.81,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-gloss": {
+      "ratio": 4.64,
+      "needs": 3.0,
+      "ok": true
+    },
+    ".tree-intro-text": {
+      "ratio": 9.04,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-intro-hint span": {
+      "ratio": 4.7,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-label": {
+      "ratio": 6.43,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-title": {
+      "ratio": 13.59,
+      "needs": 4.5,
+      "ok": true
+    },
+    ".tree-shelf-sub": {
+      "ratio": 6.95,
+      "needs": 4.5,
+      "ok": true
+    }
+  }
+}

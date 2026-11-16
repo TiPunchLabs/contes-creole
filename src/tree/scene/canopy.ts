@@ -256,14 +256,16 @@ export const RUSTLE = { value: 0 };
  * One wind for the whole tree, as a smooth displacement of world positions: it grows with the
  * height above the first fork and with the distance from the trunk, so the trunk stays put, the
  * limbs bend a little and the outer twigs most. Bark and cards share it, so a card rooted on a twig
- * moves exactly as the twig does.
+ * moves exactly as the twig does. Its strength comes and goes in slow gusts (0.2 to 1.2).
  */
 const FIELD = /* glsl */ `
 vec3 treeWind(vec3 p) {
   float h = max(0.0, p.y - 3.2);
   float r = length(p.xz);
-  float bend = 0.0008 * h * h + 0.0015 * r * r;
   float ph = dot(p.xz, vec2(0.23, 0.17));
+  // Gusts: the breeze swells and drops as it crosses the crown, so the sway never loops by eye.
+  float gust = 0.7 + 0.32 * sin(uSwayTime * 0.23 + ph * 0.5) + 0.2 * sin(uSwayTime * 0.11 + 2.1);
+  float bend = (0.0008 * h * h + 0.0015 * r * r) * gust;
   float s1 = sin(uSwayTime * 0.9 + ph);
   float s2 = sin(uSwayTime * 1.55 + ph * 1.7 + 1.3);
   vec3 d = vec3(0.8 * s1 + 0.3 * s2, -0.3 * s2, 0.45 * s2 + 0.2 * s1) * bend;

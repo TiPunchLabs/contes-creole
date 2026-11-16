@@ -1,0 +1,288 @@
+diff --git a/src/tree/index.ts b/src/tree/index.ts
+index 878a9de..aad076a 100644
+--- a/src/tree/index.ts
++++ b/src/tree/index.ts
+@@ -10,7 +10,7 @@ import { detectLite, readLiteEnv, scaleCount } from "./lite";
+ import { createTreeOverlay, type TellerBox } from "./overlay/overlay";
+ import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
+ import { RANDOM_TALE_ACTION, RANDOM_TALE_NONE, eligibleTales, pickRandomTale } from "./random-tale";
+-import { cardT, hubCam } from "./scene/camera";
++import { cardT, openingStage, treeCam } from "./scene/camera";
+ import { createCards, type CardView } from "./scene/cards";
+ import { createLapen } from "./scene/critters/lapen";
+ import type { CritterView } from "./scene/critters/parts";
+@@ -23,7 +23,7 @@ import {
+ } from "./scene/critters/wander";
+ import { createZanba } from "./scene/critters/zanba";
+ import { FLORA_OBSTACLES } from "./scene/flora";
+-import { KONTEUR_OBSTACLES, createKonteur } from "./scene/konteur";
++import { KONTEUR_OBSTACLES, createKonteur, konteurSpot } from "./scene/konteur";
+ import { createLandscape } from "./scene/landscape";
+ import { EXPOSURE, FOG } from "./scene/palette";
+ import { createSky } from "./scene/sky";
+@@ -96,7 +96,9 @@ function buildTree(
+   const konteur = createKonteur();
+   const cards = createCards(slots, tree.tips);
+   const critterRng = createRng(17);
+-  const critters = createCritterStates();
++  const aspect = container.clientWidth / (container.clientHeight || 1);
++  const critters = createCritterStates(aspect < 1, konteurSpot(aspect));
++  const onStage = openingStage(() => camera.aspect);
+   const views: Record<CritterName, CritterView> = { lapen: createLapen(), zanba: createZanba() };
+   const obstacles = [TREE_OBSTACLE, ...KONTEUR_OBSTACLES, ...FLORA_OBSTACLES];
+   scene.add(
+@@ -328,7 +330,7 @@ function buildTree(
+
+   const frame = (time: number, dt: number): void => {
+     t += (target - t) * (1 - Math.exp(-dt * 4.5));
+-    hubCam(t, cam, look);
++    treeCam(t, camera.aspect, cam, look);
+     konteur.place(camera.aspect);
+     const fov = fitFov(50, camera.aspect);
+     if (diving) {
+@@ -354,7 +356,7 @@ function buildTree(
+     sky.update(time, camera.position);
+     tree.update(time, hover !== null || near >= 0);
+     konteur.update(time, camera.position, (tellerHovered || tellerFocused) && !diving);
+-    stepCritters(critters, dt, camera.position, obstacles, critterRng);
++    stepCritters(critters, dt, camera.position, obstacles, critterRng, onStage);
+     for (const c of critters) views[c.name].pose(c, time);
+     // A focused card answers like a hovered one: it grows and its halo brightens.
+     const lit = hover ?? (cardFocused && near >= 0 ? near : null);
+diff --git a/src/tree/scene/camera.ts b/src/tree/scene/camera.ts
+index 540d903..263ed37 100644
+--- a/src/tree/scene/camera.ts
++++ b/src/tree/scene/camera.ts
+@@ -1,4 +1,6 @@
+ import type * as THREE from "three";
++import { clamp, lerp, smoothstep } from "@shared/math";
++import { fitFov } from "@shared/three/stage";
+
+ /** Climb progress (t ∈ [0, 1]) at which the card of book `index` hangs, spread over [0.2, 0.88]. */
+ export const cardT = (index: number, count: number): number =>
+@@ -13,3 +15,93 @@ export function hubCam(t: number, out: THREE.Vector3, look: THREE.Vector3): numb
+   look.set(0, y + 2.2 - t * 1.2, 0);
+   return a;
+ }
++
++/** How the opening view departs from the spiral's first shot, in metres. */
++export interface OpeningShot {
++  /** Camera pulled back from the trunk. */
++  back: number;
++  /** Camera raised. */
++  lift: number;
++  /** Camera moved sideways, towards the Konteur's side of the clearing. */
++  truck: number;
++  /** Look-at point raised: the tree comes down in the frame. */
++  lookLift: number;
++  /** Look-at point moved sideways; negative puts the tree left of the centre. */
++  lookPan: number;
++}
++
++/**
++ * Opening compositions: `wide` leaves the right of the frame to the intro column, `tall` brings the
++ * tree down under the intro band of portrait screens. Aspects in between blend the two.
++ */
++export const OPENING: { wide: OpeningShot; tall: OpeningShot } = {
++  wide: { back: -1.5, lift: -0.7, truck: 0.8, lookLift: 1.3, lookPan: -1.8 },
++  tall: { back: -1.5, lift: -0.6, truck: 0, lookLift: 3.4, lookPan: 0 },
++};
++
++const TALL_ASPECT = 0.8;
++const WIDE_ASPECT = 1.4;
++/** Climb value from which the camera is back on the spiral (the first card hangs at 0.2). */
++export const OPENING_END = 0.14;
++
++/** The opening composition for a screen aspect. */
++export function openingShot(aspect: number): OpeningShot {
++  const k = clamp((aspect - TALL_ASPECT) / (WIDE_ASPECT - TALL_ASPECT), 0, 1);
++  const { wide, tall } = OPENING;
++  return {
++    back: lerp(tall.back, wide.back, k),
++    lift: lerp(tall.lift, wide.lift, k),
++    truck: lerp(tall.truck, wide.truck, k),
++    lookLift: lerp(tall.lookLift, wide.lookLift, k),
++    lookPan: lerp(tall.lookPan, wide.lookPan, k),
++  };
++}
++
++/**
++ * The camera of the tree: the opening composition at the foot of the climb, easing into the
++ * spiral, which it follows exactly from `OPENING_END` on. Same outputs as `hubCam`.
++ */
++export function treeCam(
++  t: number,
++  aspect: number,
++  out: THREE.Vector3,
++  look: THREE.Vector3,
++): number {
++  const a = hubCam(t, out, look);
++  const w = 1 - smoothstep(clamp(t / OPENING_END, 0, 1));
++  if (w <= 0) return a;
++  const shot = openingShot(aspect);
++  // Radial (away from the trunk) and tangent axes of the spiral at this angle.
++  const rx = Math.cos(a);
++  const rz = Math.sin(a);
++  out.x += (rx * shot.back - rz * shot.truck) * w;
++  out.z += (rz * shot.back + rx * shot.truck) * w;
++  out.y += shot.lift * w;
++  look.x += -rz * shot.lookPan * w;
++  look.z += rx * shot.lookPan * w;
++  look.y += shot.lookLift * w;
++  return a;
++}
++
++/** Whether a disc of radius `r` at (x, z) stands on the stage (see `openingStage`). */
++export type StageTest = (x: number, z: number, r: number) => boolean;
++
++/**
++ * The part of the clearing the opening view shows in front of the trunk, for the current aspect:
++ * inside 0.8 of the horizontal field, far enough from the camera to clear the shelf.
++ */
++export function openingStage(aspect: () => number): StageTest {
++  return (x, z, r) => {
++    const a = aspect();
++    const shot = openingShot(a);
++    const half = Math.atan(Math.tan((fitFov(50, a) * Math.PI) / 360) * a);
++    const cx = shot.truck;
++    const cz = -(20 + shot.back);
++    const dx = shot.lookPan - cx;
++    const dz = -cz;
++    const len = Math.hypot(dx, dz);
++    const depth = ((x - cx) * dx + (z - cz) * dz) / len;
++    const side = Math.abs(((x - cx) * dz - (z - cz) * dx) / len);
++    return z < -4 && depth > 8.5 && side + r < depth * Math.tan(half) * 0.8;
++  };
++}
+diff --git a/src/tree/scene/critters/wander.ts b/src/tree/scene/critters/wander.ts
+index 99f5407..097ec93 100644
+--- a/src/tree/scene/critters/wander.ts
++++ b/src/tree/scene/critters/wander.ts
+@@ -32,22 +32,35 @@ export const TREE_OBSTACLE: Obstacle = [0, 0, 4.2];
+ export const RING = { min: 5.2, max: 13.7 } as const;
+ export const MAX_DT = 0.05;
+ const TREE_PATH_CLEARANCE = 4.4;
++/** Azimuth of the opening view around the trunk: the stage faces it. */
++const STAGE_AZIMUTH = -Math.PI / 2;
+
+-/** Initial states (v14.2): Lapen small and quick, Zanba big and slow, on both sides of the tree. */
+-export function createCritterStates(): CritterState[] {
++/** Whether a disc of radius `r` at (x, z) stands where the critters are meant to be seen. */
++export type StageTest = (x: number, z: number, r: number) => boolean;
++
++/** Where the opening finds a critter: wide screens, then portrait ones (a narrower stage). */
++const STARTS: Record<CritterName, { wide: [number, number]; tall: [number, number] }> = {
++  lapen: { wide: [1.1, -12.3], tall: [-1.0, -11.6] },
++  zanba: { wide: [-4.2, -8.8], tall: [-3.3, -8.2] },
++};
++
++/**
++ * Initial states: Lapen small and quick, Zanba big and slow, gathered at the foot of the tree
++ * in front of the opening view and turned to the Konteur at (`tellerX`, `tellerZ`). `tall` picks
++ * the portrait places.
++ */
++export function createCritterStates(
++  tall = false,
++  teller: readonly [number, number] = [4.4, -12.5],
++): CritterState[] {
+   const base = { tgt: null, moving: 0, phase: 0, react: 0, look: false };
++  const at = (name: CritterName): { pos: [number, number]; yaw: number } => {
++    const [x, z] = tall ? STARTS[name].tall : STARTS[name].wide;
++    return { pos: [x, z], yaw: Math.atan2(teller[0] - x, teller[1] - z) };
++  };
+   return [
+-    { ...base, name: "lapen", r: 0.55, speed: 2.4, step: 9, pos: [-6, -5.5], yaw: 0.4, wait: 1.2 },
+-    {
+-      ...base,
+-      name: "zanba",
+-      r: 1.5,
+-      speed: 0.95,
+-      step: 4.2,
+-      pos: [7.5, 5.5],
+-      yaw: -2.2,
+-      wait: 2.5,
+-    },
++    { ...base, name: "lapen", r: 0.55, speed: 2.4, step: 9, ...at("lapen"), wait: 3.2 },
++    { ...base, name: "zanba", r: 1.5, speed: 0.95, step: 4.2, ...at("zanba"), wait: 5.5 },
+   ];
+ }
+
+@@ -65,18 +78,23 @@ export function clearOfTree(a: readonly [number, number], b: readonly [number, n
+   return Math.hypot(a[0] + dx * t, a[1] + dz * t) > TREE_PATH_CLEARANCE;
+ }
+
+-/** Up to 40 random draws in the ring for a free target reachable without crossing the trunk. */
++/**
++ * Up to 40 random draws in the ring for a free target reachable without crossing the trunk; with
++ * `onStage`, the draws keep to the half of the ring facing the opening view and to the stage.
++ */
+ export function pickTarget(
+   c: CritterState,
+   obstacles: readonly Obstacle[],
+   rng: Rng,
++  onStage?: StageTest,
+ ): [number, number] | null {
+   for (let k = 0; k < 40; k++) {
+-    const a = rng() * 6.28,
++    const a = onStage ? STAGE_AZIMUTH + (rng() - 0.5) * Math.PI : rng() * 6.28,
+       r = RING.min + rng() * (RING.max - RING.min),
+       x = Math.cos(a) * r,
+       z = Math.sin(a) * r;
+     if (
++      (!onStage || onStage(x, z, c.r)) &&
+       isFree(x, z, c.r, obstacles) &&
+       clearOfTree(c.pos, [x, z]) &&
+       Math.hypot(x - c.pos[0], z - c.pos[1]) > 2.5
+@@ -98,13 +116,17 @@ function blocked(c: CritterState, x: number, z: number, list: readonly CritterSt
+   return list.some((o) => o !== c && Math.hypot(x - o.pos[0], z - o.pos[1]) < c.r + o.r + 0.4);
+ }
+
+-/** Advances every critter by `dt` (clamped): wait → walk → wait, reactions, mutual avoidance. */
++/**
++ * Advances every critter by `dt` (clamped): wait → walk → wait, reactions, mutual avoidance;
++ * `onStage` keeps their walks where the opening view shows them.
++ */
+ export function stepCritters(
+   list: CritterState[],
+   dt: number,
+   camera: { x: number; z: number },
+   obstacles: readonly Obstacle[],
+   rng: Rng,
++  onStage?: StageTest,
+ ): void {
+   const h = clamp(dt, 0, MAX_DT);
+   for (const c of list) {
+@@ -117,7 +139,7 @@ export function stepCritters(
+       c.moving = lerp(c.moving, 0, 0.12);
+       if (c.look) c.yaw += angleTo(c, camera.x, camera.z) * Math.min(1, h * 2);
+       if (c.wait <= 0) {
+-        c.tgt = pickTarget(c, obstacles, rng);
++        c.tgt = pickTarget(c, obstacles, rng, onStage);
+         if (!c.tgt) c.wait = 1;
+       }
+     } else if (c.tgt) {
+diff --git a/src/tree/scene/konteur.ts b/src/tree/scene/konteur.ts
+index 00d746b..c10f60a 100644
+--- a/src/tree/scene/konteur.ts
++++ b/src/tree/scene/konteur.ts
+@@ -16,6 +16,11 @@ export const KONTEUR_OBSTACLES: Obstacle[] = [
+   [KONTEUR_X_NARROW, KONTEUR_Z, 1.9],
+ ];
+
++/** Where the Konteur sits on the ground (x, z) for a screen aspect: further in on narrow screens. */
++export function konteurSpot(aspect: number): [number, number] {
++  return [lerp(KONTEUR_X_NARROW, KONTEUR_X_WIDE, clamp((aspect - 0.5) / 0.75, 0, 1)), KONTEUR_Z];
++}
++
+ /** The storyteller: a photo cut-out billboard at the foot of the tree, with a lantern. */
+ export function createKonteur(): {
+   group: THREE.Group;
+@@ -83,7 +88,7 @@ export function createKonteur(): {
+     plane,
+     anchor: (out) => out.set(0.35, 1.85, 0).add(group.position),
+     place(aspect) {
+-      const x = lerp(KONTEUR_X_NARROW, KONTEUR_X_WIDE, clamp((aspect - 0.5) / 0.75, 0, 1));
++      const [x] = konteurSpot(aspect);
+       if (x !== group.position.x) setX(x);
+     },
+     update(time, cameraPosition, hovered) {

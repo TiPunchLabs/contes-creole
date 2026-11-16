@@ -1,0 +1,1384 @@
+{
+  "w1920x839": {
+    "viewport": {
+      "width": 1920,
+      "height": 839
+    },
+    "legs": [
+      {
+        "asked": 0.2,
+        "input": "wheel",
+        "t": {
+          "from": 0,
+          "to": 0.2003,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -86.3989,
+          "to": -34.1002,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.6,
+          "to": 2.5823,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 7.1259,
+          "to": -3.5636,
+          "overshoot": 0.3422,
+          "back": 0.3422
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "wheel",
+        "t": {
+          "from": 0.2003,
+          "to": 0.5406,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -34.0999,
+          "to": 60.834,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 2.5823,
+          "to": 4.76,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -3.5636,
+          "to": 4.9703,
+          "overshoot": 0.1138,
+          "back": 0.1138
+        }
+      },
+      {
+        "asked": 0.88,
+        "input": "wheel",
+        "t": {
+          "from": 0.5406,
+          "to": 0.8806,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.8345,
+          "to": 155.7074,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.76,
+          "to": 6.9363,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 4.9703,
+          "to": -0.0471,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 1.0,
+        "input": "wheel",
+        "t": {
+          "from": 0.8807,
+          "to": 0.9999,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 155.7078,
+          "to": 188.9998,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 6.9363,
+          "to": 7.7,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -0.0472,
+          "to": -5.5204,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.88,
+        "input": "wheel",
+        "t": {
+          "from": 1,
+          "to": 0.8797,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 189.0,
+          "to": 155.4601,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 7.7,
+          "to": 6.9306,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -5.5204,
+          "to": 0.0035,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "wheel",
+        "t": {
+          "from": 0.8797,
+          "to": 0.5394,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 155.46,
+          "to": 60.5117,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 6.9306,
+          "to": 4.7526,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 0.0036,
+          "to": 4.9734,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.2,
+        "input": "wheel",
+        "t": {
+          "from": 0.5394,
+          "to": 0.1994,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.5112,
+          "to": -34.3462,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.7526,
+          "to": 2.5766,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 4.9734,
+          "to": -3.576,
+          "overshoot": 0.0,
+          "back": 0.1079
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "wheel",
+        "t": {
+          "from": 0.1994,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -34.3466,
+          "to": -86.3988,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 2.5766,
+          "to": 1.6,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -3.5761,
+          "to": 7.1259,
+          "overshoot": 0.0,
+          "back": 0.3187
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "wheel",
+        "t": {
+          "from": 0,
+          "to": 0.5409,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -86.3991,
+          "to": 60.9295,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.6,
+          "to": 4.7622,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 7.1259,
+          "to": 4.9693,
+          "overshoot": 8.8571,
+          "back": 8.9711
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "wheel",
+        "t": {
+          "from": 0.5409,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.9302,
+          "to": -86.3984,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.7622,
+          "to": 1.6,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 4.9693,
+          "to": 7.1258,
+          "overshoot": 0.0,
+          "back": 8.9695
+        }
+      },
+      {
+        "asked": 1.0,
+        "input": "wheel",
+        "t": {
+          "from": 0,
+          "to": 0.9999,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -86.3991,
+          "to": 188.9987,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.6,
+          "to": 7.7,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 7.1259,
+          "to": -5.5203,
+          "overshoot": 0.0,
+          "back": 8.8817
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "wheel",
+        "t": {
+          "from": 1,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 189.0,
+          "to": -86.3977,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 7.7,
+          "to": 1.6,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -5.5204,
+          "to": 7.1257,
+          "overshoot": 0.0,
+          "back": 8.9852
+        }
+      }
+    ]
+  },
+  "desktop": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "legs": [
+      {
+        "asked": 0.2,
+        "input": "wheel",
+        "t": {
+          "from": 0,
+          "to": 0.2003,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -86.376,
+          "to": -34.1002,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.6,
+          "to": 2.5823,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 7.3418,
+          "to": -2.2933,
+          "overshoot": 1.2353,
+          "back": 1.2353
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "wheel",
+        "t": {
+          "from": 0.2003,
+          "to": 0.5406,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -34.0999,
+          "to": 60.834,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 2.5823,
+          "to": 4.76,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -2.2932,
+          "to": 4.9703,
+          "overshoot": 0.1509,
+          "back": 0.7524
+        }
+      },
+      {
+        "asked": 0.88,
+        "input": "wheel",
+        "t": {
+          "from": 0.5406,
+          "to": 0.8806,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.8345,
+          "to": 155.7074,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.76,
+          "to": 6.9363,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 4.9703,
+          "to": 0.3061,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 1.0,
+        "input": "wheel",
+        "t": {
+          "from": 0.8807,
+          "to": 0.9999,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 155.7078,
+          "to": 188.9998,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 6.9363,
+          "to": 7.7,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 0.306,
+          "to": -5.1978,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.88,
+        "input": "wheel",
+        "t": {
+          "from": 1,
+          "to": 0.8797,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 189.0,
+          "to": 155.4601,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 7.7,
+          "to": 6.9306,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -5.1978,
+          "to": 0.3598,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "wheel",
+        "t": {
+          "from": 0.8797,
+          "to": 0.5394,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 155.46,
+          "to": 60.5117,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 6.9306,
+          "to": 4.7526,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 0.3598,
+          "to": 4.9734,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.2,
+        "input": "wheel",
+        "t": {
+          "from": 0.5394,
+          "to": 0.1994,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.5112,
+          "to": -34.3462,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.7526,
+          "to": 2.5766,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 4.9734,
+          "to": -2.3671,
+          "overshoot": 0.0,
+          "back": 0.7978
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "wheel",
+        "t": {
+          "from": 0.1994,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -34.3466,
+          "to": -86.3759,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 2.5766,
+          "to": 1.6,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -2.3672,
+          "to": 7.3418,
+          "overshoot": 0.0,
+          "back": 1.1506
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "wheel",
+        "t": {
+          "from": 0,
+          "to": 0.5409,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -86.3762,
+          "to": 60.9295,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.6,
+          "to": 4.7622,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 7.3418,
+          "to": 4.9693,
+          "overshoot": 8.4795,
+          "back": 9.2787
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "wheel",
+        "t": {
+          "from": 0.5409,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.9302,
+          "to": -86.3754,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.7622,
+          "to": 1.6,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 4.9693,
+          "to": 7.3417,
+          "overshoot": 0.0,
+          "back": 9.2181
+        }
+      },
+      {
+        "asked": 1.0,
+        "input": "wheel",
+        "t": {
+          "from": 0,
+          "to": 0.9999,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -86.3762,
+          "to": 188.9987,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.6,
+          "to": 7.7,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 7.3418,
+          "to": -5.1977,
+          "overshoot": 0.0,
+          "back": 9.1817
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "wheel",
+        "t": {
+          "from": 1,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 189.0,
+          "to": -86.3748,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 7.7,
+          "to": 1.6,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -5.1978,
+          "to": 7.3416,
+          "overshoot": 0.0,
+          "back": 9.1107
+        }
+      }
+    ]
+  },
+  "phone-landscape": {
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "legs": [
+      {
+        "asked": 0.2,
+        "input": "drag",
+        "t": {
+          "from": 0,
+          "to": 0.1999,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -86.7644,
+          "to": -34.2003,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.6,
+          "to": 2.7071,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 3.6996,
+          "to": -9.2608,
+          "overshoot": 0.074,
+          "back": 0.074
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "drag",
+        "t": {
+          "from": 0.1999,
+          "to": 0.54,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -34.2,
+          "to": 60.7001,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 2.7071,
+          "to": 4.8232,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -9.2608,
+          "to": 0.7837,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.88,
+        "input": "drag",
+        "t": {
+          "from": 0.54,
+          "to": 0.8801,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.7006,
+          "to": 155.5682,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.8232,
+          "to": 6.9993,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 0.7837,
+          "to": -3.1192,
+          "overshoot": 0.0,
+          "back": 0.4509
+        }
+      },
+      {
+        "asked": 1.0,
+        "input": "drag",
+        "t": {
+          "from": 0.8801,
+          "to": 0.9998,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 155.5687,
+          "to": 188.9998,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 6.9993,
+          "to": 7.7762,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -3.1192,
+          "to": -9.4288,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.88,
+        "input": "drag",
+        "t": {
+          "from": 1,
+          "to": 0.8799,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 189.0,
+          "to": 155.5202,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 7.7762,
+          "to": 6.8557,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -9.4289,
+          "to": -2.6238,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "drag",
+        "t": {
+          "from": 0.8799,
+          "to": 0.54,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 155.52,
+          "to": 60.6868,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 6.8557,
+          "to": 4.6905,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -2.6238,
+          "to": 1.208,
+          "overshoot": 0.4634,
+          "back": 0.4634
+        }
+      },
+      {
+        "asked": 0.2,
+        "input": "drag",
+        "t": {
+          "from": 0.54,
+          "to": 0.2,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.6864,
+          "to": -34.1651,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.6905,
+          "to": 2.5147,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 1.208,
+          "to": -8.6973,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "drag",
+        "t": {
+          "from": 0.2,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -34.1655,
+          "to": -86.7398,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 2.5147,
+          "to": 1.4734,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -8.6973,
+          "to": 3.9671,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "drag",
+        "t": {
+          "from": 0,
+          "to": 0.54,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -86.74,
+          "to": 60.6836,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.4734,
+          "to": 4.7998,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 3.9671,
+          "to": 0.8567,
+          "overshoot": 9.9364,
+          "back": 9.9364
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "drag",
+        "t": {
+          "from": 0.54,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.6843,
+          "to": -86.7312,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.7999,
+          "to": 1.5575,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 0.8567,
+          "to": 3.7851,
+          "overshoot": 0.0,
+          "back": 9.696
+        }
+      },
+      {
+        "asked": 1.0,
+        "input": "drag",
+        "t": {
+          "from": 0,
+          "to": 0.9998,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -86.7319,
+          "to": 188.9987,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.5575,
+          "to": 7.7357,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 3.7853,
+          "to": -9.2873,
+          "overshoot": 0.0,
+          "back": 10.3658
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "drag",
+        "t": {
+          "from": 1,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 189.0,
+          "to": -86.7631,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 7.7357,
+          "to": 1.5643,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": -9.2877,
+          "to": 3.776,
+          "overshoot": 0.0,
+          "back": 10.4221
+        }
+      }
+    ]
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "legs": [
+      {
+        "asked": 0.2,
+        "input": "drag",
+        "t": {
+          "from": 0,
+          "to": 0.1999,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -90,
+          "to": -34.2003,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.6,
+          "to": 2.6387,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 17.088,
+          "to": 5.6552,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "drag",
+        "t": {
+          "from": 0.1999,
+          "to": 0.54,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -34.2,
+          "to": 60.6896,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 2.6388,
+          "to": 4.8566,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 5.6552,
+          "to": 4.653,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.88,
+        "input": "drag",
+        "t": {
+          "from": 0.54,
+          "to": 0.88,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.6901,
+          "to": 155.5481,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.8566,
+          "to": 7.0325,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 4.653,
+          "to": 3.6249,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 1.0,
+        "input": "drag",
+        "t": {
+          "from": 0.88,
+          "to": 0.9999,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 155.5486,
+          "to": 188.9998,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 7.0325,
+          "to": 7.7353,
+          "overshoot": 0.0,
+          "back": 0.0113
+        },
+        "pitch": {
+          "from": 3.6249,
+          "to": 3.4506,
+          "overshoot": 0.0,
+          "back": 0.1968
+        }
+      },
+      {
+        "asked": 0.88,
+        "input": "drag",
+        "t": {
+          "from": 1,
+          "to": 0.88,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 189.0,
+          "to": 155.5202,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 7.7353,
+          "to": 6.8968,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 3.4506,
+          "to": 4.0929,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "drag",
+        "t": {
+          "from": 0.88,
+          "to": 0.54,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 155.52,
+          "to": 60.665,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 6.8967,
+          "to": 4.6562,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 4.0929,
+          "to": 5.2901,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.2,
+        "input": "drag",
+        "t": {
+          "from": 0.54,
+          "to": 0.1999,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.6645,
+          "to": -34.1965,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.6562,
+          "to": 2.4802,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 5.2901,
+          "to": 6.1236,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "drag",
+        "t": {
+          "from": 0.1999,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -34.197,
+          "to": -89.9667,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 2.4802,
+          "to": 1.542,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 6.1236,
+          "to": 17.2289,
+          "overshoot": 0.0,
+          "back": 0.0896
+        }
+      },
+      {
+        "asked": 0.54,
+        "input": "drag",
+        "t": {
+          "from": 0,
+          "to": 0.54,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -89.9669,
+          "to": 60.6923,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.542,
+          "to": 4.7654,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 17.2289,
+          "to": 4.9441,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "drag",
+        "t": {
+          "from": 0.54,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 60.6931,
+          "to": -89.9677,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 4.7654,
+          "to": 1.5921,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 4.9441,
+          "to": 17.1081,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 1.0,
+        "input": "drag",
+        "t": {
+          "from": 0,
+          "to": 0.9999,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": -89.9684,
+          "to": 188.9987,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 1.5921,
+          "to": 7.8437,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 17.1082,
+          "to": 3.0633,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      },
+      {
+        "asked": 0.0,
+        "input": "drag",
+        "t": {
+          "from": 1,
+          "to": 0,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "azimuth": {
+          "from": 189.0,
+          "to": -89.9987,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "height": {
+          "from": 7.8438,
+          "to": 1.4563,
+          "overshoot": 0.0,
+          "back": 0.0
+        },
+        "pitch": {
+          "from": 3.0633,
+          "to": 17.4342,
+          "overshoot": 0.0,
+          "back": 0.0
+        }
+      }
+    ]
+  },
+  "worst": {
+    "t": 0.0,
+    "azimuth": 0.0,
+    "height": 0.0113,
+    "pitch": 10.4221
+  }
+}

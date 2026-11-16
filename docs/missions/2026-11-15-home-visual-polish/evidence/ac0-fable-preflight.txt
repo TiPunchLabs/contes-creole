@@ -1,0 +1,8 @@
+AC0 preflight by pilotage, 2026-11-16T02:16:44Z
+Launch: herdr agent start exec-home --kind claude --pane w2D:pR -- --permission-mode auto --model fable
+herdr argv: ["claude","--permission-mode","auto","--model","fable"]
+Claude session id: 7de48663-1116-4e9e-8682-a99d55b1542b
+Neutral prompt: "Preflight only: reply with the single word READY." -> READY
+Transcript ~/.claude/projects/-home-xgueret-Workspace-01-projets-tipunchlabs-contes-creole/7de48663-1116-4e9e-8682-a99d55b1542b.jsonl
+  assistant message.model = claude-fable-5-2 (API response metadata), requestId req_011Ch5oVgwJk7tVpbrSHBPZW
+Re-check on any resume/replacement: jq -r 'select(.type=="assistant")|.message.model' <transcript> | sort -u

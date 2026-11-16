@@ -1,0 +1,2873 @@
+{
+  "phone-landscape": {
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.0701,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.1401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2702,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.3401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.4101,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.5402,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.6101,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.6801,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.7496,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.8803,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.9402,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9998,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9397,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.8803,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.81,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.6799,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.6099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.5403,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.4099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.3399,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.2698,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.1404,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.0703,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "phone-landscape-l": {
+    "viewport": {
+      "width": 932,
+      "height": 430
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.0701,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.1401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2702,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.3401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.4101,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.5402,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.6101,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.6801,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.7496,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.8803,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.9402,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9998,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9397,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.8803,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.81,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.6799,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.6099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.5403,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.4099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.3399,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.2698,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.1404,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.0703,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "phone-landscape-s": {
+    "viewport": {
+      "width": 667,
+      "height": 375
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.0701,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.1401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2702,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.3401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.4101,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.5402,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.6101,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.6801,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.7498,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.8799,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9998,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9399,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.8801,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.8101,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.7502,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.6802,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.6099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.5402,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.4099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.3399,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.2702,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.1403,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.0701,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "desktop": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2699,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.4699,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "laptop": {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2699,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.4699,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "w1280": {
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2699,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.4699,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "w1920": {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2699,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.4699,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "w1920x839": {
+    "viewport": {
+      "width": 1920,
+      "height": 839
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2699,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.8099,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.4699,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.1401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2701,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.4098,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.4701,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.6801,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.8101,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.8801,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.8801,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.8102,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.6798,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.6098,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.5401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.4701,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.4102,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.3401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.2698,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2002,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0.0003,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "tablet": {
+    "viewport": {
+      "width": 768,
+      "height": 1024
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2001,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.27,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.4699,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.8799,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.81,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.7501,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.4699,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.1999,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.1401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.0701,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0.0001,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  },
+  "small": {
+    "viewport": {
+      "width": 360,
+      "height": 640
+    },
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.1401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.2701,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.4098,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.4701,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.6801,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.8101,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.8801,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.9401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.8801,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.8102,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.6798,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.6098,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.5401,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.4701,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.4102,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.3401,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.2698,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2002,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "offered": false,
+        "pointerClear": false
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0.0003,
+        "reached": true,
+        "offered": true,
+        "pointerClear": true
+      }
+    ],
+    "activations": [],
+    "lostAgainstBase": [],
+    "pointerLostAgainstBase": [],
+    "dead": [],
+    "missed": []
+  }
+}

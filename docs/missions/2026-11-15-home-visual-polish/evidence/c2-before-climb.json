@@ -1,0 +1,1796 @@
+{
+  "phone-landscape": {
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "states": 31,
+    "faults": [
+      "up t=0.14 konteur: under shelf",
+      "up t=0.20 konteur: under shelf",
+      "up t=0.27 konteur: under shelf",
+      "up t=0.27 zanba: under shelf",
+      "up t=0.34 konteur: under shelf",
+      "up t=0.34 lapen: under shelf",
+      "up t=0.34 zanba: under shelf",
+      "up t=0.41 konteur: under shelf",
+      "up t=0.41 lapen: under shelf",
+      "up t=0.41 zanba: under shelf",
+      "up t=0.47 lapen: under shelf",
+      "up t=0.47 zanba: under shelf",
+      "up t=0.54 konteur: under shelf",
+      "up t=0.54 lapen: under shelf",
+      "up t=0.54 zanba: under shelf",
+      "up t=0.61 konteur: under shelf",
+      "up t=0.61 lapen: under shelf",
+      "up t=0.61 zanba: under shelf",
+      "up t=0.68 konteur: under shelf",
+      "up t=0.68 lapen: under shelf",
+      "up t=0.68 zanba: under shelf",
+      "up t=0.75 konteur: under shelf",
+      "up t=0.75 zanba: under shelf",
+      "up t=0.81 konteur: under shelf",
+      "up t=0.81 zanba: under shelf",
+      "up t=0.88 konteur: under shelf",
+      "up t=0.88 zanba: under shelf",
+      "up t=0.94 konteur: under shelf",
+      "up t=0.94 lapen: under shelf",
+      "up t=0.94 zanba: under shelf",
+      "up t=1.00 konteur: under shelf",
+      "up t=1.00 lapen: under shelf",
+      "up t=1.00 zanba: under shelf",
+      "back t=0.94 konteur: under shelf",
+      "back t=0.94 lapen: under shelf",
+      "back t=0.94 zanba: under shelf",
+      "back t=0.88 konteur: under shelf",
+      "back t=0.88 zanba: under shelf",
+      "back t=0.81 konteur: under shelf",
+      "back t=0.81 lapen: under shelf",
+      "back t=0.81 zanba: under shelf",
+      "back t=0.75 konteur: under shelf",
+      "back t=0.75 lapen: under shelf",
+      "back t=0.75 zanba: under shelf",
+      "back t=0.68 konteur: under shelf",
+      "back t=0.68 lapen: under shelf",
+      "back t=0.68 zanba: under shelf",
+      "back t=0.61 konteur: under shelf",
+      "back t=0.61 lapen: under shelf",
+      "back t=0.61 zanba: under shelf",
+      "back t=0.54 konteur: under shelf",
+      "back t=0.54 lapen: under shelf",
+      "back t=0.54 zanba: under shelf",
+      "back t=0.47 lapen: under shelf",
+      "back t=0.47 zanba: under shelf",
+      "back t=0.41 konteur: under shelf",
+      "back t=0.41 lapen: under shelf",
+      "back t=0.41 zanba: under shelf",
+      "back t=0.34 konteur: under shelf",
+      "back t=0.34 lapen: under shelf",
+      "back t=0.34 zanba: under shelf",
+      "back t=0.27 konteur: under shelf",
+      "back t=0.27 lapen: under shelf",
+      "back t=0.27 zanba: under shelf",
+      "back t=0.20 konteur: under shelf",
+      "back t=0.14 konteur: under shelf"
+    ],
+    "cutByEdge": 0,
+    "whole": 21,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.066,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "absent",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "absent",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "absent",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.333,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "absent",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.066,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "phone-landscape-l": {
+    "viewport": {
+      "width": 932,
+      "height": 430
+    },
+    "states": 31,
+    "faults": [
+      "up t=0.14 konteur: under shelf",
+      "up t=0.20 konteur: under shelf",
+      "up t=0.27 konteur: under shelf",
+      "up t=0.27 zanba: under shelf",
+      "up t=0.34 konteur: under shelf",
+      "up t=0.34 lapen: under shelf",
+      "up t=0.34 zanba: under shelf",
+      "up t=0.41 konteur: under shelf",
+      "up t=0.41 lapen: under shelf",
+      "up t=0.41 zanba: under shelf",
+      "up t=0.47 konteur: under shelf",
+      "up t=0.47 lapen: under shelf",
+      "up t=0.47 zanba: under shelf",
+      "up t=0.54 konteur: under shelf",
+      "up t=0.54 lapen: under shelf",
+      "up t=0.54 zanba: under shelf",
+      "up t=0.61 konteur: under shelf",
+      "up t=0.61 lapen: under shelf",
+      "up t=0.61 zanba: under shelf",
+      "up t=0.68 konteur: under shelf",
+      "up t=0.68 lapen: under shelf",
+      "up t=0.68 zanba: under shelf",
+      "up t=0.75 konteur: under shelf",
+      "up t=0.75 lapen: under shelf",
+      "up t=0.75 zanba: under shelf",
+      "up t=0.81 konteur: under shelf",
+      "up t=0.81 lapen: under shelf",
+      "up t=0.81 zanba: under shelf",
+      "up t=0.88 konteur: under shelf",
+      "up t=0.88 lapen: under shelf",
+      "up t=0.88 zanba: under shelf",
+      "up t=0.94 konteur: under shelf",
+      "up t=0.94 lapen: under shelf",
+      "up t=0.94 zanba: under shelf",
+      "up t=1.00 konteur: under shelf",
+      "up t=1.00 lapen: under shelf",
+      "up t=1.00 zanba: under shelf",
+      "back t=0.94 konteur: under shelf",
+      "back t=0.94 lapen: under shelf",
+      "back t=0.94 zanba: under shelf",
+      "back t=0.88 konteur: under shelf",
+      "back t=0.88 lapen: under shelf",
+      "back t=0.88 zanba: under shelf",
+      "back t=0.81 konteur: under shelf",
+      "back t=0.81 lapen: under shelf",
+      "back t=0.81 zanba: under shelf",
+      "back t=0.75 konteur: under shelf",
+      "back t=0.75 lapen: under shelf",
+      "back t=0.75 zanba: under shelf",
+      "back t=0.68 konteur: under shelf",
+      "back t=0.68 lapen: under shelf",
+      "back t=0.68 zanba: under shelf",
+      "back t=0.61 konteur: under shelf",
+      "back t=0.61 lapen: under shelf",
+      "back t=0.61 zanba: under shelf",
+      "back t=0.54 konteur: under shelf",
+      "back t=0.54 lapen: under shelf",
+      "back t=0.54 zanba: under shelf",
+      "back t=0.47 konteur: under shelf",
+      "back t=0.47 lapen: under shelf",
+      "back t=0.47 zanba: under shelf",
+      "back t=0.41 konteur: under shelf",
+      "back t=0.41 lapen: under shelf",
+      "back t=0.41 zanba: under shelf",
+      "back t=0.34 konteur: under shelf",
+      "back t=0.34 lapen: under shelf",
+      "back t=0.34 zanba: under shelf",
+      "back t=0.27 konteur: under shelf",
+      "back t=0.27 zanba: under shelf",
+      "back t=0.20 konteur: under shelf",
+      "back t=0.14 konteur: under shelf"
+    ],
+    "cutByEdge": 0,
+    "whole": 22,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.066,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.333,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.066,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "desktop": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "states": 31,
+    "faults": [
+      "up t=0.07 konteur: under shelf",
+      "up t=0.41 lapen: under shelf",
+      "up t=0.81 zanba: under shelf",
+      "up t=0.88 konteur: under shelf",
+      "up t=0.88 lapen: under shelf",
+      "up t=0.88 zanba: under shelf",
+      "up t=0.94 zanba: under shelf",
+      "up t=1.00 zanba: under shelf",
+      "back t=0.94 zanba: under shelf",
+      "back t=0.88 konteur: under shelf",
+      "back t=0.88 lapen: under shelf",
+      "back t=0.88 zanba: under shelf",
+      "back t=0.81 lapen: under shelf",
+      "back t=0.81 zanba: under shelf",
+      "back t=0.27 lapen: under shelf",
+      "back t=0.27 zanba: under shelf",
+      "back t=0.20 zanba: under shelf",
+      "back t=0.14 zanba: under shelf",
+      "back t=0.07 konteur: under shelf"
+    ],
+    "cutByEdge": 4,
+    "whole": 62,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "cut by edge",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "whole",
+          "lapen": "under shelf",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 1.0,
+        "places": {
+          "konteur": "cut by edge",
+          "lapen": "cut by edge",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "cut by edge",
+          "lapen": "whole",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 23,
+    "whole": 26,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.067,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "cut by edge",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "cut by edge",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.333,
+        "places": {
+          "konteur": "absent",
+          "lapen": "cut by edge",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "cut by edge",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "cut by edge",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "cut by edge",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.067,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "laptop": {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "states": 31,
+    "faults": [
+      "up t=0.07 konteur: under shelf",
+      "up t=0.75 zanba: under shelf",
+      "up t=0.81 lapen: under shelf",
+      "up t=0.81 zanba: under shelf",
+      "up t=0.88 konteur: under shelf",
+      "up t=0.88 lapen: under shelf",
+      "up t=0.88 zanba: under shelf",
+      "up t=0.94 konteur: under shelf",
+      "up t=1.00 zanba: under shelf",
+      "back t=0.94 konteur: under shelf",
+      "back t=0.88 konteur: under shelf",
+      "back t=0.88 lapen: under shelf",
+      "back t=0.88 zanba: under shelf",
+      "back t=0.81 lapen: under shelf",
+      "back t=0.81 zanba: under shelf",
+      "back t=0.75 zanba: under shelf",
+      "back t=0.34 lapen: under shelf",
+      "back t=0.27 lapen: under shelf",
+      "back t=0.27 zanba: under shelf",
+      "back t=0.20 lapen: under shelf",
+      "back t=0.20 zanba: under shelf",
+      "back t=0.14 lapen: under shelf",
+      "back t=0.14 zanba: under shelf",
+      "back t=0.07 konteur: under shelf"
+    ],
+    "cutByEdge": 4,
+    "whole": 51,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "cut by edge",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "cut by edge"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 1.0,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "under shelf",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "cut by edge",
+          "lapen": "under shelf",
+          "zanba": "under shelf"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "under shelf",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  }
+}

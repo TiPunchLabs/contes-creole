@@ -1,0 +1,41 @@
+{
+  "frames": 4687,
+  "seconds": 75.0,
+  "lapen": {
+    "hops": 24,
+    "hopHeightMinMax": [0.153, 0.8],
+    "maxTravelPerFrameOnGround": 0.0,
+    "maxLiftChangePerFrame": 0.051,
+    "maxYawStepPerFrameDeg": 5.04,
+    "maxHeadTurnPerFrameDeg": 4.95,
+    "travelled": 10.85,
+    "inViewShare": 1.0,
+    "restsSeconds": [5.2, 7.4, 6.6, 2.3, 20.3, 6.4, 3.2, 11.8]
+  },
+  "zanba": {
+    "stances": 42,
+    "footDriftPerStanceMedian": 0.008,
+    "footDriftPerStanceMax": 0.019,
+    "footDriftOver5cmShare": 0.0,
+    "worstStance": {
+      "drift": 0.019,
+      "leg": 0,
+      "fromSecond": 22.94,
+      "toSecond": 23.87,
+      "turnedDeg": -12.2
+    },
+    "topSpeed": 0.616,
+    "maxSpeedChangePerFrame": 0.0179,
+    "maxYawStepPerFrameDeg": 0.22,
+    "maxPitchChangePerFrameDeg": 0.141,
+    "travelled": 5.1,
+    "inViewShare": 1.0
+  },
+  "together": {
+    "minDistance": 2.62,
+    "touchingBelow": 2.05,
+    "minDistanceToTrunk": 6.5,
+    "screenOverlapShare": 0.0
+  },
+  "viewport": "desktop"
+}

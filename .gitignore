@@ -40,3 +40,6 @@ qa/out/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Python bytecode of the QA scripts
+__pycache__/

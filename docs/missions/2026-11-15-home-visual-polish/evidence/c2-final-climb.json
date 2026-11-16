@@ -1,0 +1,3232 @@
+{
+  "phone-landscape": {
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 21,
+    "grazed": 1,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.066,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.333,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.066,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "phone-landscape-l": {
+    "viewport": {
+      "width": 932,
+      "height": 430
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 23,
+    "grazed": 1,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.066,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.333,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.066,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "phone-landscape-s": {
+    "viewport": {
+      "width": 667,
+      "height": 375
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 15,
+    "grazed": 2,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.035,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.1,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.135,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.17,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.205,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.235,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.305,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.375,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.405,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.44,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.47,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.5,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.47,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.44,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.405,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.375,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.305,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.235,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.205,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.17,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.135,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.1,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.035,
+        "places": {
+          "konteur": "grazed",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "desktop": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 62,
+    "grazed": 3,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 1.0,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "grazed",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "laptop": {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 51,
+    "grazed": 0,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 1.0,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "w1280": {
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 51,
+    "grazed": 2,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 1.0,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "whole",
+          "lapen": "grazed",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "w1920": {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 68,
+    "grazed": 4,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 1.0,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.94,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.88,
+        "places": {
+          "konteur": "whole",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.81,
+        "places": {
+          "konteur": "whole",
+          "lapen": "grazed",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.75,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.68,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.61,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.54,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.41,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.2,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.14,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.07,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 26,
+    "grazed": 2,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.067,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.333,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.067,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "grazed"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "tablet": {
+    "viewport": {
+      "width": 768,
+      "height": 1024
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 57,
+    "grazed": 2,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.035,
+        "places": {
+          "konteur": "grazed",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.07,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.1,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.135,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.17,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.205,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.235,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.305,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.375,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.405,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.44,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.5,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.47,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.44,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.405,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.375,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.34,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.305,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.235,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.205,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.17,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.135,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.1,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.07,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.035,
+        "places": {
+          "konteur": "grazed",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  },
+  "small": {
+    "viewport": {
+      "width": 360,
+      "height": 640
+    },
+    "states": 31,
+    "faults": [],
+    "cutByEdge": 0,
+    "whole": 39,
+    "grazed": 0,
+    "rows": [
+      {
+        "leg": "up",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.2,
+        "t": 0.067,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "absent",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "up",
+        "target": 1.0,
+        "t": 0.333,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.94,
+        "t": 0.313,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.88,
+        "t": 0.293,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.81,
+        "t": 0.27,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.75,
+        "t": 0.25,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.68,
+        "t": 0.227,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.61,
+        "t": 0.203,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.54,
+        "t": 0.18,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.47,
+        "t": 0.157,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.41,
+        "t": 0.137,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.34,
+        "t": 0.113,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "absent"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.27,
+        "t": 0.09,
+        "places": {
+          "konteur": "absent",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.2,
+        "t": 0.067,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.14,
+        "t": 0.047,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.07,
+        "t": 0.023,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      },
+      {
+        "leg": "back",
+        "target": 0.0,
+        "t": 0,
+        "places": {
+          "konteur": "whole",
+          "lapen": "whole",
+          "zanba": "whole"
+        }
+      }
+    ]
+  }
+}

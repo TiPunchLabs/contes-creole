@@ -1,0 +1,391 @@
+[
+  {
+    "name": "desktop.tab-order",
+    "ok": true,
+    "detail": [
+      {
+        "tag": "button",
+        "cls": "tree-hit tree-teller",
+        "name": "Cliquez ici pour accéder à un conte au hasard.",
+        "lang": "fr"
+      },
+      {
+        "tag": "button",
+        "cls": "tree-shelf-book",
+        "name": "Ti Kannot é Gwo Rako",
+        "lang": "gcf"
+      },
+      {
+        "tag": "button",
+        "cls": "tree-shelf-book",
+        "name": "Mila et le lambi qui avait perdu son chant",
+        "lang": "fr"
+      },
+      {
+        "tag": "button",
+        "cls": "tree-shelf-book is-invitation",
+        "name": "Le prochain conte, invitation aux classes",
+        "lang": "fr"
+      },
+      null,
+      {
+        "tag": "button",
+        "cls": "tree-hit tree-teller",
+        "name": "Cliquez ici pour accéder à un conte au hasard.",
+        "lang": "fr"
+      },
+      {
+        "tag": "button",
+        "cls": "tree-shelf-book",
+        "name": "Ti Kannot é Gwo Rako",
+        "lang": "gcf"
+      },
+      {
+        "tag": "button",
+        "cls": "tree-shelf-book",
+        "name": "Mila et le lambi qui avait perdu son chant",
+        "lang": "fr"
+      }
+    ]
+  },
+  {
+    "name": "desktop.tab-reaches-teller-and-shelf",
+    "ok": true,
+    "detail": [
+      "Cliquez ici pour accéder à un conte au hasard.",
+      "Ti Kannot é Gwo Rako",
+      "Mila et le lambi qui avait perdu son chant",
+      "Le prochain conte, invitation aux classes",
+      null,
+      "Cliquez ici pour accéder à un conte au hasard.",
+      "Ti Kannot é Gwo Rako",
+      "Mila et le lambi qui avait perdu son chant"
+    ]
+  },
+  {
+    "name": "desktop.hover-lapen-bubble",
+    "ok": true,
+    "detail": "Mwen sé Konpè Lapen ! Piti, mé malen…\nJe suis Compère Lapin : petit, mais malin !"
+  },
+  {
+    "name": "desktop.hover-zanba-bubble",
+    "ok": true,
+    "detail": "Mwen sé Konpè Zanba ! Gwo, fò… é toujou fen !\nJe suis Compère Zamba : gros, fort… et toujours affamé !"
+  },
+  {
+    "name": "desktop.bubble-hides-off-critter",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.hover-teller-bubble",
+    "ok": true,
+    "detail": "« Yé krik ! …… Yé mistikrik ! »\nChwazi on liv adan pyébwa a kont-la.\nChoisis un livre dans l'arbre des contes.\nCliquez ici pour accéder à un conte au hasard."
+  },
+  {
+    "name": "desktop.arrow-keys-climb",
+    "ok": true,
+    "detail": [0.077, 0]
+  },
+  {
+    "name": "desktop.wheel-climbs-and-fades-intro",
+    "ok": true,
+    "detail": {
+      "book": null,
+      "t": 0.22,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.console-clean",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "desktop.shelf-ti-kannot-first-press-climbs",
+    "ok": true,
+    "detail": {
+      "book": null,
+      "t": 0.2,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.shelf-ti-kannot-near",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.shelf-ti-kannot-second-press-enters",
+    "ok": true,
+    "detail": {
+      "book": "ti-kannot",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.ti-kannot-way-back-to-tree",
+    "ok": true,
+    "detail": {
+      "book": null,
+      "t": 0.2,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.ti-kannot-enter-key-on-near-card",
+    "ok": true,
+    "detail": {
+      "book": "ti-kannot",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.ti-kannot-console-clean",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "desktop.shelf-mila-first-press-climbs",
+    "ok": true,
+    "detail": {
+      "book": null,
+      "t": 0.54,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.shelf-mila-near",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.shelf-mila-second-press-enters",
+    "ok": true,
+    "detail": {
+      "book": "mila",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.mila-way-back-to-tree",
+    "ok": true,
+    "detail": {
+      "book": null,
+      "t": 0.54,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.mila-enter-key-on-near-card",
+    "ok": true,
+    "detail": {
+      "book": "mila",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.mila-console-clean",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "desktop.click-on-hanging-card-enters",
+    "ok": true,
+    "detail": {
+      "book": "ti-kannot",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "desktop.invitation-opens-classes-page",
+    "ok": true,
+    "detail": "http://localhost:5181/contes-des-classes/"
+  },
+  {
+    "name": "desktop.teller-click-random-ti-kannot",
+    "ok": true,
+    "detail": {
+      "book": "ti-kannot",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 1
+    }
+  },
+  {
+    "name": "desktop.teller-click-random-mila",
+    "ok": true,
+    "detail": {
+      "book": "mila",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 1
+    }
+  },
+  {
+    "name": "mobile.lite-pixel-ratio-1",
+    "ok": true,
+    "detail": 1
+  },
+  {
+    "name": "mobile.tap-lapen-bubble",
+    "ok": true,
+    "detail": "Mwen sé Konpè Lapen ! Piti, mé malen…\nJe suis Compère Lapin : petit, mais malin !"
+  },
+  {
+    "name": "mobile.bubble-leaves-after-hold",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "mobile.finger-swipe-climbs",
+    "ok": true,
+    "detail": {
+      "book": null,
+      "t": 0.363,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "mobile.no-horizontal-overflow",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "mobile.tap-teller-opens-a-tale",
+    "ok": true,
+    "detail": {
+      "book": "ti-kannot",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 1
+    }
+  },
+  {
+    "name": "mobile.shelf-two-taps-enter",
+    "ok": true,
+    "detail": {
+      "book": "ti-kannot",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  },
+  {
+    "name": "mobile.console-clean",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "reduced.live-change-stops-critters",
+    "ok": true,
+    "detail": [
+      {
+        "lapen": [0.39, -0.59, -6.56],
+        "zanba": [-3.4, -0.63, -8.3]
+      },
+      {
+        "lapen": [0.39, -0.59, -6.56],
+        "zanba": [-3.4, -0.63, -8.3]
+      }
+    ]
+  },
+  {
+    "name": "reduced.live-change-cuts-parallax",
+    "ok": true,
+    "detail": [0.4930555555555556, 0.0986111111111112]
+  },
+  {
+    "name": "reduced.live-change-quiets-decor",
+    "ok": true,
+    "detail": [0.0388805, 0.00792913]
+  },
+  {
+    "name": "reduced.info",
+    "ok": true,
+    "detail": {
+      "walkingBefore": {
+        "lapen": [0.39, -0.59, -6.56],
+        "zanba": [-3.4, -0.63, -8.3]
+      },
+      "stirLively": 0.0388805,
+      "stirAfterLiveChange": 0.00792913
+    }
+  },
+  {
+    "name": "reduced.parallax-cut-to-a-fifth",
+    "ok": true,
+    "detail": [0.4930555555555556, 0.0986111111111112]
+  },
+  {
+    "name": "reduced.css-animations-off",
+    "ok": true,
+    "detail": ["none", "none"]
+  },
+  {
+    "name": "reduced.critters-stay-at-their-places",
+    "ok": true,
+    "detail": [
+      {
+        "lapen": [0.8, -0.61, -10.9],
+        "zanba": [-3.4, -0.63, -8.3]
+      },
+      {
+        "lapen": [0.8, -0.61, -10.9],
+        "zanba": [-3.4, -0.63, -8.3]
+      }
+    ]
+  },
+  {
+    "name": "reduced.decor-quiet",
+    "ok": true,
+    "detail": [0.0388805, 0.0102168]
+  },
+  {
+    "name": "reduced.hover-bubble-kept",
+    "ok": true,
+    "detail": "Mwen sé Konpè Lapen ! Piti, mé malen…\nJe suis Compère Lapin : petit, mais malin !"
+  },
+  {
+    "name": "reduced.tale-access-kept",
+    "ok": true,
+    "detail": {
+      "book": "ti-kannot",
+      "t": NaN,
+      "path": "/",
+      "bubble": "",
+      "introOpacity": 0
+    }
+  }
+]

@@ -1,0 +1,60 @@
+laptop             1024x768   ok
+tablet             768x1024  ok
+small              360x640   ok
+tall               430x932   ok
+w1920              1920x1080  ok
+w1280              1280x720   ok
+w1920x839          1920x839   ok
+w1100x1000         1100x1000  ok
+w900sq             900x900   ok
+w800               800x600   ok
+phone-landscape    844x390   ok
+phone-landscape-l  932x430   ok
+phone-landscape-s  667x375   ok
+w1200x1000         1200x1000  ok
+w1201x1000         1201x1000  ok
+w1250x1000         1250x1000  ok
+w1280x1024         1280x1024  ok
+w1024x540          1024x540   ok
+climb phone-landscape    844x390   31 states: 80 whole, 4 grazed, 0 leaving by the side, 0 absent; critter states cut (reported, not failed): 5; up t=0.14 konteur: under shelf; up t=0.20 konteur: under shelf; back t=0.20 konteur: under shelf; back t=0.14 konteur: under shelf
+       up t=0.88 zanba: under shelf
+       up t=0.94 zanba: under shelf
+       up t=1.00 zanba: under shelf
+       back t=0.94 zanba: under shelf
+       back t=0.88 zanba: under shelf
+climb phone-landscape-l  932x430   31 states: 84 whole, 0 grazed, 0 leaving by the side, 0 absent; critter states cut (reported, not failed): 5; up t=0.14 konteur: under shelf; up t=0.20 konteur: under shelf; back t=0.20 konteur: under shelf; back t=0.14 konteur: under shelf
+       up t=0.88 zanba: under shelf
+       up t=0.94 zanba: under shelf
+       up t=1.00 zanba: under shelf
+       back t=0.94 zanba: under shelf
+       back t=0.88 zanba: under shelf
+climb phone-landscape-s  667x375   31 states: 80 whole, 3 grazed, 2 leaving by the side, 0 absent; critter states cut (reported, not failed): 4; up t=0.14 konteur: under shelf; up t=0.20 konteur: under shelf; back t=0.20 konteur: under shelf; back t=0.14 konteur: under shelf
+       up t=0.88 zanba: under shelf
+       up t=1.00 zanba: under shelf
+       back t=0.88 zanba: under shelf
+       back t=0.81 zanba: under shelf
+climb desktop            1440x900   31 states: 81 whole, 3 grazed, 4 leaving by the side, 2 absent; critter states cut (reported, not failed): 3; ok
+       up t=0.07 zanba: under intro
+       up t=0.94 zanba: under shelf
+       up t=1.00 zanba: under shelf
+climb laptop             1024x768   31 states: 79 whole, 0 grazed, 2 leaving by the side, 7 absent; critter states cut (reported, not failed): 5; ok
+       up t=0.07 zanba: under intro
+       up t=0.94 zanba: under shelf
+       up t=1.00 lapen: under shelf
+       up t=1.00 zanba: under shelf
+       back t=0.94 zanba: under shelf
+climb w1280              1280x720   31 states: 82 whole, 1 grazed, 4 leaving by the side, 0 absent; critter states cut (reported, not failed): 4; up t=0.14 konteur: under shelf; back t=0.14 konteur: under shelf
+       up t=0.07 zanba: under intro
+       up t=0.94 zanba: under shelf
+       up t=1.00 zanba: under shelf
+       back t=0.07 lapen: under intro
+climb w1920              1920x1080  31 states: 86 whole, 2 grazed, 4 leaving by the side, 0 absent; critter states cut (reported, not failed): 1; ok
+       up t=1.00 zanba: cut by edge
+climb w1920x839          1920x839   31 states: 88 whole, 3 grazed, 0 leaving by the side, 0 absent; critter states cut (reported, not failed): 2; ok
+       up t=0.94 zanba: under shelf
+       up t=1.00 zanba: under shelf
+climb mobile             390x844   31 states: 45 whole, 0 grazed, 15 leaving by the side, 33 absent; critter states cut (reported, not failed): 0; ok
+climb tablet             768x1024  31 states: 71 whole, 0 grazed, 11 leaving by the side, 9 absent; critter states cut (reported, not failed): 2; ok
+       up t=0.94 zanba: under shelf
+       back t=0.94 zanba: under shelf
+climb small              360x640   31 states: 53 whole, 0 grazed, 17 leaving by the side, 23 absent; critter states cut (reported, not failed): 0; ok
