@@ -55,6 +55,8 @@ const TAP_MS = 600;
 const BUBBLE_HOLD_MS = 4500;
 /** Reach of the Konteur's lantern and fill light on the lawn, in metres. */
 const LAMP_REACH = 3.6;
+/** Pace of the decor's clock under reduced motion: leaves and lights barely drift. */
+const CALM_PACE = 0.08;
 const CLIMB_KEYS_UP = ["ArrowUp", "ArrowLeft"];
 const CLIMB_KEYS_DOWN = ["ArrowDown", "ArrowRight", " "];
 
@@ -120,8 +122,10 @@ function buildTree(
     views.lapen.group,
     views.zanba.group,
   );
-  const calm = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-  const parallax = calm ? 0.2 : 1;
+  const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  let calm = motion?.matches ?? false;
+  /** Clock of the decor (wind, fireflies, sparkles, swinging cards): near still when calm. */
+  let decor = 0;
   /** What each critter sees around it: the camera, the Konteur and the other one. */
   const around: Record<CritterName, Surroundings> = {
     lapen: {
@@ -276,6 +280,12 @@ function buildTree(
   const speakerOf = (p: Pick): Speaker | null =>
     p?.type === "teller" ? "teller" : p?.type === "critter" ? p.name : null;
 
+  /** Follows a change of the reduced-motion preference while the tree is open. */
+  const onMotion = (e: MediaQueryListEvent): void => {
+    calm = e.matches;
+    around.lapen.calm = around.zanba.calm = calm;
+  };
+
   /** Whether an input event comes from the HUD's own controls (buttons, links, shelf). */
   const fromControl = (e: Event): boolean =>
     e.target instanceof Element && e.target.closest("button, a, .tree-shelf") !== null;
@@ -354,6 +364,8 @@ function buildTree(
     x > container.clientWidth * 0.12 && x < container.clientWidth * 0.88;
 
   const frame = (time: number, dt: number): void => {
+    decor += dt * (calm ? CALM_PACE : 1);
+    const parallax = calm ? 0.2 : 1;
     t += (target - t) * (1 - Math.exp(-dt * 4.5));
     treeCam(t, camera.aspect, cam, look);
     konteur.place(camera.aspect);
@@ -377,15 +389,15 @@ function buildTree(
     camera.lookAt(look);
     // Projections below use this frame's camera, not the last render's (stale right after resume).
     camera.updateMatrixWorld();
-    landscape.update(time);
-    sky.update(time, camera.position);
-    tree.update(time, hover !== null || near >= 0);
-    konteur.update(time, camera.position, (tellerHovered || tellerFocused) && !diving);
+    landscape.update(decor);
+    sky.update(decor, camera.position);
+    tree.update(decor, !calm && (hover !== null || near >= 0));
+    konteur.update(decor, camera.position, (tellerHovered || tellerFocused) && !diving);
     stepCritters(critters, dt, camera.position, obstacles, critterRng, onStage, calm);
     for (const c of critters) views[c.name].pose(c, time, around[c.name]);
     // A focused card answers like a hovered one: it grows and its halo brightens.
     const lit = hover ?? (cardFocused && near >= 0 ? near : null);
-    const cardViews = cards.update(time, t, lit, camera.position, stage.project);
+    const cardViews = cards.update(decor, t, lit, camera.position, stage.project);
     let best: CardView | null = null;
     for (const v of cardViews)
       if (v.visible && onScreen(v.x) && v.near > 0.35 && (!best || v.near > best.near)) best = v;
@@ -421,6 +433,7 @@ function buildTree(
   container.addEventListener("pointermove", onPointerMove);
   container.addEventListener("pointerup", onPointerUp);
   window.addEventListener("keydown", onKey);
+  motion?.addEventListener("change", onMotion);
   stage.start(frame);
 
   return {
@@ -459,6 +472,7 @@ function buildTree(
       container.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKey);
+      motion?.removeEventListener("change", onMotion);
       overlay.dispose();
       stage.dispose();
     },
