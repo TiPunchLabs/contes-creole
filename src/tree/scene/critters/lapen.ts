@@ -149,6 +149,8 @@ export function createLapen(): CritterView {
   let last = 0;
   let lastHeight = 0;
   let wasAirborne = false;
+  let wasHopping = false;
+  let spring = 1;
 
   return {
     group,
@@ -164,7 +166,10 @@ export function createLapen(): CritterView {
       const airborne = cycle >= HOP_GROUND;
       const air = airborne ? (cycle - HOP_GROUND) / (1 - HOP_GROUND) : 0;
       const gather = !airborne && c.phase > 0 ? Math.sin((Math.PI * cycle) / HOP_GROUND) : 0;
-      let height = Math.sin(Math.PI * air) * HOP * (0.45 + 0.55 * c.moving);
+      // A hop keeps the height it left the ground with, whatever happens to his speed in the air.
+      if (airborne && !wasHopping) spring = 0.45 + 0.55 * c.moving;
+      wasHopping = airborne;
+      let height = Math.sin(Math.PI * air) * HOP * spring;
       const lean = airborne ? Math.sin(Math.PI * air) * (0.5 - air) * 0.5 : gather * 0.08;
       let tuck = airborne ? Math.sin(Math.PI * air) * 0.85 : -gather * 0.2;
       let crouch = gather * 0.11;

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createRng } from "@shared/random";
 import {
   HOP_GROUND,
+  WALK_CYCLE,
   RING,
   TREE_OBSTACLE,
   clearOfTree,
@@ -180,7 +181,8 @@ describe("gaits", () => {
     let last = [...lapen.pos];
     for (let i = 0; i < 400; i++) {
       const before = lapen.phase / (Math.PI * 2);
-      stepCritters(list, 1 / 60, CAMERA, OBSTACLES, rng);
+      // From frame 200 on nobody sets off again: the hop under way must still be landed.
+      stepCritters(list, 1 / 60, CAMERA, OBSTACLES, rng, undefined, i > 200);
       const moved = Math.hypot(lapen.pos[0] - last[0], lapen.pos[1] - last[1]);
       if (before < HOP_GROUND) expect(moved).toBe(0);
       last = [...lapen.pos];
@@ -190,7 +192,7 @@ describe("gaits", () => {
     expect(lapen.v).toBe(0);
   });
 
-  it("Zanba's legs turn over once per 0.72 m, and he eases in and out of his walk", () => {
+  it("Zanba's legs turn over once per cycle of ground, and he eases in and out of his walk", () => {
     const rng = createRng(17);
     const list = createCritterStates();
     const zanba = list[1];
@@ -206,7 +208,7 @@ describe("gaits", () => {
     }
     const walked = Math.hypot(zanba.pos[0] - start[0], zanba.pos[1] - start[1]);
     expect(top).toBeGreaterThan(zanba.speed * 0.9);
-    expect((zanba.phase - phase) / (Math.PI * 2)).toBeCloseTo(walked / 0.72, 1);
+    expect((zanba.phase - phase) / (Math.PI * 2)).toBeCloseTo(walked / WALK_CYCLE, 1);
   });
 
   it("keeps everybody in place with `still`", () => {
@@ -216,5 +218,27 @@ describe("gaits", () => {
     for (let i = 0; i < 1200; i++)
       stepCritters(list, 1 / 60, CAMERA, OBSTACLES, rng, undefined, true);
     expect(list.map((c) => c.pos)).toEqual(at);
+  });
+});
+
+describe("turns", () => {
+  it("nobody turns faster than its own limit, and Zanba never turns on the spot", () => {
+    const rng = createRng(17);
+    const list = createCritterStates();
+    let yaws = list.map((c) => c.yaw);
+    let places = list.map((c) => [...c.pos]);
+    for (let i = 0; i < 9000; i++) {
+      if (i === 3000) list.forEach(poke);
+      stepCritters(list, 1 / 60, CAMERA, OBSTACLES, rng);
+      list.forEach((c, k) => {
+        const turned = Math.abs(Math.atan2(Math.sin(c.yaw - yaws[k]), Math.cos(c.yaw - yaws[k])));
+        expect(turned).toBeLessThanOrEqual(c.spin / 60 + 1e-9);
+        const moved = Math.hypot(c.pos[0] - places[k][0], c.pos[1] - places[k][1]);
+        // No pivot: a turn needs ground covered (arcs of 2 m at the tightest).
+        if (c.gait === "walk") expect(turned).toBeLessThanOrEqual(moved / 2 + 1e-9);
+      });
+      yaws = list.map((c) => c.yaw);
+      places = list.map((c) => [...c.pos]);
+    }
   });
 });

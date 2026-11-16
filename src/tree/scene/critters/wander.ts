@@ -19,6 +19,10 @@ export interface CritterState {
   /** How fast the speed and the heading follow what the critter wants (1 / s). */
   accel: number;
   turn: number;
+  /** Fastest the heading may change, radians per second: nobody snaps round. */
+  spin: number;
+  /** Seconds spent on the current walk; a walk that drags on is dropped. */
+  since: number;
   /** Current speed. */
   v: number;
   pos: [number, number];
@@ -42,6 +46,12 @@ export const MAX_DT = 0.05;
 /** Share of a hop spent gathering on the ground before the leap. */
 export const HOP_GROUND = 0.3;
 const TWO_PI = Math.PI * 2;
+/** Ground Zanba covers in one full cycle of his four legs, in metres. */
+export const WALK_CYCLE = 0.56;
+/** Tightest arc Zanba walks, in metres: his planted feet cannot pivot. */
+const WALK_ARC = 2;
+/** Seconds after which a walk that has not arrived is given up. */
+const WALK_PATIENCE = 28;
 /** Distance from its target at which a critter starts to slow down, in seconds of cruising. */
 const BRAKE_SECONDS = 0.9;
 const TREE_PATH_CLEARANCE = 4.4;
@@ -57,8 +67,8 @@ export type StageTest = (x: number, z: number, r: number) => boolean;
 
 /** Where the opening finds a critter: wide screens, then portrait ones (a narrower stage). */
 const STARTS: Record<CritterName, { wide: [number, number]; tall: [number, number] }> = {
-  lapen: { wide: [0.8, -10.9], tall: [-1.0, -11.2] },
-  zanba: { wide: [-3.4, -8.3], tall: [-3.3, -8.2] },
+  lapen: { wide: [0.8, -10.9], tall: [-0.5, -11.0] },
+  zanba: { wide: [-3.4, -8.3], tall: [-2.5, -8.4] },
 };
 
 /**
@@ -70,7 +80,7 @@ export function createCritterStates(
   tall = false,
   teller: readonly [number, number] = [4.4, -12.5],
 ): CritterState[] {
-  const base = { tgt: null, moving: 0, phase: 0, react: 0, look: false, v: 0 };
+  const base = { tgt: null, moving: 0, phase: 0, react: 0, look: false, v: 0, since: 0 };
   const at = (name: CritterName): { pos: [number, number]; yaw: number } => {
     const [x, z] = tall ? STARTS[name].tall : STARTS[name].wide;
     // Three quarters: turned to the Konteur, but enough towards the opening view to show a face.
@@ -91,6 +101,7 @@ export function createCritterStates(
       step: TWO_PI * 2.1,
       accel: 9,
       turn: 6,
+      spin: 5.5,
       ...at("lapen"),
       wait: 6.5,
     },
@@ -100,10 +111,11 @@ export function createCritterStates(
       r: 1.5,
       speed: 0.62,
       gait: "walk",
-      // One full cycle of his four legs covers 0.72 m (zanba.ts: leg length and swing).
-      step: TWO_PI / 0.72,
+      // One full cycle of his four legs covers `WALK_CYCLE` metres (zanba.ts sets the stride on it).
+      step: TWO_PI / WALK_CYCLE,
       accel: 1.8,
       turn: 1.5,
+      spin: 1.1,
       ...at("zanba"),
       wait: 9,
     },
@@ -141,7 +153,10 @@ export function pickTarget(
       r = RING.min + rng() * (RING.max - RING.min),
       x = Math.cos(a) * r,
       z = Math.sin(a) * r;
+    // A walker first looks for somewhere ahead of it: it turns in wide arcs only.
+    const ahead = c.gait === "hop" || k >= 28 || Math.abs(angleTo(c, x, z)) < 0.9;
     if (
+      ahead &&
       (!onStage || onStage(x, z, c.r)) &&
       others.every(
         (o) => o === c || Math.hypot(x - o.pos[0], z - o.pos[1]) > c.r + o.r + COMPANY,
@@ -161,6 +176,23 @@ function angleTo(c: CritterState, x: number, z: number): number {
   return Math.atan2(Math.sin(d), Math.cos(d));
 }
 
+/**
+ * How freely `c` may walk on, 1 to 0: it slows down over 1.5 m as it nears another critter that
+ * stands ahead of it, and stops short of the distance at which `blocked` would halt it dead.
+ */
+function roomAhead(c: CritterState, list: readonly CritterState[]): number {
+  let room = 1;
+  for (const o of list) {
+    if (o === c) continue;
+    const dx = o.pos[0] - c.pos[0];
+    const dz = o.pos[1] - c.pos[1];
+    const gap = Math.hypot(dx, dz);
+    const ahead = (dx * Math.sin(c.yaw) + dz * Math.cos(c.yaw)) / (gap || 1);
+    if (ahead > 0.3) room = Math.min(room, clamp((gap - (c.r + o.r + 0.6)) / 1.5, 0, 1));
+  }
+  return room;
+}
+
 /** Whether moving `c` to (x, z) would bump into another critter or into the trunk. */
 function blocked(c: CritterState, x: number, z: number, list: readonly CritterState[]): boolean {
   if (Math.hypot(x, z) <= TREE_OBSTACLE[2] + c.r * 0.5) return true;
@@ -172,7 +204,8 @@ function blocked(c: CritterState, x: number, z: number, list: readonly CritterSt
  * `onStage` keeps their walks where the opening view shows them. Speed and heading ease towards
  * what the critter wants, so starts, stops and turns have weight. Lapen only travels while a hop
  * has him in the air and always lands the hop he started; Zanba's steps follow the ground he
- * covers, turning included, so his feet do not slide. With `still`, nobody sets off.
+ * covers and he never turns on the spot, so his feet do not slide. Headings change at a bounded
+ * rate. With `still`, nobody sets off.
  */
 export function stepCritters(
   list: CritterState[],
@@ -188,35 +221,54 @@ export function stepCritters(
     c.react = Math.max(0, c.react - h);
     let want = 0;
     let turned = 0;
+    // A walker's planted feet cannot pivot: Zanba only turns as he walks, his head does the rest.
+    const pivots = c.gait === "hop";
     if (c.react > 0) {
-      turned = angleTo(c, camera.x, camera.z) * Math.min(1, h * 5);
+      if (pivots) turned = angleTo(c, camera.x, camera.z) * Math.min(1, h * 5);
     } else if (c.wait > 0 || still) {
       c.wait -= h;
-      if (c.look) turned = angleTo(c, camera.x, camera.z) * Math.min(1, h * c.turn * 0.4);
+      if (c.look && pivots) turned = angleTo(c, camera.x, camera.z) * Math.min(1, h * c.turn * 0.4);
       if (c.wait <= 0 && !still) {
         c.tgt = pickTarget(c, obstacles, rng, onStage, list);
+        c.since = 0;
         if (!c.tgt) c.wait = 1;
       }
     } else if (c.tgt) {
       const d = Math.hypot(c.tgt[0] - c.pos[0], c.tgt[1] - c.pos[1]);
-      if (d < 0.25) {
+      c.since += h;
+      // A walker turns in arcs and may circle a spot it cannot quite reach: near enough will do.
+      if (d < (pivots ? 0.25 : 0.7) || c.since > WALK_PATIENCE) {
         c.tgt = null;
         c.wait = 2.5 + rng() * 5;
         c.look = rng() < 0.6;
       } else {
         const turn = angleTo(c, c.tgt[0], c.tgt[1]);
         turned = turn * Math.min(1, h * c.turn);
-        const facing = Math.abs(turn) < 0.7 ? 1 : 0.25;
-        want = c.speed * facing * clamp(d / (c.speed * BRAKE_SECONDS), 0.3, 1);
+        // Inside its own turning circle a walker would go round its target for ever: let it go.
+        if (!pivots && Math.abs(turn) > 0.35 && d < 2 * WALK_ARC * Math.abs(Math.sin(turn)))
+          c.since = WALK_PATIENCE;
+        const facing = Math.abs(turn) < 0.7 ? 1 : pivots ? 0.25 : 0.75;
+        const room = roomAhead(c, list);
+        if (room <= 0) {
+          // The other one is in the way: give up this walk in good time rather than bump into it.
+          c.tgt = null;
+          c.wait = 0.9 + rng();
+          c.look = true;
+        } else {
+          want = c.speed * facing * clamp(d / (c.speed * BRAKE_SECONDS), 0.3, 1) * room;
+        }
       }
     } else {
       c.wait = 0.4;
     }
-    c.yaw += turned;
     c.v += (want - c.v) * Math.min(1, h * c.accel);
     if (c.v < 0.01 && want === 0) c.v = 0;
 
     let travel = c.v * h;
+    // A walker turns only as far as the ground it covers allows (arcs of `WALK_ARC` at least).
+    const most = pivots ? c.spin * h : Math.min(c.spin * h, travel / WALK_ARC);
+    turned = clamp(turned, -most, most);
+    c.yaw += turned;
     if (c.gait === "hop") {
       const hopping = c.phase > 0 || want > 0;
       const airborne = c.phase / TWO_PI >= HOP_GROUND;
@@ -227,17 +279,15 @@ export function stepCritters(
         if (c.phase >= TWO_PI) c.phase = want > 0 ? c.phase - TWO_PI : 0;
       }
     } else {
-      // Half a metre of turning circle: a turn on the spot is walked, not slid.
-      c.phase += (travel + Math.abs(turned) * 0.5) * c.step;
-      if (c.v === 0 && turned === 0) {
-        const rest = Math.round(c.phase / Math.PI) * Math.PI;
-        c.phase += (rest - c.phase) * Math.min(1, h * 4);
-      }
+      // The legs turn over with the ground covered; when he stops they stay where they stand.
+      c.phase += travel * c.step;
     }
     if (travel > 0) {
       const nx = c.pos[0] + Math.sin(c.yaw) * travel,
         nz = c.pos[1] + Math.cos(c.yaw) * travel;
       if (blocked(c, nx, nz, list)) {
+        // Held where it stands: a walker does not turn either.
+        if (!pivots) c.yaw -= turned;
         c.tgt = null;
         c.v = 0;
         c.wait = 0.9 + rng();

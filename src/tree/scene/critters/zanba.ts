@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { clamp, lerp } from "@shared/math";
+import { WALK_CYCLE } from "./wander";
 import {
   SMOOTH,
   SPHERE,
@@ -27,9 +28,12 @@ const PINK = "#e9b3ad";
 const NAIL = "#f3e6d2";
 const STRAW = "#e2c07a";
 const SCALE = 0.8;
-/** Hip height and leg swing: with wander.ts's `step`, one cycle of the legs covers 0.72 m. */
+/** Hip height. */
 const HIP = 0.66;
-const SWING = 0.35;
+/** Share of a leg's cycle spent on the ground: three feet down at any time. */
+const DUTY = 0.75;
+/** How far a planted foot travels under the body, in his own units: the ground covered meanwhile. */
+const STRIDE = (WALK_CYCLE * DUTY) / SCALE;
 const TRUNK_PIECE = 0.2;
 /** Lean of each trunk joint from straight down towards the front, hanging and raised. */
 const TRUNK_REST = [0.8, 0.42, 0.1, -0.15, -0.3, -0.1];
@@ -94,20 +98,23 @@ export function createZanba(): CritterView {
       0.04,
     ]),
   ]);
-  const legs = (
-    [
-      [0.41, 0.5, 0],
-      [-0.41, 0.5, Math.PI],
-      [-0.41, -0.6, Math.PI * 0.5],
-      [0.41, -0.6, Math.PI * 1.5],
-    ] as const
-  ).map(([x, z, phase]) => {
-    const g = new THREE.Group();
-    g.position.set(x, HIP, z);
-    g.add(new THREE.Mesh(legWithNails, hide));
-    group.add(g);
-    return { g, phase };
-  });
+  const legs = // Four beats: left hind, left fore, right hind, right fore.
+    (
+      [
+        [0.41, 0.5, Math.PI * 0.5],
+        [-0.41, 0.5, Math.PI * 1.5],
+        [-0.41, -0.6, Math.PI],
+        [0.41, -0.6, 0],
+      ] as const
+    ).map(([x, z, phase]) => {
+      const g = new THREE.Group();
+      g.position.set(x, HIP, z);
+      g.add(new THREE.Mesh(legWithNails, hide));
+      group.add(g);
+      const u = (phase / (Math.PI * 2)) % 1;
+      const reach = u < DUTY ? (0.5 - u / DUTY) * STRIDE : 0;
+      return { g, phase, x, z, reach, from: reach, side: 0, sideFrom: 0, swinging: u >= DUTY };
+    });
 
   const head = new THREE.Group();
   head.position.set(0, 1.46, 0.86);
@@ -204,6 +211,7 @@ export function createZanba(): CritterView {
   let lastYaw = 0;
   let lastPhase = 0;
   let lastBeat = 0;
+  let started = false;
 
   return {
     group,
@@ -214,6 +222,16 @@ export function createZanba(): CritterView {
       last = time;
       const lively = around.calm ? 0 : 1;
       const push = dt > 0 ? clamp((c.v - lastSpeed) / dt, -3, 3) : 0;
+      if (!started) {
+        // First frame: nothing has moved yet, whatever heading he starts with.
+        started = true;
+        lastYaw = c.yaw;
+        lastPhase = c.phase;
+        lastSpeed = c.v;
+      }
+      // Ground covered since the last frame, and the turn taken meanwhile.
+      const travel = (c.phase - lastPhase) / c.step;
+      const turned = Math.atan2(Math.sin(c.yaw - lastYaw), Math.cos(c.yaw - lastYaw));
       const veer = dt > 0 ? clamp((c.yaw - lastYaw) / dt, -2, 2) : 0;
       const pace = dt > 0 ? clamp(Math.abs(c.phase - lastPhase) / dt / 3, 0, 1) : 0;
       lastSpeed = c.v;
@@ -223,9 +241,33 @@ export function createZanba(): CritterView {
 
       // Legs: the stance foot stays where it is on the ground while the body passes over it.
       for (const leg of legs) {
-        const a = c.phase + leg.phase;
-        leg.g.rotation.x = Math.sin(a) * SWING;
-        leg.g.position.y = HIP + Math.max(0, -Math.cos(a)) * 0.075 * pace;
+        const u = ((c.phase + leg.phase) / (Math.PI * 2)) % 1;
+        if (u < DUTY) {
+          // On the ground the foot goes back under the body by exactly the ground its own hip
+          // covers (less on the inside of a turn, more on the outside): it holds its place.
+          if (leg.swinging) leg.reach = 0.5 * STRIDE;
+          leg.swinging = false;
+          leg.reach = clamp(leg.reach - travel / SCALE + turned * leg.x, -0.45, 0.45);
+          // A turn also carries the hip sideways over the foot: the hip slides inside the belly.
+          leg.side = clamp(leg.side - turned * (leg.z + leg.reach), -0.16, 0.16);
+          leg.from = leg.reach;
+          leg.sideFrom = leg.side;
+        } else {
+          // Then it swings forward in the air, from wherever it left the ground.
+          const swing = (u - DUTY) / (1 - DUTY);
+          leg.swinging = true;
+          const ease = swing * swing * (3 - 2 * swing);
+          leg.reach = lerp(leg.from, 0.5 * STRIDE, ease);
+          leg.side = lerp(leg.sideFrom, 0, ease);
+        }
+        const swing = u < DUTY ? 0 : (u - DUTY) / (1 - DUTY);
+        const angle = Math.asin(clamp(leg.reach / HIP, -0.75, 0.75));
+        leg.g.rotation.x = -angle;
+        leg.g.position.x = leg.x + leg.side;
+        // The hip gives what the leaning leg loses in height, so the sole stays on the ground;
+        // a leg in the air is lifted at any pace, slow arcs included: a swinging foot never drags.
+        leg.g.position.y =
+          HIP * Math.cos(angle) + Math.sin(swing * Math.PI) * 0.085 * Math.min(1, pace * 8);
       }
       // Each footfall shakes the belly a little.
       const beat = Math.floor(c.phase / (Math.PI / 2));
