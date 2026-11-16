@@ -76,7 +76,8 @@ export function createKonteur(): {
   lampCap.position.set(0.7, 0.3, 0.15);
   const lampLight = new THREE.PointLight("#f0b860", 4, 8, 1.6);
   lampLight.position.set(0.7, 0.5, 0.45);
-  const fill = new THREE.PointLight("#f6d8a8", 10, 7, 1.4);
+  // Short reach: it lights the photo, not the critters that pass a few metres away.
+  const fill = new THREE.PointLight("#f6d8a8", 11.5, 4.6, 1.4);
   fill.position.set(-0.4, 1.4, 2.2);
   const glow = softSprite("#f0b860", 2, 0.2);
   glow.position.set(0.7, 0.2, 0.15);

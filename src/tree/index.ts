@@ -54,7 +54,7 @@ const TAP_DISTANCE = 8;
 const TAP_MS = 600;
 const BUBBLE_HOLD_MS = 4500;
 /** Reach of the Konteur's lantern and fill light on the lawn, in metres. */
-const LAMP_REACH = 3.6;
+const LAMP_REACH = 4.2;
 /** Pace of the decor's clock under reduced motion: leaves and lights barely drift. */
 const CALM_PACE = 0.08;
 const CLIMB_KEYS_UP = ["ArrowUp", "ArrowLeft"];
