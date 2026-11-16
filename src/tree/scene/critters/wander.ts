@@ -57,7 +57,7 @@ export type StageTest = (x: number, z: number, r: number) => boolean;
 
 /** Where the opening finds a critter: wide screens, then portrait ones (a narrower stage). */
 const STARTS: Record<CritterName, { wide: [number, number]; tall: [number, number] }> = {
-  lapen: { wide: [1.1, -11.7], tall: [-1.0, -11.6] },
+  lapen: { wide: [0.8, -10.9], tall: [-1.0, -11.2] },
   zanba: { wide: [-3.4, -8.3], tall: [-3.3, -8.2] },
 };
 
