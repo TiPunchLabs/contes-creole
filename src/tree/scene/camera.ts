@@ -7,8 +7,34 @@ import { groundHeight } from "./ground";
 export const cardT = (index: number, count: number): number =>
   count <= 1 ? 0.5 : 0.2 + index * (0.68 / (count - 1));
 
+/** A point that can be written to: a three.js vector, or the solver's own. */
+export interface Spot {
+  x: number;
+  y: number;
+  z: number;
+  set(x: number, y: number, z: number): unknown;
+}
+
+/** A bare writable point. */
+function spot(): Spot {
+  return {
+    x: 0,
+    y: 0,
+    z: 0,
+    set(x, y, z) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+    },
+  };
+}
+
+/** Distance from the trunk axis at which the cards hang, and their height above the camera's. */
+export const CARD_RADIUS = 12.2;
+export const CARD_RISE = 0.3;
+
 /** Spiral camera path around the tree (v14); writes position and look-at target, returns the angle. */
-export function hubCam(t: number, out: THREE.Vector3, look: THREE.Vector3): number {
+export function hubCam(t: number, out: Spot, look: Spot): number {
   const a = -Math.PI / 2 + t * Math.PI * 1.55;
   const r = 20 - t * 4;
   const y = 1.3 + t * 6.4;
@@ -25,10 +51,13 @@ export interface OpeningShot {
   lift: number;
   /** Camera moved sideways, towards the Konteur's side of the clearing. */
   truck: number;
-  /** Look-at point raised: the tree comes down in the frame. */
+  /** Look-at point raised on the trunk axis: the tree comes down in the frame. */
   lookLift: number;
-  /** Look-at point moved sideways; negative puts the tree left of the centre. */
-  lookPan: number;
+  /**
+   * The picture slid sideways by the lens, in half-widths of the screen; negative puts the tree
+   * left of the centre. The camera itself keeps looking at the trunk axis.
+   */
+  shift: number;
 }
 
 /** Same limit as the intro band's media query in overlay.css. */
@@ -80,13 +109,18 @@ const CROWN: readonly (readonly [number, number, number])[] = [
   [5.5, 11.4, -3],
 ];
 
-/** Height on screen (0 top, 1 bottom) of a world point for a camera at `cam` looking at `look`. */
-function screenY(
+/**
+ * Where a world point shows for a camera at `cam` looking at `look`: `x` in half-widths of the
+ * screen from its centre (right positive, before any lens shift), `y` from 0 (top) to 1 (bottom),
+ * and its depth in front of the camera.
+ */
+function screenPoint(
   p: readonly [number, number, number],
   cam: readonly [number, number, number],
   look: readonly [number, number, number],
   tanHalf: number,
-): number {
+  aspect: number,
+): { x: number; y: number; depth: number } {
   let fx = look[0] - cam[0];
   let fy = look[1] - cam[1];
   let fz = look[2] - cam[2];
@@ -107,14 +141,29 @@ function screenY(
   const vy = p[1] - cam[1];
   const vz = p[2] - cam[2];
   const depth = vx * fx + vy * fy + vz * fz;
-  return (1 - (vx * ux + vy * uy + vz * uz) / depth / tanHalf) / 2;
+  return {
+    x: (vx * rx + vz * rz) / depth / (tanHalf * aspect),
+    y: (1 - (vx * ux + vy * uy + vz * uz) / depth / tanHalf) / 2,
+    depth,
+  };
+}
+
+/** Height on screen (0 top, 1 bottom) of a world point for a camera at `cam` looking at `look`. */
+function screenY(
+  p: readonly [number, number, number],
+  cam: readonly [number, number, number],
+  look: readonly [number, number, number],
+  tanHalf: number,
+): number {
+  return screenPoint(p, cam, look, tanHalf, 1).y;
 }
 
 let solved: { aspect: number; height: number; shot: OpeningShot } | null = null;
 
 /**
  * The opening composition for a screen (aspect, height in CSS px). The sideways placement is keyed
- * on the aspect: centred under the band, left of the column. Distance and tilt are solved: the
+ * on the aspect: centred under the band, left of the column; it is a shift of the lens, so the
+ * camera looks at the trunk axis from the first frame on. Distance and tilt are solved: the
  * camera backs off until the whole crown fits under what the intro needs, with the Konteur's feet
  * resting just above the shelf. Everything is continuous in width and height, so resizing a
  * window never makes the camera jump, across the change of layout included.
@@ -133,7 +182,7 @@ export function openingShot(aspect: number, height = 900): OpeningShot {
     1.5,
     short,
   );
-  const lookPan = lerp(
+  const pan = lerp(
     keyed(aspect, [
       [1, 0],
       [BAND_ASPECT, -1.8],
@@ -155,7 +204,7 @@ export function openingShot(aspect: number, height = 900): OpeningShot {
     let hi = 30;
     for (let i = 0; i < 26; i++) {
       const mid = (lo + hi) / 2;
-      if (screenY(feet, cam, [lookPan, 3.5 + mid, 0], tanHalf) < 1 - bottom) lo = mid;
+      if (screenY(feet, cam, [0, 3.5 + mid, 0], tanHalf) < 1 - bottom) lo = mid;
       else hi = mid;
     }
     return (lo + hi) / 2;
@@ -163,7 +212,7 @@ export function openingShot(aspect: number, height = 900): OpeningShot {
   /** Whether the whole crown then sits below the top clearance. */
   const fits = (back: number): boolean => {
     const cam: [number, number, number] = [truck, y, -(20 + back)];
-    const look: [number, number, number] = [lookPan, 3.5 + tilt(back), 0];
+    const look: [number, number, number] = [0, 3.5 + tilt(back), 0];
     return CROWN.every((p) => screenY(p, cam, look, tanHalf) >= top);
   };
   let near = -4;
@@ -173,23 +222,15 @@ export function openingShot(aspect: number, height = 900): OpeningShot {
     if (fits(mid)) far = mid;
     else near = mid;
   }
-  const shot: OpeningShot = { back: far, lift, truck, lookLift: tilt(far), lookPan };
+  // `pan` metres beside the trunk, seen from the camera's distance, as a share of the half-width.
+  const shift = pan / ((20 + far) * tanHalf * aspect);
+  const shot: OpeningShot = { back: far, lift, truck, lookLift: tilt(far), shift };
   solved = { aspect, height, shot };
   return shot;
 }
 
-/**
- * The camera of the tree: the opening composition at the foot of the climb, easing into the
- * spiral, which it follows exactly from `OPENING_END` on. Same outputs as `hubCam`. `height` is
- * the screen's, in CSS px.
- */
-export function treeCam(
-  t: number,
-  aspect: number,
-  out: THREE.Vector3,
-  look: THREE.Vector3,
-  height = 900,
-): number {
+/** The spiral with the opening composition eased in, before the climb's own tilt. */
+function stagedCam(t: number, aspect: number, out: Spot, look: Spot, height: number): number {
   const a = hubCam(t, out, look);
   const w = 1 - smoothstep(clamp(t / OPENING_END, 0, 1));
   if (w <= 0) return a;
@@ -200,10 +241,155 @@ export function treeCam(
   out.x += (rx * shot.back - rz * shot.truck) * w;
   out.z += (rz * shot.back + rx * shot.truck) * w;
   out.y += shot.lift * w;
-  look.x += -rz * shot.lookPan * w;
-  look.z += rx * shot.lookPan * w;
   look.y += shot.lookLift * w;
   return a;
+}
+
+/**
+ * Sideways shift of the lens at climb value `t`, in half-widths of the screen: the opening's,
+ * given back evenly over the whole climb. Spread that thin, the trunk drifts across the screen far
+ * slower than the scene turns, and the turn reads as one about the trunk.
+ */
+export function lensShift(t: number, aspect: number, height = 900): number {
+  return openingShot(aspect, height).shift * (1 - clamp(t, 0, 1));
+}
+
+const DROP_STEPS = 64;
+/** Half-width of the Konteur's photo and lantern, in metres. */
+const KONTEUR_HALF = 0.9;
+let dropped: { aspect: number; height: number; table: Float32Array } | null = null;
+
+/**
+ * How far the look-at point is lowered along the climb, sampled over t: at each step, what it
+ * takes for the Konteur's feet to stay above the shelf while he is in the frame. The camera rises
+ * and the ground sinks towards the shelf; looking a little lower keeps him whole until he leaves
+ * by the side, as far as the card of that part of the climb leaves room at the top of the screen.
+ * Widened and smoothed over t so the tilt never starts or stops short.
+ */
+function dropTable(aspect: number, height: number): Float32Array {
+  if (dropped && dropped.aspect === aspect && dropped.height === height) return dropped.table;
+  const tanHalf = Math.tan((fitFov(50, aspect) * Math.PI) / 360);
+  const line = 1 - clearances(aspect, height).bottom;
+  const [kx, kz] = konteurSpot(aspect);
+  const feet: [number, number, number] = [kx, groundHeight(kx, kz), kz];
+  const pos = spot();
+  const look = spot();
+  const need = new Float32Array(DROP_STEPS + 1);
+  const room = new Float32Array(DROP_STEPS + 1);
+  for (let i = 0; i <= DROP_STEPS; i++) {
+    const t = i / DROP_STEPS;
+    stagedCam(t, aspect, pos, look, height);
+    const cam: [number, number, number] = [pos.x, pos.y, pos.z];
+    const at = (drop: number): { x: number; y: number; depth: number } =>
+      screenPoint(feet, cam, [0, look.y - drop, 0], tanHalf, aspect);
+    room[i] = cardRoom(t, cam, look.y, tanHalf, aspect);
+    const now = at(0);
+    const half = KONTEUR_HALF / (now.depth * tanHalf * aspect);
+    const inFrame = now.depth > 0 && Math.abs(now.x + lensShift(t, aspect, height)) < 1 + half;
+    if (!inFrame || now.y <= line) continue;
+    let lo = 0;
+    let hi = DROP_MAX;
+    for (let k = 0; k < 20; k++) {
+      const mid = (lo + hi) / 2;
+      if (at(mid).y <= line) hi = mid;
+      else lo = mid;
+    }
+    need[i] = hi;
+  }
+  const reach = 3;
+  const wide = need.map((_, i) => {
+    let most = 0;
+    let free = DROP_MAX;
+    for (let k = -reach; k <= reach; k++) {
+      most = Math.max(most, need[clamp(i + k, 0, DROP_STEPS)]);
+      // The least room around, so the smoothing below cannot spend more than a card leaves.
+      free = Math.min(free, room[clamp(i + k, 0, DROP_STEPS)]);
+    }
+    return Math.min(most, free);
+  });
+  const table = wide.map((_, i) => {
+    let sum = 0;
+    for (let k = -reach; k <= reach; k++) sum += wide[clamp(i + k, 0, DROP_STEPS)];
+    // The opening is solved on its own: the tilt comes in as the climb starts.
+    return (sum / (2 * reach + 1)) * smoothstep(clamp(i / DROP_STEPS / 0.06, 0, 1));
+  });
+  dropped = { aspect, height, table };
+  return table;
+}
+
+/** Share of the screen's height a card keeps clear above it. */
+const CARD_HEADROOM = 0.025;
+/** Largest lowering the tilt solver considers, in metres. */
+const DROP_MAX = 14;
+
+/**
+ * How far the look-at point (at height `lookY` on the trunk axis) may be lowered before the card
+ * of this part of the climb touches the top of the screen. Cards hang anywhere from 0.2 to 0.88,
+ * each at the camera's height there; before and after, the first and the last are the ones in view.
+ */
+function cardRoom(
+  t: number,
+  cam: readonly [number, number, number],
+  lookY: number,
+  tanHalf: number,
+  aspect: number,
+): number {
+  const at = clamp(t, 0.2, 0.88);
+  const hang = spot();
+  const a = hubCam(at, hang, spot());
+  // Top edge of a card at its largest (cards.ts: 2.1 high, scale 1.18, a tenth more when near),
+  // on either side of the camera's line (cards hang 0.06 rad off it, alternately).
+  const tops = [-0.06, 0.06].map((off): [number, number, number] => [
+    Math.cos(a + off) * CARD_RADIUS,
+    hang.y + CARD_RISE + 1.05 * 1.18 * 1.1,
+    Math.sin(a + off) * CARD_RADIUS,
+  ]);
+  const fits = (drop: number): boolean =>
+    tops.every((top) => {
+      const s = screenPoint(top, cam, [0, lookY - drop, 0], tanHalf, aspect);
+      return s.depth <= 0 || Math.abs(s.x) > 1.2 || s.y >= CARD_HEADROOM;
+    });
+  if (fits(DROP_MAX)) return DROP_MAX;
+  if (!fits(0)) return 0;
+  let lo = 0;
+  let hi = DROP_MAX;
+  for (let k = 0; k < 20; k++) {
+    const mid = (lo + hi) / 2;
+    if (fits(mid)) lo = mid;
+    else hi = mid;
+  }
+  return lo;
+}
+
+/** Metres the look-at point is lowered at climb value `t` (see `dropTable`). */
+export function climbDrop(t: number, aspect: number, height = 900): number {
+  const table = dropTable(aspect, height);
+  const at = clamp(t, 0, 1) * DROP_STEPS;
+  const i = Math.min(DROP_STEPS - 1, Math.floor(at));
+  return lerp(table[i], table[i + 1], at - i);
+}
+
+/**
+ * The camera of the tree: the opening composition at the foot of the climb, easing into the
+ * spiral, whose path it follows exactly from `OPENING_END` on. It always looks at the trunk axis,
+ * so the scene turns about the trunk; along the climb it looks lower by `climbDrop`. Same outputs
+ * as `hubCam`. `height` is the screen's, in CSS px.
+ */
+export function treeCam(t: number, aspect: number, out: Spot, look: Spot, height = 900): number {
+  const a = stagedCam(t, aspect, out, look, height);
+  look.y -= climbDrop(t, aspect, height);
+  return a;
+}
+
+/**
+ * Slides the picture sideways by `shift` half-widths (see `lensShift`) without turning the
+ * camera. To call after every `updateProjectionMatrix`, which resets it.
+ */
+export function shiftLens(camera: THREE.PerspectiveCamera, shift: number): void {
+  const m = camera.projectionMatrix.elements;
+  if (m[8] === -shift) return;
+  m[8] = -shift;
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
 }
 
 /** Whether a disc of radius `r` at (x, z) stands on the stage (see `openingStage`). */
@@ -226,14 +412,15 @@ export function openingStage(
     const half = Math.atan(Math.tan((fitFov(50, a) * Math.PI) / 360) * a);
     const cx = shot.truck;
     const cz = -(20 + shot.back);
-    const dx = shot.lookPan - cx;
-    const dz = -cz;
-    const len = Math.hypot(dx, dz);
-    const depth = ((x - cx) * dx + (z - cz) * dz) / len;
-    const side = Math.abs(((x - cx) * dz - (z - cz) * dx) / len);
+    // The camera looks at the trunk axis; the lens shift moves the frame's edges, not the view.
+    const len = Math.hypot(cx, cz);
+    const depth = (-(x - cx) * cx - (z - cz) * cz) / len;
+    const right = ((x - cx) * cz - (z - cz) * cx) / len;
+    const unit = depth * Math.tan(half);
     // Nearer the camera than the Konteur, a critter would stand lower on screen than he does:
     // behind the shelf.
-    if (z > -6.2 || z < KONTEUR_Z + r || side + r > depth * Math.tan(half) * 0.8) return false;
+    if (z > -6.2 || z < KONTEUR_Z + r || depth <= 0) return false;
+    if (Math.abs(right / unit + shot.shift) + r / unit > 0.8) return false;
     const reach = Math.hypot(x - cx, z - cz);
     return screens.every(([sx, sz, sr]) => {
       const along = ((sx - cx) * (x - cx) + (sz - cz) * (z - cz)) / reach;

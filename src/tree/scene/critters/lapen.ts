@@ -7,8 +7,6 @@ import {
   blink,
   blobShadow,
   eye,
-  eyeMaterial,
-  fader,
   fused,
   gazeYaw,
   liftShadow,
@@ -101,8 +99,7 @@ export function createLapen(): CritterView {
   const head = new THREE.Group();
   head.position.set(0, 1.15, 0.05);
   body.add(head);
-  const gloss = eyeMaterial();
-  const eyes = [eye(0.125, 0.05, 0.245, 0.055, gloss), eye(-0.125, 0.05, 0.245, 0.055, gloss)];
+  const eyes = [eye(0.125, 0.05, 0.245, 0.055), eye(-0.125, 0.05, 0.245, 0.055)];
   head.add(
     new THREE.Mesh(
       fused([
@@ -151,8 +148,6 @@ export function createLapen(): CritterView {
   const nod: Spring = { x: 0, v: 0 };
   let last = 0;
   let lastHeight = 0;
-  const fade = fader(group, shadow);
-  let presence = 1;
   let wasAirborne = false;
   let wasHopping = false;
   let spring = 1;
@@ -160,11 +155,6 @@ export function createLapen(): CritterView {
   return {
     group,
     top: 1.6,
-    extent: [0.5 * SCALE, 2.35 * SCALE, 0.55 * SCALE, 0.5 * SCALE],
-    present(opacity) {
-      presence = opacity;
-      fade(opacity);
-    },
     pose(c, time, around) {
       place(group, c);
       const dt = clamp(time - last, 0, 0.05);
@@ -222,7 +212,7 @@ export function createLapen(): CritterView {
         arm.rotation.z = (i ? 1 : -1) * (0.25 + cheer * 0.55);
       });
       tail.position.y = 0.42 + clamp(-rise, -1, 1) * 0.02;
-      liftShadow(shadow, height, presence);
+      liftShadow(shadow, height);
 
       // Ears: thrown back by the leap, late on the way down, and a twitch now and then.
       ears.forEach((e, i) => {

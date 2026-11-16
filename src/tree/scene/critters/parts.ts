@@ -17,10 +17,6 @@ export interface CritterView {
   group: THREE.Group;
   /** Bubble anchor height above the ground, world units. */
   top: number;
-  /** The box the figure fills, world units: half width, height, reach behind and ahead. */
-  extent: readonly [number, number, number, number];
-  /** Sets how present the figure is, 0 (stepped out) to 1. */
-  present(opacity: number): void;
   pose(c: CritterState, time: number, around: Surroundings): void;
 }
 
@@ -336,25 +332,17 @@ export function part(
   return m;
 }
 
-/** Glossy material of a pair of eyes; one per critter, so each can fade on its own. */
-export const eyeMaterial = (): THREE.MeshStandardMaterial =>
-  new THREE.MeshStandardMaterial({ roughness: 0.25, vertexColors: true });
+const eyeMat = new THREE.MeshStandardMaterial({ roughness: 0.25, vertexColors: true });
 const EYE = new THREE.SphereGeometry(1, 14, 10);
 let eyeGeo: THREE.BufferGeometry | null = null;
 
 /** Glossy round eye with a highlight, one mesh in a holder; scale the holder's y to close the lid. */
-export function eye(
-  x: number,
-  y: number,
-  z: number,
-  r: number,
-  material: THREE.Material,
-): THREE.Group {
+export function eye(x: number, y: number, z: number, r: number): THREE.Group {
   eyeGeo ??= fused([
     [EYE, "#2a1d16", 0, 0, 0, 1, 1.2, 0.8],
     [EYE, "#ffffff", 0.35, 0.45, 0.6, 0.32],
   ]);
-  const ball = new THREE.Mesh(eyeGeo, material);
+  const ball = new THREE.Mesh(eyeGeo, eyeMat);
   ball.scale.setScalar(r);
   const holder = new THREE.Group();
   holder.position.set(x, y, z);
@@ -420,40 +408,14 @@ export function tag(group: THREE.Group, who: CritterName): void {
   group.userData.who = who;
 }
 
-/**
- * Fades a figure as one: every material under `group` but its contact shadow takes `opacity`, and
- * the group stops being drawn once it is gone. Returns the function that sets it.
- */
-export function fader(
-  group: THREE.Group,
-  shadow: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>,
-): (opacity: number) => void {
-  const materials = new Set<THREE.Material>();
-  group.traverse((o) => {
-    const m = (o as THREE.Mesh).material;
-    if (m && !Array.isArray(m) && m !== shadow.material) materials.add(m);
-  });
-  let last = 1;
-  return (opacity) => {
-    if (opacity === last) return;
-    last = opacity;
-    group.visible = opacity > 0.01;
-    for (const m of materials) {
-      m.transparent = opacity < 1;
-      m.opacity = opacity;
-    }
-  };
-}
-
 /** Shrinks and fades a contact shadow as its owner leaves the ground by `height` (in own units). */
 export function liftShadow(
   shadow: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>,
   height: number,
-  presence = 1,
 ): void {
   const k = 1 / (1 + height * 1.6);
   shadow.scale.setScalar(k);
-  shadow.material.opacity = k * presence;
+  shadow.material.opacity = k;
 }
 
 /** Yaw, within ±`limit`, that turns a head on a body of heading `yaw` at `from` towards `to`. */

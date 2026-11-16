@@ -6,14 +6,31 @@ import {
   OPENING_END,
   cardT,
   clearances,
+  climbDrop,
   hubCam,
   konteurSpot,
+  lensShift,
   openingShot,
   openingStage,
+  shiftLens,
   shortness,
   treeCam,
 } from "./camera";
 import { groundHeight } from "./ground";
+
+/** Screens the camera is checked on: aspect, height in CSS px. */
+const SCREENS: [number, number][] = [
+  [1440 / 900, 900],
+  [1920 / 1080, 1080],
+  [1280 / 720, 720],
+  [1024 / 768, 768],
+  [768 / 1024, 1024],
+  [390 / 844, 844],
+  [360 / 640, 640],
+  [844 / 390, 390],
+  [932 / 430, 430],
+  [667 / 375, 375],
+];
 
 describe("cardT", () => {
   it("puts a single book in the middle of the climb", () => {
@@ -53,15 +70,105 @@ describe("treeCam", () => {
     return { cam, look };
   };
 
-  it("follows the spiral exactly once the climb has started", () => {
+  it("follows the spiral's path exactly once the climb has started", () => {
     for (const t of [OPENING_END, 0.2, 0.54, 0.88, 1]) {
       const cam = new THREE.Vector3();
       const look = new THREE.Vector3();
       hubCam(t, cam, look);
-      for (const aspect of [0.46, 1.6]) {
-        const shot = at(t, aspect);
+      for (const [aspect, height] of SCREENS) {
+        const shot = at(t, aspect, height);
         expect(shot.cam.distanceTo(cam)).toBeCloseTo(0, 9);
-        expect(shot.look.distanceTo(look)).toBeCloseTo(0, 9);
+        // It may look lower than the spiral does, never elsewhere.
+        expect(shot.look.y).toBeLessThanOrEqual(look.y + 1e-9);
+        expect(shot.look.y).toBeCloseTo(look.y - climbDrop(t, aspect, height), 9);
+      }
+    }
+  });
+
+  it("turns about the trunk: it looks at the trunk axis all along the climb, on every screen", () => {
+    for (const [aspect, height] of SCREENS) {
+      let angle = -Infinity;
+      for (let t = 0; t <= 1.0001; t += 0.005) {
+        const { cam, look } = at(t, aspect, height);
+        expect(Math.hypot(look.x, look.z)).toBe(0);
+        // The camera goes round the axis one way, never back.
+        const now = Math.atan2(cam.z, cam.x);
+        const turned = now < angle - Math.PI ? now + 2 * Math.PI : now;
+        expect(turned).toBeGreaterThan(angle);
+        angle = now;
+      }
+    }
+  });
+
+  it("lets the trunk drift across the screen far slower than the scene turns", () => {
+    for (const [aspect, height] of SCREENS) {
+      const tanHalfWidth = Math.tan((fitFov(50, aspect) * Math.PI) / 360) * aspect;
+      for (let t = 0; t < 1; t += 0.01) {
+        // The drift of the lens over a step, as an angle, against the turn of the spiral over it.
+        const drift = Math.atan(
+          Math.abs(lensShift(t + 0.01, aspect, height) - lensShift(t, aspect, height)) *
+            tanHalfWidth,
+        );
+        expect(drift / (0.01 * Math.PI * 1.55)).toBeLessThan(0.04);
+      }
+      expect(lensShift(1, aspect, height)).toBeCloseTo(0, 12);
+    }
+  });
+
+  it("keeps the Konteur's feet above the shelf for as long as the climb shows him", () => {
+    const camera = new THREE.PerspectiveCamera();
+    const feet = new THREE.Vector3();
+    for (const [aspect, height] of SCREENS) {
+      camera.aspect = aspect;
+      camera.fov = fitFov(50, aspect);
+      const shelfTop = 1 - (66 + Math.min(26, Math.max(12, height * 0.03))) / height;
+      const [x, z] = konteurSpot(aspect);
+      for (let t = 0; t <= 1.0001; t += 0.01) {
+        const { cam, look } = at(t, aspect, height);
+        camera.position.copy(cam);
+        camera.lookAt(look);
+        camera.updateMatrixWorld();
+        camera.updateProjectionMatrix();
+        shiftLens(camera, lensShift(t, aspect, height));
+        feet.set(x, groundHeight(x, z), z).project(camera);
+        if (feet.z > 1 || Math.abs(feet.x) > 1) continue;
+        expect((1 - feet.y) / 2, `t ${t.toFixed(2)} at ${aspect.toFixed(2)}`).toBeLessThan(
+          shelfTop,
+        );
+      }
+    }
+  });
+
+  it("tilts smoothly, and not at all at the opening", () => {
+    for (const [aspect, height] of SCREENS) {
+      expect(climbDrop(0, aspect, height)).toBe(0);
+      for (let t = 0; t < 1; t += 0.002) {
+        const step = Math.abs(climbDrop(t + 0.002, aspect, height) - climbDrop(t, aspect, height));
+        expect(step).toBeLessThan(0.2);
+      }
+    }
+  });
+
+  it("keeps the cards under the top of the screen while it looks lower", () => {
+    const camera = new THREE.PerspectiveCamera();
+    const spot = new THREE.Vector3();
+    const top = new THREE.Vector3();
+    for (const [aspect, height] of SCREENS) {
+      camera.aspect = aspect;
+      camera.fov = fitFov(50, aspect);
+      camera.updateProjectionMatrix();
+      for (const count of [2, 3, 4, 5]) {
+        for (let index = 0; index < count; index++) {
+          const t = cardT(index, count);
+          const a = hubCam(t, spot, top) + (index % 2 ? 0.06 : -0.06);
+          // The card's top edge at its largest (cards.ts: 2.1 high, scale 1.18, 1.1 when near).
+          top.set(Math.cos(a) * 12.2, spot.y + 0.3 + 1.05 * 1.18 * 1.1, Math.sin(a) * 12.2);
+          const { cam, look } = at(t, aspect, height);
+          camera.position.copy(cam);
+          camera.lookAt(look);
+          camera.updateMatrixWorld();
+          expect((1 - top.project(camera).y) / 2).toBeGreaterThan(0.015);
+        }
       }
     }
   });
@@ -77,7 +184,9 @@ describe("treeCam", () => {
       expect(cam.x).toBeCloseTo(shot.truck);
       expect(cam.y).toBeCloseTo(1.3 + shot.lift);
       expect(cam.z).toBeCloseTo(-20 - shot.back);
-      expect(look.x).toBeCloseTo(shot.lookPan);
+      expect(look.x).toBe(0);
+      expect(look.z).toBe(0);
+      expect(lensShift(0, aspect, height)).toBe(shot.shift);
       expect(look.y).toBeCloseTo(3.5 + shot.lookLift);
     }
   });
@@ -182,9 +291,9 @@ describe("openingStage", () => {
   it("keeps to the lawn the opening view shows in front of the trunk", () => {
     for (const aspect of [0.46, 1.6]) {
       const onStage = openingStage(() => aspect);
-      const { truck, lookPan } = openingShot(aspect);
+      const { truck } = openingShot(aspect);
       // On the view axis, between the trunk and the camera.
-      expect(onStage(truck + (lookPan - truck) * 0.5, -9, 0.55)).toBe(true);
+      expect(onStage(truck * 0.5, -9, 0.55)).toBe(true);
       expect(onStage(0, 9, 0.55)).toBe(false);
       expect(onStage(13, -6, 0.55)).toBe(false);
       // Nearer the camera than the Konteur: the shelf would hide it.

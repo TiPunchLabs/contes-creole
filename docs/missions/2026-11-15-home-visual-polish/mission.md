@@ -103,3 +103,8 @@ Closing rule: "ready for human validation" only if mandatory criteria are reache
 
 - Phase: S1 to dispatch.
 - Review cycle: 0 of 3.
+
+## Log
+
+- 2026-11-16 (owner, decision CAP after review 3 at the cap): « fix: les personnages apparaissent et disparaisse fait f5, f4 ». Authorizes one extra correction cycle (cycle 3) and Codex review 4, scope: the characters must no longer pop in and out during the climb (the cycle-2 step-out rule is rejected as a solution), review-3 F5 (keep the Konteur's random-tale entry point, click and keyboard) and F4 (climb harness must assert reached progress, full climb re-captured). Nothing else is authorized by this decision.
+- 2026-11-16 (owner observation, added to cycle 3 as O1): « lors de la rotation la scene ne semble plus pivoter autour de son axe ». The climb/rotation must stay visibly centred on the tree's trunk axis, as on the base.

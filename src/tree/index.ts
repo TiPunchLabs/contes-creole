@@ -10,7 +10,7 @@ import { detectLite, readLiteEnv, scaleCount } from "./lite";
 import { createTreeOverlay, type TellerBox } from "./overlay/overlay";
 import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { RANDOM_TALE_ACTION, RANDOM_TALE_NONE, eligibleTales, pickRandomTale } from "./random-tale";
-import { cardT, konteurSpot, openingStage, treeCam } from "./scene/camera";
+import { cardT, konteurSpot, lensShift, openingStage, shiftLens, treeCam } from "./scene/camera";
 import { createCards, type CardView } from "./scene/cards";
 import { createLapen } from "./scene/critters/lapen";
 import type { CritterView, Surroundings } from "./scene/critters/parts";
@@ -26,7 +26,6 @@ import { FLORA_OBSTACLES } from "./scene/flora";
 import { KONTEUR_OBSTACLES, createKonteur } from "./scene/konteur";
 import { createLandscape } from "./scene/landscape";
 import { EXPOSURE, FOG } from "./scene/palette";
-import { hiddenShare, stepPresence, type Presence, type ScreenBox } from "./scene/presence";
 import { createSky } from "./scene/sky";
 import { createLightTree } from "./scene/tree";
 
@@ -174,72 +173,6 @@ function buildTree(
   const ray = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
   const pickable = [...cards.planes, konteur.plane, views.lapen.group, views.zanba.group];
-  /**
-   * How present each figure is. One the shelf or the frame would cut steps out whole and comes
-   * back whole (presence.ts); while it is out it cannot be pointed at, focused or made to speak.
-   */
-  const presence: Record<Speaker, Presence> = {
-    teller: { opacity: 1, shown: true },
-    lapen: { opacity: 1, shown: true },
-    zanba: { opacity: 1, shown: true },
-  };
-  const corner = new THREE.Vector3();
-  const photo = [0, 1, 2, 3].map(() => new THREE.Vector3());
-  const box: ScreenBox = { left: 0, top: 0, right: 0, bottom: 0 };
-  /** What the HUD lays over the scene: the shelf, and the intro text while it shows. */
-  const covers: (ScreenBox | null)[] = [null, null];
-  let coversAge = 0;
-  /** Set when the view changes at once (mount, back from a tale): presences follow without a fade. */
-  let settle = true;
-
-  /** Share of a figure hidden by the shelf or the frame, from the world points that bound it. */
-  const hiddenOf = (points: Iterable<THREE.Vector3>): number => {
-    box.left = box.top = Infinity;
-    box.right = box.bottom = -Infinity;
-    for (const p of points) {
-      const s = stage.project(p);
-      if (!s.visible) return 1;
-      box.left = Math.min(box.left, s.x);
-      box.right = Math.max(box.right, s.x);
-      box.top = Math.min(box.top, s.y);
-      box.bottom = Math.max(box.bottom, s.y);
-    }
-    return hiddenShare(box, stage.canvas.clientWidth, stage.canvas.clientHeight, covers);
-  };
-  /** The eight corners of the box a critter fills, one after the other in the same vector. */
-  function* cornersOf(view: CritterView): Generator<THREE.Vector3> {
-    const [ex, h, behind, ahead] = view.extent;
-    const { position, rotation } = view.group;
-    const cos = Math.cos(rotation.y);
-    const sin = Math.sin(rotation.y);
-    for (const x of [-ex, ex])
-      for (const y of [0, h])
-        for (const z of [-behind, ahead])
-          yield corner.set(
-            position.x + x * cos + z * sin,
-            position.y + y,
-            position.z - x * sin + z * cos,
-          );
-  }
-  /** Lets the figures step out or back in for this frame's camera. */
-  const updatePresence = (dt: number): void => {
-    // Measured a few times a second: the shelf barely moves, the intro fades with the climb.
-    if (--coversAge <= 0) {
-      covers[0] = overlay.shelfBox();
-      covers[1] = overlay.introBox();
-      coversAge = 6;
-    }
-    const instant = settle || calm;
-    settle = false;
-    konteur.present(
-      stepPresence(presence.teller, hiddenOf(konteur.corners(photo)), dt, instant).opacity,
-    );
-    for (const c of critters) {
-      const view = views[c.name];
-      view.present(stepPresence(presence[c.name], hiddenOf(cornersOf(view)), dt, instant).opacity);
-    }
-    if (speaker && !presence[speaker].shown) setSpeaker(null);
-  };
 
   const climb = (dy: number): void => {
     target = clamp(target + dy * 0.00055, 0, 1);
@@ -335,23 +268,15 @@ function buildTree(
   const pick = (): Pick => {
     ndc.set(pointer.x, pointer.y);
     ray.setFromCamera(ndc, camera);
-    // A figure that has stepped out is not there to be pointed at: the ray goes on to what is.
-    for (const { object: hit } of ray.intersectObjects(pickable, true)) {
-      if (hit === konteur.plane) {
-        if (presence.teller.shown) return { type: "teller" };
-        continue;
-      }
-      let who: CritterName | undefined;
-      for (let o: THREE.Object3D | null = hit; o && !who; o = o.parent)
-        who = o.userData.who as CritterName | undefined;
-      if (who) {
-        if (presence[who].shown) return { type: "critter", name: who };
-        continue;
-      }
-      const index = cards.planes.indexOf(hit as THREE.Mesh);
-      return index >= 0 ? { type: "card", index } : null;
+    const hit = ray.intersectObjects(pickable, true)[0]?.object;
+    if (!hit) return null;
+    if (hit === konteur.plane) return { type: "teller" };
+    for (let o: THREE.Object3D | null = hit; o; o = o.parent) {
+      const who = o.userData.who as CritterName | undefined;
+      if (who) return { type: "critter", name: who };
     }
-    return null;
+    const index = cards.planes.indexOf(hit as THREE.Mesh);
+    return index >= 0 ? { type: "card", index } : null;
   };
   const speakerOf = (p: Pick): Speaker | null =>
     p?.type === "teller" ? "teller" : p?.type === "critter" ? p.name : null;
@@ -426,7 +351,6 @@ function buildTree(
 
   /** The storyteller's box on screen, or null when he is out of view. */
   const tellerOnStage = (): TellerBox | null => {
-    if (!presence.teller.shown) return null;
     const foot = stage.project(feet.copy(konteur.group.position));
     const top = stage.project(head.copy(konteur.group.position).setY(head.y + 1.75));
     const h = container.clientHeight;
@@ -447,6 +371,7 @@ function buildTree(
     treeCam(t, camera.aspect, cam, look, stage.canvas.clientHeight);
     konteur.place(camera.aspect);
     const fov = fitFov(50, camera.aspect);
+    let shift = lensShift(t, camera.aspect, stage.canvas.clientHeight);
     if (diving) {
       diving.progress = Math.min(1, diving.progress + dt / DIVE_SECONDS);
       const d = smoothstep(diving.progress);
@@ -456,10 +381,13 @@ function buildTree(
       look.lerp(card, d);
       camera.fov = lerp(fov, 95, d);
       camera.updateProjectionMatrix();
+      shift *= 1 - d;
     } else if (camera.fov !== fov) {
       camera.fov = fov;
       camera.updateProjectionMatrix();
     }
+    // After any change of the projection (a resize included), which resets it.
+    shiftLens(camera, shift);
     camera.position.copy(cam);
     camera.position.x += pointer.x * 0.5 * parallax;
     camera.position.y += pointer.y * 0.3 * parallax;
@@ -472,7 +400,6 @@ function buildTree(
     konteur.update(decor, camera.position, (tellerHovered || tellerFocused) && !diving);
     stepCritters(critters, dt, camera.position, obstacles, critterRng, onStage, calm);
     for (const c of critters) views[c.name].pose(c, time, around[c.name]);
-    updatePresence(dt);
     // A focused card answers like a hovered one: it grows and its halo brightens.
     const lit = hover ?? (cardFocused && near >= 0 ? near : null);
     const cardViews = cards.update(decor, t, lit, camera.position, stage.project);
@@ -540,7 +467,6 @@ function buildTree(
       tellerHovered = false;
       near = -1;
       active = true;
-      settle = true;
       stage.start(frame);
     },
     dispose() {

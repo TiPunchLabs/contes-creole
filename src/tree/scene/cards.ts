@@ -2,7 +2,7 @@ import * as THREE from "three";
 import type { BookManifest } from "@app/contract";
 import { clamp, lerp } from "@shared/math";
 import type { ScreenPoint } from "@shared/three/stage";
-import { cardT, hubCam } from "./camera";
+import { CARD_RADIUS, CARD_RISE, cardT, hubCam } from "./camera";
 import { isInvitation } from "../invitation";
 import { fitTitle } from "./card-title";
 import { paintInvitationCover } from "./invitation-cover";
@@ -157,7 +157,7 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
     const t = cardT(i, books.length);
     const a = hubCam(t, camPos, look) + (i % 2 ? 0.06 : -0.06);
     const g = new THREE.Group();
-    g.position.set(Math.cos(a) * 12.2, camPos.y + 0.3, Math.sin(a) * 12.2);
+    g.position.set(Math.cos(a) * CARD_RADIUS, camPos.y + CARD_RISE, Math.sin(a) * CARD_RADIUS);
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(1.5, 2.1),
       new THREE.MeshBasicMaterial({ map: coverTexture(book), transparent: true }),

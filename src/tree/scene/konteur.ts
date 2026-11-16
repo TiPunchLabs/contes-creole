@@ -9,8 +9,6 @@ import type { Obstacle } from "./critters/wander";
 import { groundHeight } from "./ground";
 
 const KONTEUR_Z = -12.5;
-/** Strength of the fill light on his photo. */
-const FILL = 11.5;
 const KONTEUR_X_WIDE = 4.4;
 const KONTEUR_X_NARROW = 1.9;
 
@@ -27,10 +25,6 @@ export function createKonteur(): {
   anchor(out: THREE.Vector3): THREE.Vector3;
   place(aspect: number): void;
   update(time: number, cameraPosition: THREE.Vector3, hovered: boolean): void;
-  /** Sets how present he is, 0 (stepped out) to 1: photo, shadows, lantern and lights together. */
-  present(opacity: number): void;
-  /** The four corners of his photo in the world, written into `out` (four vectors). */
-  corners(out: THREE.Vector3[]): THREE.Vector3[];
 } {
   const group = new THREE.Group();
   const setX = (x: number): void => {
@@ -42,18 +36,20 @@ export function createKonteur(): {
   texture.anisotropy = 8;
   const height = 1.75;
   const width = height * 0.588;
-  const photo = new THREE.MeshStandardMaterial({
-    map: texture,
-    transparent: true,
-    alphaTest: 0.08,
-    roughness: 0.9,
-    color: "#ffffff",
-    emissive: "#6a5040",
-    emissiveMap: texture,
-    emissiveIntensity: 0.18,
-    side: THREE.DoubleSide,
-  });
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), photo);
+  const plane = new THREE.Mesh(
+    new THREE.PlaneGeometry(width, height),
+    new THREE.MeshStandardMaterial({
+      map: texture,
+      transparent: true,
+      alphaTest: 0.08,
+      roughness: 0.9,
+      color: "#ffffff",
+      emissive: "#6a5040",
+      emissiveMap: texture,
+      emissiveIntensity: 0.18,
+      side: THREE.DoubleSide,
+    }),
+  );
   plane.position.y = height / 2 - 0.02;
   // Flat on the ground like the critters' shadows, so it shows under the feet from any side; the
   // camera sees it at a grazing angle, hence a wide soft blob plus a tighter one under the feet.
@@ -69,24 +65,21 @@ export function createKonteur(): {
   });
   const lampGlass = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.24, 8), glassMat);
   lampGlass.position.set(0.7, 0.13, 0.15);
-  const capMat = new THREE.MeshStandardMaterial({
-    color: "#2a2a30",
-    metalness: 0.5,
-    roughness: 0.6,
-  });
-  const lampCap = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.09, 8), capMat);
+  const lampCap = new THREE.Mesh(
+    new THREE.ConeGeometry(0.12, 0.09, 8),
+    new THREE.MeshStandardMaterial({ color: "#2a2a30", metalness: 0.5, roughness: 0.6 }),
+  );
   lampCap.position.set(0.7, 0.3, 0.15);
   const lampLight = new THREE.PointLight("#f0b860", 4, 8, 1.6);
   lampLight.position.set(0.7, 0.5, 0.45);
   // Short reach: it lights the photo, not the critters that pass a few metres away.
-  const fill = new THREE.PointLight("#f6d8a8", FILL, 4.6, 1.4);
+  const fill = new THREE.PointLight("#f6d8a8", 11.5, 4.6, 1.4);
   fill.position.set(-0.4, 1.4, 2.2);
   const glow = softSprite("#f0b860", 2, 0.2);
   glow.position.set(0.7, 0.2, 0.15);
   group.add(plane, shadow, contact, fill, lampGlass, lampCap, lampLight, glow);
 
   let lit = 0;
-  let seen = 1;
   const toCamera = new THREE.Vector3();
   return {
     group,
@@ -102,29 +95,10 @@ export function createKonteur(): {
       plane.scale.y = 1 + Math.sin(time * 1.3) * 0.006;
       lit = lerp(lit, hovered ? 1 : 0, 0.1);
       const flicker = Math.sin(time * 7) * 0.08 + Math.sin(time * 3.3) * 0.06;
-      lampLight.intensity = lerp(3, 22, lit) * (1 + flicker) * seen;
-      glow.material.opacity = lerp(0.28, 0.75, lit) * (1 + flicker) * seen;
+      lampLight.intensity = lerp(3, 22, lit) * (1 + flicker);
+      glow.material.opacity = lerp(0.28, 0.75, lit) * (1 + flicker);
       glow.scale.setScalar(lerp(1.6, 3.4, lit));
       glassMat.emissiveIntensity = lerp(0.5, 2.4, lit);
-    },
-    present(opacity) {
-      if (opacity === seen) return;
-      seen = opacity;
-      group.visible = opacity > 0.01;
-      photo.opacity = opacity;
-      shadow.material.opacity = contact.material.opacity = opacity;
-      fill.intensity = FILL * opacity;
-      for (const m of [glassMat, capMat]) {
-        m.transparent = opacity < 1;
-        m.opacity = opacity;
-      }
-    },
-    corners(out) {
-      plane.updateWorldMatrix(true, false);
-      let k = 0;
-      for (const x of [-width / 2, width / 2])
-        for (const y of [-height / 2, height / 2]) plane.localToWorld(out[k++].set(x, y, 0));
-      return out;
     },
   };
 }
