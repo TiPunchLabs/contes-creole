@@ -9,10 +9,29 @@ report replaces the one written for `8d7f813`. Codex reviews 1 to 3 (all CHANGES
 their briefs are committed beside it. Cycle 3 was authorized by the owner on 2026-11-16 beyond the
 review cap, with a review 4 (`mission.md`, Log).
 
+## Owner decision, 2026-11-16 (after review 4)
+
+Codex review 4 of `2a6ed4c` (`review-4.md`): CHANGES_REQUESTED, with two findings left. The owner
+then decided (`mission.md`, Log, decisions D-FINAL, MERGE, DEPLOY, CLEANUP; his words: « contes-creole
+j'accepte on peut pousser en prod et tout clean et mettre à jour en local »):
+
+- F7 (AC6: the shelf still cuts the Konteur at 14 states on four sizes, and 31 critter-states) is
+  accepted as a recorded exception.
+- F8 (AC9: the desktop climb, uncapped, is 10.46 % under the base for a limit of 10 %) is
+  accepted as a recorded exception.
+- The result is accepted artistically, O1 to O5 included.
+- Push, pull request to `main`, merge after a green CI, production through Netlify, and cleanup
+  are authorized.
+
+The verdict stays PARTIAL as a statement of what was verified: AC6 and AC9 are not met as
+written, and two things are still not verified by anyone: playback of the character motion by a
+person at ×1 and ×0.25 (AC2, AC3), and the frame rate on a real phone (AC9). The rest of this
+report is as written before the review and the decision.
+
 Why PARTIAL: these are not verified or not fully met; all but the AC9 desktop margin are beyond
 what the executor can verify.
 
-- AC12: review 3 asked for changes; no review exists yet for `2a6ed4c`.
+- AC12: review 4 of `2a6ed4c` asks for changes (F7, F8); see the owner's decision above.
 - AC6: nothing steps out any more and far fewer figures are cut, but not none: the Konteur's legs
   are behind the shelf around the first card on short landscape screens, and his feet at one stop
   at 1280×720 (14 states,
@@ -240,8 +259,5 @@ Optional, by impact over effort:
 
 ## Next actions
 
-1. Xavier watches the turn and the climb on the page (O1, O2, the characters, Zanba's ears, the lantern).
-2. Codex review 4 of `ef821d2..2a6ed4c`.
-3. A person plays the character videos at ×1 and ×0.25, or watches the page for a minute.
-4. A phone test when a device is at hand.
-5. Xavier's artistic acceptance and merge decision.
+1. A person plays the character videos at ×1 and ×0.25, or watches the page for a minute (AC2, AC3).
+2. A phone test when a device is at hand (AC9).
