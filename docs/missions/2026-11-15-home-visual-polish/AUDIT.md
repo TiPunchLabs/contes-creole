@@ -730,3 +730,338 @@ Worst uncapped change: -5.9 % (limit −10 %). Phone: still not measured on a de
   shelf on those screens) or the cards to move, both outside this mission's limits.
 - The limits of 12.4 stand (Zanba does not walk on portrait phones; the compact intro touches the
   crown at 667×375 and 1024×540; Zanba's rump).
+
+## 14. Correction cycle 3 (after Codex review 3 and the owner's decision; appended, sections 1 to 13 unchanged)
+
+Authorized by the owner on 2026-11-16 beyond the review cap (`mission.md`, Log). Review:
+`review-3.md`, CHANGES_REQUESTED on `e03959f`. Owner's findings: the characters appear and
+disappear during the climb; during the rotation the scene no longer seems to turn about its axis
+(O1); a rebound when the scene pivots towards the next card (O2); the elephant's ears (O3), which then sank into his body at times (O4); a black-and-white triangle at the
+Konteur's foot (O5). Product HEAD after the cycle: `2a6ed4c`. Media: `cycle3/` (`base` is `ef821d2`, `c2` is
+`8d7f813`, `o2-before` is `aae0e5f`, `interim-240c4f5` a run stopped when O3 came in, `o3-before` is
+`240c4f5`, `o4-before` is `69ab983`, `o5-before` is `7482c74`, `interim-7482c74` a run stopped when O5
+came in, `interim-725a942` the full run that showed the frame cost of 14.9, `final/` the state measured); manifest `evidence/c3-media-manifest.tsv`.
+
+### 14.1 F4 — the climb harness, and what it invalidates in section 13
+
+`climb_check.py` wheeled a computed amount and took the stop as reached. On an emulated phone a
+wheel notch weighs one third of what it does on desktop (one half at pixel ratio 2), so on six of
+the ten sizes of cycle 2 the "0.54" states were at t = 0.18 and the climb never went past 0.33 or
+0.5. The script now reads the climb bar after each move, corrects until the value asked for is
+read (within 0.0025), records the value reached, and marks a stop missed beyond 0.01.
+`layout_check.py` fails on a missed stop, on a climb not covered from foot to top both ways, and on
+a gap wider than 0.08 between stops. Final run: 0 missed stop on 11 sizes,
+341 states (`evidence/c3-final-climb.json`).
+
+What this corrects in section 13: the before and after tables of 13.1 and 13.2 hold for the three
+desktop-pointer sizes only; on the phone and tablet sizes they describe the first third or half of
+the climb under wrong labels. The geometry of 13.1 ("no tilt holds for every stop") was hand
+reasoning and is replaced by 14.3, computed on the real modules: a tilt does hold for the Konteur
+on every size, though one that never comes back up (14.4) does so only in part on short landscape; none holds for every point of the lawn the critters walk.
+
+### 14.2 O1 — the turn about the trunk
+
+Cause. Since cycle 1 the opening placed the tree left of the intro column by aiming the camera at a
+point up to 3.2 m beside the trunk, and gave that offset back between t = 0 and 0.14, while the
+spiral turns its first 39°. The line of sight swung back onto the trunk during the turn, so the
+scene turned about a point well off it. Measured in the browser (`pivot.py`: distance between the
+line of sight and the trunk axis, pointer at the centre of the screen):
+
+| Size      | Base `ef821d2` | Cycle 2 `8d7f813` | Final `2a6ed4c` | Trunk on screen along the final climb |
+| --------- | -------------- | ----------------- | --------------- | ------------------------------------- |
+| 1440×900  | 0 m            | 2.756 m           | 0 m             | 0.42 to 0.50 of the width             |
+| 1920×1080 | 0 m            | 2.755 m           | 0 m             | 0.43 to 0.50 of the width             |
+| 1920×839  | 0 m            | 2.756 m           | 0 m             | 0.45 to 0.50 of the width             |
+| 1024×768  | 0 m            | 2.423 m           | 0 m             | 0.43 to 0.50 of the width             |
+| 844×390   | 0 m            | 3.152 m           | 0 m             | 0.44 to 0.50 of the width             |
+| 390×844   | 0 m            | 0 m               | 0 m             | 0.50 to 0.50 of the width             |
+
+Fix (`camera.ts`). The camera looks at the trunk axis at every climb value: the look-at point only
+ever moves up and down that axis, and the camera goes round it one way. The opening's sideways
+placement is now a shift of the lens (the picture slides, the camera does not turn), and it is
+given back evenly over the whole climb instead of over its first seventh: the trunk drifts across
+the screen by the share shown in the last column over 279° of turn, under 4 % of the turn at any
+moment (unit test). The opening compositions are kept: 0 fault on 18 sizes.
+
+Tests added (`camera.test.ts`): the look-at point is on the trunk axis for every t on ten screens
+and the camera's angle about the axis only grows; the lens drift stays under 4 % of the turn; from
+t = 0.14 the camera's position is the spiral's exactly.
+
+Frame sequences of the rotation, base and final, t = 0 to 0.3 by 0.02 then 0.4, 0.54, 0.7, 0.88,
+1: `cycle3/base/board-pivot-*.jpg`, `cycle3/c2/board-pivot-*.jpg`,
+`cycle3/final/checks/board-pivot-*.jpg` and the frames beside them. What they cannot show is how
+the turn feels in motion: that stays the owner's reading.
+
+### 14.3 The figures along the climb: no stepping out, a solved tilt
+
+The step-out rule of cycle 2 (`presence.ts`, `d34975b`, `8d7f813`) is removed whole. The figures
+are always there, as on the base.
+
+Measured first, on the real camera, ground and field-of-view modules (ten sizes, t by 0.01): how
+far the look-at point must be lowered for a point of the ground to stay above the shelf while it is
+in the frame, and how far it can be lowered before the card of that part of the climb leaves by the
+top. For the Konteur's feet the first is at most 4.9 m (short landscape, t near 0.16) and fits
+under the second, within a few pixels at 844×390 near t = 0.9. For the lawn the critters walk
+it does not fit: on 844×390 no point of it stays clear for the whole climb, whatever the tilt (at
+the top the camera is above part of the lawn).
+
+So the camera's pitch along the climb is solved for the Konteur (`climbPitch`): at each of 65
+steps, the pitch that keeps his feet above the shelf while he is in the frame. It only ever goes
+down as the climb goes up (14.4): once lowered it stays lowered, and it is never lowered further
+than the cards still ahead leave room for at the top of the screen. It moves the look-at point up
+and down the trunk axis only. The spiral's path, the cards, their timings, the trigger and the
+journey are untouched.
+
+Figure-states along the climb (16 stops up, 15 back, three figures), base then final. `Cut` is
+behind the shelf in part, under the intro text, or cut by the top or bottom edge; `side` is a
+figure the turning camera is leaving by the left or right edge:
+
+| Size      | Base: whole or grazed | Base: cut | Base: side | Base: absent | Final: whole or grazed | Final: cut | Final: side | Final: absent |
+| --------- | --------------------- | --------- | ---------- | ------------ | ---------------------- | ---------- | ----------- | ------------- |
+| 844×390   | 13                    | 73        | 0          | 7            | 84                     | 9          | 0           | 0             |
+| 932×430   | 20                    | 66        | 0          | 7            | 84                     | 9          | 0           | 0             |
+| 667×375   | 11                    | 69        | 2          | 11           | 83                     | 8          | 2           | 0             |
+| 1440×900  | 39                    | 40        | 1          | 13           | 84                     | 3          | 4           | 2             |
+| 1024×768  | 31                    | 41        | 3          | 18           | 79                     | 5          | 2           | 7             |
+| 1280×720  | 34                    | 45        | 4          | 10           | 83                     | 6          | 4           | 0             |
+| 1920×1080 | 45                    | 34        | 4          | 10           | 88                     | 1          | 4           | 0             |
+| 1920×839  | 44                    | 43        | 0          | 6            | 91                     | 2          | 0           | 0             |
+| 390×844   | 41                    | 1         | 11         | 40           | 45                     | 0          | 15          | 33            |
+| 768×1024  | 59                    | 4         | 12         | 18           | 71                     | 2          | 11          | 9             |
+| 360×640   | 49                    | 2         | 11         | 31           | 53                     | 0          | 17          | 23            |
+
+The Konteur alone: cut at 119 states on the base, 14 on the final (up t = 0.14 at 844×390; up t = 0.20 at 844×390; back t = 0.20 at 844×390; back t = 0.14 at 844×390; up t = 0.14 at 932×430; up t = 0.20 at 932×430; back t = 0.20 at 932×430; back t = 0.14 at 932×430; up t = 0.14 at 667×375; up t = 0.20 at 667×375; back t = 0.20 at 667×375; back t = 0.14 at 667×375; up t = 0.14 at 1280×720; back t = 0.14 at 1280×720).
+
+What is left, plainly.
+
+- The Konteur on short landscape screens, around the first card (t = 0.14 to 0.2): his legs are
+  behind the shelf, head and body above it. At 1280×720 the shelf's top edge crosses his feet and
+  the stump he sits on at t = 0.14, and he is whole at the next stop. Clearing him there would take a pitch the last card
+  cannot afford, and a pitch that came back up after him is the rebound of 14.4. On the base he
+  showed head and shoulders only at those stops, and was cut at most others.
+- The critters wander, and where one stands when the camera passes decides whether the shelf cuts
+  it: 31 critter-states of 682 are still cut on the final (299 on
+  the base), listed in `evidence/c3-final-layout.txt`. Most are a critter low on screen near the
+  top of the climb, small and far, its feet behind the shelf; some a critter under the intro text
+  while that text fades (t = 0.07, the text at a third of its strength).
+
+Nothing pops: a figure slides behind the shelf as the ground does, and is never hidden by a rule.
+No softer treatment was added (a mist above the shelf was considered and not built: it would have
+been a new element on every screen for a residue of this size). Captures:
+`cycle3/final/checks/board-climbcheck-*.jpg`.
+
+What the tilt costs: from the first card on the camera looks lower than the spiral did, by 2 to
+9° depending on the screen (`evidence/c3-final-settle.json` gives the pitch at each stop against
+`c3-base-settle.json`), and it stays lower to the top. Cards sit higher on screen (never closer
+than 1.5 % of the height to the top, unit test), and at the top of the climb on short landscape
+screens the crown's top leaves the frame.
+
+### 14.4 O2 — the rebound when the scene pivots
+
+The owner's capture (1920×839, 60 fps, 7 s, taken on `aae0e5f`): the opening, a fast climb to the
+second card and on to the top, then back down. Decoded with ffmpeg into strips of frames
+(`cycle3/o2-owner/`), it shows the crown leaving by the top and coming back as the view passes the
+first card. The instrumented run (`settle.py`: one input burst per leg, the camera read on each of
+170 frames) names what moves: on `aae0e5f`, at that window size, from the opening to the second
+card the climb value and the angle about the trunk go one way and stop, the camera's height too;
+the pitch goes from 7.1° down by 8.9° and back up to 5.0°. That was the tilt of `aae0e5f` itself,
+which lowered the look-at point around the Konteur's spot and gave it back after: any leg across
+that stretch dipped and returned. The easing of the climb value (an exponential approach, 4.5 per
+second, the same on wheel, trackpad and touch) never overshoots, on the base or since.
+
+Fix (`240c4f5`): the pitch is one falling curve over the climb (14.3). Height, distance from the
+trunk and lens shift already went one way. A unit test holds all four to it on ten screens, for
+every t by 0.002: whatever stretch is travelled, either way, each of them moves one way and stops.
+
+Twelve legs per size (card to card up and down, and long legs across the whole climb), wheel on
+pointer sizes and finger drag on touch sizes. `Back` is the largest move of the pitch against its
+own direction of travel on a leg:
+
+| Size     | Input | Base `ef821d2`: back | `aae0e5f` (the capture): back | Final `2a6ed4c`: back | Final: legs with a rebound |
+| -------- | ----- | -------------------- | ----------------------------- | --------------------- | -------------------------- |
+| 1920×839 | wheel | 0.00°                | 8.99°                         | 0.00°                 | 0 of 12                    |
+| 1440×900 | wheel | 0.00°                | 9.28°                         | 0.00°                 | 0 of 12                    |
+| 1024×768 | wheel | 0.00°                | –                             | 0.00°                 | 0 of 12                    |
+| 844×390  | drag  | 0.12°                | 10.42°                        | 0.00°                 | 0 of 12                    |
+| 390×844  | drag  | 0.20°                | 0.20°                         | 0.20°                 | 2 of 12                    |
+
+Where a value is left on touch sizes it is the pointer parallax, on the base too: the camera
+follows the finger by up to 0.3 m, so a drag that ends higher or lower on the glass than it
+started leaves the view that much higher or lower. It is not touched here.
+
+The same journey filmed on the final at the capture's window size, frame by frame at true speed:
+`cycle3/final/checks/settle-w1920x839.webm`; the frames as numbers:
+`cycle3/final/checks/settle-*.tsv`. Not established: how it feels under a real trackpad's inertia
+or a real finger, which only the owner can say.
+
+### 14.5 O3 — Zanba's ears
+
+The owner's screenshot (`owner-o3-zamba-ears-2026-11-16.png`): two flat pink discs beside the
+head. Each ear was a flattened ball 0.88 wide in the model's units, set 0.3 out from its hinge, pink over most of
+its front face: round, and readable as a separate disc from the front.
+
+Fix (`69ab983`, `zanba.ts`): each ear is a leaf shaped for the purpose from the same ball: a thick
+root hinged inside the temple (the hinge is under the head's surface, so the root stays sunk in
+it at every angle), a broad top, a lobe that hangs lower and narrower, a rim
+that curls back, and the pink kept to the hollow inside a rim of skin. The fanning, the flap and
+the spread when touched are the same hinge motion as before; still one mesh per ear, so the draw
+calls do not change. Not a limit of the rig. O4 below moved the hinge and added a constraint; the captures named here
+are of the final state.
+
+Before and after at four bearings, at displayed size and at ×2:
+`cycle3/final/boards/o3-zanba-ears-before-after.jpg` (before: `cycle3/o3-before/`). Read on those
+frames: no gap between ear and head from the front, the three-quarter, the side or the back; the
+far ear shows less than the near one when his head is turned. Not checked: every angle of the fan
+in motion, which the videos of `cycle3/final/` show and a person should watch.
+
+### 14.6 O4 — the ears and the body
+
+The owner, after reloading on `69ab983`: the ears sometimes sink into the body. Measured rather
+than looked for (`ears.py`): on every frame of a minute (idle, walks, turns, the fanning and the
+flaps, the pointer resting on him twice so that he is touched), each vertex of both ears is taken
+into the head's ball and into the body's (the barrel, a stretched sphere). On `69ab983`
+(`evidence/c3-o4-before-ears.json`): part of an ear's blade was inside the body on 3750 of 3750 frames at 1440×900, up to 459 vertices and 38 cm deep; 3750 of 3750 frames at 390×844, up to 300 vertices and 32 cm deep.
+Two causes: the lower inner ear hung inside the chest even at rest (the discs before O3 did too,
+less visibly), and a head turned towards an ear carried that ear into the shoulder.
+
+Fix (`7482c74`, `zanba.ts`), geometry and a constraint, nothing hidden:
+
+- The ears are hinged higher on the temple, with a shorter lobe, so that at rest they hang beside
+  the head and above the chest.
+- Each frame the pose of each ear is solved against the body as it is on that frame (the head's
+  turn and nod, the belly's breathing and jiggle): the ear fans back as far as its motion asks and
+  lifts off the shoulder, about its hinge, by the least that keeps its blade 7 % of the body's
+  radius clear of the barrel; when no lift is enough it is held further forward. The lift is eased
+  and never under what the clearance asks. The fanning, the flap and the spread when touched are
+  kept; the spring's overshoot is cut at the limit.
+
+After, on `2a6ed4c`, 60 s per size (`evidence/c3-final-ears.json`):
+
+| Size           | Frames | Frames with blade vertices in the body | Frames with the ear folded into the head | Least clearance to the body | Lift used      | Head turn covered   |
+| -------------- | ------ | -------------------------------------- | ---------------------------------------- | --------------------------- | -------------- | ------------------- |
+| 1440×900 at ×2 | 3750   | 0                                      | 0                                        | 4.1 cm                      | 0 to 1.191 rad | -0.503 to 0.515 rad |
+| 390×844        | 3750   | 0                                      | 0                                        | 4.1 cm                      | 0 to 1.073 rad | -0.519 to 0.362 rad |
+| 844×390        | 3750   | 0                                      | 0                                        | 4.1 cm                      | 0 to 1.191 rad | -0.503 to 0.515 rad |
+
+What the check does not cover, plainly. The body is taken as its barrel: the legs and the hat are
+not tested (the ears hang above the one and beside the other on every capture read). The root of
+the ear (nearer than 0.16 of the model's units to its hinge) is excluded: it is sunk in the head on
+purpose, and when the head turns its own side meets the shoulder, so up to 281 root
+vertices then lie at that junction, inside both. And a minute per size is a sample of his life,
+not all of it; the constraint itself holds at any pose, on the points it tests (one vertex in five
+of the blade).
+
+Captures at the extremes of the run (least clearance, widest lift, furthest head turn each way),
+with the owner's build beside them: `cycle3/final/boards/o4-zanba-ears-extremes.jpg`; all of them
+in `cycle3/final/checks/ears-*.png`.
+
+### 14.7 O5 — the triangle at the Konteur's foot
+
+The owner's screenshot (`owner-o5-konteur-foot-triangle-2026-11-16.png`): a small black-and-white
+wedge by his left sandal. Captured close along the climb (`konteur_foot.py`,
+`cycle3/o5-before/`), it is his lantern, in the scene since the base and unchanged by this
+mission: a pale cylinder for the glass, bleached to cream by the lantern's own light and the fill
+light, under a near-black cone. From the opening it read, just, as a lantern; from the climb's
+higher angles the cone covers the glass and the pair is a black triangle on a white stub. Not an
+alpha edge of the photo, not a decal, not z-fighting.
+
+Fix (`725a942`, `konteur.ts`), at the source and with nothing hidden: the lantern is given what
+makes one readable at that size: a bronze base, a shaped cap of the same bronze instead of the
+black cone, a handle, and glass of dark amber lit from within, so that the lights around it warm
+it and do not bleach it. Same place, same light on the lawn, same glow when he is pointed at; two
+more small meshes (draw calls at the opening: 317).
+
+Before and after at the same framings, 1440×900 at ×2 and 390×844, t = 0, 0.07, 0.14, 0.2, 0.3,
+0.54, 0.88 and 1 where he is in the frame: `cycle3/final/boards/o5-konteur-lantern-before-after.jpg`
+(crops in `cycle3/o5-before/` and `cycle3/final/checks/konteur-foot-*.png`; 844×390 too, its
+before taken on `8d7f813`, whose lantern is the same). Read on those crops: a lantern at every
+stop. Whether it is the lantern the owner wants there is his eye's call.
+
+### 14.8 F5 — the Konteur's random tale
+
+With the rule gone, his entry point is offered by the base's own test again. `teller_check.py`
+reads at each of the 31 climb stops whether it is offered and whether its pointer point is clear
+of the shelf, on the base and on the final, and at three stops per size activates it by pointer
+(click, or tap on touch sizes) and by keyboard:
+
+| Size      | Offered: base → final | Pointer point clear of the shelf: base → final | Opens a tale (pointer and keyboard, three stops) |
+| --------- | --------------------- | ---------------------------------------------- | ------------------------------------------------ |
+| 844×390   | 31 → 31 of 31         | 14 → 31                                        | 6 of 6                                           |
+| 932×430   | 31 → 31 of 31         | 20 → 31                                        | 6 of 6                                           |
+| 667×375   | 25 → 29 of 31         | 12 → 29                                        | 6 of 6                                           |
+| 1440×900  | 25 → 25 of 31         | 25 → 25                                        | 6 of 6                                           |
+| 1024×768  | 20 → 24 of 31         | 20 → 24                                        | 6 of 6                                           |
+| 1280×720  | 25 → 29 of 31         | 23 → 29                                        | 6 of 6                                           |
+| 1920×1080 | 25 → 29 of 31         | 25 → 29                                        | 6 of 6                                           |
+| 1920×839  | 31 → 31 of 31         | 31 → 31                                        | 6 of 6                                           |
+| 390×844   | 14 → 14 of 31         | 14 → 14                                        | 6 of 6                                           |
+| 768×1024  | 18 → 18 of 31         | 18 → 18                                        | 6 of 6                                           |
+| 360×640   | 16 → 16 of 31         | 16 → 16                                        | 6 of 6                                           |
+
+Lost against the base: 0 stop.
+
+### 14.9 Other checks on `2a6ed4c`
+
+- `pnpm typecheck`, `lint`, `build`: exit 0. `pnpm test`: 378 passed.
+- Behaviours 43 of 43; other pages 24 of 24; contrast: all texts at or
+  over their minimum on 9 sizes (weakest .tree-intro-kicker at 4.62:1 on `w800`).
+- Opening sweep: 0 fault on 18 sizes. Live resize both ways: largest camera
+  move 0.351 m per step, 0 step with a figure cut.
+- Motion, 75 s per viewport: Lapen travels 0.0 m on the ground at most per frame; Zanba's
+  planted feet drift 0.008 m median and 0.019 m at most per stance.
+- Performance, capped runs and the first uncapped round, base measured in the same session
+  (`cycle3/final/ab-base`):
+
+| Viewport       | Sequence     | Final capped FPS | p95     | > 33 ms | Base, same session | Final        | Final vs base |
+| -------------- | ------------ | ---------------- | ------- | ------- | ------------------ | ------------ | ------------- |
+| Desktop        | rest         | 59.9             | 16.7 ms | 0       | 735 / 2 ms         | 672 / 2.2 ms | -8.5 %        |
+| Desktop        | climb        | 59.9             | 16.7 ms | 0       | 580 / 2.5 ms       | 485 / 3.4 ms | -16.4 %       |
+| Desktop        | interactions | 59.9             | 16.7 ms | 0       | 578 / 2.5 ms       | 552 / 2.5 ms | -4.5 %        |
+| Mobile (emul.) | rest         | 59.9             | 16.7 ms | 3       | 1068 / 1.3 ms      | 973 / 1.6 ms | -8.9 %        |
+| Mobile (emul.) | climb        | 59.9             | 16.7 ms | 0       | 756 / 1.9 ms       | 722 / 2 ms   | -4.4 %        |
+| Mobile (emul.) | interactions | 59.9             | 16.7 ms | 0       | 743 / 1.9 ms       | 729 / 2 ms   | -2.0 %        |
+
+Worst uncapped change in that single round: -16.4 % (limit −10 %). Phone: still not measured
+on a device.
+
+- A frame cost found by this check and removed (`2a6ed4c`). The full run on `725a942`
+  (`cycle3/interim-725a942`) read -14.0 to -34.1 % against the base uncapped, over the limit, where
+  the run before the ears (`interim-240c4f5`) read within it. Cause: the search of 14.6 that
+  keeps Zanba's ears out of his body, timed alone at 0.14 ms a frame (6000 poses in Node) against
+  0.004 ms for Lapen's whole pose. It rebuilt its rotation for each probe point and searched the
+  same lift twice for an ear at rest. `2a6ed4c` builds the rotation once per check and reuses
+  the lift already found: 0.05 ms a frame, the same arithmetic on the same points, and the ears
+  check of 14.6 was run again on it. The capped rate was 59.9 FPS with no frame over 33 ms before
+  and after: the cost showed only uncapped.
+- One round is not a measure at these rates: two runs of the same base build a few minutes apart
+  gave 593 and 784 FPS (desktop, rest). So the comparison below is three rounds, final and base
+  in turn, mean frame rate of each 20 s sequence (`evidence/c3-final-fps-rounds.json`,
+  `cycle3/final/ab-rounds`):
+
+| Viewport | Sequence     | Base, three rounds | Final, three rounds | Base mean | Final mean | Change  | On `725a942`, one round |
+| -------- | ------------ | ------------------ | ------------------- | --------- | ---------- | ------- | ----------------------- |
+| desktop  | rest         | 735 / 770 / 751    | 672 / 696 / 742     | 752       | 704        | -6.4 %  | -14.0 %                 |
+| desktop  | climb        | 580 / 643 / 666    | 485 / 614 / 592     | 629       | 564        | -10.5 % | -14.7 %                 |
+| desktop  | interactions | 578 / 595 / 703    | 552 / 516 / 630     | 625       | 566        | -9.5 %  | -18.2 %                 |
+| mobile   | rest         | 1068 / 1103 / 1285 | 973 / 1069 / 1142   | 1152      | 1061       | -7.9 %  | -15.4 %                 |
+| mobile   | climb        | 756 / 806 / 939    | 722 / 821 / 777     | 833       | 774        | -7.2 %  | -14.3 %                 |
+| mobile   | interactions | 743 / 783 / 993    | 729 / 742 / 855     | 840       | 775        | -7.7 %  | -34.1 %                 |
+
+Worst change of the means: -10.5 % (limit −10 %), on the desktop climb; the other five are
+between -6.4 and -9.5 %. So the limit is met on five sequences and missed by half a point on
+one, with rounds of the same build that differ by more than that. Cycle 2 read -5.9 % at worst
+in one round. What is left of the difference is not attributed: the ear search still takes
+0.05 ms a frame (about 3 to 5 % of an uncapped frame here), the rest was not measured. The lead,
+if the margin matters: keep the ear's lift from one frame to the next while the head has not
+turned.
+
+### 14.10 Limits left after the cycle
+
+- On short landscape screens the Konteur's legs pass behind the shelf around the first card (at
+  1280×720, his feet at one stop), and
+  critters can still pass behind the shelf (14.3). Only a shelf that gives way, or a lawn the
+  critters keep to that no camera overlooks, would remove that; neither is in this cycle's scope.
+- The fading intro text can cross a critter between t = 0.03 and 0.1.
+- The limits of 12.4 stand (Zanba does not walk on portrait phones; the compact intro touches the
+  crown at 667×375 and 1024×540; Zanba's rump).
+- Not established by any of this: how the turn and the tilt feel at speed, on a real phone.

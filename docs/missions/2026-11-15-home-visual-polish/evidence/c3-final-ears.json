@@ -1,0 +1,74 @@
+{
+  "desktop2x": {
+    "frames": 3750,
+    "seconds": 60,
+    "verticesPerFrame": 2790,
+    "framesWithEarInBody": 0,
+    "framesWithBladeInHead": 0,
+    "mostVerticesInBody": 0,
+    "mostRootVerticesAtTheShoulder": 280,
+    "liftRangeRadians": [0, 1.191],
+    "deepestInBodyMetres": 0,
+    "leastClearanceMetres": 0.0408,
+    "fanRangeRadians": [0.079, 0.856],
+    "headYawRangeRadians": [-0.503, 0.515],
+    "extremeFrames": [
+      "ears-desktop2x-frame0903-yawR-gap+4.1cm-lift0.16-yaw+0.00.png",
+      "ears-desktop2x-frame0997-yawR-gap+5.5cm-lift0.36-yaw+0.11.png",
+      "ears-desktop2x-frame1004-yawR-gap+4.2cm-lift0.42-yaw+0.21.png",
+      "ears-desktop2x-frame1241-yawR-gap+4.2cm-lift0.54-yaw+0.31.png",
+      "ears-desktop2x-frame1250-yawR-gap+4.2cm-lift0.79-yaw+0.42.png",
+      "ears-desktop2x-frame1275-lift-gap+4.2cm-lift0.93-yaw+0.51.png",
+      "ears-desktop2x-frame1851-lift-gap+4.2cm-lift1.05-yaw+0.50.png",
+      "ears-desktop2x-frame2283-lift-gap+4.2cm-lift1.17-yaw+0.40.png"
+    ]
+  },
+  "mobile": {
+    "frames": 3750,
+    "seconds": 60,
+    "verticesPerFrame": 2790,
+    "framesWithEarInBody": 0,
+    "framesWithBladeInHead": 0,
+    "mostVerticesInBody": 0,
+    "mostRootVerticesAtTheShoulder": 276,
+    "liftRangeRadians": [0, 1.073],
+    "deepestInBodyMetres": 0,
+    "leastClearanceMetres": 0.0414,
+    "fanRangeRadians": [0.079, 0.81],
+    "headYawRangeRadians": [-0.519, 0.362],
+    "extremeFrames": [
+      "ears-mobile-frame0439-lift-gap+4.2cm-lift0.72-yaw-0.39.png",
+      "ears-mobile-frame0462-yawL-gap+4.2cm-lift0.79-yaw-0.43.png",
+      "ears-mobile-frame0879-yawR-gap+4.2cm-lift0.34-yaw-0.00.png",
+      "ears-mobile-frame0885-yawR-gap+4.2cm-lift0.27-yaw+0.11.png",
+      "ears-mobile-frame0892-yawR-gap+4.2cm-lift0.47-yaw+0.22.png",
+      "ears-mobile-frame0904-yawR-gap+4.2cm-lift0.66-yaw+0.32.png",
+      "ears-mobile-frame0949-lift-gap+4.2cm-lift0.86-yaw+0.35.png",
+      "ears-mobile-frame0955-lift-gap+4.2cm-lift0.98-yaw+0.34.png"
+    ]
+  },
+  "phone-landscape": {
+    "frames": 3750,
+    "seconds": 60,
+    "verticesPerFrame": 2790,
+    "framesWithEarInBody": 0,
+    "framesWithBladeInHead": 0,
+    "mostVerticesInBody": 0,
+    "mostRootVerticesAtTheShoulder": 281,
+    "liftRangeRadians": [0, 1.191],
+    "deepestInBodyMetres": 0,
+    "leastClearanceMetres": 0.0408,
+    "fanRangeRadians": [0.079, 0.856],
+    "headYawRangeRadians": [-0.503, 0.515],
+    "extremeFrames": [
+      "ears-phone-landscape-frame0903-yawR-gap+4.1cm-lift0.16-yaw+0.00.png",
+      "ears-phone-landscape-frame0997-yawR-gap+5.5cm-lift0.36-yaw+0.11.png",
+      "ears-phone-landscape-frame1004-yawR-gap+4.2cm-lift0.42-yaw+0.21.png",
+      "ears-phone-landscape-frame1241-yawR-gap+4.2cm-lift0.54-yaw+0.31.png",
+      "ears-phone-landscape-frame1250-yawR-gap+4.2cm-lift0.79-yaw+0.42.png",
+      "ears-phone-landscape-frame1275-lift-gap+4.2cm-lift0.93-yaw+0.51.png",
+      "ears-phone-landscape-frame1851-lift-gap+4.2cm-lift1.05-yaw+0.50.png",
+      "ears-phone-landscape-frame2283-lift-gap+4.2cm-lift1.17-yaw+0.40.png"
+    ]
+  }
+}

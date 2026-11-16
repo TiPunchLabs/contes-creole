@@ -43,6 +43,8 @@ VIEWPORTS: dict[str, dict[str, Any]] = {
 SWEEP: dict[str, dict[str, Any]] = {
     "w1920": {"viewport": {"width": 1920, "height": 1080}, "device_scale_factor": 1},
     "w1280": {"viewport": {"width": 1280, "height": 720}, "device_scale_factor": 1},
+    # The window of the owner's capture of 2026-11-16 (finding O2).
+    "w1920x839": {"viewport": {"width": 1920, "height": 839}, "device_scale_factor": 1},
     "w1100x1000": {"viewport": {"width": 1100, "height": 1000}, "device_scale_factor": 1},
     "w900sq": {"viewport": {"width": 900, "height": 900}, "device_scale_factor": 1},
     "w800": {"viewport": {"width": 800, "height": 600}, "device_scale_factor": 1},

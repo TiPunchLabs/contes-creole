@@ -1,0 +1,909 @@
+{
+  "width at 1000 px high": {
+    "steps": 81,
+    "pixelsPerStep": 10,
+    "maxCameraMove": 0.266,
+    "maxViewTurn": 0.0043,
+    "layoutSwitchesAt": [
+      [1210, 1000],
+      [1200, 1000]
+    ],
+    "moveAtSwitch": [0.135, 0.135],
+    "faults": [],
+    "detail": [
+      {
+        "size": [1000, 1000],
+        "band": true,
+        "move": 0.0,
+        "turn": 0.0,
+        "faults": []
+      },
+      {
+        "size": [1010, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.0021,
+        "faults": []
+      },
+      {
+        "size": [1020, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.0021,
+        "faults": []
+      },
+      {
+        "size": [1030, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.0021,
+        "faults": []
+      },
+      {
+        "size": [1040, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1050, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1060, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1070, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1080, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1090, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1100, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1110, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1120, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1130, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1140, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1150, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1160, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1170, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1180, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1190, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1200, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0017,
+        "faults": []
+      },
+      {
+        "size": [1210, 1000],
+        "band": false,
+        "move": 0.135,
+        "turn": 0.0043,
+        "faults": []
+      },
+      {
+        "size": [1220, 1000],
+        "band": false,
+        "move": 0.131,
+        "turn": 0.0043,
+        "faults": []
+      },
+      {
+        "size": [1230, 1000],
+        "band": false,
+        "move": 0.127,
+        "turn": 0.0042,
+        "faults": []
+      },
+      {
+        "size": [1240, 1000],
+        "band": false,
+        "move": 0.123,
+        "turn": 0.0042,
+        "faults": []
+      },
+      {
+        "size": [1250, 1000],
+        "band": false,
+        "move": 0.119,
+        "turn": 0.0041,
+        "faults": []
+      },
+      {
+        "size": [1260, 1000],
+        "band": false,
+        "move": 0.266,
+        "turn": 0.0033,
+        "faults": []
+      },
+      {
+        "size": [1270, 1000],
+        "band": false,
+        "move": 0.258,
+        "turn": 0.0034,
+        "faults": []
+      },
+      {
+        "size": [1280, 1000],
+        "band": false,
+        "move": 0.251,
+        "turn": 0.0034,
+        "faults": []
+      },
+      {
+        "size": [1290, 1000],
+        "band": false,
+        "move": 0.244,
+        "turn": 0.0034,
+        "faults": []
+      },
+      {
+        "size": [1300, 1000],
+        "band": false,
+        "move": 0.237,
+        "turn": 0.0035,
+        "faults": []
+      },
+      {
+        "size": [1310, 1000],
+        "band": false,
+        "move": 0.227,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1320, 1000],
+        "band": false,
+        "move": 0.221,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1330, 1000],
+        "band": false,
+        "move": 0.215,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1340, 1000],
+        "band": false,
+        "move": 0.209,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1350, 1000],
+        "band": false,
+        "move": 0.203,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1360, 1000],
+        "band": false,
+        "move": 0.197,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1370, 1000],
+        "band": false,
+        "move": 0.192,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1380, 1000],
+        "band": false,
+        "move": 0.187,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1390, 1000],
+        "band": false,
+        "move": 0.182,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1400, 1000],
+        "band": false,
+        "move": 0.177,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1390, 1000],
+        "band": false,
+        "move": 0.177,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1380, 1000],
+        "band": false,
+        "move": 0.182,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1370, 1000],
+        "band": false,
+        "move": 0.187,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1360, 1000],
+        "band": false,
+        "move": 0.192,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1350, 1000],
+        "band": false,
+        "move": 0.197,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1340, 1000],
+        "band": false,
+        "move": 0.203,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1330, 1000],
+        "band": false,
+        "move": 0.209,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1320, 1000],
+        "band": false,
+        "move": 0.215,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1310, 1000],
+        "band": false,
+        "move": 0.221,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1300, 1000],
+        "band": false,
+        "move": 0.227,
+        "turn": 0.003,
+        "faults": []
+      },
+      {
+        "size": [1290, 1000],
+        "band": false,
+        "move": 0.237,
+        "turn": 0.0035,
+        "faults": []
+      },
+      {
+        "size": [1280, 1000],
+        "band": false,
+        "move": 0.244,
+        "turn": 0.0034,
+        "faults": []
+      },
+      {
+        "size": [1270, 1000],
+        "band": false,
+        "move": 0.251,
+        "turn": 0.0034,
+        "faults": []
+      },
+      {
+        "size": [1260, 1000],
+        "band": false,
+        "move": 0.258,
+        "turn": 0.0034,
+        "faults": []
+      },
+      {
+        "size": [1250, 1000],
+        "band": false,
+        "move": 0.266,
+        "turn": 0.0033,
+        "faults": []
+      },
+      {
+        "size": [1240, 1000],
+        "band": false,
+        "move": 0.119,
+        "turn": 0.0041,
+        "faults": []
+      },
+      {
+        "size": [1230, 1000],
+        "band": false,
+        "move": 0.123,
+        "turn": 0.0042,
+        "faults": []
+      },
+      {
+        "size": [1220, 1000],
+        "band": false,
+        "move": 0.127,
+        "turn": 0.0042,
+        "faults": []
+      },
+      {
+        "size": [1210, 1000],
+        "band": false,
+        "move": 0.131,
+        "turn": 0.0043,
+        "faults": []
+      },
+      {
+        "size": [1200, 1000],
+        "band": true,
+        "move": 0.135,
+        "turn": 0.0043,
+        "faults": []
+      },
+      {
+        "size": [1190, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0017,
+        "faults": []
+      },
+      {
+        "size": [1180, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1170, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1160, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1150, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1140, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0018,
+        "faults": []
+      },
+      {
+        "size": [1130, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1120, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1110, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1100, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1090, 1000],
+        "band": true,
+        "move": 0.174,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1080, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1070, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1060, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1050, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1040, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1030, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1020, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.0021,
+        "faults": []
+      },
+      {
+        "size": [1010, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.0021,
+        "faults": []
+      },
+      {
+        "size": [1000, 1000],
+        "band": true,
+        "move": 0.173,
+        "turn": 0.0021,
+        "faults": []
+      }
+    ]
+  },
+  "height at 1280 px wide": {
+    "steps": 45,
+    "pixelsPerStep": 20,
+    "maxCameraMove": 0.351,
+    "maxViewTurn": 0.007,
+    "layoutSwitchesAt": [],
+    "moveAtSwitch": [],
+    "faults": [],
+    "detail": [
+      {
+        "size": [1280, 820],
+        "band": false,
+        "move": 0.0,
+        "turn": 0.0,
+        "faults": []
+      },
+      {
+        "size": [1280, 800],
+        "band": false,
+        "move": 0.068,
+        "turn": 0.0021,
+        "faults": []
+      },
+      {
+        "size": [1280, 780],
+        "band": false,
+        "move": 0.053,
+        "turn": 0.0013,
+        "faults": []
+      },
+      {
+        "size": [1280, 760],
+        "band": false,
+        "move": 0.056,
+        "turn": 0.0014,
+        "faults": []
+      },
+      {
+        "size": [1280, 740],
+        "band": false,
+        "move": 0.06,
+        "turn": 0.0015,
+        "faults": []
+      },
+      {
+        "size": [1280, 720],
+        "band": false,
+        "move": 0.064,
+        "turn": 0.0016,
+        "faults": []
+      },
+      {
+        "size": [1280, 700],
+        "band": false,
+        "move": 0.068,
+        "turn": 0.0016,
+        "faults": []
+      },
+      {
+        "size": [1280, 680],
+        "band": false,
+        "move": 0.073,
+        "turn": 0.0017,
+        "faults": []
+      },
+      {
+        "size": [1280, 660],
+        "band": false,
+        "move": 0.078,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1280, 640],
+        "band": false,
+        "move": 0.084,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1280, 620],
+        "band": false,
+        "move": 0.091,
+        "turn": 0.0021,
+        "faults": []
+      },
+      {
+        "size": [1280, 600],
+        "band": false,
+        "move": 0.098,
+        "turn": 0.0023,
+        "faults": []
+      },
+      {
+        "size": [1280, 580],
+        "band": false,
+        "move": 0.106,
+        "turn": 0.0025,
+        "faults": []
+      },
+      {
+        "size": [1280, 560],
+        "band": false,
+        "move": 0.116,
+        "turn": 0.0026,
+        "faults": []
+      },
+      {
+        "size": [1280, 540],
+        "band": false,
+        "move": 0.126,
+        "turn": 0.0029,
+        "faults": []
+      },
+      {
+        "size": [1280, 520],
+        "band": false,
+        "move": 0.138,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1280, 500],
+        "band": false,
+        "move": 0.152,
+        "turn": 0.0034,
+        "faults": []
+      },
+      {
+        "size": [1280, 480],
+        "band": false,
+        "move": 0.169,
+        "turn": 0.0037,
+        "faults": []
+      },
+      {
+        "size": [1280, 460],
+        "band": false,
+        "move": 0.187,
+        "turn": 0.004,
+        "faults": []
+      },
+      {
+        "size": [1280, 440],
+        "band": false,
+        "move": 0.21,
+        "turn": 0.0044,
+        "faults": []
+      },
+      {
+        "size": [1280, 420],
+        "band": false,
+        "move": 0.236,
+        "turn": 0.0049,
+        "faults": []
+      },
+      {
+        "size": [1280, 400],
+        "band": false,
+        "move": 0.268,
+        "turn": 0.0055,
+        "faults": []
+      },
+      {
+        "size": [1280, 380],
+        "band": false,
+        "move": 0.351,
+        "turn": 0.007,
+        "faults": []
+      },
+      {
+        "size": [1280, 400],
+        "band": false,
+        "move": 0.351,
+        "turn": 0.007,
+        "faults": []
+      },
+      {
+        "size": [1280, 420],
+        "band": false,
+        "move": 0.268,
+        "turn": 0.0055,
+        "faults": []
+      },
+      {
+        "size": [1280, 440],
+        "band": false,
+        "move": 0.236,
+        "turn": 0.0049,
+        "faults": []
+      },
+      {
+        "size": [1280, 460],
+        "band": false,
+        "move": 0.21,
+        "turn": 0.0044,
+        "faults": []
+      },
+      {
+        "size": [1280, 480],
+        "band": false,
+        "move": 0.187,
+        "turn": 0.004,
+        "faults": []
+      },
+      {
+        "size": [1280, 500],
+        "band": false,
+        "move": 0.169,
+        "turn": 0.0037,
+        "faults": []
+      },
+      {
+        "size": [1280, 520],
+        "band": false,
+        "move": 0.152,
+        "turn": 0.0034,
+        "faults": []
+      },
+      {
+        "size": [1280, 540],
+        "band": false,
+        "move": 0.138,
+        "turn": 0.0031,
+        "faults": []
+      },
+      {
+        "size": [1280, 560],
+        "band": false,
+        "move": 0.126,
+        "turn": 0.0029,
+        "faults": []
+      },
+      {
+        "size": [1280, 580],
+        "band": false,
+        "move": 0.116,
+        "turn": 0.0026,
+        "faults": []
+      },
+      {
+        "size": [1280, 600],
+        "band": false,
+        "move": 0.106,
+        "turn": 0.0025,
+        "faults": []
+      },
+      {
+        "size": [1280, 620],
+        "band": false,
+        "move": 0.098,
+        "turn": 0.0023,
+        "faults": []
+      },
+      {
+        "size": [1280, 640],
+        "band": false,
+        "move": 0.091,
+        "turn": 0.0021,
+        "faults": []
+      },
+      {
+        "size": [1280, 660],
+        "band": false,
+        "move": 0.084,
+        "turn": 0.002,
+        "faults": []
+      },
+      {
+        "size": [1280, 680],
+        "band": false,
+        "move": 0.078,
+        "turn": 0.0019,
+        "faults": []
+      },
+      {
+        "size": [1280, 700],
+        "band": false,
+        "move": 0.073,
+        "turn": 0.0017,
+        "faults": []
+      },
+      {
+        "size": [1280, 720],
+        "band": false,
+        "move": 0.068,
+        "turn": 0.0016,
+        "faults": []
+      },
+      {
+        "size": [1280, 740],
+        "band": false,
+        "move": 0.064,
+        "turn": 0.0016,
+        "faults": []
+      },
+      {
+        "size": [1280, 760],
+        "band": false,
+        "move": 0.06,
+        "turn": 0.0015,
+        "faults": []
+      },
+      {
+        "size": [1280, 780],
+        "band": false,
+        "move": 0.056,
+        "turn": 0.0014,
+        "faults": []
+      },
+      {
+        "size": [1280, 800],
+        "band": false,
+        "move": 0.053,
+        "turn": 0.0013,
+        "faults": []
+      },
+      {
+        "size": [1280, 820],
+        "band": false,
+        "move": 0.068,
+        "turn": 0.0021,
+        "faults": []
+      }
+    ]
+  }
+}

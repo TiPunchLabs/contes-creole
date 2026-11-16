@@ -1,0 +1,1448 @@
+{
+  "desktop": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "rows": [
+      {
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "position": [1.5, 1.6, -23.935],
+        "radius": 23.982,
+        "azimuth": -86.41,
+        "pitch": 7.08,
+        "sightMissesAxisBy": 2.756,
+        "trunkScreenX": 0.4224
+      },
+      {
+        "target": 0.02,
+        "t": 0.0199,
+        "reached": true,
+        "position": [3.709, 1.711, -23.387],
+        "radius": 23.679,
+        "azimuth": -80.99,
+        "pitch": 7.02,
+        "sightMissesAxisBy": 2.607,
+        "trunkScreenX": 0.4257
+      },
+      {
+        "target": 0.04,
+        "t": 0.04,
+        "reached": true,
+        "position": [5.639, 1.797, -22.321],
+        "radius": 23.023,
+        "azimuth": -75.82,
+        "pitch": 6.89,
+        "sightMissesAxisBy": 2.218,
+        "trunkScreenX": 0.4351
+      },
+      {
+        "target": 0.06,
+        "t": 0.06,
+        "reached": true,
+        "position": [7.255, 1.866, -20.941],
+        "radius": 22.162,
+        "azimuth": -70.89,
+        "pitch": 6.72,
+        "sightMissesAxisBy": 1.684,
+        "trunkScreenX": 0.4489
+      },
+      {
+        "target": 0.08,
+        "t": 0.0799,
+        "reached": true,
+        "position": [8.61, 1.93, -19.412],
+        "radius": 21.236,
+        "azimuth": -66.08,
+        "pitch": 6.5,
+        "sightMissesAxisBy": 1.098,
+        "trunkScreenX": 0.4653
+      },
+      {
+        "target": 0.1,
+        "t": 0.1001,
+        "reached": true,
+        "position": [9.804, 2, -17.866],
+        "radius": 20.379,
+        "azimuth": -61.24,
+        "pitch": 6.27,
+        "sightMissesAxisBy": 0.553,
+        "trunkScreenX": 0.4818
+      },
+      {
+        "target": 0.12,
+        "t": 0.12,
+        "reached": true,
+        "position": [10.959, 2.085, -16.416],
+        "radius": 19.738,
+        "azimuth": -56.27,
+        "pitch": 6.08,
+        "sightMissesAxisBy": 0.155,
+        "trunkScreenX": 0.4947
+      },
+      {
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "position": [12.253, 2.196, -15.092],
+        "radius": 19.44,
+        "azimuth": -50.93,
+        "pitch": 5.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.16,
+        "t": 0.16,
+        "reached": true,
+        "position": [13.608, 2.324, -13.771],
+        "radius": 19.36,
+        "azimuth": -45.34,
+        "pitch": 5.92,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.18,
+        "t": 0.18,
+        "reached": true,
+        "position": [14.821, 2.452, -12.331],
+        "radius": 19.28,
+        "azimuth": -39.76,
+        "pitch": 5.88,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "position": [15.883, 2.58, -10.787],
+        "radius": 19.2,
+        "azimuth": -34.18,
+        "pitch": 5.83,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.22,
+        "t": 0.22,
+        "reached": true,
+        "position": [16.786, 2.708, -9.155],
+        "radius": 19.12,
+        "azimuth": -28.61,
+        "pitch": 5.78,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.24,
+        "t": 0.2399,
+        "reached": true,
+        "position": [17.521, 2.836, -7.451],
+        "radius": 19.04,
+        "azimuth": -23.04,
+        "pitch": 5.73,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.26,
+        "t": 0.2601,
+        "reached": true,
+        "position": [18.088, 2.964, -5.683],
+        "radius": 18.96,
+        "azimuth": -17.44,
+        "pitch": 5.69,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.28,
+        "t": 0.28,
+        "reached": true,
+        "position": [18.476, 3.092, -3.886],
+        "radius": 18.88,
+        "azimuth": -11.88,
+        "pitch": 5.64,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.3,
+        "t": 0.3,
+        "reached": true,
+        "position": [18.687, 3.22, -2.059],
+        "radius": 18.8,
+        "azimuth": -6.29,
+        "pitch": 5.59,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.4,
+        "t": 0.4,
+        "reached": true,
+        "position": [17.106, 3.86, 6.779],
+        "radius": 18.4,
+        "azimuth": 21.62,
+        "pitch": 5.34,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.54,
+        "t": 0.5399,
+        "reached": true,
+        "position": [8.74, 4.756, 15.552],
+        "radius": 17.84,
+        "azimuth": 60.67,
+        "pitch": 4.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.7,
+        "t": 0.7,
+        "reached": true,
+        "position": [-4.547, 5.781, 16.588],
+        "radius": 17.2,
+        "azimuth": 105.33,
+        "pitch": 4.52,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "position": [-15.001, 6.933, 6.823],
+        "radius": 16.48,
+        "azimuth": 155.54,
+        "pitch": 3.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "position": [-15.803, 7.7, -2.503],
+        "radius": 16,
+        "azimuth": -171,
+        "pitch": 3.58,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      }
+    ],
+    "largestMiss": 2.756,
+    "trunkScreenX": [0.4224, 0.5]
+  },
+  "w1920": {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "rows": [
+      {
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "position": [1.5, 1.6, -23.566],
+        "radius": 23.614,
+        "azimuth": -86.36,
+        "pitch": 7.61,
+        "sightMissesAxisBy": 2.755,
+        "trunkScreenX": 0.4291
+      },
+      {
+        "target": 0.02,
+        "t": 0.0199,
+        "reached": true,
+        "position": [3.675, 1.711, -23.04],
+        "radius": 23.332,
+        "azimuth": -80.94,
+        "pitch": 7.52,
+        "sightMissesAxisBy": 2.606,
+        "trunkScreenX": 0.4321
+      },
+      {
+        "target": 0.04,
+        "t": 0.04,
+        "reached": true,
+        "position": [5.582, 1.797, -22.032],
+        "radius": 22.728,
+        "azimuth": -75.78,
+        "pitch": 7.33,
+        "sightMissesAxisBy": 2.217,
+        "trunkScreenX": 0.4408
+      },
+      {
+        "target": 0.06,
+        "t": 0.06,
+        "reached": true,
+        "position": [7.19, 1.866, -20.727],
+        "radius": 21.939,
+        "azimuth": -70.87,
+        "pitch": 7.06,
+        "sightMissesAxisBy": 1.684,
+        "trunkScreenX": 0.4535
+      },
+      {
+        "target": 0.08,
+        "t": 0.0799,
+        "reached": true,
+        "position": [8.555, 1.93, -19.278],
+        "radius": 21.091,
+        "azimuth": -66.07,
+        "pitch": 6.74,
+        "sightMissesAxisBy": 1.098,
+        "trunkScreenX": 0.4685
+      },
+      {
+        "target": 0.1,
+        "t": 0.1001,
+        "reached": true,
+        "position": [9.77, 2, -17.801],
+        "radius": 20.306,
+        "azimuth": -61.24,
+        "pitch": 6.4,
+        "sightMissesAxisBy": 0.553,
+        "trunkScreenX": 0.4836
+      },
+      {
+        "target": 0.12,
+        "t": 0.12,
+        "reached": true,
+        "position": [10.948, 2.085, -16.399],
+        "radius": 19.717,
+        "azimuth": -56.27,
+        "pitch": 6.11,
+        "sightMissesAxisBy": 0.155,
+        "trunkScreenX": 0.4953
+      },
+      {
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "position": [12.253, 2.196, -15.092],
+        "radius": 19.44,
+        "azimuth": -50.93,
+        "pitch": 5.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.16,
+        "t": 0.16,
+        "reached": true,
+        "position": [13.608, 2.324, -13.771],
+        "radius": 19.36,
+        "azimuth": -45.34,
+        "pitch": 5.92,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.18,
+        "t": 0.18,
+        "reached": true,
+        "position": [14.821, 2.452, -12.331],
+        "radius": 19.28,
+        "azimuth": -39.76,
+        "pitch": 5.88,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "position": [15.883, 2.58, -10.787],
+        "radius": 19.2,
+        "azimuth": -34.18,
+        "pitch": 5.83,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.22,
+        "t": 0.22,
+        "reached": true,
+        "position": [16.786, 2.708, -9.155],
+        "radius": 19.12,
+        "azimuth": -28.61,
+        "pitch": 5.78,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.24,
+        "t": 0.2399,
+        "reached": true,
+        "position": [17.521, 2.836, -7.451],
+        "radius": 19.04,
+        "azimuth": -23.04,
+        "pitch": 5.73,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.26,
+        "t": 0.2601,
+        "reached": true,
+        "position": [18.088, 2.964, -5.683],
+        "radius": 18.96,
+        "azimuth": -17.44,
+        "pitch": 5.69,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.28,
+        "t": 0.28,
+        "reached": true,
+        "position": [18.476, 3.092, -3.886],
+        "radius": 18.88,
+        "azimuth": -11.88,
+        "pitch": 5.64,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.3,
+        "t": 0.3,
+        "reached": true,
+        "position": [18.687, 3.22, -2.059],
+        "radius": 18.8,
+        "azimuth": -6.29,
+        "pitch": 5.59,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.4,
+        "t": 0.4,
+        "reached": true,
+        "position": [17.106, 3.86, 6.779],
+        "radius": 18.4,
+        "azimuth": 21.62,
+        "pitch": 5.34,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.54,
+        "t": 0.5399,
+        "reached": true,
+        "position": [8.74, 4.756, 15.552],
+        "radius": 17.84,
+        "azimuth": 60.67,
+        "pitch": 4.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.7,
+        "t": 0.7,
+        "reached": true,
+        "position": [-4.547, 5.781, 16.588],
+        "radius": 17.2,
+        "azimuth": 105.33,
+        "pitch": 4.52,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "position": [-15.001, 6.933, 6.823],
+        "radius": 16.48,
+        "azimuth": 155.54,
+        "pitch": 3.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "position": [-15.803, 7.7, -2.503],
+        "radius": 16,
+        "azimuth": -171,
+        "pitch": 3.58,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      }
+    ],
+    "largestMiss": 2.755,
+    "trunkScreenX": [0.4291, 0.5]
+  },
+  "w1920x839": {
+    "viewport": {
+      "width": 1920,
+      "height": 839
+    },
+    "rows": [
+      {
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "position": [1.5, 1.6, -24.084],
+        "radius": 24.131,
+        "azimuth": -86.44,
+        "pitch": 6.87,
+        "sightMissesAxisBy": 2.756,
+        "trunkScreenX": 0.4461
+      },
+      {
+        "target": 0.02,
+        "t": 0.0199,
+        "reached": true,
+        "position": [3.722, 1.711, -23.527],
+        "radius": 23.82,
+        "azimuth": -81.01,
+        "pitch": 6.82,
+        "sightMissesAxisBy": 2.607,
+        "trunkScreenX": 0.4484
+      },
+      {
+        "target": 0.04,
+        "t": 0.04,
+        "reached": true,
+        "position": [5.662, 1.797, -22.439],
+        "radius": 23.142,
+        "azimuth": -75.84,
+        "pitch": 6.72,
+        "sightMissesAxisBy": 2.218,
+        "trunkScreenX": 0.4548
+      },
+      {
+        "target": 0.06,
+        "t": 0.06,
+        "reached": true,
+        "position": [7.281, 1.866, -21.027],
+        "radius": 22.252,
+        "azimuth": -70.9,
+        "pitch": 6.58,
+        "sightMissesAxisBy": 1.684,
+        "trunkScreenX": 0.4644
+      },
+      {
+        "target": 0.08,
+        "t": 0.0799,
+        "reached": true,
+        "position": [8.633, 1.93, -19.466],
+        "radius": 21.294,
+        "azimuth": -66.08,
+        "pitch": 6.41,
+        "sightMissesAxisBy": 1.098,
+        "trunkScreenX": 0.4758
+      },
+      {
+        "target": 0.1,
+        "t": 0.1001,
+        "reached": true,
+        "position": [9.818, 2, -17.892],
+        "radius": 20.408,
+        "azimuth": -61.24,
+        "pitch": 6.23,
+        "sightMissesAxisBy": 0.553,
+        "trunkScreenX": 0.4873
+      },
+      {
+        "target": 0.12,
+        "t": 0.12,
+        "reached": true,
+        "position": [10.963, 2.085, -16.423],
+        "radius": 19.746,
+        "azimuth": -56.27,
+        "pitch": 6.06,
+        "sightMissesAxisBy": 0.155,
+        "trunkScreenX": 0.4963
+      },
+      {
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "position": [12.253, 2.196, -15.092],
+        "radius": 19.44,
+        "azimuth": -50.93,
+        "pitch": 5.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.16,
+        "t": 0.16,
+        "reached": true,
+        "position": [13.608, 2.324, -13.771],
+        "radius": 19.36,
+        "azimuth": -45.34,
+        "pitch": 5.92,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.18,
+        "t": 0.18,
+        "reached": true,
+        "position": [14.821, 2.452, -12.331],
+        "radius": 19.28,
+        "azimuth": -39.76,
+        "pitch": 5.88,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "position": [15.883, 2.58, -10.787],
+        "radius": 19.2,
+        "azimuth": -34.18,
+        "pitch": 5.83,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.22,
+        "t": 0.22,
+        "reached": true,
+        "position": [16.786, 2.708, -9.155],
+        "radius": 19.12,
+        "azimuth": -28.61,
+        "pitch": 5.78,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.24,
+        "t": 0.2399,
+        "reached": true,
+        "position": [17.521, 2.836, -7.451],
+        "radius": 19.04,
+        "azimuth": -23.04,
+        "pitch": 5.73,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.26,
+        "t": 0.2601,
+        "reached": true,
+        "position": [18.088, 2.964, -5.683],
+        "radius": 18.96,
+        "azimuth": -17.44,
+        "pitch": 5.69,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.28,
+        "t": 0.28,
+        "reached": true,
+        "position": [18.476, 3.092, -3.886],
+        "radius": 18.88,
+        "azimuth": -11.88,
+        "pitch": 5.64,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.3,
+        "t": 0.3,
+        "reached": true,
+        "position": [18.687, 3.22, -2.059],
+        "radius": 18.8,
+        "azimuth": -6.29,
+        "pitch": 5.59,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.4,
+        "t": 0.4,
+        "reached": true,
+        "position": [17.106, 3.86, 6.779],
+        "radius": 18.4,
+        "azimuth": 21.62,
+        "pitch": 5.34,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.54,
+        "t": 0.5399,
+        "reached": true,
+        "position": [8.74, 4.756, 15.552],
+        "radius": 17.84,
+        "azimuth": 60.67,
+        "pitch": 4.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.7,
+        "t": 0.7,
+        "reached": true,
+        "position": [-4.547, 5.781, 16.588],
+        "radius": 17.2,
+        "azimuth": 105.33,
+        "pitch": 4.52,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "position": [-15.001, 6.933, 6.823],
+        "radius": 16.48,
+        "azimuth": 155.54,
+        "pitch": 3.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "position": [-15.803, 7.7, -2.503],
+        "radius": 16,
+        "azimuth": -171,
+        "pitch": 3.58,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      }
+    ],
+    "largestMiss": 2.756,
+    "trunkScreenX": [0.4461, 0.5]
+  },
+  "laptop": {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "rows": [
+      {
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "position": [1.233, 1.6, -27.456],
+        "radius": 27.484,
+        "azimuth": -87.43,
+        "pitch": 9.44,
+        "sightMissesAxisBy": 2.423,
+        "trunkScreenX": 0.4285
+      },
+      {
+        "target": 0.02,
+        "t": 0.0199,
+        "reached": true,
+        "position": [3.781, 1.711, -26.722],
+        "radius": 26.988,
+        "azimuth": -81.95,
+        "pitch": 9.3,
+        "sightMissesAxisBy": 2.29,
+        "trunkScreenX": 0.4311
+      },
+      {
+        "target": 0.04,
+        "t": 0.04,
+        "reached": true,
+        "position": [5.976, 1.797, -25.13],
+        "radius": 25.83,
+        "azimuth": -76.62,
+        "pitch": 8.93,
+        "sightMissesAxisBy": 1.945,
+        "trunkScreenX": 0.439
+      },
+      {
+        "target": 0.06,
+        "t": 0.06,
+        "reached": true,
+        "position": [7.715, 1.866, -23.029],
+        "radius": 24.287,
+        "azimuth": -71.48,
+        "pitch": 8.37,
+        "sightMissesAxisBy": 1.474,
+        "trunkScreenX": 0.4509
+      },
+      {
+        "target": 0.08,
+        "t": 0.0799,
+        "reached": true,
+        "position": [9.039, 1.93, -20.733],
+        "radius": 22.617,
+        "azimuth": -66.44,
+        "pitch": 7.67,
+        "sightMissesAxisBy": 0.959,
+        "trunkScreenX": 0.4658
+      },
+      {
+        "target": 0.1,
+        "t": 0.1001,
+        "reached": true,
+        "position": [10.083, 2, -18.505],
+        "radius": 21.074,
+        "azimuth": -61.41,
+        "pitch": 6.91,
+        "sightMissesAxisBy": 0.483,
+        "trunkScreenX": 0.4816
+      },
+      {
+        "target": 0.12,
+        "t": 0.12,
+        "reached": true,
+        "position": [11.054, 2.085, -16.586],
+        "radius": 19.932,
+        "azimuth": -56.32,
+        "pitch": 6.27,
+        "sightMissesAxisBy": 0.135,
+        "trunkScreenX": 0.4945
+      },
+      {
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "position": [12.253, 2.196, -15.092],
+        "radius": 19.44,
+        "azimuth": -50.93,
+        "pitch": 5.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.16,
+        "t": 0.16,
+        "reached": true,
+        "position": [13.608, 2.324, -13.771],
+        "radius": 19.36,
+        "azimuth": -45.34,
+        "pitch": 5.92,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.18,
+        "t": 0.18,
+        "reached": true,
+        "position": [14.821, 2.452, -12.331],
+        "radius": 19.28,
+        "azimuth": -39.76,
+        "pitch": 5.88,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "position": [15.883, 2.58, -10.787],
+        "radius": 19.2,
+        "azimuth": -34.18,
+        "pitch": 5.83,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.22,
+        "t": 0.22,
+        "reached": true,
+        "position": [16.786, 2.708, -9.155],
+        "radius": 19.12,
+        "azimuth": -28.61,
+        "pitch": 5.78,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.24,
+        "t": 0.2399,
+        "reached": true,
+        "position": [17.521, 2.836, -7.451],
+        "radius": 19.04,
+        "azimuth": -23.04,
+        "pitch": 5.73,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.26,
+        "t": 0.2601,
+        "reached": true,
+        "position": [18.088, 2.964, -5.683],
+        "radius": 18.96,
+        "azimuth": -17.44,
+        "pitch": 5.69,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.28,
+        "t": 0.28,
+        "reached": true,
+        "position": [18.476, 3.092, -3.886],
+        "radius": 18.88,
+        "azimuth": -11.88,
+        "pitch": 5.64,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.3,
+        "t": 0.3,
+        "reached": true,
+        "position": [18.687, 3.22, -2.059],
+        "radius": 18.8,
+        "azimuth": -6.29,
+        "pitch": 5.59,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.4,
+        "t": 0.4,
+        "reached": true,
+        "position": [17.106, 3.86, 6.779],
+        "radius": 18.4,
+        "azimuth": 21.62,
+        "pitch": 5.34,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.54,
+        "t": 0.5399,
+        "reached": true,
+        "position": [8.74, 4.756, 15.552],
+        "radius": 17.84,
+        "azimuth": 60.67,
+        "pitch": 4.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.7,
+        "t": 0.7,
+        "reached": true,
+        "position": [-4.547, 5.781, 16.588],
+        "radius": 17.2,
+        "azimuth": 105.33,
+        "pitch": 4.52,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "position": [-15.001, 6.933, 6.823],
+        "radius": 16.48,
+        "azimuth": 155.54,
+        "pitch": 3.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "position": [-15.803, 7.7, -2.503],
+        "radius": 16,
+        "azimuth": -171,
+        "pitch": 3.58,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      }
+    ],
+    "largestMiss": 2.423,
+    "trunkScreenX": [0.4285, 0.5]
+  },
+  "phone-landscape": {
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "rows": [
+      {
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "position": [1.5, 1.6, -26.797],
+        "radius": 26.839,
+        "azimuth": -86.8,
+        "pitch": 3.51,
+        "sightMissesAxisBy": 3.152,
+        "trunkScreenX": 0.4415
+      },
+      {
+        "target": 0.02,
+        "t": 0.0203,
+        "reached": true,
+        "position": [4.016, 1.713, -26.055],
+        "radius": 26.363,
+        "azimuth": -81.24,
+        "pitch": 3.59,
+        "sightMissesAxisBy": 2.974,
+        "trunkScreenX": 0.4438
+      },
+      {
+        "target": 0.04,
+        "t": 0.04,
+        "reached": true,
+        "position": [6.081, 1.797, -24.572],
+        "radius": 25.314,
+        "azimuth": -76.1,
+        "pitch": 3.87,
+        "sightMissesAxisBy": 2.536,
+        "trunkScreenX": 0.4502
+      },
+      {
+        "target": 0.06,
+        "t": 0.06,
+        "reached": true,
+        "position": [7.747, 1.866, -22.612],
+        "radius": 23.902,
+        "azimuth": -71.09,
+        "pitch": 4.3,
+        "sightMissesAxisBy": 1.928,
+        "trunkScreenX": 0.4599
+      },
+      {
+        "target": 0.08,
+        "t": 0.0803,
+        "reached": true,
+        "position": [9.06, 1.931, -20.409],
+        "radius": 22.33,
+        "azimuth": -66.06,
+        "pitch": 4.84,
+        "sightMissesAxisBy": 1.241,
+        "trunkScreenX": 0.4724
+      },
+      {
+        "target": 0.1,
+        "t": 0.1001,
+        "reached": true,
+        "position": [10.074, 2, -18.354],
+        "radius": 20.937,
+        "azimuth": -61.24,
+        "pitch": 5.39,
+        "sightMissesAxisBy": 0.628,
+        "trunkScreenX": 0.4851
+      },
+      {
+        "target": 0.12,
+        "t": 0.1203,
+        "reached": true,
+        "position": [11.064, 2.086, -16.52],
+        "radius": 19.882,
+        "azimuth": -56.19,
+        "pitch": 5.82,
+        "sightMissesAxisBy": 0.171,
+        "trunkScreenX": 0.4957
+      },
+      {
+        "target": 0.14,
+        "t": 0.1401,
+        "reached": true,
+        "position": [12.263, 2.197, -15.083],
+        "radius": 19.439,
+        "azimuth": -50.89,
+        "pitch": 5.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.16,
+        "t": 0.1597,
+        "reached": true,
+        "position": [13.595, 2.323, -13.785],
+        "radius": 19.361,
+        "azimuth": -45.4,
+        "pitch": 5.92,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.18,
+        "t": 0.1797,
+        "reached": true,
+        "position": [14.803, 2.45, -12.354],
+        "radius": 19.281,
+        "azimuth": -39.85,
+        "pitch": 5.88,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.2,
+        "t": 0.2,
+        "reached": true,
+        "position": [15.891, 2.581, -10.775],
+        "radius": 19.199,
+        "azimuth": -34.14,
+        "pitch": 5.83,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.22,
+        "t": 0.2198,
+        "reached": true,
+        "position": [16.783, 2.708, -9.16],
+        "radius": 19.12,
+        "azimuth": -28.63,
+        "pitch": 5.78,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.24,
+        "t": 0.24,
+        "reached": true,
+        "position": [17.525, 2.837, -7.44],
+        "radius": 19.039,
+        "azimuth": -23,
+        "pitch": 5.73,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.26,
+        "t": 0.2598,
+        "reached": true,
+        "position": [18.085, 2.964, -5.693],
+        "radius": 18.96,
+        "azimuth": -17.47,
+        "pitch": 5.69,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.28,
+        "t": 0.2802,
+        "reached": true,
+        "position": [18.478, 3.093, -3.872],
+        "radius": 18.879,
+        "azimuth": -11.84,
+        "pitch": 5.64,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.3,
+        "t": 0.3001,
+        "reached": true,
+        "position": [18.688, 3.221, -2.043],
+        "radius": 18.799,
+        "azimuth": -6.24,
+        "pitch": 5.59,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.4,
+        "t": 0.4001,
+        "reached": true,
+        "position": [17.101, 3.861, 6.789],
+        "radius": 18.399,
+        "azimuth": 21.65,
+        "pitch": 5.34,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.54,
+        "t": 0.5398,
+        "reached": true,
+        "position": [8.745, 4.756, 15.55],
+        "radius": 17.84,
+        "azimuth": 60.65,
+        "pitch": 4.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.7,
+        "t": 0.7,
+        "reached": true,
+        "position": [-4.549, 5.781, 16.587],
+        "radius": 17.199,
+        "azimuth": 105.34,
+        "pitch": 4.52,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.88,
+        "t": 0.8801,
+        "reached": true,
+        "position": [-15.004, 6.933, 6.815],
+        "radius": 16.479,
+        "azimuth": 155.57,
+        "pitch": 3.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 1.0,
+        "t": 0.9998,
+        "reached": true,
+        "position": [-15.803, 7.7, -2.503],
+        "radius": 16,
+        "azimuth": -171,
+        "pitch": 3.58,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      }
+    ],
+    "largestMiss": 3.152,
+    "trunkScreenX": [0.4415, 0.5]
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "rows": [
+      {
+        "target": 0.0,
+        "t": 0,
+        "reached": true,
+        "position": [0, 1.6, -21.695],
+        "radius": 21.695,
+        "azimuth": -90,
+        "pitch": 17.09,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.02,
+        "t": 0.0201,
+        "reached": true,
+        "position": [2.113, 1.712, -21.415],
+        "radius": 21.519,
+        "azimuth": -84.36,
+        "pitch": 16.55,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.04,
+        "t": 0.0397,
+        "reached": true,
+        "position": [4.089, 1.796, -20.804],
+        "radius": 21.202,
+        "azimuth": -78.88,
+        "pitch": 15.15,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.06,
+        "t": 0.0597,
+        "reached": true,
+        "position": [5.968, 1.865, -19.918],
+        "radius": 20.793,
+        "azimuth": -73.32,
+        "pitch": 13.13,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.08,
+        "t": 0.0797,
+        "reached": true,
+        "position": [7.714, 1.93, -18.832],
+        "radius": 20.351,
+        "azimuth": -67.73,
+        "pitch": 10.77,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.1,
+        "t": 0.1001,
+        "reached": true,
+        "position": [9.34, 2, -17.61],
+        "radius": 19.933,
+        "azimuth": -62.06,
+        "pitch": 8.45,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.12,
+        "t": 0.1202,
+        "reached": true,
+        "position": [10.834, 2.086, -16.348],
+        "radius": 19.611,
+        "azimuth": -56.47,
+        "pitch": 6.69,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.14,
+        "t": 0.14,
+        "reached": true,
+        "position": [12.256, 2.197, -15.089],
+        "radius": 19.44,
+        "azimuth": -50.92,
+        "pitch": 5.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.16,
+        "t": 0.1599,
+        "reached": true,
+        "position": [13.602, 2.324, -13.777],
+        "radius": 19.36,
+        "azimuth": -45.37,
+        "pitch": 5.92,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.18,
+        "t": 0.18,
+        "reached": true,
+        "position": [14.817, 2.452, -12.336],
+        "radius": 19.28,
+        "azimuth": -39.78,
+        "pitch": 5.88,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.2,
+        "t": 0.2002,
+        "reached": true,
+        "position": [15.894, 2.582, -10.769],
+        "radius": 19.199,
+        "azimuth": -34.12,
+        "pitch": 5.83,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.22,
+        "t": 0.2197,
+        "reached": true,
+        "position": [16.774, 2.707, -9.178],
+        "radius": 19.121,
+        "azimuth": -28.68,
+        "pitch": 5.78,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.24,
+        "t": 0.2402,
+        "reached": true,
+        "position": [17.527, 2.837, -7.436],
+        "radius": 19.039,
+        "azimuth": -22.99,
+        "pitch": 5.73,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.26,
+        "t": 0.26,
+        "reached": true,
+        "position": [18.088, 2.964, -5.685],
+        "radius": 18.96,
+        "azimuth": -17.45,
+        "pitch": 5.69,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.28,
+        "t": 0.2799,
+        "reached": true,
+        "position": [18.474, 3.091, -3.895],
+        "radius": 18.88,
+        "azimuth": -11.91,
+        "pitch": 5.64,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.3,
+        "t": 0.3002,
+        "reached": true,
+        "position": [18.688, 3.222, -2.035],
+        "radius": 18.799,
+        "azimuth": -6.22,
+        "pitch": 5.59,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.4,
+        "t": 0.3999,
+        "reached": true,
+        "position": [17.108, 3.86, 6.774],
+        "radius": 18.4,
+        "azimuth": 21.6,
+        "pitch": 5.34,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.54,
+        "t": 0.5399,
+        "reached": true,
+        "position": [8.746, 4.756, 15.55],
+        "radius": 17.84,
+        "azimuth": 60.65,
+        "pitch": 4.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.7,
+        "t": 0.7002,
+        "reached": true,
+        "position": [-4.553, 5.781, 16.586],
+        "radius": 17.199,
+        "azimuth": 105.35,
+        "pitch": 4.52,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 0.88,
+        "t": 0.88,
+        "reached": true,
+        "position": [-15, 6.932, 6.826],
+        "radius": 16.48,
+        "azimuth": 155.53,
+        "pitch": 3.97,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      },
+      {
+        "target": 1.0,
+        "t": 0.9999,
+        "reached": true,
+        "position": [-15.803, 7.7, -2.503],
+        "radius": 16,
+        "azimuth": -171,
+        "pitch": 3.58,
+        "sightMissesAxisBy": 0,
+        "trunkScreenX": 0.5
+      }
+    ],
+    "largestMiss": 0,
+    "trunkScreenX": [0.5, 0.5]
+  }
+}

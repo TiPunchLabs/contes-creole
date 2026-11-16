@@ -1,10 +1,13 @@
 """Layout check along the climb: at each stop on the way up and on the way back, where the
 Konteur and the critters stand on screen against the shelf, the intro and the edges.
 
-One open page per viewport, fake clock; the climb is driven by the wheel, the value read back
-from the climb bar. A figure is `whole` (all of it on screen, clear of the shelf), `absent` (out
-of frame, or faded out), `under shelf` (part of it shows above or beside the shelf, part is behind
-it) or `cut by edge`. Usage: OUT=<dir> [VPS=...] uv run --with playwright python climb_check.py
+One open page per viewport, fake clock; the climb is driven by the wheel until the value read
+back from the climb bar is the one asked for (a wheel notch does not weigh the same on every
+emulated device), and a stop that is not reached within `REACH` is recorded as a fault. A figure is
+`whole` (all of it on screen, clear of the shelf), `absent` (out of frame), `under shelf` (part of
+it shows above or beside the shelf, part is behind it), `cut by edge` (by the top or the bottom of
+the screen) or `leaving by the side` (the camera turning past it).
+Usage: OUT=<dir> [VPS=...] uv run --with playwright python climb_check.py
 """
 
 from __future__ import annotations
@@ -19,6 +22,8 @@ from playwright.sync_api import Page, sync_playwright
 import hvp
 
 GRAZE = 0.06
+# How close to the value asked for the climb bar must read, once settled.
+REACH = 0.01
 STOPS = [0.0, 0.07, 0.14, 0.2, 0.27, 0.34, 0.41, 0.47, 0.54, 0.61, 0.68, 0.75, 0.81, 0.88, 0.94, 1.0]
 SHOTS = {0.0, 0.14, 0.2, 0.54, 0.88, 1.0}
 
@@ -72,24 +77,47 @@ def classify(box: dict[str, Any], state: dict[str, Any]) -> str:
             "h": max(0.0, min(h, box["y"] + box["h"]) - max(0.0, box["y"]))}
     behind = overlap(seen, shelf) / area
     beyond = 1 - overlap(box, screen) / area
+    # What the left and right edges alone cut: the figure leaving the frame as the camera turns.
+    tall = {"x": 0, "y": box["y"], "w": w, "h": box["h"]}
+    sideways = 1 - overlap(box, tall) / area
     if state["intro"] and hit(box, state["intro"]):
         return "under intro"
     # The app lets a figure stand until 6 % of it is hidden (a toe behind the shelf): a graze.
     if behind > GRAZE:
         return "under shelf"
-    if beyond > GRAZE:
+    if beyond - sideways > GRAZE:
         return "cut by edge"
+    if sideways > GRAZE:
+        return "leaving by the side"
     return "grazed" if behind + beyond > 0.001 else "whole"
 
 
-def go(page: Page, target: float, current: float) -> None:
-    """Wheels the climb from `current` to `target` and lets the camera settle (fake clock)."""
-    left = (target - current) / 0.00055
-    while abs(left) > 0.5:
-        step = max(-120.0, min(120.0, left))
-        page.mouse.wheel(0, step)
-        left -= step
-    page.clock.run_for(2496)
+def progress(page: Page) -> float:
+    """Climb value the page shows, read from the climb bar."""
+    return page.evaluate("""() => { const th = document.querySelector('.tree-climb-thumb'),
+      tr = th.parentElement.getBoundingClientRect(), tb = th.getBoundingClientRect();
+      return (tb.top - tr.top) / (tr.height - tb.height); }""")
+
+
+def go(page: Page, target: float) -> float:
+    """Wheels the climb to `target`, correcting on what the page shows; returns the value reached."""
+    gain = 1.0
+    reached = progress(page)
+    for _ in range(8):
+        if abs(target - reached) <= REACH / 4:
+            break
+        left = (target - reached) / 0.00055 * gain
+        while abs(left) > 0.5:
+            step = max(-120.0, min(120.0, left))
+            page.mouse.wheel(0, step)
+            left -= step
+        page.clock.run_for(2496)
+        now = progress(page)
+        # What the wheel really moved, against what was asked: the device's own scale.
+        if abs(now - reached) > 0.002 and not (now in (0.0, 1.0)):
+            gain *= (target - reached) / (now - reached)
+        reached = now
+    return reached
 
 
 def main() -> None:
@@ -104,14 +132,13 @@ def main() -> None:
             page.mouse.move(page.viewport_size["width"] / 2, page.viewport_size["height"] * 0.35)
             rows = []
             shots = []
-            current = 0.0
             for leg, stops in (("up", STOPS), ("back", STOPS[::-1][1:])):
                 for target in stops:
-                    go(page, target, current)
-                    current = target
+                    go(page, target)
                     state = page.evaluate(STATE)
                     places = {who: classify(box, state) for who, box in state["figures"].items()}
-                    rows.append({"leg": leg, "target": target, "t": round(state["t"], 3), "places": places})
+                    rows.append({"leg": leg, "target": target, "t": round(state["t"], 4), "places": places,
+                                 "reached": abs(state["t"] - target) <= REACH})
                     if target in SHOTS:
                         shot = hvp.OUT / f"climbcheck-{vp}-{leg}-t{target:.2f}.png"
                         page.screenshot(path=str(shot))
@@ -120,14 +147,19 @@ def main() -> None:
             faults = [f'{r["leg"]} t={r["target"]:.2f} {who}: {place}' for r in rows for who, place in r["places"].items()
                       if place in ("under shelf", "under intro")]
             edges = sum(1 for r in rows for place in r["places"].values() if place == "cut by edge")
+            sides = sum(1 for r in rows for place in r["places"].values() if place == "leaving by the side")
+            missed = [f'{r["leg"]} asked {r["target"]:.2f} read {r["t"]:.3f}' for r in rows if not r["reached"]]
             whole = sum(1 for r in rows for place in r["places"].values() if place == "whole")
             grazed = sum(1 for r in rows for place in r["places"].values() if place == "grazed")
             record[vp] = {"viewport": hvp.VIEWPORTS[vp]["viewport"], "states": len(rows), "faults": faults,
-                          "cutByEdge": edges, "whole": whole, "grazed": grazed, "rows": rows}
+                          "cutByEdge": edges, "leavingBySide": sides, "missed": missed, "whole": whole, "grazed": grazed, "rows": rows}
             subprocess.run(["magick", "montage", "-font", "DejaVu-Sans", "-pointsize", "20", "-label", "%f", *shots,
                             "-tile", "6x", "-geometry", "560x420+4+4", "-quality", "88",
                             str(hvp.OUT / f"board-climbcheck-{vp}.jpg")], check=True)
-            print(f"{vp:18} states {len(rows)}  under shelf or intro: {len(faults)}  cut by edge: {edges}  grazed: {grazed}  whole: {whole}")
+            print(f"{vp:18} states {len(rows)}  missed stops: {len(missed)}  under shelf or intro: {len(faults)}  "
+                  f"cut by edge: {edges}  leaving by the side: {sides}  grazed: {grazed}  whole: {whole}")
+            for m in missed:
+                print("    MISSED", m)
             for f in faults[:40]:
                 print("   ", f)
         browser.close()
