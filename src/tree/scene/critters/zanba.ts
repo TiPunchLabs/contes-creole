@@ -41,6 +41,19 @@ const TRUNK_UP = [1.15, 1.7, 2.2, 2.6, 2.95, 3.3];
 /** A sniff now and then: the tip curls in. */
 const TRUNK_SNIFF = [0.6, 0.5, 0.5, 0.75, 1.3, 1.9];
 
+/** Moves a point of the unit ball to its place in the ear (right side; mirrored for the left). */
+function earPoint(p: THREE.Vector3): THREE.Vector3 {
+  const out = Math.max(0, p.x);
+  // Narrower towards the lobe, which hangs lower than the top rises.
+  const taper = 1 - 0.3 * ramp(0.1, -1, p.y);
+  const x = p.x > 0 ? p.x * 0.82 * taper : p.x * 0.2;
+  const y = p.y * (p.y > 0 ? 0.4 : 0.45) - 0.04;
+  // Thick where it leaves the head, thin at the rim, which curls back; the lobe tips forward.
+  const thick = lerp(0.19, 0.045, ramp(-0.6, 0.7, p.x));
+  const z = p.z * thick - 0.13 * out * out + 0.05 * ramp(-0.3, -1, p.y) * out;
+  return p.set(x, y, z);
+}
+
 /**
  * One ear, for the right side (mirrored for the left): a leaf with a thick root that sinks into
  * the temple, a broad rounded top, a lobe that hangs lower and narrower, and a rim that curls
@@ -55,21 +68,34 @@ function earLeaf(skin: THREE.Color, pink: THREE.Color): THREE.BufferGeometry {
   const position = geo.attributes.position;
   const p = new THREE.Vector3();
   for (let i = 0; i < position.count; i++) {
-    p.fromBufferAttribute(position, i);
-    const out = Math.max(0, p.x);
-    // Narrower towards the lobe, which hangs lower than the top rises.
-    const taper = 1 - 0.3 * ramp(0.1, -1, p.y);
-    const x = p.x > 0 ? p.x * 0.74 * taper : p.x * 0.2;
-    const y = p.y * (p.y > 0 ? 0.52 : 0.68) - 0.06;
-    // Thick where it leaves the head, thin at the rim, which curls back; the lobe tips forward.
-    const thick = lerp(0.19, 0.045, ramp(-0.6, 0.7, p.x));
-    const z = p.z * thick - 0.13 * out * out + 0.05 * ramp(-0.3, -1, p.y) * out;
-    position.setXYZ(i, x, y, z);
+    earPoint(p.fromBufferAttribute(position, i));
+    position.setXYZ(i, p.x, p.y, p.z);
   }
   geo.computeVertexNormals();
   smoothSeams(geo);
   return geo;
 }
+
+/** Where the blade of the ear starts, out from its hinge: nearer is the root, sunk in the temple. */
+const EAR_BLADE = 0.16;
+/**
+ * Points of the blade that must stay out of the body, in the ear's own frame (right side): one
+ * vertex in five of its two faces.
+ */
+const EAR_PROBES: readonly THREE.Vector3[] = (() => {
+  const position = SMOOTH.attributes.position;
+  const probes: THREE.Vector3[] = [];
+  for (let i = 0; i < position.count; i += 5) {
+    const p = earPoint(new THREE.Vector3().fromBufferAttribute(position, i));
+    if (p.x >= EAR_BLADE) probes.push(p);
+  }
+  return probes;
+})();
+/** Clearance kept between an ear and the body, as a share of the body's own radii. */
+const EAR_CLEAR = 0.07;
+/** How far an ear may lift off the shoulder, and the furthest forward it may be held (radians). */
+const EAR_LIFT = 1.3;
+const EAR_FORWARD = -0.3;
 
 /** Gives the vertices a sphere doubles along its seam and at its poles one shared normal. */
 function smoothSeams(geo: THREE.BufferGeometry): void {
@@ -185,13 +211,73 @@ export function createZanba(): CritterView {
   const ears = [-1, 1].map((side) => {
     // Hinged inside the temple, so the root of the ear is always sunk in the head.
     const pivot = new THREE.Group();
-    pivot.position.set(side * 0.43, 0.1, -0.12);
+    pivot.position.set(side * 0.43, 0.28, 0);
     const leaf = new THREE.Mesh(earGeo, hide);
     leaf.scale.x = side;
     pivot.add(leaf);
     head.add(pivot);
-    return { side, pivot, fan: { x: 0.5, v: 0 } as Spring };
+    return { side, pivot, fan: { x: 0.42, v: 0 } as Spring, lift: { x: 0, v: 0 } as Spring };
   });
+  const probe = new THREE.Vector3();
+  const tilt = new THREE.Euler(0, 0, 0, "YXZ");
+  /** Whether an ear fanned back by `fan` and lifted by `lift` keeps its blade out of the body. */
+  const earClear = (side: number, fan: number, lift: number): boolean => {
+    tilt.set(0, side * fan, side * lift);
+    const pivot = ears[side < 0 ? 0 : 1].pivot.position;
+    const reach = (1 + EAR_CLEAR) * (1 + EAR_CLEAR);
+    for (const q of EAR_PROBES) {
+      // Ear frame (mirrored on the left) → hinge → head → body, then into the barrel's own ball.
+      probe
+        .set(q.x * side, q.y, q.z)
+        .applyEuler(tilt)
+        .add(pivot);
+      // Inside the head it is hidden, and no concern of the body's.
+      if ((probe.x / 0.58) ** 2 + (probe.y / 0.55) ** 2 + (probe.z / 0.52) ** 2 < 1) continue;
+      probe
+        .applyQuaternion(head.quaternion)
+        .add(head.position)
+        .sub(barrel.position)
+        .divide(barrel.scale);
+      if (probe.lengthSq() < reach) return false;
+    }
+    return true;
+  };
+  /** The least lift that keeps an ear fanned by `fan` out of the body, or -1 if none does. */
+  const earLift = (side: number, fan: number): number => {
+    if (earClear(side, fan, 0)) return 0;
+    let touching = 0;
+    let clear = -1;
+    for (let lift = 0.2; lift <= EAR_LIFT + 1e-6; lift += 0.2) {
+      if (earClear(side, fan, lift)) {
+        clear = lift;
+        break;
+      }
+      touching = lift;
+    }
+    if (clear < 0) return -1;
+    // Refined, so the lift follows the head's turn smoothly.
+    for (let k = 0; k < 6; k++) {
+      const mid = (clear + touching) / 2;
+      if (earClear(side, fan, mid)) clear = mid;
+      else touching = mid;
+    }
+    return clear;
+  };
+  /**
+   * Where an ear that wants to fan back by `wanted` may be: as far back as that, lifted off the
+   * shoulder by what it takes; held further forward when no lift is enough.
+   */
+  const earPose = (side: number, wanted: number, out: { fan: number; lift: number }): void => {
+    for (let fan = wanted; ; fan -= 0.15) {
+      const lift = earLift(side, Math.max(fan, EAR_FORWARD));
+      if (lift >= 0 || fan <= EAR_FORWARD) {
+        out.fan = Math.max(fan, EAR_FORWARD);
+        out.lift = lift >= 0 ? lift : EAR_LIFT;
+        return;
+      }
+    }
+  };
+  const earAt = { fan: 0, lift: 0 };
   const trunk = bendy(
     hide,
     TRUNK_REST.length + 1,
@@ -335,12 +421,6 @@ export function createZanba(): CritterView {
       const since = time - slot * 5.1 - noise(slot, 5) * 3.6;
       const flap =
         lively && since > 0 && since < 0.7 ? Math.sin((since / 0.7) * Math.PI * 2) * 0.22 : 0;
-      for (const ear of ears) {
-        const idle =
-          lively * (Math.sin(time * 0.83 + ear.side) * 0.07 + Math.sin(time * 0.29) * 0.05);
-        const target = 0.5 + idle + flap + up * 0.38 + pace * 0.08 - ear.side * veer * 0.16;
-        ear.pivot.rotation.y = ear.side * springTo(ear.fan, target, 42, 5, dt);
-      }
 
       // Trunk: hangs, swings with the walk, sniffs, rises when touched; each joint follows late.
       const sniffSlot = Math.floor(time / 8.7);
@@ -389,6 +469,25 @@ export function createZanba(): CritterView {
         Math.sin(c.phase * 2 + 0.6) * 0.03 * pace +
         lively * Math.sin(time * 0.7) * 0.02;
       head.rotation.z = -body.rotation.z * 0.6;
+      // After the head, whose turn decides how far back each ear may lie without entering the body.
+      for (const ear of ears) {
+        const idle =
+          lively * (Math.sin(time * 0.83 + ear.side) * 0.07 + Math.sin(time * 0.29) * 0.05);
+        const target = 0.42 + idle + flap + up * 0.38 + pace * 0.08 - ear.side * veer * 0.16;
+        earPose(ear.side, target, earAt);
+        let fan = springTo(ear.fan, earAt.fan, 42, 5, dt);
+        if (fan > earAt.fan) {
+          // Past what the pose allows (the spring's own overshoot): held at the limit.
+          fan = ear.fan.x = earAt.fan;
+          ear.fan.v = Math.min(0, ear.fan.v);
+        }
+        // The lift for where the ear really is, eased, and never under what clearance asks.
+        const found = earLift(ear.side, fan);
+        const need = found < 0 ? EAR_LIFT : found;
+        const lift = Math.max(need, springTo(ear.lift, need, 60, 12, dt));
+        ear.lift.x = lift;
+        ear.pivot.rotation.set(0, ear.side * fan, ear.side * lift, "YXZ");
+      }
       const lid = blink(time, 2);
       for (const e of eyes) e.scale.y = lid;
     },
