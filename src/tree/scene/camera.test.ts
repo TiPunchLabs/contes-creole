@@ -105,3 +105,18 @@ describe("openingStage", () => {
     expect(openingStage(() => 0.46)(5, -9, 0.55)).toBe(false);
   });
 });
+
+describe("openingStage screens", () => {
+  it("rejects a place hidden behind a plant, keeps the one beside it", () => {
+    const onStage = openingStage(() => 1.6, [[-3, -14, 1.2]]);
+    const { truck, back } = openingShot(1.6);
+    // On the line from the camera through the plant, further away.
+    const behind: [number, number] = [
+      truck + (-3 - truck) * 1.5,
+      -(20 + back) + (-14 + 20 + back) * 1.5,
+    ];
+    expect(onStage(behind[0], behind[1], 0.55)).toBe(false);
+    expect(onStage(behind[0] + 4, behind[1], 0.55)).toBe(true);
+    expect(openingStage(() => 1.6)(behind[0], behind[1], 0.55)).toBe(true);
+  });
+});

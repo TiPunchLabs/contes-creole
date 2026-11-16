@@ -13,7 +13,7 @@ import { RANDOM_TALE_ACTION, RANDOM_TALE_NONE, eligibleTales, pickRandomTale } f
 import { cardT, openingStage, treeCam } from "./scene/camera";
 import { createCards, type CardView } from "./scene/cards";
 import { createLapen } from "./scene/critters/lapen";
-import type { CritterView } from "./scene/critters/parts";
+import type { CritterView, Surroundings } from "./scene/critters/parts";
 import {
   TREE_OBSTACLE,
   createCritterStates,
@@ -53,6 +53,8 @@ const DIVE_SECONDS = 1.7;
 const TAP_DISTANCE = 8;
 const TAP_MS = 600;
 const BUBBLE_HOLD_MS = 4500;
+/** Reach of the Konteur's lantern and fill light on the lawn, in metres. */
+const LAMP_REACH = 3.6;
 const CLIMB_KEYS_UP = ["ArrowUp", "ArrowLeft"];
 const CLIMB_KEYS_DOWN = ["ArrowDown", "ArrowRight", " "];
 
@@ -98,7 +100,15 @@ function buildTree(
   const critterRng = createRng(17);
   const aspect = container.clientWidth / (container.clientHeight || 1);
   const critters = createCritterStates(aspect < 1, konteurSpot(aspect));
-  const onStage = openingStage(() => camera.aspect);
+  // Plants hide more than their trunk: their leaves count for the view, not only for the walk.
+  const lawn = openingStage(
+    () => camera.aspect,
+    FLORA_OBSTACLES.map(([x, z, r]) => [x, z, r + 0.9] as const),
+  );
+  /** On the stage and out of the Konteur's lamplight, which would bleach them. */
+  const onStage = (x: number, z: number, r: number): boolean =>
+    lawn(x, z, r) &&
+    Math.hypot(x - konteur.group.position.x, z - konteur.group.position.z) > LAMP_REACH + r;
   const views: Record<CritterName, CritterView> = { lapen: createLapen(), zanba: createZanba() };
   const obstacles = [TREE_OBSTACLE, ...KONTEUR_OBSTACLES, ...FLORA_OBSTACLES];
   scene.add(
@@ -112,6 +122,21 @@ function buildTree(
   );
   const calm = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   const parallax = calm ? 0.2 : 1;
+  /** What each critter sees around it: the camera, the Konteur and the other one. */
+  const around: Record<CritterName, Surroundings> = {
+    lapen: {
+      camera: camera.position,
+      teller: konteur.group.position,
+      other: views.zanba.group.position,
+      calm,
+    },
+    zanba: {
+      camera: camera.position,
+      teller: konteur.group.position,
+      other: views.lapen.group.position,
+      calm,
+    },
+  };
 
   let t = 0;
   let target = 0;
@@ -356,8 +381,8 @@ function buildTree(
     sky.update(time, camera.position);
     tree.update(time, hover !== null || near >= 0);
     konteur.update(time, camera.position, (tellerHovered || tellerFocused) && !diving);
-    stepCritters(critters, dt, camera.position, obstacles, critterRng, onStage);
-    for (const c of critters) views[c.name].pose(c, time);
+    stepCritters(critters, dt, camera.position, obstacles, critterRng, onStage, calm);
+    for (const c of critters) views[c.name].pose(c, time, around[c.name]);
     // A focused card answers like a hovered one: it grows and its halo brightens.
     const lit = hover ?? (cardFocused && near >= 0 ? near : null);
     const cardViews = cards.update(time, t, lit, camera.position, stage.project);

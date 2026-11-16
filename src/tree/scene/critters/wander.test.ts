@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createRng } from "@shared/random";
 import {
+  HOP_GROUND,
   RING,
   TREE_OBSTACLE,
   clearOfTree,
@@ -99,8 +100,9 @@ describe("stepCritters", () => {
     list[0].tgt = [list[0].pos[0] + 5, list[0].pos[1]];
     const before = [...list[0].pos];
     stepCritters(list, 30, CAMERA, OBSTACLES, rng);
+    // A hop covers its ground during its airborne share only, hence the faster instants.
     expect(Math.hypot(list[0].pos[0] - before[0], list[0].pos[1] - before[1])).toBeLessThanOrEqual(
-      list[0].speed * 0.05 + 1e-9,
+      (list[0].speed * 0.05) / (1 - HOP_GROUND) + 1e-9,
     );
   });
 });
@@ -137,8 +139,10 @@ describe("the stage", () => {
       for (const c of createCritterStates(tall, teller)) {
         expect(c.pos[1]).toBeLessThan(-4);
         expect(Math.hypot(c.pos[0], c.pos[1])).toBeGreaterThan(TREE_OBSTACLE[2] + c.r);
-        const facing = Math.atan2(teller[0] - c.pos[0], teller[1] - c.pos[1]);
-        expect(c.yaw).toBeCloseTo(facing);
+        // Between the Konteur and the opening camera: listening, face still showing.
+        const listening = Math.atan2(teller[0] - c.pos[0], teller[1] - c.pos[1]);
+        const off = Math.atan2(Math.sin(c.yaw - listening), Math.cos(c.yaw - listening));
+        expect(Math.abs(off)).toBeLessThan(1.5);
         expect(Math.hypot(teller[0] - c.pos[0], teller[1] - c.pos[1])).toBeGreaterThan(1.9 + c.r);
       }
     }
@@ -164,5 +168,53 @@ describe("the stage", () => {
       stepCritters(list, 1 / 60, CAMERA, OBSTACLES, rng, onStage);
       for (const c of list) expect(c.pos[1]).toBeLessThan(-2.5);
     }
+  });
+});
+
+describe("gaits", () => {
+  it("Lapen only travels while a hop has him in the air, and lands the hop he started", () => {
+    const rng = createRng(17);
+    const list = createCritterStates();
+    const lapen = list[0];
+    Object.assign(lapen, { wait: 0, tgt: [lapen.pos[0] - 6, lapen.pos[1] + 3] });
+    let last = [...lapen.pos];
+    for (let i = 0; i < 400; i++) {
+      const before = lapen.phase / (Math.PI * 2);
+      stepCritters(list, 1 / 60, CAMERA, OBSTACLES, rng);
+      const moved = Math.hypot(lapen.pos[0] - last[0], lapen.pos[1] - last[1]);
+      if (before < HOP_GROUND) expect(moved).toBe(0);
+      last = [...lapen.pos];
+      if (i === 200) lapen.tgt = [lapen.pos[0], lapen.pos[1]];
+    }
+    expect(lapen.phase).toBe(0);
+    expect(lapen.v).toBe(0);
+  });
+
+  it("Zanba's legs turn over once per 0.72 m, and he eases in and out of his walk", () => {
+    const rng = createRng(17);
+    const list = createCritterStates();
+    const zanba = list[1];
+    Object.assign(zanba, { wait: 0, yaw: Math.PI / 2, tgt: [zanba.pos[0] + 3, zanba.pos[1]] });
+    const start = [...zanba.pos];
+    const phase = zanba.phase;
+    let top = 0;
+    for (let i = 0; i < 240; i++) {
+      const v = zanba.v;
+      stepCritters(list, 1 / 60, CAMERA, OBSTACLES, rng);
+      expect(Math.abs(zanba.v - v)).toBeLessThan(zanba.speed * 0.05);
+      top = Math.max(top, zanba.v);
+    }
+    const walked = Math.hypot(zanba.pos[0] - start[0], zanba.pos[1] - start[1]);
+    expect(top).toBeGreaterThan(zanba.speed * 0.9);
+    expect((zanba.phase - phase) / (Math.PI * 2)).toBeCloseTo(walked / 0.72, 1);
+  });
+
+  it("keeps everybody in place with `still`", () => {
+    const rng = createRng(17);
+    const list = createCritterStates();
+    const at = list.map((c) => [...c.pos]);
+    for (let i = 0; i < 1200; i++)
+      stepCritters(list, 1 / 60, CAMERA, OBSTACLES, rng, undefined, true);
+    expect(list.map((c) => c.pos)).toEqual(at);
   });
 });

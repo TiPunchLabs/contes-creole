@@ -101,9 +101,14 @@ export type StageTest = (x: number, z: number, r: number) => boolean;
 
 /**
  * The part of the clearing the opening view shows in front of the trunk, for the current aspect:
- * inside 0.8 of the horizontal field, far enough from the camera to clear the shelf.
+ * inside 0.8 of the horizontal field, far enough from the camera to clear the shelf, not deep
+ * under the crown, and not behind one of the `screens` (x, z, radius: plants, the Konteur) as
+ * seen from the camera.
  */
-export function openingStage(aspect: () => number): StageTest {
+export function openingStage(
+  aspect: () => number,
+  screens: readonly (readonly [number, number, number])[] = [],
+): StageTest {
   return (x, z, r) => {
     const a = aspect();
     const shot = openingShot(a);
@@ -115,6 +120,14 @@ export function openingStage(aspect: () => number): StageTest {
     const len = Math.hypot(dx, dz);
     const depth = ((x - cx) * dx + (z - cz) * dz) / len;
     const side = Math.abs(((x - cx) * dz - (z - cz) * dx) / len);
-    return z < -4 && depth > 8.5 && side + r < depth * Math.tan(half) * 0.8;
+    if (z > -6.2 || depth < 8.5 || side + r > depth * Math.tan(half) * 0.8) return false;
+    const reach = Math.hypot(x - cx, z - cz);
+    return screens.every(([sx, sz, sr]) => {
+      const along = ((sx - cx) * (x - cx) + (sz - cz) * (z - cz)) / reach;
+      if (along <= 0 || along >= reach) return true;
+      const off = Math.abs(((sx - cx) * (z - cz) - (sz - cz) * (x - cx)) / reach);
+      // What matters is the gap on screen: scale the miss to the target's distance.
+      return (off * reach) / along > sr + r;
+    });
   };
 }
