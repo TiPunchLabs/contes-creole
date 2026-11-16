@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { OPENING, OPENING_END, cardT, hubCam, openingShot, openingStage, treeCam } from "./camera";
+import {
+  BAND_ASPECT,
+  OPENING,
+  OPENING_END,
+  cardT,
+  hubCam,
+  openingShot,
+  openingStage,
+  treeCam,
+} from "./camera";
 
 describe("cardT", () => {
   it("puts a single book in the middle of the climb", () => {
@@ -82,6 +91,13 @@ describe("openingStage", () => {
       expect(onStage(13, -6, 0.55)).toBe(false);
       expect(onStage(truck, -19, 0.55)).toBe(false);
     }
+  });
+
+  it("changes shot where the intro changes layout", () => {
+    expect(openingShot(BAND_ASPECT)).toEqual(OPENING.square);
+    expect(openingShot(BAND_ASPECT + 1e-6).lookPan).toBeCloseTo(OPENING.column.lookPan, 3);
+    expect(openingShot(0.46)).toEqual(OPENING.tall);
+    expect(openingShot(2.2)).toEqual(OPENING.wide);
   });
 
   it("is narrower on a portrait screen", () => {

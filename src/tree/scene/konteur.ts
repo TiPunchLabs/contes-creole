@@ -18,7 +18,7 @@ export const KONTEUR_OBSTACLES: Obstacle[] = [
 
 /** Where the Konteur sits on the ground (x, z) for a screen aspect: further in on narrow screens. */
 export function konteurSpot(aspect: number): [number, number] {
-  return [lerp(KONTEUR_X_NARROW, KONTEUR_X_WIDE, clamp((aspect - 0.5) / 0.75, 0, 1)), KONTEUR_Z];
+  return [lerp(KONTEUR_X_NARROW, KONTEUR_X_WIDE, clamp((aspect - 0.5) / 1.1, 0, 1)), KONTEUR_Z];
 }
 
 /** The storyteller: a photo cut-out billboard at the foot of the tree, with a lantern. */

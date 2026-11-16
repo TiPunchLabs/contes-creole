@@ -31,30 +31,43 @@ export interface OpeningShot {
 }
 
 /**
- * Opening compositions: `wide` leaves the right of the frame to the intro column, `tall` brings the
- * tree down under the intro band of portrait screens. Aspects in between blend the two.
+ * Opening compositions by screen aspect. Up to `BAND_ASPECT` the intro is a band at the top
+ * (overlay.css): `tall` and `square` bring the whole tree down under it. Above, the intro is a
+ * column on the right: `column` and `wide` leave it the sky beside the crown.
  */
-export const OPENING: { wide: OpeningShot; tall: OpeningShot } = {
-  wide: { back: 2, lift: 0.2, truck: 1.5, lookLift: 1.5, lookPan: -2.8 },
+export const OPENING: Record<"tall" | "square" | "column" | "wide", OpeningShot> = {
   tall: { back: 2, lift: 0.3, truck: 0, lookLift: 3.9, lookPan: 0 },
+  square: { back: 11, lift: 0.3, truck: 0, lookLift: 6.3, lookPan: 0 },
+  column: { back: 4.5, lift: 0.3, truck: 1.2, lookLift: 2, lookPan: -2.4 },
+  wide: { back: 2, lift: 0.2, truck: 1.5, lookLift: 1.5, lookPan: -2.8 },
 };
 
 const TALL_ASPECT = 0.8;
-const WIDE_ASPECT = 1.4;
+/** Same limit as the intro band's media query in overlay.css. */
+export const BAND_ASPECT = 1.2;
+const WIDE_ASPECT = 1.6;
 /** Climb value from which the camera is back on the spiral (the first card hangs at 0.2). */
 export const OPENING_END = 0.14;
 
-/** The opening composition for a screen aspect. */
-export function openingShot(aspect: number): OpeningShot {
-  const k = clamp((aspect - TALL_ASPECT) / (WIDE_ASPECT - TALL_ASPECT), 0, 1);
-  const { wide, tall } = OPENING;
+/** Blends two shots. */
+function mix(a: OpeningShot, b: OpeningShot, k: number): OpeningShot {
   return {
-    back: lerp(tall.back, wide.back, k),
-    lift: lerp(tall.lift, wide.lift, k),
-    truck: lerp(tall.truck, wide.truck, k),
-    lookLift: lerp(tall.lookLift, wide.lookLift, k),
-    lookPan: lerp(tall.lookPan, wide.lookPan, k),
+    back: lerp(a.back, b.back, k),
+    lift: lerp(a.lift, b.lift, k),
+    truck: lerp(a.truck, b.truck, k),
+    lookLift: lerp(a.lookLift, b.lookLift, k),
+    lookPan: lerp(a.lookPan, b.lookPan, k),
   };
+}
+
+/** The opening composition for a screen aspect; it changes layout, hence shot, at `BAND_ASPECT`. */
+export function openingShot(aspect: number): OpeningShot {
+  if (aspect <= BAND_ASPECT) {
+    const k = clamp((aspect - TALL_ASPECT) / (BAND_ASPECT - TALL_ASPECT), 0, 1);
+    return mix(OPENING.tall, OPENING.square, k);
+  }
+  const k = clamp((aspect - BAND_ASPECT) / (WIDE_ASPECT - BAND_ASPECT), 0, 1);
+  return mix(OPENING.column, OPENING.wide, k);
 }
 
 /**

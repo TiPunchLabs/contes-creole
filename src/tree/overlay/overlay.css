@@ -29,9 +29,9 @@
  */
 .tree-intro {
   position: absolute;
-  right: 72px;
-  top: clamp(150px, 23vh, 230px);
-  width: clamp(280px, calc(50vw - 32vh - 72px), 400px);
+  right: clamp(40px, 5vw, 72px);
+  top: clamp(96px, 23vh, 230px);
+  width: clamp(260px, calc(50vw - 32vh - 72px), 400px);
 }
 
 .tree-intro-inner {
@@ -265,9 +265,10 @@
   white-space: nowrap;
 }
 
-/* Portrait and narrow screens (board 12 M1): no room beside the canopy, so the column becomes a
-   band at the top, on a paper veil that fades into the sky above the tree. */
-@media (min-height: 501px) and (max-width: 899px), (min-height: 501px) and (max-aspect-ratio: 7/5) {
+/* Portrait and square screens (board 12 M1): no room beside the canopy, so the column becomes a
+   band at the top, on a paper veil that fades into the sky above the tree. Landscape screens keep
+   the column: the opening view leaves it the sky right of the crown. */
+@media (min-height: 501px) and (max-aspect-ratio: 6/5) {
   .tree-intro {
     left: 0;
     right: 0;
@@ -293,6 +294,43 @@
 
   .tree-intro-title {
     font-size: clamp(36px, 6.4vw, 52px);
+  }
+}
+
+/* Small landscape windows keep the column, set smaller so it stays beside the crown. */
+@media (min-aspect-ratio: 6/5) and (max-width: 899px) and (min-height: 501px) {
+  .tree-intro {
+    right: 36px;
+    top: 64px;
+    width: 232px;
+  }
+
+  .tree-intro-inner::before {
+    inset: -56px;
+  }
+
+  .tree-intro-title {
+    font-size: 32px;
+  }
+
+  .tree-intro-motto {
+    margin-top: 12px;
+    font-size: 20px;
+  }
+
+  .tree-intro-gloss {
+    font-size: 17px;
+  }
+
+  .tree-intro-text {
+    margin-top: 10px;
+    font-size: 15px;
+  }
+
+  .tree-intro-hint {
+    margin-top: 12px;
+    padding-top: 10px;
+    font-size: 14px;
   }
 }
 
@@ -329,24 +367,25 @@
 }
 
 /* Landscape phones: neither the band (too short) nor the side column fits, so a compact column
-   sits top left on the same paper veil as the band, clear of the shelf and the climb bar. */
+   sits top right on the same paper veil as the band, beside the crown, clear of the shelf and
+   the climb bar. */
 @media (max-height: 500px) {
   .tree-intro {
-    left: 16px;
-    top: 16px;
-    width: min(520px, calc(100% - 64px));
+    right: 44px;
+    top: 12px;
+    width: min(300px, 36vw);
   }
 
   .tree-intro-inner::before {
-    inset: -16px -56px -14px -16px;
+    inset: -12px -44px -14px -56px;
     background: linear-gradient(
       180deg,
       oklch(0.985 0.012 85 / 0.88) 0%,
       oklch(0.985 0.012 85 / 0.82) calc(100% - 14px),
       oklch(0.985 0.012 85 / 0)
     );
-    /* Soft right edge too, so the veil never ends in a hard line over the scene. */
-    mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent);
+    /* Soft left edge too, so the veil never ends in a hard line over the scene. */
+    mask-image: linear-gradient(270deg, #000 calc(100% - 56px), transparent);
   }
 
   .tree-intro-kicker {
@@ -376,7 +415,7 @@
   }
 
   .tree-intro-title {
-    font-size: 28px;
+    font-size: 25px;
   }
 
   .tree-climb {
