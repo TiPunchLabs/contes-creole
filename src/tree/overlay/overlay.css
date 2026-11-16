@@ -45,13 +45,14 @@
 .tree-intro-inner::before {
   content: "";
   position: absolute;
-  /* Wide enough that the text stays inside the opaque part; the ellipse fades out before the edges. */
-  inset: -96px;
+  /* Wide enough that the text stays inside the opaque part, the hint at the foot of the column
+     included (it sits over the lawn and the far trees); the ellipse fades out before the edges. */
+  inset: -96px -96px -132px;
   z-index: -1;
   background: radial-gradient(
     closest-side,
-    oklch(0.985 0.012 85 / 0.9) 50%,
-    oklch(0.985 0.012 85 / 0.74) 72%,
+    oklch(0.985 0.012 85 / 0.93) 58%,
+    oklch(0.985 0.012 85 / 0.8) 78%,
     oklch(0.985 0.012 85 / 0)
   );
 }
@@ -306,7 +307,7 @@
   }
 
   .tree-intro-inner::before {
-    inset: -56px;
+    inset: -64px -64px -170px;
   }
 
   .tree-intro-title {
