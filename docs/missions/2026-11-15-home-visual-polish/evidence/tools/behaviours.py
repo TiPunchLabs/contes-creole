@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 from typing import Any
 
 from playwright.sync_api import Browser, Page, sync_playwright
@@ -197,41 +198,75 @@ def mobile(browser: Browser) -> None:
     ctx.close()
 
 
+def stir(page: Page, name: str) -> float:
+    """Mean absolute pixel change of the crown and sky area over 1.2 s (ImageMagick MAE, 0..1)."""
+    clip = {"x": 200, "y": 20, "width": 700, "height": 330}
+    files = [hvp.OUT / f"stir-{name}-{i}.png" for i in (0, 1)]
+    page.screenshot(path=str(files[0]), clip=clip)
+    page.wait_for_timeout(1200)
+    page.screenshot(path=str(files[1]), clip=clip)
+    out = subprocess.run(["magick", "compare", "-metric", "MAE", str(files[0]), str(files[1]), "null:"],
+                         capture_output=True, text=True).stderr
+    return float(re.search(r"\(([0-9.e-]+)\)", out).group(1))
+
+
+def places(page: Page) -> dict[str, list[float]]:
+    """World positions of the critters, rounded to the centimetre."""
+    return {k: [round(x, 2) for x in v["world"]] for k, v in page.evaluate(hvp.BOXES_JS).items()}
+
+
 def reduced(browser: Browser) -> None:
     """prefers-reduced-motion: decorative motion cut, the journey kept; live preference change."""
     cam_x = "() => window.__hvp.camera.position.x"
-    shifts = {}
-    for calm in (False, True):
-        ctx, page, logs = fresh(browser, "desktop", reduced_motion=calm)
+
+    def shift(page: Page) -> float:
         page.mouse.move(720, 450)
         page.wait_for_timeout(300)
         x0 = page.evaluate(cam_x)
         page.mouse.move(1430, 450)
         page.wait_for_timeout(300)
-        shifts[calm] = abs(page.evaluate(cam_x) - x0)
-        if calm:
-            anim = page.evaluate("() => [getComputedStyle(document.querySelector('.tree-intro-inner')).animationName, getComputedStyle(document.querySelector('.tree-intro-hint svg')).animationName]")
-            check("reduced.css-animations-off", anim == ["none", "none"], anim)
-            button = page.locator(".tree-shelf-book").nth(0)
-            button.click()
-            page.wait_for_timeout(2500)
-            button.click()
-            page.wait_for_function("() => document.querySelector('.app').dataset.book", timeout=15000)
-            check("reduced.tale-access-kept", state(page)["book"] == "ti-kannot", state(page))
-        else:
-            page.emulate_media(reduced_motion="reduce")
-            page.wait_for_timeout(300)
-            page.mouse.move(720, 450)
-            page.wait_for_timeout(300)
-            x1 = page.evaluate(cam_x)
-            page.mouse.move(1430, 450)
-            page.wait_for_timeout(300)
-            live = abs(page.evaluate(cam_x) - x1)
-            RESULTS.append({"name": "reduced.live-change-parallax", "ok": True,
-                            "detail": {"shiftAfterLiveChange": live, "note": "INFO: the 3D scene reads the preference at mount only"}})
-            print("INFO live preference change: parallax shift", round(live, 3))
-        ctx.close()
-    check("reduced.parallax-cut-to-a-fifth", shifts[False] > 0.3 and shifts[True] < shifts[False] * 0.3, shifts)
+        moved = abs(page.evaluate(cam_x) - x0)
+        page.mouse.move(720, 120)
+        return moved
+
+    ctx, page, logs = fresh(browser, "desktop")
+    full = shift(page)
+    page.wait_for_timeout(9000)
+    lively = stir(page, "lively")
+    walking = places(page)
+    page.emulate_media(reduced_motion="reduce")
+    page.wait_for_timeout(2500)
+    live_shift = shift(page)
+    stopped = places(page)
+    page.wait_for_timeout(4000)
+    check("reduced.live-change-stops-critters", places(page) == stopped, [stopped, places(page)])
+    check("reduced.live-change-cuts-parallax", live_shift < full * 0.3, [full, live_shift])
+    live_stir = stir(page, "live")
+    check("reduced.live-change-quiets-decor", live_stir < lively * 0.5, [lively, live_stir])
+    RESULTS.append({"name": "reduced.info", "ok": True, "detail": {"walkingBefore": walking, "stirLively": lively, "stirAfterLiveChange": live_stir}})
+    ctx.close()
+
+    ctx, page, logs = fresh(browser, "desktop", reduced_motion=True)
+    calm_shift = shift(page)
+    check("reduced.parallax-cut-to-a-fifth", full > 0.3 and calm_shift < full * 0.3, [full, calm_shift])
+    anim = page.evaluate("() => [getComputedStyle(document.querySelector('.tree-intro-inner')).animationName, getComputedStyle(document.querySelector('.tree-intro-hint svg')).animationName]")
+    check("reduced.css-animations-off", anim == ["none", "none"], anim)
+    start = places(page)
+    page.wait_for_timeout(11000)
+    check("reduced.critters-stay-at-their-places", places(page) == start, [start, places(page)])
+    calm_stir = stir(page, "calm")
+    check("reduced.decor-quiet", calm_stir < lively * 0.5, [lively, calm_stir])
+    page.mouse.move(*centre(page.evaluate(hvp.BOXES_JS)["lapen"]))
+    page.wait_for_timeout(500)
+    check("reduced.hover-bubble-kept", "Konpè Lapen" in state(page)["bubble"], state(page)["bubble"])
+    page.mouse.move(720, 120)
+    button = page.locator(".tree-shelf-book").nth(0)
+    button.click()
+    page.wait_for_timeout(2500)
+    button.click()
+    page.wait_for_function("() => document.querySelector('.app').dataset.book", timeout=15000)
+    check("reduced.tale-access-kept", state(page)["book"] == "ti-kannot", state(page))
+    ctx.close()
 
 
 def main() -> None:

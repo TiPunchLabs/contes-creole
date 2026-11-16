@@ -145,8 +145,8 @@ def turntable(browser: Browser, record: dict[str, Any]) -> None:
     """Each critter from 4 bearings at inspection distance, lit and as a flat silhouette (DPR 2)."""
     ctx, page = hvp.open_home(browser, "desktop2x")
     page.add_style_tag(content=HIDE_UI)
-    for seconds, state in ((2, "idle"), (9, "walk")):
-        page.clock.run_for(2000 if seconds == 2 else 7000)
+    for seconds, state in ((2, "idle"), (int(os.environ.get("WALK_AT", "9")), "walk")):
+        page.clock.run_for(2000 if seconds == 2 else (seconds - 2) * 1000)
         for who, dist, height, look in (("lapen", 4.2, 1.0, 0.75), ("zanba", 6.4, 1.6, 1.05)):
             for name, bearing in (("front", 0.0), ("three-quarter", 0.7), ("side", 1.5708), ("back", 3.1416)):
                 for flat in (False, True):
@@ -155,6 +155,24 @@ def turntable(browser: Browser, record: dict[str, Any]) -> None:
                     page.screenshot(path=str(OUT / f"turntable-{who}-{state}-{name}-{kind}.png"),
                                     clip={"x": 420, "y": 150, "width": 600, "height": 600})
     ctx.close()
+
+
+def sweep(browser: Browser, record: dict[str, Any]) -> None:
+    """The opening at every size of the layout sweep (fake clock 2 s), with overflow and box checks."""
+    names = ["laptop", "tablet", "small", "tall", *hvp.SWEEP]
+    for vp in names:
+        ctx, page = hvp.open_home(browser, vp)
+        page.clock.run_for(2000)
+        page.screenshot(path=str(OUT / f"sweep-{vp}.png"))
+        size = page.viewport_size
+        boxes = page.evaluate(hvp.BOXES_JS)
+        dom = page.evaluate("""() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null;
+            const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; };
+          return { intro: r('.tree-intro-inner'), shelf: r('.tree-shelf'), teller: r('.tree-teller'),
+                   overflow: document.documentElement.scrollWidth > innerWidth }; }""")
+        record.setdefault("sweep", {})[vp] = {"viewport": size, "dom": dom, "critters": {
+            k: {"x": round(v["x"]), "y": round(v["y"]), "w": round(v["w"]), "h": round(v["h"])} for k, v in boxes.items()}}
+        ctx.close()
 
 
 def encode(frames: Path, target: Path, fps: int = 30) -> None:
@@ -170,7 +188,10 @@ def encode(frames: Path, target: Path, fps: int = 30) -> None:
 def videos(browser: Browser, record: dict[str, Any]) -> None:
     """Frame-stepped videos (every other 16 ms frame, played at 30 fps = near real time)."""
     step_ms, per_second = 32, 31.25
+    kinds = os.environ.get("VIDEO_KINDS", "tree,rest,follow").split(",")
     for vp in ("desktop", "mobile"):
+        if "tree" not in kinds:
+            break
         # Tree: 6 s at rest, the climb up in 12 s, 3 s at the top, down in 9 s.
         ctx, page = hvp.open_home(browser, vp)
         page.clock.run_for(2000)
@@ -188,6 +209,9 @@ def videos(browser: Browser, record: dict[str, Any]) -> None:
             page.screenshot(path=str(frames / f"{i:05d}.jpg"), type="jpeg", quality=88)
         ctx.close()
         encode(frames, OUT / f"video-tree-climb-{vp}.mp4")
+    for vp in ("desktop", "mobile"):
+        if "rest" not in kinds:
+            break
         # Characters in the app's own framing: 45 s at rest, each critter hovered once.
         ctx, page = hvp.open_home(browser, vp)
         page.clock.run_for(2000)
@@ -209,6 +233,8 @@ def videos(browser: Browser, record: dict[str, Any]) -> None:
         encode(frames, OUT / f"video-characters-rest-{vp}.mp4")
     # Character close-ups: a camera riding 3/4 in front of each critter at a fixed world bearing.
     for who, dist, height, look in (("lapen", 4.2, 1.0, 0.5), ("zanba", 7.5, 1.9, 1.0)):
+        if "follow" not in kinds:
+            break
         ctx, page = hvp.open_home(browser, "desktop")
         page.add_style_tag(content=HIDE_UI)
         page.clock.run_for(2000)

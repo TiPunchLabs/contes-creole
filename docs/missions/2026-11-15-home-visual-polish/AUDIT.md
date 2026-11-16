@@ -308,3 +308,165 @@ Not yet measured on `62939bb`: load, FPS, the frame-stepped videos.
    painted foliage (L1, L2, P10).
 5. Tree animation, reduced motion (critters and wind keep moving today), lite pixel ratio (L3).
 6. Measures after each kept change, then the full protocol: load, FPS, behaviours, other pages.
+
+## 11. S2 — improvement loop (appended; sections 1 to 10 are the S1 text, unchanged)
+
+Product HEAD after S2: `bc06474`. Each kept change is one commit; nothing was kept without a
+capture or a measure. Media of the loop: `s2/` (one folder per trial); final state: `final/`,
+boards in `final/boards/`. The manifest `evidence/s2-media-manifest.tsv` lists everything.
+
+### 11.1 Kept changes
+
+| Commit    | Change                                                                                                                                                                                                                                                                                                                | Defects                    | Evidence                                                                                                 |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `04bfacb` | Layouts: the intro is a column from an aspect of 6/5 (it was 7/5, so 1024×768 took the band); one opening shot per layout (tall, square, column, wide); smaller column on small landscape windows; landscape phones get the intro on the right; the Konteur's outer place only on the widest screens                  | R1, C8                     | `s2/01-band`, `s2/02-keys`, `s2/03-tune` (sweeps), `final/boards/final-layout-sweep.jpg`                 |
+| `e60ebab` | Lapen and Zanba rebuilt: one painted skin each, single bent limbs (trunk, tail, ears), attached legs and feet, lower Zanba; eased speed and heading, real hops, four-beat walk tied to the ground covered, springs on ears, tail, trunk and belly, breath, irregular blinks, gaze, shadow that follows; staging rules | P1–P10, L1, L2, R5, C2, C3 | `s2/10-shapes` to `s2/15-stage`, `final/boards/before-after-turntable-*.jpg`, `final/video-follow-*.mp4` |
+| `3016dd0` | Reduced motion: the decor's clock runs at 8 %, no hover rustle, critters keep their places, and the preference is followed live                                                                                                                                                                                       | S1 §3                      | `evidence/s2-final-behaviours.json` (`reduced.*`), `final/boards/before-after-reduced-motion.jpg`        |
+| `3cdfa59` | Konteur served as `konteur.webp` (quality 88, alpha exact), 117 kB for 825 kB; the PNG stays as the original                                                                                                                                                                                                          | S1 §4                      | `s2/20-konteur` (47.9 dB PSNR at twice the displayed size)                                               |
+| `0f70c39` | Wind in gusts: the sway's strength swells and drops (0.2 to 1.2), same peak, same rustle and timings                                                                                                                                                                                                                  | E                          | `s2/30-wind-before`, `s2/31-wind-after`: variation 0.11 → 0.21, mean change 0.0388 → 0.0336              |
+| `957e576` | Lapen's start place a little further in: his feet no longer touch the shelf                                                                                                                                                                                                                                           | R4                         | `s2/41-starts`                                                                                           |
+| `b76c396` | Critters' rigid pieces welded (14 meshes each for 22 and 32), limbs written as one buffer with precomputed weights                                                                                                                                                                                                    | perf                       | section 11.3                                                                                             |
+| `eaf3f09` | The intro's paper wash reaches lower and keeps more body                                                                                                                                                                                                                                                              | AC4                        | `evidence/s2-final-contrast.json`                                                                        |
+| `bc06474` | The Konteur's fill light reaches 4.6 m instead of 7 m, and the critters keep 4.2 m from him                                                                                                                                                                                                                           | L1                         | `s2/60-lamp` (Zanba no longer bleached; Konteur 42 dB against his previous close-up)                     |
+
+### 11.2 Tried and not kept, found and fixed on the way
+
+- First layout attempt (band only up to a square, `s2/01-band`): at 1100×1000 the column sat on
+  the crown. Replaced before commit by the 6/5 limit and the `square` shot.
+- First Lapen (`s2/10-shapes`): the idle capture caught him mid-hop because the start waits ran
+  out under the loader. Waits raised (6.5 s and 9 s) so the opening group holds a few seconds.
+- First limbs: triangles wound inwards, so trunk, tail and ears showed their far side, flat and
+  pale (`s2/11-shapes`). Fixed before commit (`s2/12-shapes`).
+- Staging without rules (`s2/13-motion`, `s2/14-chars`): Lapen hopped against Zanba, Zanba ended
+  behind the foreground balisier, and both drifted towards the trunk. Added to `e60ebab`: room
+  round the other critter, no target hidden behind a plant from the opening camera, no target
+  deeper than 6.2 m in front of the trunk.
+- Welded eyes (`s2/50-fused`, first run): the blink overrode the eye's own scale and drew two
+  spikes. Fixed before commit: the lid scales a holder.
+- Lite pixel ratio (L3): **not changed.** Raising it from 1 to 1.5 on phones costs 2.25 times
+  the pixels, and no phone was available to check the "≥ 30 FPS" target; an adaptive scheme
+  (start at 1, step up when frames are fast) was considered and left for a session with a device.
+- Geometry count (S1 §4): it rises once, on the first climb, and stays there (117 at the foot,
+  188 after one climb, 188 after three climbs and a further minute). Geometries are uploaded the
+  first time they are drawn; nothing is rebuilt. No change.
+- Scene lights (key, rim, hemisphere): not changed. The critters' edge light is in their
+  material; the scene's grade is the validated "Veillée claire".
+- Balisier under the intro column (C7): no plant was moved. With the kept framing it sits right
+  of the group and below the column, where it balances the Konteur on the left.
+
+### 11.3 Performance
+
+Same protocol as S1 (section 1). Capped: median FPS, p95 frame, frames over 33 ms. Uncapped:
+mean FPS / p95 frame for three builds: the S1 baseline run (machine load 6.6), the base
+commit `ef821d2` rebuilt and measured in the same session as the final run (`final/ab-base-4`,
+load 3.3), and the final HEAD.
+
+| Viewport       | Sequence     | Final capped FPS | p95     | > 33 ms | S1 baseline   | Base, same session | Final         | Final vs base, same session | Final vs S1 baseline |
+| -------------- | ------------ | ---------------- | ------- | ------- | ------------- | ------------------ | ------------- | --------------------------- | -------------------- |
+| Desktop        | rest         | 59.9             | 16.7 ms | 0       | 796 / 2.9 ms  | 817 / 3.2 ms       | 824 / 3.1 ms  | +0.9 %                      | +3.6 %               |
+| Desktop        | climb        | 59.9             | 16.7 ms | 0       | 665 / 3.7 ms  | 673 / 3.9 ms       | 674 / 4.3 ms  | +0.1 %                      | +1.4 %               |
+| Desktop        | interactions | 59.9             | 16.7 ms | 0       | 695 / 2.4 ms  | 722 / 2.7 ms       | 726 / 2.8 ms  | +0.5 %                      | +4.5 %               |
+| Mobile (emul.) | rest         | 59.9             | 16.7 ms | 0       | 1366 / 0.9 ms | 1437 / 0.8 ms      | 1440 / 0.8 ms | +0.2 %                      | +5.4 %               |
+| Mobile (emul.) | climb        | 59.9             | 16.7 ms | 0       | 1036 / 1.3 ms | 1087 / 1.2 ms      | 1090 / 1.2 ms | +0.3 %                      | +5.2 %               |
+| Mobile (emul.) | interactions | 59.9             | 16.7 ms | 0       | 996 / 1.4 ms  | 1141 / 1.1 ms      | 1063 / 1.2 ms | -6.9 %                      | +6.6 %               |
+
+Worst uncapped change against the base measured in the same session: -6.9 % (limit −10 %).
+The comparison that counts is the same-session one: the S1 baseline ran on a busier machine.
+
+An intermediate state did break the limit and was corrected. With `e60ebab` to `957e576` the
+emulated phone lost 17 to 36 % across the three sequences (`final/ab-head-1` against
+`final/ab-base-1`), because both critters now stay in view on the narrow frame, where the old ones were culled much of the
+time. `b76c396` halves their draw calls and cheapens their limbs; three quick alternating runs
+then gave 1354 fps for 1442 at rest and 1120 for 1122 in the interactions.
+
+Load, production build, medians of 5 (before → after):
+
+| Case               | Loader gone    | load event   | Requests | Transferred   |
+| ------------------ | -------------- | ------------ | -------- | ------------- |
+| Desktop, cold      | 1735 → 1574 ms | 798 → 611 ms | 19 → 16  | 1424 → 715 kB |
+| Desktop, warm      | 1527 → 1527 ms | 588 → 554 ms | 17 → 15  | 3 → 2 kB      |
+| Mobile emul., cold | 1845 → 1506 ms | 907 → 531 ms | 18 → 15  | 1424 → 715 kB |
+| Mobile emul., warm | 1445 → 1461 ms | 433 → 461 ms | 17 → 15  | 3 → 2 kB      |
+
+Images 1106 → 398 kB (the Konteur), script 195 → 195 kB gzip. The final runs
+block the site's analytics script (`cloud.umami.is`), which accounts for the request counts
+differing by more than the favicon.
+
+`renderer.info` (before → after):
+
+| View                 | Draw calls | Triangles         | Geometries | Textures | Programs |
+| -------------------- | ---------- | ----------------- | ---------- | -------- | -------- |
+| Desktop t = 0        | 322 → 284  | 262 550 → 266 537 | 106 → 118  | 25 → 25  | 29 → 31  |
+| Desktop t = 0.54     | 244 → 249  | 230 928 → 258 578 | 140 → 149  | 28 → 28  | 29 → 31  |
+| Desktop t = 1        | 212 → 176  | 231 899 → 210 201 | 180 → 189  | 28 → 28  | 29 → 31  |
+| Mobile lite t = 0    | 186 → 158  | 184 204 → 190 692 | 79 → 91    | 15 → 16  | 28 → 30  |
+| Mobile lite t = 0.54 | 122 → 126  | 148 937 → 150 021 | 105 → 117  | 19 → 19  | 29 → 31  |
+
+Two more programs: the critters' vertex-coloured skin and their eyes.
+
+**Phone: not verified.** Every mobile figure is the lite mode emulated on the laptop's GPU.
+The "≥ 30 FPS on an average mobile" target has no evidence either way.
+
+### 11.4 Legibility
+
+Contrast of each text against the pixels really behind it (text made transparent, darkest pixel
+of its box; `evidence/tools/contrast.py`):
+
+| Viewport | Weakest text          | Its ratio | Title ratio | All at or over their minimum |
+| -------- | --------------------- | --------- | ----------- | ---------------------------- |
+| desktop  | .tree-intro-kicker    | 5.2       | 8.67        | yes                          |
+| laptop   | .tree-intro-hint span | 5.14      | 9.8         | yes                          |
+| mobile   | .tree-intro-kicker    | 6.3       | 12.34       | yes                          |
+| tablet   | .tree-intro-hint span | 6.21      | 12.35       | yes                          |
+| w800     | .tree-intro-kicker    | 4.68      | 8.03        | yes                          |
+
+Minimum 4.5:1, 3:1 for the display sizes (title, motto, gloss). Before `eaf3f09` the hint
+measured 4.25 at 1440×900, 2.94 at 1024×768 and 1.75 at 800×600. The baseline was not measured
+with this tool (it needs the dev server of the commit under test).
+
+### 11.5 Techniques present and their coherence (AC7)
+
+- Photograph: the Konteur, unchanged but for its file format.
+- Painted cards: the crown and the plants, unchanged but for the gusts.
+- Procedural solids: bark, ground, ridges, cards, and the two critters. The critters were the
+  ones out of key (smooth plastic spheres). They are now matte, painted per vertex (belly, inner
+  ear, tips, a darker underside) with a warm edge light: closer to the painted foliage, still
+  clearly modelled. They remain a third technique beside the photograph and the painted cards;
+  the gap is narrower, not closed.
+- Does not apply: there is no 2D character sprite, no outline pass, no post-processing, no grain
+  in the 3D scene (the shell's CSS grain and vignette are unchanged).
+
+### 11.6 Viewing notes on the videos
+
+The videos are frame-stepped (S1 §1) and were read as frame sequences: contact sheets at 10 to
+15 frames per second for the ×1 files, and the ×0.25 copies (`*-x0.25.mp4`) exist for a human
+viewer. Nobody watched them play in real time in this session.
+
+- `final/video-follow-lapen.mp4`: each hop shows the gather, the legs tucking, the ears thrown
+  back then late on landing; no frame with the feet apart from the body; he stays put between
+  hops. The jump for joy (18 s) has its crouch, raised arms and a squash on landing. He still
+  passes close in front of Zanba at times, and grass tufts hide him when he stands in them.
+- `final/video-follow-zanba.mp4`: four beats, the stance feet hold their ground through the
+  frames read, turns are walked. The trunk hangs and swings as one piece and rises as one piece
+  when touched (18 s); ears fan late on turns. A faint paler oval shows on his rump from behind
+  at some angles.
+- `final/video-characters-rest-desktop.mp4`: both critters stay inside the frame and in front of
+  the plants for the 45 s. At 15 s the pointer aimed at Lapen lands on the Konteur, whom Lapen is
+  passing close by: the Konteur's bubble opens instead of Lapen's. Zanba's bubble (28 s) and the
+  Konteur's open clear of the title.
+- `final/video-tree-climb-*.mp4`: the opening eases into the spiral with no jump. Beyond the
+  opening the camera is the baseline's (unit test `treeCam` = `hubCam` from t = 0.14); the
+  captures at t = 0.54 and 1 differ from the baseline's by 0.6 to 1.7 % of their pixels at 8 %
+  fuzz, which is the critters and the gusts.
+- Not judged from frames: whether the motion feels right at speed. That is for the owner.
+
+### 11.7 Limits left
+
+- 844×390 (landscape phone): the title sits on the right edge of the crown and the shelf hides
+  the group's feet (`final/sweep-phone-landscape.png`).
+- 360×640: the crown's top is still under the band's fade (`final/sweep-small.png`).
+- 800×600: the column touches the crown's right edge.
+- Critters are out of view from the far side of the climb (S1 R3), by design of the stage.
+- The opening frame differs from the one the owner validated on 2026-11-09 (S1 R2).
+- `favicon.ico` 404: on the base already, not addressed (no favicon exists to add).
+- Docs under `doc/` do not yet describe the opening shots or the new critters.

@@ -39,6 +39,17 @@ VIEWPORTS: dict[str, dict[str, Any]] = {
     "tall": {"viewport": {"width": 430, "height": 932}, "device_scale_factor": 3,
              "is_mobile": True, "has_touch": True},
 }
+# Extra sizes of the layout sweep (desktop pointer unless stated).
+SWEEP: dict[str, dict[str, Any]] = {
+    "w1920": {"viewport": {"width": 1920, "height": 1080}, "device_scale_factor": 1},
+    "w1280": {"viewport": {"width": 1280, "height": 720}, "device_scale_factor": 1},
+    "w1100x1000": {"viewport": {"width": 1100, "height": 1000}, "device_scale_factor": 1},
+    "w900sq": {"viewport": {"width": 900, "height": 900}, "device_scale_factor": 1},
+    "w800": {"viewport": {"width": 800, "height": 600}, "device_scale_factor": 1},
+    "phone-landscape": {"viewport": {"width": 844, "height": 390}, "device_scale_factor": 3,
+                        "is_mobile": True, "has_touch": True},
+}
+VIEWPORTS.update(SWEEP)
 
 # Grabs the live scene, camera and renderer without touching the app: three's module instance is
 # the one Vite serves to the app, so patching its prototypes reaches the app's own objects.
@@ -127,6 +138,7 @@ def open_home(
         opts["record_video_dir"] = str(video_dir)
         opts["record_video_size"] = opts["viewport"]
     ctx = browser.new_context(**opts)
+    quiet(ctx)
     page = ctx.new_page()
     if logs is not None:
         page.on("console", lambda m: logs.append({"type": m.type, "text": m.text})
@@ -153,6 +165,11 @@ def open_home(
     if "NVIDIA" not in renderer:
         raise RuntimeError(f"not on the NVIDIA GPU: {renderer}")
     return ctx, page
+
+
+def quiet(ctx: BrowserContext) -> None:
+    """Keeps QA runs out of the site's analytics: its script is answered locally with nothing."""
+    ctx.route("**/cloud.umami.is/**", lambda route: route.fulfill(status=204, body=""))
 
 
 def wait(page: Page, ms: int, fake_clock: bool) -> None:

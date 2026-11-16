@@ -69,6 +69,8 @@ def load_once(browser: Browser, vp: str, warm: bool) -> dict[str, Any]:
     page.add_init_script(f"({LOADER_PROBE})()")
     cdp = ctx.new_cdp_session(page)
     cdp.send("Network.enable")
+    # The site's analytics stay out of QA runs; blocked here, not routed, so the HTTP cache works.
+    cdp.send("Network.setBlockedURLs", {"urls": ["*cloud.umami.is*"]})
     requests: dict[str, dict[str, Any]] = {}
     failures: list[str] = []
     cdp.on("Network.responseReceived", lambda e: requests.setdefault(e["requestId"], {}).update(
@@ -170,10 +172,14 @@ def sequence(page: Page, name: str, seconds: float) -> list[float]:
 def fps(pw: Any, record: dict[str, Any]) -> None:
     """The three sequences per viewport, display-capped then uncapped."""
     out: dict[str, Any] = {}
+    modes = os.environ.get("FPS_MODES", "capped,uncapped").split(",")
     for uncapped in (False, True):
+        if ("uncapped" if uncapped else "capped") not in modes:
+            continue
         browser = hvp.launch(pw, uncapped=uncapped)
-        for vp in ("desktop", "mobile"):
+        for vp in os.environ.get("FPS_VPS", "desktop,mobile").split(","):
             ctx = browser.new_context(**hvp.VIEWPORTS[vp])
+            hvp.quiet(ctx)
             page = ctx.new_page()
             page.goto(hvp.SITE, wait_until="load")
             page.wait_for_function(
@@ -182,7 +188,7 @@ def fps(pw: Any, record: dict[str, Any]) -> None:
             if "NVIDIA" not in renderer:
                 raise RuntimeError(f"not on the NVIDIA GPU: {renderer}")
             page.wait_for_timeout(5000)
-            for name in ("rest", "climb", "interactions"):
+            for name in os.environ.get("FPS_SEQS", "rest,climb,interactions").split(","):
                 deltas = sequence(page, name, SEQ_SECONDS)
                 key = f'{vp}-{"uncapped" if uncapped else "capped"}-{name}'
                 out[key] = summarize(deltas)
