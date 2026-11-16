@@ -220,16 +220,18 @@ export function createZanba(): CritterView {
   });
   const probe = new THREE.Vector3();
   const tilt = new THREE.Euler(0, 0, 0, "YXZ");
+  const turned = new THREE.Quaternion();
   /** Whether an ear fanned back by `fan` and lifted by `lift` keeps its blade out of the body. */
   const earClear = (side: number, fan: number, lift: number): boolean => {
-    tilt.set(0, side * fan, side * lift);
+    // One rotation for all the probes: this runs dozens of times a frame.
+    turned.setFromEuler(tilt.set(0, side * fan, side * lift));
     const pivot = ears[side < 0 ? 0 : 1].pivot.position;
     const reach = (1 + EAR_CLEAR) * (1 + EAR_CLEAR);
     for (const q of EAR_PROBES) {
       // Ear frame (mirrored on the left) → hinge → head → body, then into the barrel's own ball.
       probe
         .set(q.x * side, q.y, q.z)
-        .applyEuler(tilt)
+        .applyQuaternion(turned)
         .add(pivot);
       // Inside the head it is hidden, and no concern of the body's.
       if ((probe.x / 0.58) ** 2 + (probe.y / 0.55) ** 2 + (probe.z / 0.52) ** 2 < 1) continue;
@@ -482,8 +484,11 @@ export function createZanba(): CritterView {
           ear.fan.v = Math.min(0, ear.fan.v);
         }
         // The lift for where the ear really is, eased, and never under what clearance asks.
-        const found = earLift(ear.side, fan);
-        const need = found < 0 ? EAR_LIFT : found;
+        let need = earAt.lift;
+        if (fan !== earAt.fan) {
+          const found = earLift(ear.side, fan);
+          need = found < 0 ? EAR_LIFT : found;
+        }
         const lift = Math.max(need, springTo(ear.lift, need, 60, 12, dt));
         ear.lift.x = lift;
         ear.pivot.rotation.set(0, ear.side * fan, ear.side * lift, "YXZ");
