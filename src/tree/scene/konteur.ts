@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { clamp, lerp } from "@shared/math";
 import { softSprite } from "@shared/three/soft-sprite";
-import konteurUrl from "../assets/konteur.png";
+// Lossy WebP derivative (quality 88, alpha kept exact) of assets/konteur.png, the kept original.
+import konteurUrl from "../assets/konteur.webp";
 import { blobShadow } from "./critters/parts";
 import type { Obstacle } from "./critters/wander";
 import { groundHeight } from "./ground";
