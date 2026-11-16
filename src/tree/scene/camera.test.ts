@@ -6,13 +6,12 @@ import {
   OPENING_END,
   cardT,
   clearances,
-  climbDrop,
+  climbPitch,
   hubCam,
   konteurSpot,
   lensShift,
   openingShot,
   openingStage,
-  shiftLens,
   shortness,
   treeCam,
 } from "./camera";
@@ -78,9 +77,30 @@ describe("treeCam", () => {
       for (const [aspect, height] of SCREENS) {
         const shot = at(t, aspect, height);
         expect(shot.cam.distanceTo(cam)).toBeCloseTo(0, 9);
-        // It may look lower than the spiral does, never elsewhere.
-        expect(shot.look.y).toBeLessThanOrEqual(look.y + 1e-9);
-        expect(shot.look.y).toBeCloseTo(look.y - climbDrop(t, aspect, height), 9);
+        expect(Math.hypot(shot.look.x, shot.look.z)).toBe(0);
+      }
+    }
+  });
+
+  it("settles without a rebound: pitch, height, distance and lens only ever go one way", () => {
+    for (const [aspect, height] of SCREENS) {
+      let last = { pitch: Infinity, y: -Infinity, reach: Infinity, shift: -Infinity };
+      for (let t = 0; t <= 1.0001; t += 0.002) {
+        const { cam, look } = at(t, aspect, height);
+        const reach = Math.hypot(cam.x, cam.z);
+        const now = {
+          pitch: Math.atan2(look.y - cam.y, reach),
+          y: cam.y,
+          reach,
+          shift: -Math.abs(lensShift(t, aspect, height)),
+        };
+        const where = `t ${t.toFixed(3)} at ${aspect.toFixed(2)}`;
+        expect(now.pitch, where).toBeLessThanOrEqual(last.pitch + 1e-6);
+        expect(now.pitch).toBeCloseTo(climbPitch(t, aspect, height), 6);
+        expect(now.y, where).toBeGreaterThanOrEqual(last.y);
+        expect(now.reach, where).toBeLessThanOrEqual(last.reach + 1e-9);
+        expect(now.shift, where).toBeGreaterThanOrEqual(last.shift - 1e-12);
+        last = now;
       }
     }
   });
@@ -115,36 +135,37 @@ describe("treeCam", () => {
     }
   });
 
-  it("keeps the Konteur's feet above the shelf for as long as the climb shows him", () => {
+  it("never shows the Konteur lower on screen than the plain spiral would", () => {
     const camera = new THREE.PerspectiveCamera();
     const feet = new THREE.Vector3();
+    const plain = { cam: new THREE.Vector3(), look: new THREE.Vector3() };
     for (const [aspect, height] of SCREENS) {
       camera.aspect = aspect;
       camera.fov = fitFov(50, aspect);
-      const shelfTop = 1 - (66 + Math.min(26, Math.max(12, height * 0.03))) / height;
+      camera.updateProjectionMatrix();
       const [x, z] = konteurSpot(aspect);
-      for (let t = 0; t <= 1.0001; t += 0.01) {
-        const { cam, look } = at(t, aspect, height);
+      const heightOf = (cam: THREE.Vector3, look: THREE.Vector3): number => {
         camera.position.copy(cam);
         camera.lookAt(look);
         camera.updateMatrixWorld();
-        camera.updateProjectionMatrix();
-        shiftLens(camera, lensShift(t, aspect, height));
-        feet.set(x, groundHeight(x, z), z).project(camera);
-        if (feet.z > 1 || Math.abs(feet.x) > 1) continue;
-        expect((1 - feet.y) / 2, `t ${t.toFixed(2)} at ${aspect.toFixed(2)}`).toBeLessThan(
-          shelfTop,
-        );
+        return (1 - feet.set(x, groundHeight(x, z), z).project(camera).y) / 2;
+      };
+      for (let t = OPENING_END; t <= 1.0001; t += 0.01) {
+        const { cam, look } = at(t, aspect, height);
+        hubCam(t, plain.cam, plain.look);
+        // Within what the sampling of the pitch over t leaves (a fifth of a percent of the height).
+        expect(heightOf(cam, look)).toBeLessThanOrEqual(heightOf(plain.cam, plain.look) + 0.002);
       }
     }
   });
 
-  it("tilts smoothly, and not at all at the opening", () => {
+  it("opens at the opening's own pitch and tilts smoothly from there", () => {
     for (const [aspect, height] of SCREENS) {
-      expect(climbDrop(0, aspect, height)).toBe(0);
+      const shot = openingShot(aspect, height);
+      expect(at(0, aspect, height).look.y).toBeCloseTo(3.5 + shot.lookLift, 3);
       for (let t = 0; t < 1; t += 0.002) {
-        const step = Math.abs(climbDrop(t + 0.002, aspect, height) - climbDrop(t, aspect, height));
-        expect(step).toBeLessThan(0.2);
+        const step = climbPitch(t, aspect, height) - climbPitch(t + 0.002, aspect, height);
+        expect(step).toBeLessThan(0.012);
       }
     }
   });

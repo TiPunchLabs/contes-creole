@@ -254,35 +254,43 @@ export function lensShift(t: number, aspect: number, height = 900): number {
   return openingShot(aspect, height).shift * (1 - clamp(t, 0, 1));
 }
 
-const DROP_STEPS = 64;
+const TILT_STEPS = 64;
 /** Half-width of the Konteur's photo and lantern, in metres. */
 const KONTEUR_HALF = 0.9;
-let dropped: { aspect: number; height: number; table: Float32Array } | null = null;
+let tilted: { aspect: number; height: number; table: Float64Array } | null = null;
 
 /**
- * How far the look-at point is lowered along the climb, sampled over t: at each step, what it
- * takes for the Konteur's feet to stay above the shelf while he is in the frame. The camera rises
- * and the ground sinks towards the shelf; looking a little lower keeps him whole until he leaves
- * by the side, as far as the card of that part of the climb leaves room at the top of the screen.
- * Widened and smoothed over t so the tilt never starts or stops short.
+ * The camera's pitch along the climb (radians, up positive), sampled over t. The camera rises and
+ * the ground sinks towards the shelf; looking lower keeps the Konteur's feet above it while he is
+ * in the frame. The pitch only ever goes down as the climb goes up: whatever stretch of the climb
+ * the visitor travels, either way, the view tilts one way and settles, with no coming back. So
+ * once lowered for the Konteur it stays lowered, and it is never lowered further than the cards
+ * still to come leave room for at the top of the screen. It starts at the opening's own pitch.
  */
-function dropTable(aspect: number, height: number): Float32Array {
-  if (dropped && dropped.aspect === aspect && dropped.height === height) return dropped.table;
+function pitchTable(aspect: number, height: number): Float64Array {
+  if (tilted && tilted.aspect === aspect && tilted.height === height) return tilted.table;
   const tanHalf = Math.tan((fitFov(50, aspect) * Math.PI) / 360);
   const line = 1 - clearances(aspect, height).bottom;
   const [kx, kz] = konteurSpot(aspect);
   const feet: [number, number, number] = [kx, groundHeight(kx, kz), kz];
   const pos = spot();
   const look = spot();
-  const need = new Float32Array(DROP_STEPS + 1);
-  const room = new Float32Array(DROP_STEPS + 1);
-  for (let i = 0; i <= DROP_STEPS; i++) {
-    const t = i / DROP_STEPS;
+  /** The pitch wanted at each step, and the lowest the card of that step allows. */
+  const wanted = new Float64Array(TILT_STEPS + 1);
+  const lowest = new Float64Array(TILT_STEPS + 1);
+  /** The pitch of the camera left to itself, never backing up. */
+  const plain = new Float64Array(TILT_STEPS + 1);
+  for (let i = 0; i <= TILT_STEPS; i++) {
+    const t = i / TILT_STEPS;
     stagedCam(t, aspect, pos, look, height);
     const cam: [number, number, number] = [pos.x, pos.y, pos.z];
+    const reach = Math.hypot(pos.x, pos.z);
+    const pitchOf = (drop: number): number => Math.atan2(look.y - drop - pos.y, reach);
+    lowest[i] = pitchOf(cardRoom(t, cam, look.y, tanHalf, aspect));
+    wanted[i] = pitchOf(0);
+    plain[i] = i ? Math.min(plain[i - 1], wanted[i]) : wanted[i];
     const at = (drop: number): { x: number; y: number; depth: number } =>
       screenPoint(feet, cam, [0, look.y - drop, 0], tanHalf, aspect);
-    room[i] = cardRoom(t, cam, look.y, tanHalf, aspect);
     const now = at(0);
     const half = KONTEUR_HALF / (now.depth * tanHalf * aspect);
     const inFrame = now.depth > 0 && Math.abs(now.x + lensShift(t, aspect, height)) < 1 + half;
@@ -294,26 +302,25 @@ function dropTable(aspect: number, height: number): Float32Array {
       if (at(mid).y <= line) hi = mid;
       else lo = mid;
     }
-    need[i] = hi;
+    wanted[i] = pitchOf(hi);
   }
-  const reach = 3;
-  const wide = need.map((_, i) => {
-    let most = 0;
-    let free = DROP_MAX;
-    for (let k = -reach; k <= reach; k++) {
-      most = Math.max(most, need[clamp(i + k, 0, DROP_STEPS)]);
-      // The least room around, so the smoothing below cannot spend more than a card leaves.
-      free = Math.min(free, room[clamp(i + k, 0, DROP_STEPS)]);
-    }
-    return Math.min(most, free);
-  });
-  const table = wide.map((_, i) => {
+  // Never back up: the lowest pitch wanted so far, but no lower than any card ahead allows.
+  const floor = new Float64Array(TILT_STEPS + 1);
+  for (let i = TILT_STEPS, most = -Infinity; i >= 0; i--)
+    floor[i] = most = Math.max(most, lowest[i]);
+  const steady = new Float64Array(TILT_STEPS + 1);
+  for (let i = 0, least = Infinity; i <= TILT_STEPS; i++) {
+    least = Math.min(least, wanted[i]);
+    steady[i] = Math.max(least, floor[i]);
+  }
+  // Smoothed (an average of a falling series still falls), then held between its two bounds,
+  // which fall too; the opening keeps its own pitch.
+  const table = steady.map((_, i) => {
     let sum = 0;
-    for (let k = -reach; k <= reach; k++) sum += wide[clamp(i + k, 0, DROP_STEPS)];
-    // The opening is solved on its own: the tilt comes in as the climb starts.
-    return (sum / (2 * reach + 1)) * smoothstep(clamp(i / DROP_STEPS / 0.06, 0, 1));
+    for (let k = -2; k <= 2; k++) sum += steady[clamp(i + k, 0, TILT_STEPS)];
+    return i === 0 ? steady[0] : clamp(sum / 5, Math.min(floor[i], plain[i]), plain[i]);
   });
-  dropped = { aspect, height, table };
+  tilted = { aspect, height, table };
   return table;
 }
 
@@ -361,23 +368,23 @@ function cardRoom(
   return lo;
 }
 
-/** Metres the look-at point is lowered at climb value `t` (see `dropTable`). */
-export function climbDrop(t: number, aspect: number, height = 900): number {
-  const table = dropTable(aspect, height);
-  const at = clamp(t, 0, 1) * DROP_STEPS;
-  const i = Math.min(DROP_STEPS - 1, Math.floor(at));
+/** The camera's pitch at climb value `t`, in radians (see `pitchTable`). */
+export function climbPitch(t: number, aspect: number, height = 900): number {
+  const table = pitchTable(aspect, height);
+  const at = clamp(t, 0, 1) * TILT_STEPS;
+  const i = Math.min(TILT_STEPS - 1, Math.floor(at));
   return lerp(table[i], table[i + 1], at - i);
 }
 
 /**
  * The camera of the tree: the opening composition at the foot of the climb, easing into the
  * spiral, whose path it follows exactly from `OPENING_END` on. It always looks at the trunk axis,
- * so the scene turns about the trunk; along the climb it looks lower by `climbDrop`. Same outputs
- * as `hubCam`. `height` is the screen's, in CSS px.
+ * so the scene turns about the trunk, at the pitch of `climbPitch`. Same outputs as `hubCam`.
+ * `height` is the screen's, in CSS px.
  */
 export function treeCam(t: number, aspect: number, out: Spot, look: Spot, height = 900): number {
   const a = stagedCam(t, aspect, out, look, height);
-  look.y -= climbDrop(t, aspect, height);
+  look.y = out.y + Math.tan(climbPitch(t, aspect, height)) * Math.hypot(out.x, out.z);
   return a;
 }
 
