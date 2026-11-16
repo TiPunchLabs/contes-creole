@@ -48,6 +48,15 @@ SWEEP: dict[str, dict[str, Any]] = {
     "w800": {"viewport": {"width": 800, "height": 600}, "device_scale_factor": 1},
     "phone-landscape": {"viewport": {"width": 844, "height": 390}, "device_scale_factor": 3,
                         "is_mobile": True, "has_touch": True},
+    "phone-landscape-l": {"viewport": {"width": 932, "height": 430}, "device_scale_factor": 3,
+                          "is_mobile": True, "has_touch": True},
+    "phone-landscape-s": {"viewport": {"width": 667, "height": 375}, "device_scale_factor": 2,
+                          "is_mobile": True, "has_touch": True},
+    "w1200x1000": {"viewport": {"width": 1200, "height": 1000}, "device_scale_factor": 1},
+    "w1201x1000": {"viewport": {"width": 1201, "height": 1000}, "device_scale_factor": 1},
+    "w1250x1000": {"viewport": {"width": 1250, "height": 1000}, "device_scale_factor": 1},
+    "w1280x1024": {"viewport": {"width": 1280, "height": 1024}, "device_scale_factor": 1},
+    "w1024x540": {"viewport": {"width": 1024, "height": 540}, "device_scale_factor": 1},
 }
 VIEWPORTS.update(SWEEP)
 
@@ -86,7 +95,10 @@ BOXES_JS = """
   const size = renderer.getSize(new T.Vector2());
   const out = {};
   const boxOf = (o) => {
-    const b = new T.Box3().setFromObject(o), v = new T.Vector3();
+    // The body only: the contact shadow (a transparent plane) is left out of the box.
+    const b = new T.Box3(), v = new T.Vector3();
+    o.updateWorldMatrix(true, true);
+    o.traverse((n) => { if (n.isMesh && !n.material.transparent) b.union(new T.Box3().setFromObject(n)); });
     let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, behind = false;
     for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) {
       v.set(x, y, z).project(camera);

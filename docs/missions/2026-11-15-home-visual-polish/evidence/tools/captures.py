@@ -58,7 +58,7 @@ ORBIT_JS = """([who, bearing, dist, height, lookUp, flat]) => {
 
 def climb_to(page: Page, t: float) -> None:
     """Scrolls the climb to `t` with wheel events (0.00055 per pixel) and lets the camera settle."""
-    page.mouse.move(720 if page.viewport_size["width"] > 900 else 195, 300)
+    page.mouse.move(page.viewport_size["width"] / 2, page.viewport_size["height"] * 0.35)
     left = t / 0.00055
     while left > 0.5:
         step = min(120.0, left)
@@ -81,7 +81,7 @@ def views(browser: Browser, record: dict[str, Any]) -> None:
             continue
         logs: list[dict[str, Any]] = []
         ctx, page = hvp.open_home(browser, vp, logs=logs)
-        for seconds in (2, 12, 30) if vp in ("desktop", "mobile") else (2,):
+        for seconds in (2, 12, 30) if vp in ("desktop", "mobile", "phone-landscape") else (2,):
             page.clock.run_for({2: 2000, 12: 10000, 30: 18000}[seconds])
             path = OUT / f"view-{vp}-rest-{seconds:02d}s.png"
             page.screenshot(path=str(path))
@@ -168,7 +168,7 @@ def sweep(browser: Browser, record: dict[str, Any]) -> None:
         boxes = page.evaluate(hvp.BOXES_JS)
         dom = page.evaluate("""() => { const r = (s) => { const e = document.querySelector(s); if (!e) return null;
             const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; };
-          return { intro: r('.tree-intro-inner'), shelf: r('.tree-shelf'), teller: r('.tree-teller'),
+          return { intro: r('.tree-intro-inner'), shelf: r('.tree-shelf'), teller: r('.tree-teller'), climb: r('.tree-climb'),
                    overflow: document.documentElement.scrollWidth > innerWidth }; }""")
         record.setdefault("sweep", {})[vp] = {"viewport": size, "dom": dom, "critters": {
             k: {"x": round(v["x"]), "y": round(v["y"]), "w": round(v["w"]), "h": round(v["h"])} for k, v in boxes.items()}}
@@ -180,16 +180,16 @@ def encode(frames: Path, target: Path, fps: int = 30) -> None:
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(fps), "-i",
                     str(frames / "%05d.jpg"), "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2", "-c:v", "libx264",
                     "-pix_fmt", "yuv420p", "-crf", "18", str(target)], check=True)
-    for f in frames.glob("*.jpg"):
-        f.unlink()
-    frames.rmdir()
+    # Generated frames go to the trash, never rm.
+    subprocess.run(["trash", str(frames)], check=True)
 
 
 def videos(browser: Browser, record: dict[str, Any]) -> None:
     """Frame-stepped videos (every other 16 ms frame, played at 30 fps = near real time)."""
     step_ms, per_second = 32, 31.25
     kinds = os.environ.get("VIDEO_KINDS", "tree,rest,follow").split(",")
-    for vp in ("desktop", "mobile"):
+    video_vps = os.environ.get("VIDEO_VPS", "desktop,mobile").split(",")
+    for vp in video_vps:
         if "tree" not in kinds:
             break
         # Tree: 6 s at rest, the climb up in 12 s, 3 s at the top, down in 9 s.
@@ -209,7 +209,7 @@ def videos(browser: Browser, record: dict[str, Any]) -> None:
             page.screenshot(path=str(frames / f"{i:05d}.jpg"), type="jpeg", quality=88)
         ctx.close()
         encode(frames, OUT / f"video-tree-climb-{vp}.mp4")
-    for vp in ("desktop", "mobile"):
+    for vp in video_vps:
         if "rest" not in kinds:
             break
         # Characters in the app's own framing: 45 s at rest, each critter hovered once.

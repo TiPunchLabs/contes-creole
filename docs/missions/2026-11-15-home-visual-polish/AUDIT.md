@@ -470,3 +470,157 @@ viewer. Nobody watched them play in real time in this session.
 - The opening frame differs from the one the owner validated on 2026-11-09 (S1 R2).
 - `favicon.ico` 404: on the base already, not addressed (no favicon exists to add).
 - Docs under `doc/` do not yet describe the opening shots or the new critters.
+
+## 12. Correction cycle 1 (after Codex review 1; appended, sections 1 to 11 unchanged)
+
+Review: `review-1.md`, CHANGES_REQUESTED on `996f0e1`. Product HEAD after the cycle: `3143928`.
+Media of the cycle: `cycle1/` (trials `t1` to `t14`, final state `cycle1/final/`, boards in
+`cycle1/final/boards/`); manifest `evidence/c1-media-manifest.tsv`. Where sections 11.3, 11.6 and
+11.7 gave figures or limits for `bc06474`, the ones below replace them for `3143928`.
+
+### 12.1 F1 and F2 — the opening shot is solved, not picked (`c5f4bff`)
+
+The review found the group hidden by the shelf at 844×390 (F1) and a 6.5 m camera jump across
+aspect 1.2 (F2). A check written for the cycle (`evidence/tools/layout_check.py`: each figure
+whole on screen, clear of the shelf and of the intro text) showed F1 was wider than reported: on
+`bc06474` the Konteur or Lapen were partly under the shelf at 1024×768, 1280×720, 800×600,
+1024×540 and from 1200×1000 to 1280×1024 as well, and Zanba touched the right edge at 430×932.
+
+Both come from choosing a camera per layout by hand. The fix removes the choice: sideways
+placement stays keyed on the aspect, and distance and tilt are solved for the screen so that the
+Konteur's feet rest just above the shelf and the whole crown sits below what the intro needs (the
+band up to aspect 1.2, then less and less as the column widens, so both layouts ask the same at
+their limit). The critters' stage no longer lets them stand nearer the camera than the Konteur.
+
+Evidence on `3143928`:
+
+- Unit tests (`camera.test.ts`): the camera moves less than 12 cm per CSS pixel of width from 400
+  to 2400 px in both directions, less than 30 cm per pixel of height from 1100 to 340 px, and the
+  feet and crown clearances hold on 18 sizes.
+- Live resize of one open page, both directions (`evidence/c1-final-resize.json`,
+  `cycle1/final/checks/board-resize-*.jpg`):
+
+| Sweep                                                 | Steps | Largest camera move per step | Move at the layout switch | Figures cut, under the shelf or under the intro |
+| ----------------------------------------------------- | ----- | ---------------------------- | ------------------------- | ----------------------------------------------- |
+| width at 1000 px high (10 px a step, there and back)  | 81    | 0.259 m                      | 0.13 m, 0.13 m            | 0 step(s)                                       |
+| height at 1280 px wide (20 px a step, there and back) | 45    | 0.347 m                      | no switch in this sweep   | 0 step(s)                                       |
+
+- Layout check on the 17 sizes of the sweep (`evidence/c1-final-layout.txt`):
+  0 fault(s). Sizes: 1024×768, 768×1024, 360×640, 430×932, 1920×1080, 1280×720,
+  1100×1000, 900×900, 800×600, 844×390, 932×430, 667×375, 1200×1000, 1201×1000, 1250×1000,
+  1280×1024, 1024×540.
+- Short landscape phones: opening at 2, 12 and 30 s, climb at t = 0.1, 0.2, 0.54 and 1, and
+  45 s of motion at 844×390; opening and climb at 932×430
+  (`cycle1/final/boards/final-phone-landscape.jpg`,
+  `cycle1/final/video-characters-rest-phone-landscape.mp4`,
+  `cycle1/final/video-tree-climb-phone-landscape.mp4`). Over 75 s at 844×390 Lapen is whole and
+  clear of the shelf 100.0 % of the frames and Zanba 100.0 %
+  (`evidence/c1-final-motion-phone-landscape.json`).
+
+What it costs: the tree is smaller wherever the shelf and the intro leave it less room (most of
+all on a phone on its side), and on desktop the camera stands further back than in section 11,
+so the Konteur and the critters are a little smaller there.
+
+### 12.2 F3 — motion read frame by frame, and what that found (`1868a5c`)
+
+The review is right that contact sheets could not carry AC2 and AC3. Two things were done.
+
+First, every frame of 75 s was read from the live scene, not from a video
+(`evidence/tools/motion.py`: fake clock, 16 ms frames, one touch per critter). On `bc06474` that
+reading found defects the sheets had missed:
+
+- Zanba's planted feet drifted 8 cm per stance (median) and up to 63 cm when he turned on the
+  spot or settled after a stop.
+- Both could snap round: up to 16° in one frame for Lapen, 4° for Zanba.
+- Reaching the other critter's space stopped a walk dead (0.62 m/s to 0 in one frame), which
+  also cut Lapen's hop height in mid-air.
+
+`1868a5c` fixes them: a planted foot goes back under the body by the ground its own hip covers,
+turns included; a swinging foot is lifted at any pace; Zanba turns only as he walks, in arcs of
+2 m at least, picks places ahead of him and drops one he would circle; headings change at a
+bounded rate; a walk slows down ahead of the other critter; a hop keeps its height.
+
+Per-frame figures on `3143928` (`evidence/c1-final-motion-*.json`, 4 687 frames each):
+
+| Measure                                              | Desktop 1440×900 | Phone 390×844 (emul.) | Phone on its side 844×390 (emul.) |
+| ---------------------------------------------------- | ---------------- | --------------------- | --------------------------------- |
+| Lapen: travel while on the ground, largest per frame | 0.0 m            | 0.0 m                 | 0.0 m                             |
+| Lapen: hops in 75 s                                  | 24               | 53                    | 23                                |
+| Lapen: sharpest turn in one frame                    | 5.04°            | 5.04°                 | 5.04°                             |
+| Lapen: rests between bouts (s)                       | 2.3 to 20.3      | 1.2 to 8.7            | 3.2 to 21.6                       |
+| Zanba: stances read                                  | 42               | 4                     | 42                                |
+| Zanba: planted-foot drift per stance, median         | 0.008 m          | 0.0 m                 | 0.008 m                           |
+| Zanba: planted-foot drift per stance, largest        | 0.019 m          | 0.002 m               | 0.019 m                           |
+| Zanba: stances drifting over 5 cm                    | 0.0 %            | 0.0 %                 | 0.0 %                             |
+| Zanba: sharpest turn in one frame                    | 0.22°            | 0.01°                 | 0.22°                             |
+| Zanba: largest speed change in one frame             | 0.0179 m/s       | 0.0134 m/s            | 0.0179 m/s                        |
+| Closest the two come (they would touch at 2.05 m)    | 2.62 m           | 2.55 m                | 2.62 m                            |
+| Lapen whole and clear of the shelf                   | 100.0 %          | 100.0 %               | 100.0 %                           |
+| Zanba whole and clear of the shelf                   | 100.0 %          | 100.0 %               | 100.0 %                           |
+
+Second, the videos were read as frame sequences by the executor, an AI agent. This is not a
+person watching playback: **human playback at ×1 and ×0.25 is not verified.** What was read:
+
+- At ×1 (two frames per second across each whole file, `cycle1/final/`):
+  - `video-follow-zanba.mp4`, 40 s: he stands, sets off on an arc past the plants, walks about
+    20 s, legs alternating in the frames read, then stands with his back to the camera for
+    the last 18 s, where little shows but ears and tail. Trunk and ears trail on the arc. Nothing
+    snaps between consecutive samples.
+  - `video-follow-lapen.mp4`, 40 s: short runs of hops between rests of several seconds; the
+    jump for joy at 18 to 20 s leaves the ground with arms up and lands on his feet; ears lean
+    back on the hops and stand up at rest; eyes closed in two samples (blinks). Zanba's flank
+    enters the edge of this close framing for the last 15 s.
+  - `video-characters-rest-desktop.mp4` and `-mobile.mp4`, 45 s, one frame every 3 s: the three
+    figures stay inside the frame and above the shelf in every sample; Lapen's and Zanba's
+    bubbles open clear of the title; on the phone Zanba keeps his place.
+  - `video-characters-rest-phone-landscape.mp4`, 45 s, one frame every 3 s: the Konteur and both
+    critters are above the shelf in all 15 samples; they are about 20 px high there, too small
+    to judge anything but their place.
+- At ×0.25 grain (every frame of the ×1 file, which is what the `-x0.25` copies slow down):
+  - Lapen, 1.3 s at rest from 6.6 s and 1.3 s from 18.6 s: consecutive frames differ by a
+    breath and an ear's lean; one blink closes and opens over five frames; no frame out of line.
+  - Zanba, 2.6 s from 9 s (every other frame): standing, the trunk and ears drift smoothly; no
+    frame out of line.
+  - Hops and steps were not read at this grain from the videos; for them the per-frame figures
+    above stand instead (no travel on the ground, foot drift, turn and speed steps).
+- Not done: nobody watched any of this play. Rhythm, weight and charm at speed are unjudged.
+
+The same reading showed what the rules cost on a portrait phone: with so little stage left,
+Lapen made 8 hops in 75 s and Zanba none. `3143928` lets Lapen hop on the spot when he finds
+nowhere to go and loosens their spacing to 1 m; Zanba stays at his place there (he breathes,
+fans his ears, sniffs and looks around, but does not walk).
+
+### 12.3 Other checks on `3143928`
+
+- `pnpm typecheck`, `lint`, `build`: exit 0. `pnpm test`: 372 passed (369 before the cycle).
+- Behaviours 43 of 43; other pages 24 of 24.
+- Contrast, now on 9 sizes including both sides of the layout limit and the two phones on
+  their side: weakest text .tree-intro-kicker at 4.63:1 on `w800` (needs 4.5); all at or over their minimum: yes.
+- Performance, same protocol; the base `ef821d2` was measured again in the same session
+  (`cycle1/final/ab-base`):
+
+| Viewport       | Sequence     | Final capped FPS | p95     | > 33 ms | Base, same session | Final         | Final vs base |
+| -------------- | ------------ | ---------------- | ------- | ------- | ------------------ | ------------- | ------------- |
+| Desktop        | rest         | 59.9             | 16.8 ms | 0       | 816 / 3.3 ms       | 868 / 2.3 ms  | +6.4 %        |
+| Desktop        | climb        | 59.9             | 16.7 ms | 0       | 683 / 3.4 ms       | 676 / 4 ms    | -1.1 %        |
+| Desktop        | interactions | 59.9             | 16.8 ms | 0       | 722 / 2.5 ms       | 749 / 2.2 ms  | +3.7 %        |
+| Mobile (emul.) | rest         | 59.9             | 16.7 ms | 0       | 1448 / 0.8 ms      | 1453 / 0.8 ms | +0.3 %        |
+| Mobile (emul.) | climb        | 59.9             | 16.7 ms | 0       | 1112 / 1.2 ms      | 1118 / 1.2 ms | +0.5 %        |
+| Mobile (emul.) | interactions | 59.9             | 16.7 ms | 0       | 1106 / 1.2 ms      | 1075 / 1.2 ms | -2.7 %        |
+
+Worst uncapped change: -2.7 % (limit −10 %). Cold load 1424 → 716 kB, loader gone at 1735 → 1591 ms. Draw calls at the desktop
+opening 311 (322 on the base). Phone: still not measured on a device.
+
+- Wind: variation 0.21 (0.11 before the gusts), unchanged by the cycle.
+
+### 12.4 Limits left after the cycle
+
+- Portrait phones: Zanba does not walk (see 12.2); Lapen mostly hops near his place.
+- Along the climb on short landscape screens the critters can pass under the shelf, as on the
+  base: the opening is solved for the shelf, the spiral beyond it is the validated path.
+- 667×375 and 1024×540: the compact intro still touches the right edge of the crown.
+- The tree is small on a phone on its side; that is the price of keeping the group above the shelf.
+- Zanba's rump: faint paler oval from behind (unchanged).
+- Lateral foot drift is absorbed by sliding each hip inside the belly, up to 16 cm; a turn tighter
+  than his 2 m arcs would exceed it, which is why he no longer makes one.
+- Generated frames are now sent to the trash by the scripts (`trash`), never unlinked.

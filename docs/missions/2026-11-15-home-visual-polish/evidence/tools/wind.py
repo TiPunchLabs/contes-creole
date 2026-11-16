@@ -37,8 +37,7 @@ def main() -> None:
         out = subprocess.run(["magick", "compare", "-metric", "MAE", str(a), str(b), "null:"],
                              capture_output=True, text=True).stderr
         series.append(float(re.search(r"\(([0-9.e-]+)\)", out).group(1)))
-    for f in files[1:-1]:
-        f.unlink()
+    subprocess.run(["trash", *[str(f) for f in files[1:-1]]], check=True)
     result = {"mean": statistics.mean(series), "min": min(series), "max": max(series),
               "cv": statistics.pstdev(series) / statistics.mean(series), "series": series}
     (hvp.OUT / "wind.json").write_text(json.dumps(result, indent=1))

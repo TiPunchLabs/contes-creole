@@ -49,7 +49,8 @@ def main() -> None:
     out: dict[str, dict[str, dict[str, float | bool]]] = {}
     with sync_playwright() as pw:
         browser = hvp.launch(pw)
-        for vp in ("desktop", "laptop", "mobile", "tablet", "w800"):
+        for vp in ("desktop", "laptop", "mobile", "tablet", "w800", "w1200x1000", "w1201x1000",
+                   "phone-landscape", "phone-landscape-l"):
             ctx, page = hvp.open_home(browser, vp)
             page.clock.run_for(2000)
             # Computed colours come back as the browser serialises them; a canvas turns them to rgb.
