@@ -58,7 +58,7 @@ const TREE_PATH_CLEARANCE = 4.4;
 /** Rough place of the opening camera on the z axis, for the critters' first pose. */
 const OPENING_CAMERA_Z = -22;
 /** Room a critter leaves round the other one when it picks where to go. */
-const COMPANY = 1.6;
+const COMPANY = 1;
 /** Azimuth of the opening view around the trunk: the stage faces it. */
 const STAGE_AZIMUTH = -Math.PI / 2;
 
@@ -231,7 +231,11 @@ export function stepCritters(
       if (c.wait <= 0 && !still) {
         c.tgt = pickTarget(c, obstacles, rng, onStage, list);
         c.since = 0;
-        if (!c.tgt) c.wait = 1;
+        if (!c.tgt) {
+          // Nowhere to go (a narrow stage on a phone): Lapen hops where he stands, Zanba stays.
+          c.wait = 1 + rng() * 1.5;
+          if (pivots && rng() < 0.7) c.phase = 1e-3;
+        }
       }
     } else if (c.tgt) {
       const d = Math.hypot(c.tgt[0] - c.pos[0], c.tgt[1] - c.pos[1]);
