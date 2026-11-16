@@ -106,7 +106,8 @@ BOXES_JS = """
       const sx = (v.x + 1) / 2 * size.x, sy = (1 - v.y) / 2 * size.y;
       x0 = Math.min(x0, sx); y0 = Math.min(y0, sy); x1 = Math.max(x1, sx); y1 = Math.max(y1, sy);
     }
-    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0, behind,
+    let shown = true; for (let p = o; p; p = p.parent) if (!p.visible) shown = false;
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0, behind, shown,
              world: o.getWorldPosition(new T.Vector3()).toArray(),
              dist: camera.position.distanceTo(o.getWorldPosition(new T.Vector3())) };
   };

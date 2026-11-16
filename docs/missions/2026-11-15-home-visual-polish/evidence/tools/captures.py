@@ -171,7 +171,8 @@ def sweep(browser: Browser, record: dict[str, Any]) -> None:
           return { intro: r('.tree-intro-inner'), shelf: r('.tree-shelf'), teller: r('.tree-teller'), climb: r('.tree-climb'),
                    overflow: document.documentElement.scrollWidth > innerWidth }; }""")
         record.setdefault("sweep", {})[vp] = {"viewport": size, "dom": dom, "critters": {
-            k: {"x": round(v["x"]), "y": round(v["y"]), "w": round(v["w"]), "h": round(v["h"])} for k, v in boxes.items()}}
+            k: {"x": round(v["x"]), "y": round(v["y"]), "w": round(v["w"]), "h": round(v["h"]), "shown": v["shown"]}
+            for k, v in boxes.items()}}
         ctx.close()
 
 

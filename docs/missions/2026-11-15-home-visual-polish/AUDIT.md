@@ -624,3 +624,109 @@ opening 311 (322 on the base). Phone: still not measured on a device.
 - Lateral foot drift is absorbed by sliding each hip inside the belly, up to 16 cm; a turn tighter
   than his 2 m arcs would exceed it, which is why he no longer makes one.
 - Generated frames are now sent to the trash by the scripts (`trash`), never unlinked.
+
+## 13. Correction cycle 2 (after Codex review 2; appended, sections 1 to 12 unchanged)
+
+Review: `review-2.md`, CHANGES_REQUESTED on `c91eebc`. Product HEAD after the cycle: `8d7f813`.
+Media: `cycle2/` (`before` is `3143928`, `t1` to `t6` the trials, `final/` the state measured);
+manifest `evidence/c2-media-manifest.tsv`.
+
+### 13.1 F1 — what the climb does to the figures, measured
+
+`evidence/tools/climb_check.py` drives one open page up the climb and back (16 values of t each
+way, the camera settled at each) and places the Konteur and both critters against the shelf and
+the edges, from their real meshes in their own frame. On `3143928` (`cycle2/before/climb.json`):
+
+| Size     | Figure-states | Whole | Behind the shelf in part | Cut by an edge | Absent |
+| -------- | ------------- | ----- | ------------------------ | -------------- | ------ |
+| 844×390  | 93            | 21    | 66                       | 0              | 6      |
+| 932×430  | 93            | 22    | 71                       | 0              | 0      |
+| 1440×900 | 93            | 62    | 19                       | 4              | 8      |
+| 390×844  | 93            | 26    | 0                        | 23             | 44     |
+| 1024×768 | 93            | 51    | 24                       | 4              | 14     |
+
+So the fault is not one of short landscape screens only. There the shelf spans the whole width
+and it happens at nearly every stop; but a fifth of the states on desktop and a quarter at
+1024×768 had it too, the Konteur included, and the portrait phone cut figures at its side edges.
+
+Why the camera cannot fix it. As the camera rises round the tree the figures on the lawn go down
+the frame and leave it by the bottom. Whatever is at the bottom of the screen, they cross it. By
+the geometry of the spiral (worked out by hand, not measured), at t = 0.54 on 844×390 their feet
+are at about 81 % of the height and the shelf starts at 80 %: a tilt of some 2.5° would clear
+them there, but at t = 0.2 they stand near 90 % and it would take about 12°, which puts the
+hanging card, the subject of that view, off the top of a 390 px screen. Shifting the
+whole picture up (a lens shift) only moves the band they cross. No tilt holds for every stop
+without moving the cards, and the cards hang on the validated spiral.
+
+### 13.2 The fix: a figure is seen whole or not at all (`d34975b`, `8d7f813`)
+
+The rule is on the figures, at every size. Each frame the box each figure fills is projected; when
+more than 2.5 % of it would be behind the shelf, under the intro text while that shows, or beyond
+an edge, the figure steps out whole in a fifth of a second, and it comes back whole once all but
+1 % of it shows (`presence.ts`). The check below is looser than the app on purpose (6 %), since
+it measures the real meshes and the app a simpler box. While
+it is out it cannot be pointed at, focused or made to speak, exactly as when it is out of frame.
+Under reduced motion it steps out and in at once. The spiral, the cards, their timings, the
+trigger and the opening are not touched.
+
+After, on `8d7f813` (`evidence/c2-final-climb.json`, boards
+`cycle2/final/checks/board-climbcheck-*.jpg`):
+
+| Size      | Figure-states | Whole | Grazed (6 % at most hidden) | Behind the shelf | Cut by an edge | Absent |
+| --------- | ------------- | ----- | --------------------------- | ---------------- | -------------- | ------ |
+| 844×390   | 93            | 21    | 1                           | 0                | 0              | 71     |
+| 932×430   | 93            | 23    | 1                           | 0                | 0              | 69     |
+| 667×375   | 93            | 15    | 2                           | 0                | 0              | 76     |
+| 1440×900  | 93            | 62    | 3                           | 0                | 0              | 28     |
+| 1024×768  | 93            | 51    | 0                           | 0                | 0              | 42     |
+| 1280×720  | 93            | 51    | 2                           | 0                | 0              | 40     |
+| 1920×1080 | 93            | 68    | 4                           | 0                | 0              | 21     |
+| 390×844   | 93            | 26    | 2                           | 0                | 0              | 65     |
+| 768×1024  | 93            | 57    | 2                           | 0                | 0              | 34     |
+| 360×640   | 93            | 39    | 0                           | 0                | 0              | 54     |
+
+`evidence/tools/layout_check.py` now reads these climb states with the opening sweep:
+0 fault on the 17 opening sizes, 0 on the 10 climb runs (`evidence/c2-final-layout.txt`).
+
+What it costs, plainly:
+
+- On a phone on its side the figures are on stage at the foot of the tree and gone for most of
+  the climb (see the `Absent` column): there is no room for them above a shelf that takes a fifth
+  of the height. They are back when the visitor comes back down.
+- The Konteur's shortcut to a random tale is offered only while he is shown, as it already was
+  only while he was in frame. Where he used to stand half behind the shelf he could still be
+  clicked; now he cannot until he is whole again. Every tale stays one or two presses away on the
+  shelf at all times; the 43 behaviour checks, his click and tap included, pass.
+- Between two stops a figure that is being cut stays on screen for up to a fifth of a second
+  while it fades. The check reads settled states, not those instants.
+
+### 13.3 Other checks on `8d7f813`
+
+- `pnpm typecheck`, `lint`, `build`: exit 0. `pnpm test`: 380 passed (372 before the cycle;
+  the new ones cover the hidden share and the fade).
+- Behaviours 43 of 43; other pages 24 of 24; contrast: all texts at or
+  over their minimum on 9 sizes (weakest .tree-intro-kicker at 4.6:1 on `w800`).
+- Opening sweep: 0 fault on 17 sizes. Live resize both ways: largest camera
+  move 0.347 m per step, 0 step with a figure cut.
+- Motion, 75 s per viewport: Lapen travels 0.0 m on the ground at most per frame; Zanba's
+  planted feet drift 0.008 m median and 0.019 m at most per stance.
+- Performance, base measured in the same session (`cycle2/final/ab-base`):
+
+| Viewport       | Sequence     | Final capped FPS | p95     | > 33 ms | Base, same session | Final         | Final vs base |
+| -------------- | ------------ | ---------------- | ------- | ------- | ------------------ | ------------- | ------------- |
+| Desktop        | rest         | 59.9             | 16.7 ms | 0       | 815 / 3.3 ms       | 872 / 2 ms    | +7.0 %        |
+| Desktop        | climb        | 59.9             | 16.8 ms | 1       | 677 / 3.6 ms       | 737 / 2.9 ms  | +8.8 %        |
+| Desktop        | interactions | 59.9             | 16.7 ms | 0       | 725 / 2.4 ms       | 811 / 1.6 ms  | +11.9 %       |
+| Mobile (emul.) | rest         | 59.9             | 16.7 ms | 0       | 1414 / 0.9 ms      | 1381 / 0.9 ms | -2.4 %        |
+| Mobile (emul.) | climb        | 59.9             | 16.7 ms | 1       | 1077 / 1.2 ms      | 1099 / 1.2 ms | +2.1 %        |
+| Mobile (emul.) | interactions | 59.9             | 16.8 ms | 0       | 1072 / 1.2 ms      | 1008 / 1.3 ms | -5.9 %        |
+
+Worst uncapped change: -5.9 % (limit −10 %). Phone: still not measured on a device.
+
+### 13.4 Limits left after the cycle
+
+- The fade is a rule, not a staging: on short landscape screens the characters do not take part
+  in the climb. Keeping them in it would need the shelf to give way (a smaller or collapsible
+  shelf on those screens) or the cards to move, both outside this mission's limits.
+- The limits of 12.4 stand (Zanba does not walk on portrait phones; the compact intro touches the
+  crown at 667×375 and 1024×540; Zanba's rump).

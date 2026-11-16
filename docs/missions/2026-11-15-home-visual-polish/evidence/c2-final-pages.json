@@ -1,0 +1,122 @@
+[
+  {
+    "name": "desktop.classes-page-renders",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.classes-page-has-way-back",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.back-opens-tree-on-invitation",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.classes-console-clean",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "desktop.ti-kannot-first-page-has-text",
+    "ok": true,
+    "detail": 369
+  },
+  {
+    "name": "desktop.ti-kannot-language-switch",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.ti-kannot-back-to-tree",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.ti-kannot-console-clean",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "desktop.mila-first-page-has-text",
+    "ok": true,
+    "detail": 291
+  },
+  {
+    "name": "desktop.mila-language-switch",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.mila-back-to-tree",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "desktop.mila-console-clean",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "mobile.classes-page-renders",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "mobile.classes-page-has-way-back",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "mobile.back-opens-tree-on-invitation",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "mobile.classes-console-clean",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "mobile.ti-kannot-first-page-has-text",
+    "ok": true,
+    "detail": 351
+  },
+  {
+    "name": "mobile.ti-kannot-language-switch",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "mobile.ti-kannot-back-to-tree",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "mobile.ti-kannot-console-clean",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "mobile.mila-first-page-has-text",
+    "ok": true,
+    "detail": 273
+  },
+  {
+    "name": "mobile.mila-language-switch",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "mobile.mila-back-to-tree",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "mobile.mila-console-clean",
+    "ok": true,
+    "detail": []
+  }
+]
