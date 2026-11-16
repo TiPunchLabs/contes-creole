@@ -10,6 +10,7 @@ import {
   poke,
   stepCritters,
   type Obstacle,
+  type StageTest,
 } from "./wander";
 
 const OBSTACLES: Obstacle[] = [TREE_OBSTACLE, [5.2, -12.5, 1.9], [-12, 4, 1.4], [3, 11.5, 0.9]];
@@ -124,5 +125,44 @@ describe("poke", () => {
     lapen.react = 0.4;
     poke(lapen);
     expect(lapen.react).toBe(0.4);
+  });
+});
+
+describe("the stage", () => {
+  const onStage: StageTest = (x, z, r) => z < -4 && Math.abs(x) + r < 7;
+
+  it("starts both critters in front of the opening view, turned to the Konteur", () => {
+    for (const tall of [false, true]) {
+      const teller: [number, number] = tall ? [1.9, -12.5] : [4.4, -12.5];
+      for (const c of createCritterStates(tall, teller)) {
+        expect(c.pos[1]).toBeLessThan(-4);
+        expect(Math.hypot(c.pos[0], c.pos[1])).toBeGreaterThan(TREE_OBSTACLE[2] + c.r);
+        const facing = Math.atan2(teller[0] - c.pos[0], teller[1] - c.pos[1]);
+        expect(c.yaw).toBeCloseTo(facing);
+        expect(Math.hypot(teller[0] - c.pos[0], teller[1] - c.pos[1])).toBeGreaterThan(1.9 + c.r);
+      }
+    }
+  });
+
+  it("only picks targets on the stage", () => {
+    const rng = createRng(5);
+    const [lapen] = createCritterStates();
+    let found = 0;
+    for (let i = 0; i < 200; i++) {
+      const tgt = pickTarget(lapen, OBSTACLES, rng, onStage);
+      if (!tgt) continue;
+      found++;
+      expect(onStage(tgt[0], tgt[1], lapen.r)).toBe(true);
+    }
+    expect(found).toBeGreaterThan(100);
+  });
+
+  it("keeps the critters on it over a long walk", () => {
+    const rng = createRng(17);
+    const list = createCritterStates();
+    for (let i = 0; i < 6000; i++) {
+      stepCritters(list, 1 / 60, CAMERA, OBSTACLES, rng, onStage);
+      for (const c of list) expect(c.pos[1]).toBeLessThan(-2.5);
+    }
   });
 });

@@ -16,6 +16,11 @@ export const KONTEUR_OBSTACLES: Obstacle[] = [
   [KONTEUR_X_NARROW, KONTEUR_Z, 1.9],
 ];
 
+/** Where the Konteur sits on the ground (x, z) for a screen aspect: further in on narrow screens. */
+export function konteurSpot(aspect: number): [number, number] {
+  return [lerp(KONTEUR_X_NARROW, KONTEUR_X_WIDE, clamp((aspect - 0.5) / 0.75, 0, 1)), KONTEUR_Z];
+}
+
 /** The storyteller: a photo cut-out billboard at the foot of the tree, with a lantern. */
 export function createKonteur(): {
   group: THREE.Group;
@@ -83,7 +88,7 @@ export function createKonteur(): {
     plane,
     anchor: (out) => out.set(0.35, 1.85, 0).add(group.position),
     place(aspect) {
-      const x = lerp(KONTEUR_X_NARROW, KONTEUR_X_WIDE, clamp((aspect - 0.5) / 0.75, 0, 1));
+      const [x] = konteurSpot(aspect);
       if (x !== group.position.x) setX(x);
     },
     update(time, cameraPosition, hovered) {

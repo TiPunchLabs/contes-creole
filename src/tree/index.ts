@@ -10,7 +10,7 @@ import { detectLite, readLiteEnv, scaleCount } from "./lite";
 import { createTreeOverlay, type TellerBox } from "./overlay/overlay";
 import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { RANDOM_TALE_ACTION, RANDOM_TALE_NONE, eligibleTales, pickRandomTale } from "./random-tale";
-import { cardT, hubCam } from "./scene/camera";
+import { cardT, openingStage, treeCam } from "./scene/camera";
 import { createCards, type CardView } from "./scene/cards";
 import { createLapen } from "./scene/critters/lapen";
 import type { CritterView } from "./scene/critters/parts";
@@ -23,7 +23,7 @@ import {
 } from "./scene/critters/wander";
 import { createZanba } from "./scene/critters/zanba";
 import { FLORA_OBSTACLES } from "./scene/flora";
-import { KONTEUR_OBSTACLES, createKonteur } from "./scene/konteur";
+import { KONTEUR_OBSTACLES, createKonteur, konteurSpot } from "./scene/konteur";
 import { createLandscape } from "./scene/landscape";
 import { EXPOSURE, FOG } from "./scene/palette";
 import { createSky } from "./scene/sky";
@@ -96,7 +96,9 @@ function buildTree(
   const konteur = createKonteur();
   const cards = createCards(slots, tree.tips);
   const critterRng = createRng(17);
-  const critters = createCritterStates();
+  const aspect = container.clientWidth / (container.clientHeight || 1);
+  const critters = createCritterStates(aspect < 1, konteurSpot(aspect));
+  const onStage = openingStage(() => camera.aspect);
   const views: Record<CritterName, CritterView> = { lapen: createLapen(), zanba: createZanba() };
   const obstacles = [TREE_OBSTACLE, ...KONTEUR_OBSTACLES, ...FLORA_OBSTACLES];
   scene.add(
@@ -328,7 +330,7 @@ function buildTree(
 
   const frame = (time: number, dt: number): void => {
     t += (target - t) * (1 - Math.exp(-dt * 4.5));
-    hubCam(t, cam, look);
+    treeCam(t, camera.aspect, cam, look);
     konteur.place(camera.aspect);
     const fov = fitFov(50, camera.aspect);
     if (diving) {
@@ -354,7 +356,7 @@ function buildTree(
     sky.update(time, camera.position);
     tree.update(time, hover !== null || near >= 0);
     konteur.update(time, camera.position, (tellerHovered || tellerFocused) && !diving);
-    stepCritters(critters, dt, camera.position, obstacles, critterRng);
+    stepCritters(critters, dt, camera.position, obstacles, critterRng, onStage);
     for (const c of critters) views[c.name].pose(c, time);
     // A focused card answers like a hovered one: it grows and its halo brightens.
     const lit = hover ?? (cardFocused && near >= 0 ? near : null);

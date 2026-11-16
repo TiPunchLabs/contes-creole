@@ -32,22 +32,35 @@ export const TREE_OBSTACLE: Obstacle = [0, 0, 4.2];
 export const RING = { min: 5.2, max: 13.7 } as const;
 export const MAX_DT = 0.05;
 const TREE_PATH_CLEARANCE = 4.4;
+/** Azimuth of the opening view around the trunk: the stage faces it. */
+const STAGE_AZIMUTH = -Math.PI / 2;
 
-/** Initial states (v14.2): Lapen small and quick, Zanba big and slow, on both sides of the tree. */
-export function createCritterStates(): CritterState[] {
+/** Whether a disc of radius `r` at (x, z) stands where the critters are meant to be seen. */
+export type StageTest = (x: number, z: number, r: number) => boolean;
+
+/** Where the opening finds a critter: wide screens, then portrait ones (a narrower stage). */
+const STARTS: Record<CritterName, { wide: [number, number]; tall: [number, number] }> = {
+  lapen: { wide: [1.1, -11.7], tall: [-1.0, -11.6] },
+  zanba: { wide: [-3.4, -8.3], tall: [-3.3, -8.2] },
+};
+
+/**
+ * Initial states: Lapen small and quick, Zanba big and slow, gathered at the foot of the tree
+ * in front of the opening view and turned to the Konteur at `teller` (x, z). `tall` picks the
+ * portrait places.
+ */
+export function createCritterStates(
+  tall = false,
+  teller: readonly [number, number] = [4.4, -12.5],
+): CritterState[] {
   const base = { tgt: null, moving: 0, phase: 0, react: 0, look: false };
+  const at = (name: CritterName): { pos: [number, number]; yaw: number } => {
+    const [x, z] = tall ? STARTS[name].tall : STARTS[name].wide;
+    return { pos: [x, z], yaw: Math.atan2(teller[0] - x, teller[1] - z) };
+  };
   return [
-    { ...base, name: "lapen", r: 0.55, speed: 2.4, step: 9, pos: [-6, -5.5], yaw: 0.4, wait: 1.2 },
-    {
-      ...base,
-      name: "zanba",
-      r: 1.5,
-      speed: 0.95,
-      step: 4.2,
-      pos: [7.5, 5.5],
-      yaw: -2.2,
-      wait: 2.5,
-    },
+    { ...base, name: "lapen", r: 0.55, speed: 2.4, step: 9, ...at("lapen"), wait: 3.2 },
+    { ...base, name: "zanba", r: 1.5, speed: 0.95, step: 4.2, ...at("zanba"), wait: 5.5 },
   ];
 }
 
@@ -65,18 +78,23 @@ export function clearOfTree(a: readonly [number, number], b: readonly [number, n
   return Math.hypot(a[0] + dx * t, a[1] + dz * t) > TREE_PATH_CLEARANCE;
 }
 
-/** Up to 40 random draws in the ring for a free target reachable without crossing the trunk. */
+/**
+ * Up to 40 random draws in the ring for a free target reachable without crossing the trunk; with
+ * `onStage`, the draws keep to the half of the ring facing the opening view and to the stage.
+ */
 export function pickTarget(
   c: CritterState,
   obstacles: readonly Obstacle[],
   rng: Rng,
+  onStage?: StageTest,
 ): [number, number] | null {
   for (let k = 0; k < 40; k++) {
-    const a = rng() * 6.28,
+    const a = onStage ? STAGE_AZIMUTH + (rng() - 0.5) * Math.PI : rng() * 6.28,
       r = RING.min + rng() * (RING.max - RING.min),
       x = Math.cos(a) * r,
       z = Math.sin(a) * r;
     if (
+      (!onStage || onStage(x, z, c.r)) &&
       isFree(x, z, c.r, obstacles) &&
       clearOfTree(c.pos, [x, z]) &&
       Math.hypot(x - c.pos[0], z - c.pos[1]) > 2.5
@@ -98,13 +116,17 @@ function blocked(c: CritterState, x: number, z: number, list: readonly CritterSt
   return list.some((o) => o !== c && Math.hypot(x - o.pos[0], z - o.pos[1]) < c.r + o.r + 0.4);
 }
 
-/** Advances every critter by `dt` (clamped): wait → walk → wait, reactions, mutual avoidance. */
+/**
+ * Advances every critter by `dt` (clamped): wait → walk → wait, reactions, mutual avoidance;
+ * `onStage` keeps their walks where the opening view shows them.
+ */
 export function stepCritters(
   list: CritterState[],
   dt: number,
   camera: { x: number; z: number },
   obstacles: readonly Obstacle[],
   rng: Rng,
+  onStage?: StageTest,
 ): void {
   const h = clamp(dt, 0, MAX_DT);
   for (const c of list) {
@@ -117,7 +139,7 @@ export function stepCritters(
       c.moving = lerp(c.moving, 0, 0.12);
       if (c.look) c.yaw += angleTo(c, camera.x, camera.z) * Math.min(1, h * 2);
       if (c.wait <= 0) {
-        c.tgt = pickTarget(c, obstacles, rng);
+        c.tgt = pickTarget(c, obstacles, rng, onStage);
         if (!c.tgt) c.wait = 1;
       }
     } else if (c.tgt) {
