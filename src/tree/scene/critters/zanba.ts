@@ -8,6 +8,8 @@ import {
   blink,
   blobShadow,
   eye,
+  eyeMaterial,
+  fader,
   fused,
   gazeYaw,
   mat,
@@ -119,7 +121,8 @@ export function createZanba(): CritterView {
   const head = new THREE.Group();
   head.position.set(0, 1.46, 0.86);
   body.add(head);
-  const eyes = [eye(0.22, 0.1, 0.42, 0.07), eye(-0.22, 0.1, 0.42, 0.07)];
+  const gloss = eyeMaterial();
+  const eyes = [eye(0.22, 0.1, 0.42, 0.07, gloss), eye(-0.22, 0.1, 0.42, 0.07, gloss)];
   head.add(
     new THREE.Mesh(
       fused([
@@ -210,12 +213,19 @@ export function createZanba(): CritterView {
   let lastSpeed = 0;
   let lastYaw = 0;
   let lastPhase = 0;
+  const fade = fader(group, shadow);
   let lastBeat = 0;
   let started = false;
 
   return {
     group,
     top: 2.3,
+    // Tail to trunk: he reaches further ahead of his hips than behind.
+    extent: [1.25 * SCALE, 2.3 * SCALE, 1.3 * SCALE, 1.9 * SCALE],
+    present(opacity) {
+      fade(opacity);
+      shadow.material.opacity = opacity;
+    },
     pose(c, time, around) {
       place(group, c);
       const dt = clamp(time - last, 0, 0.05);

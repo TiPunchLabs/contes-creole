@@ -92,6 +92,8 @@ export function createTreeOverlay(
   setTeller(text: string, available: boolean): void;
   /** Reads a short message out to screen readers. */
   announce(text: string): void;
+  /** Where the shelf sits on screen, in CSS pixels. */
+  shelfBox(): { left: number; top: number; right: number; bottom: number };
   dispose(): void;
 } {
   const el = document.createElement("div");
@@ -182,6 +184,10 @@ export function createTreeOverlay(
       requestAnimationFrame(() => {
         status.textContent = text;
       });
+    },
+    shelfBox() {
+      const r = part(".tree-shelf").getBoundingClientRect();
+      return { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
     },
     dispose() {
       shelf.dispose();
