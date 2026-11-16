@@ -1,29 +1,40 @@
 # Report — 2026-11-15-home-visual-polish
 
 Verdict: PARTIAL
-Version: bc064747190c36f4542a01cd0e98d23feca63c68
+Version: 31439283160bd55b658c3372acea31d3255eb190
 
-`Version` is the product HEAD every final check ran on (`bc06474`). The commit that adds this
-report and the S2 evidence sits on top of it and touches nothing under `src/`.
+`Version` is the product HEAD every final check of correction cycle 1 ran on (`3143928`). The
+two commits on top of it (the cycle's evidence, then this report) touch nothing under `src/`. This report replaces the one written for `bc06474`; Codex review 1 (`review-1.md`,
+CHANGES_REQUESTED on `996f0e1`) and its brief are committed beside it.
 
-Why PARTIAL and not "ready for human validation": two criteria are not verified. AC12 cannot be
-(the Codex review is step S3, after this report), and the phone half of AC9 has no evidence (no
-device). Everything else in the checklist is verified on `bc06474`. Exact next actions are at
-the end.
+Why PARTIAL: three things are not verified, and none of them can be by the executor.
 
-Three things are kept apart below, as the mission asks:
+- AC12: review 1 asked for changes; no review exists yet for `3143928`.
+- AC9, phone half: no device.
+- AC2 and AC3, human half: the motion was measured on every frame and read as frame sequences by
+  an AI agent. Nobody has watched it play at ×1 and ×0.25.
+
+Three things are kept apart, as the mission asks:
 
 - Technical compliance: verified by commands and measures, listed per criterion.
-- Observed visual improvement: what the before/after captures show, stated by the executor.
-- Artistic acceptance: Xavier's, not given here. The opening frame in particular replaces the one
-  he validated on 2026-11-09 (CANOPY-FACE).
+- Observed visual improvement: what the captures show, stated by the executor.
+- Artistic acceptance: Xavier's, not given here. The opening frame replaces the one he validated
+  on 2026-11-09 (CANOPY-FACE).
+
+## Correction cycle 1
+
+| Finding                                         | Severity | What was done                                                                                                                                                                                                                                                  | Evidence on `3143928`                                                                                                                                                                                                                                            |
+| ----------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F1: figures hidden by the shelf at 844×390      | major    | `c5f4bff`: distance and tilt of the opening camera are solved for the screen, so the Konteur's feet rest above the shelf and the crown below the intro; critters no nearer the camera than he is. The same check found and fixed the fault at eight more sizes | Layout check: 0 fault on 17 sizes (`evidence/c1-final-layout.txt`); opening, 45 s of motion and climb at 844×390, opening and climb at 932×430 (`cycle1/final/boards/final-phone-landscape.jpg`, videos); `AUDIT.md` 12.1                                        |
+| F2: 6.5 m camera jump across aspect 1.2         | major    | Same commit: one continuous solution in width and height replaces the per-layout shots                                                                                                                                                                         | Unit test across the limit, one pixel at a time, both directions; live resize of an open page both directions: largest move 0.347 m per step, 0.13 m at the layout switch, 0 step with a figure cut, hidden or under the intro (`evidence/c1-final-resize.json`) |
+| F3: AC statuses overstated; motion not observed | minor    | Statuses corrected below. Every frame of 75 s read from the scene on three viewports; that found real defects (feet drifting, snap turns, dead stops), fixed in `1868a5c` and `3143928`; frame-sequence notes at ×1 and ×0.25 recorded, labelled as an agent's | `evidence/c1-final-motion-*.json`, `AUDIT.md` 12.2                                                                                                                                                                                                               |
 
 ## Scope delivered
 
-- Branch `feat/home-visual-polish`, base `ef821d2`, product HEAD `bc06474`, local only: no push,
+- Branch `feat/home-visual-polish`, base `ef821d2`, product HEAD `3143928`, local only: no push,
   PR, preview, merge or deploy.
 - Executor: Claude Code session `7de48663-1116-4e9e-8682-a99d55b1542b`, model `claude-fable-5-2`.
-  No sub-agent was used, for code or anything else.
+  No sub-agent was used.
 - Commits on the branch, oldest first:
 
 | Commit    | Subject                                                                |
@@ -40,102 +51,104 @@ Three things are kept apart below, as the mission asks:
 | `b76c396` | perf(tree): halve the critters' draw calls, cheapen their limbs        |
 | `eaf3f09` | fix(tree): hold the intro hint's contrast on the column layouts        |
 | `bc06474` | fix(tree): keep the Konteur's fill light off the critters              |
+| `996f0e1` | docs(missions): report S2 of home-visual-polish                        |
+| `1a3a104` | docs(missions): add Codex review 1 of home-visual-polish and its brief |
+| `c5f4bff` | fix(tree): solve the opening shot so nothing hides behind the shelf    |
+| `1868a5c` | fix(tree): plant Zanba's feet, bound every turn, ease every stop       |
+| `3143928` | fix(tree): let Lapen hop on the spot when the stage has no room        |
 
-- Files changed under `src/`: `tree/index.ts`, `tree/overlay/overlay.css`,
+- Files changed under `src/` since the base: `tree/index.ts`, `tree/overlay/overlay.css`,
   `tree/scene/camera.ts`, `canopy.ts`, `konteur.ts`, `critters/{lapen,zanba,parts,wander}.ts`,
-  their tests, and the new `tree/assets/konteur.webp`. Nothing under `src/app`, `src/shared`,
-  `src/books` or `src/pages`. No text, name, navigation target or reading order changed; no
-  dependency added.
-- Detail of every kept and dropped change: `AUDIT.md` section 11.
+  their tests, and `tree/assets/konteur.webp`. Nothing under `src/app`, `src/shared`, `src/books`
+  or `src/pages`. No text, name, navigation target or reading order changed; no dependency added.
+- Detail: `AUDIT.md` sections 11 (S2) and 12 (this cycle).
 
 ## Acceptance criteria
 
 Evidence paths starting with `evidence/` are in the mission folder; the others are under
 `~/.local/share/contes-creole-qa/home-visual-polish/` and listed in
-`evidence/s2-media-manifest.tsv`. SHA is the revision the evidence was produced on.
+`evidence/c1-media-manifest.tsv`. All evidence below was produced on `3143928` unless a row says
+otherwise.
 
-| ID   | Status                                   | Evidence                                                                                                                                                                                                                                                                                                                                        | SHA       |
-| ---- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| AC0  | verified (by pilotage)                   | `evidence/ac0-fable-preflight.txt`: launch argv `--model fable`, transcript `message.model = claude-fable-5-2`. The executor confirms the same model id for this session; the check itself is pilotage's                                                                                                                                        | n/a       |
-| AC1  | verified                                 | `final/boards/before-after-turntable-lapen.jpg`, `-zanba.jpg` (lit and flat silhouettes, 4 bearings and a walk), `final/boards/before-after-closeups.jpg` (displayed size at DPR 2 and on the emulated phone). Beaded trunk, chest seam and detached feet are gone; outlines differ at displayed size. Left: a faint paler oval on Zanba's rump | `bc06474` |
-| AC2  | verified on frame sequences              | `final/video-follow-lapen.mp4`, `-zanba.mp4`, `final/video-characters-rest-*.mp4` and their `-x0.25` copies; notes in `AUDIT.md` 11.6; gait tests in `wander.test.ts`. Read as frames, not watched at speed                                                                                                                                     | `bc06474` |
-| AC3  | verified                                 | Shadows shrink and fade with the hop (`final/video-follow-lapen.mp4`), feet hold their ground, edge light on both, no bleaching near the lantern (`s2/60-lamp`)                                                                                                                                                                                 | `bc06474` |
-| AC4  | verified                                 | `evidence/s2-final-contrast.json`: every intro and shelf text at or over its minimum on 5 sizes (`AUDIT.md` 11.4); grey views `final/boards/before-after-*-grey.jpg`. Scene lights and palette unchanged                                                                                                                                        | `bc06474` |
-| AC5  | verified                                 | Variant boards and choice: `AUDIT.md` section 8 (`variants/board-*.jpg`); before/after `final/boards/before-after-desktop.jpg`, `-mobile.jpg`, thumbnails and grey                                                                                                                                                                              | `bc06474` |
-| AC6  | verified, with three named limits        | `final/boards/before-after-intermediate.jpg` (768×1024, 1024×768, 360×640, 430×932), `final/boards/final-layout-sweep.jpg` (10 sizes, no horizontal overflow on any), `final/boards/before-after-climb-*.jpg`. Limits: 844×390, 360×640, 800×600 (`AUDIT.md` 11.7)                                                                              | `bc06474` |
-| AC7  | verified                                 | `AUDIT.md` 11.5                                                                                                                                                                                                                                                                                                                                 | `bc06474` |
-| AC8  | verified                                 | Gusts measured (`AUDIT.md` 11.1, `evidence/s2-final-wind.json`); trigger, rustle and timings untouched; journeys to both tales, the classes page and the random tale pass (`evidence/s2-final-behaviours.json`)                                                                                                                                 | `bc06474` |
-| AC9  | desktop verified; phone **not verified** | `AUDIT.md` 11.3, `evidence/s2-final-perf.json`: 60 FPS capped on the reference laptop, worst uncapped change -6.9 % against the base measured in the same session. Mobile figures are emulation on the laptop GPU; no real device was tested                                                                                                    | `bc06474` |
-| AC10 | verified                                 | `evidence/s2-final-behaviours.json`: 43 of 43 (Playwright `reducedMotion`, a live change of the preference, Tab order, arrow keys, Enter, touch taps and finger swipe, emulated)                                                                                                                                                                | `bc06474` |
-| AC11 | verified                                 | `pnpm build`, `typecheck`, `lint` exit 0; `pnpm test` 369 passed (356 on the base); other pages 24 of 24 (`evidence/s2-final-pages.json`); console: only `favicon.ico` 404, already on the base                                                                                                                                                 | `bc06474` |
-| AC12 | not verified (S3 not run yet)            | No Codex review exists for this revision                                                                                                                                                                                                                                                                                                        | n/a       |
+| ID   | Status                                                                                                      | Evidence                                                                                                                                                                                                                                                                                                                                                                  |
+| ---- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC0  | verified (by pilotage and by the reviewer)                                                                  | `evidence/ac0-fable-preflight.txt`; review 1 parsed the transcript: every assistant record reports `claude-fable-5-2`                                                                                                                                                                                                                                                     |
+| AC1  | verified                                                                                                    | `cycle1/final/boards/before-after-turntable-lapen.jpg`, `-zanba.jpg`, `before-after-closeups.jpg`. Sampled poses, not every animated pose. Left: a faint paler oval on Zanba's rump                                                                                                                                                                                       |
+| AC2  | verified by per-frame measurement and by an agent's frame-sequence reading; **human playback not verified** | `evidence/c1-final-motion-*.json` (4 687 frames on each of three viewports), notes at ×1 and ×0.25 in `AUDIT.md` 12.2, videos and `-x0.25` copies in `cycle1/final/`, gait and turn tests in `wander.test.ts`                                                                                                                                                             |
+| AC3  | verified on the same basis; **human playback not verified**                                                 | Planted-foot drift 0.008 m median and 0.019 m at most per stance; Lapen travels 0 m on the ground; shadows follow the hop; no bleaching by the lantern (`s2/60-lamp`)                                                                                                                                                                                                     |
+| AC4  | verified                                                                                                    | `evidence/c1-final-contrast.json`: 9 sizes, all texts at or over their minimum, weakest .tree-intro-kicker at 4.63:1 on `w800` (needs 4.5); grey boards. Measured at the opening only                                                                                                                                                                                     |
+| AC5  | verified                                                                                                    | Variants and choice: `AUDIT.md` section 8; before/after boards in `cycle1/final/boards/`                                                                                                                                                                                                                                                                                  |
+| AC6  | verified at the opening, with named limits                                                                  | Layout check 0 fault on 17 sizes; resize both directions without a jump; phones on their side captured at opening, in motion and along the climb. Left: at 667×375 and 1024×540 the compact intro touches the crown's right edge; along the climb (not at the opening) on short landscape screens the critters can pass under the shelf, as on the base (`AUDIT.md` 12.4) |
+| AC7  | verified                                                                                                    | `AUDIT.md` 11.5                                                                                                                                                                                                                                                                                                                                                           |
+| AC8  | verified                                                                                                    | Gusts (`evidence/c1-final-wind.json`), trigger and timings untouched; journeys pass (`evidence/c1-final-behaviours.json`); camera equals the spiral from t = 0.14 (unit test)                                                                                                                                                                                             |
+| AC9  | desktop verified; phone **not verified**                                                                    | `evidence/c1-final-perf.json`: 60 FPS capped, worst uncapped change -2.7 % against the base measured in the same session. Mobile figures are emulation on the laptop GPU                                                                                                                                                                                                  |
+| AC10 | verified                                                                                                    | `evidence/c1-final-behaviours.json`: 43 of 43                                                                                                                                                                                                                                                                                                                             |
+| AC11 | verified                                                                                                    | `pnpm build`, `typecheck`, `lint` exit 0; `pnpm test` 372 passed; other pages 24 of 24; console: only the base's `favicon.ico` 404                                                                                                                                                                                                                                        |
+| AC12 | not verified                                                                                                | Review 1: CHANGES_REQUESTED on `996f0e1`. No review of `3143928` yet                                                                                                                                                                                                                                                                                                      |
 
 ## Performance summary
 
-| Measure                                  | Base `ef821d2` | Final `bc06474` |
-| ---------------------------------------- | -------------- | --------------- |
-| Cold load, transferred (desktop)         | 1 424 kB       | 715 kB          |
-| Capped FPS, all six sequences            | 59.9           | 59.9            |
-| Worst uncapped change, same-session base | n/a            | -6.9 %          |
-| Draw calls at the opening, desktop       | 322            | 284             |
-| Phone                                    | not measured   | not measured    |
+| Measure                                  | Base `ef821d2` | Final `3143928`                              |
+| ---------------------------------------- | -------------- | -------------------------------------------- |
+| Cold load and loader (desktop)           | see right      | 1424 → 716 kB, loader gone at 1735 → 1591 ms |
+| Capped FPS, all six sequences            | 59.9           | 59.9                                         |
+| Worst uncapped change, same-session base | n/a            | -2.7 %                                       |
+| Draw calls at the opening, desktop       | 322            | 311                                          |
+| Phone                                    | not measured   | not measured                                 |
 
-Full tables, protocol and the intermediate regression that was corrected: `AUDIT.md` 11.3.
+Tables: `AUDIT.md` 12.3 (this HEAD) and 11.3 (protocol, history).
 
 ## Observed visual improvement (executor's reading)
 
-- The flamboyant is a whole shape at the opening on every size captured but 360×640, where its
-  top stays under the band's fade.
-- The three characters read as one group at its foot; both critters stay visible over 30 s on
-  desktop and the emulated phone.
-- Zanba and Lapen no longer show joins between pieces at twice the displayed size.
-- What the captures cannot show is in `AUDIT.md` 11.6: nobody watched the motion at speed.
+- The flamboyant is a whole shape at the opening on every size captured, under the band or beside
+  the column.
+- The Konteur and both critters stand above the shelf and inside the frame on every size checked,
+  phones on their side included, and stay there for the 75 s read.
+- Zanba and Lapen show no join between pieces at twice the displayed size; Zanba's feet hold the
+  ground and he walks his turns.
+- Not established here: how the motion feels at speed. That needs a person.
 
 ## Deviations and things to know
 
-- Deletions against the user's `trash` rule: the capture scripts remove their intermediate frames
-  with `unlink`, and `rm -f` was used a few times on files generated in the same session. Nothing
-  outside the mission's own QA output was removed.
-- A scratch worktree of `ef821d2` remains registered, for the same-session base build:
-  `<scratchpad>/base`. It is not removed (that is a deletion); `git worktree remove` on it, then
-  `git worktree prune`, cleans it.
-- `04bfacb` was amended once, before any review and unpushed, to fix a test import its first
-  version broke.
-- The pre-commit hooks do not run `tsc` or the tests; both were run by hand before each commit
-  from then on.
-- `mission.md` was reformatted by prettier (tables only) and `__pycache__/` was added to
-  `.gitignore`, both in S1.
-- The site loads an analytics script from `cloud.umami.is`. S1's runs did not block it; from
-  S2 on the scripts answer it locally or block it. Whether S1's runs were counted is not known.
+- `review-1.md` was realigned by prettier (its table only), which the pre-commit hook requires.
+- Deletions: the scripts now send generated frames to the trash (`trash`). Earlier in the mission
+  they used `unlink`, and `rm -f` was used a few times on files generated in the same session.
+- A scratch worktree of `ef821d2` is still registered under the session scratchpad, for the
+  same-session base build. `git worktree remove` on it, then `git worktree prune`, cleans it.
+- `04bfacb` was amended once, unpushed, before any review.
+- The site loads an analytics script from `cloud.umami.is`; the QA scripts block it since S2.
+  Whether S1's runs were counted is not known.
 - Load and FPS use the production build on ports 5182 (final) and 5183 (base), beside the dev
   server on 5181. All three are stopped at the end of the step.
 
 ## Remaining leads
 
-Unmet mandatory criteria:
+Mandatory, not met:
 
-| Lead                                      | Impact | Effort | Note                                                |
-| ----------------------------------------- | ------ | ------ | --------------------------------------------------- |
-| AC12: Codex review of `ef821d2..bc06474`  | high   | low    | step S3                                             |
-| AC9: frame rate on a real mid-range phone | high   | low    | needs a device; the preview or a LAN build would do |
+| Lead                                                                      | Impact | Effort | Note                                              |
+| ------------------------------------------------------------------------- | ------ | ------ | ------------------------------------------------- |
+| AC12: Codex review 2 of `ef821d2..3143928`                                | high   | low    | next step                                         |
+| AC2/AC3: a person watches the videos at ×1 and ×0.25 (or the page itself) | high   | low    | files in `cycle1/final/`, list in `AUDIT.md` 12.2 |
+| AC9: frame rate on a real mid-range phone                                 | high   | low    | needs a device                                    |
 
 Optional, by impact over effort:
 
-| Lead                                                                                  | Impact | Effort |
-| ------------------------------------------------------------------------------------- | ------ | ------ |
-| Lite pixel ratio on phones (stair-stepped edges at ratio 1), with a device to measure | high   | low    |
-| Landscape phones (844×390): shelf over the group, title on the crown's edge           | medium | medium |
-| 360×640: crown top under the band                                                     | medium | low    |
-| Critters seen from the far side of the climb (they keep to the opening side)          | medium | medium |
-| Faces: no mouth or brows, expression comes from ears, eyes and posture only           | medium | medium |
-| Zanba's rump: faint paler oval from behind                                            | low    | low    |
-| A favicon (the only console error)                                                    | low    | low    |
-| `doc/architecture.md` and `CLAUDE.md`: opening shots, stage, new critters, WebP       | low    | low    |
-| An external pass on the characters (Blender) is not needed for the defects found      | n/a    | n/a    |
+| Lead                                                                                            | Impact | Effort |
+| ----------------------------------------------------------------------------------------------- | ------ | ------ |
+| Lite pixel ratio on phones (stair-stepped edges at ratio 1), with a device to measure           | high   | low    |
+| Compact intro on short landscape windows (667×375, 1024×540): still touches the crown           | medium | low    |
+| Portrait phones: Zanba never walks, the stage being too narrow for his arcs                     | medium | medium |
+| Short landscape screens: critters can pass under the shelf along the climb (not at the opening) | low    | medium |
+| Critters seen from the far side of the climb (they keep to the opening side)                    | medium | medium |
+| Faces: no mouth or brows, expression comes from ears, eyes and posture only                     | medium | medium |
+| Zanba's rump: faint paler oval from behind                                                      | low    | low    |
+| A favicon (the only console error)                                                              | low    | low    |
+| `doc/architecture.md` and `CLAUDE.md`: opening shot, stage, new critters, WebP                  | low    | low    |
 
 ## Next actions
 
-1. S3: Codex review of `ef821d2..bc06474` with `AUDIT.md`, this report and
-   `evidence/s2-media-manifest.tsv`. No approval needed to start it.
-2. A phone test, when a device is at hand, to close AC9.
-3. S4: Xavier's artistic acceptance and merge decision.
+1. Codex review 2 of `ef821d2..3143928` (review 2 of 3). No approval needed to start it.
+2. A person plays `cycle1/final/video-follow-lapen.mp4`, `video-follow-zanba.mp4` and
+   `video-characters-rest-*.mp4` at ×1 and their `-x0.25` copies, or watches the page for a minute.
+3. A phone test when a device is at hand.
+4. Xavier's artistic acceptance and merge decision.
