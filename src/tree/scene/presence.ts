@@ -7,8 +7,8 @@ export interface ScreenBox {
 }
 
 /** Share of a figure that may be hidden before it steps out, and under which it steps back in. */
-export const HIDE_ABOVE = 0.04;
-export const SHOW_BELOW = 0.015;
+export const HIDE_ABOVE = 0.025;
+export const SHOW_BELOW = 0.01;
 /** A figure comes and goes in a fifth of a second. */
 const FADE_PER_SECOND = 5;
 
@@ -24,19 +24,21 @@ const meet = (a: ScreenBox, b: ScreenBox): ScreenBox => ({
 
 /**
  * Share of a figure's box (0 to 1) that the screen does not show: what lies beyond the edges of a
- * `width` × `height` screen, plus what lies behind the shelf.
+ * `width` × `height` screen, plus what lies behind the `covers` laid over the scene (the shelf,
+ * the intro text while it shows). Covers are taken not to overlap each other.
  */
 export function hiddenShare(
   box: ScreenBox,
   width: number,
   height: number,
-  shelf: ScreenBox | null,
+  covers: readonly (ScreenBox | null)[],
 ): number {
   const whole = area(box);
   if (whole <= 0) return 1;
   const inside = meet(box, { left: 0, top: 0, right: width, bottom: height });
-  const behind = shelf ? area(meet(inside, shelf)) : 0;
-  return 1 - (area(inside) - behind) / whole;
+  let behind = 0;
+  for (const cover of covers) if (cover) behind += area(meet(inside, cover));
+  return Math.min(1, 1 - (area(inside) - behind) / whole);
 }
 
 /** How present a figure is: its opacity, and whether it is meant to be seen. */
@@ -47,8 +49,8 @@ export interface Presence {
 
 /**
  * A figure is seen whole or not at all: it steps out once more than `HIDE_ABOVE` of it would be
- * cut by the shelf or the frame, and back in once nearly all of it shows again, so the shelf never
- * leaves a pair of ears or half a body on screen. `instant` skips the fade.
+ * cut by the shelf, the intro text or the frame, and back in once nearly all of it shows again, so
+ * the shelf never leaves a pair of ears or half a body on screen. `instant` skips the fade.
  */
 export function stepPresence(p: Presence, hidden: number, dt: number, instant = false): Presence {
   if (p.shown && hidden > HIDE_ABOVE) p.shown = false;

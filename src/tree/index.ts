@@ -186,8 +186,9 @@ function buildTree(
   const corner = new THREE.Vector3();
   const photo = [0, 1, 2, 3].map(() => new THREE.Vector3());
   const box: ScreenBox = { left: 0, top: 0, right: 0, bottom: 0 };
-  let shelfBox: ScreenBox | null = null;
-  let shelfAge = 0;
+  /** What the HUD lays over the scene: the shelf, and the intro text while it shows. */
+  const covers: (ScreenBox | null)[] = [null, null];
+  let coversAge = 0;
   /** Set when the view changes at once (mount, back from a tale): presences follow without a fade. */
   let settle = true;
 
@@ -203,7 +204,7 @@ function buildTree(
       box.top = Math.min(box.top, s.y);
       box.bottom = Math.max(box.bottom, s.y);
     }
-    return hiddenShare(box, stage.canvas.clientWidth, stage.canvas.clientHeight, shelfBox);
+    return hiddenShare(box, stage.canvas.clientWidth, stage.canvas.clientHeight, covers);
   };
   /** The eight corners of the box a critter fills, one after the other in the same vector. */
   function* cornersOf(view: CritterView): Generator<THREE.Vector3> {
@@ -222,9 +223,11 @@ function buildTree(
   }
   /** Lets the figures step out or back in for this frame's camera. */
   const updatePresence = (dt: number): void => {
-    if (--shelfAge <= 0) {
-      shelfBox = overlay.shelfBox();
-      shelfAge = 20;
+    // Measured a few times a second: the shelf barely moves, the intro fades with the climb.
+    if (--coversAge <= 0) {
+      covers[0] = overlay.shelfBox();
+      covers[1] = overlay.introBox();
+      coversAge = 6;
     }
     const instant = settle || calm;
     settle = false;

@@ -94,6 +94,8 @@ export function createTreeOverlay(
   announce(text: string): void;
   /** Where the shelf sits on screen, in CSS pixels. */
   shelfBox(): { left: number; top: number; right: number; bottom: number };
+  /** Where the intro text sits on screen, or null once the climb has faded it out. */
+  introBox(): { left: number; top: number; right: number; bottom: number } | null;
   dispose(): void;
 } {
   const el = document.createElement("div");
@@ -187,6 +189,11 @@ export function createTreeOverlay(
     },
     shelfBox() {
       const r = part(".tree-shelf").getBoundingClientRect();
+      return { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+    },
+    introBox() {
+      if (Number(intro.style.opacity || 1) < 0.05) return null;
+      const r = part(".tree-intro-inner").getBoundingClientRect();
       return { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
     },
     dispose() {
