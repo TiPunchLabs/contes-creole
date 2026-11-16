@@ -1,8 +1,9 @@
 import * as THREE from "three";
-import { clamp, lerp } from "@shared/math";
+import { lerp } from "@shared/math";
 import { softSprite } from "@shared/three/soft-sprite";
 // Lossy WebP derivative (quality 88, alpha kept exact) of assets/konteur.png, the kept original.
 import konteurUrl from "../assets/konteur.webp";
+import { konteurSpot } from "./camera";
 import { blobShadow } from "./critters/parts";
 import type { Obstacle } from "./critters/wander";
 import { groundHeight } from "./ground";
@@ -16,11 +17,6 @@ export const KONTEUR_OBSTACLES: Obstacle[] = [
   [KONTEUR_X_WIDE, KONTEUR_Z, 1.9],
   [KONTEUR_X_NARROW, KONTEUR_Z, 1.9],
 ];
-
-/** Where the Konteur sits on the ground (x, z) for a screen aspect: further in on narrow screens. */
-export function konteurSpot(aspect: number): [number, number] {
-  return [lerp(KONTEUR_X_NARROW, KONTEUR_X_WIDE, clamp((aspect - 0.5) / 1.1, 0, 1)), KONTEUR_Z];
-}
 
 /** The storyteller: a photo cut-out billboard at the foot of the tree, with a lantern. */
 export function createKonteur(): {

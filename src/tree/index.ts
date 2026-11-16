@@ -10,7 +10,7 @@ import { detectLite, readLiteEnv, scaleCount } from "./lite";
 import { createTreeOverlay, type TellerBox } from "./overlay/overlay";
 import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { RANDOM_TALE_ACTION, RANDOM_TALE_NONE, eligibleTales, pickRandomTale } from "./random-tale";
-import { cardT, openingStage, treeCam } from "./scene/camera";
+import { cardT, konteurSpot, openingStage, treeCam } from "./scene/camera";
 import { createCards, type CardView } from "./scene/cards";
 import { createLapen } from "./scene/critters/lapen";
 import type { CritterView, Surroundings } from "./scene/critters/parts";
@@ -23,7 +23,7 @@ import {
 } from "./scene/critters/wander";
 import { createZanba } from "./scene/critters/zanba";
 import { FLORA_OBSTACLES } from "./scene/flora";
-import { KONTEUR_OBSTACLES, createKonteur, konteurSpot } from "./scene/konteur";
+import { KONTEUR_OBSTACLES, createKonteur } from "./scene/konteur";
 import { createLandscape } from "./scene/landscape";
 import { EXPOSURE, FOG } from "./scene/palette";
 import { createSky } from "./scene/sky";
@@ -106,6 +106,7 @@ function buildTree(
   const lawn = openingStage(
     () => camera.aspect,
     FLORA_OBSTACLES.map(([x, z, r]) => [x, z, r + 0.9] as const),
+    () => stage.canvas.clientHeight,
   );
   /** On the stage and out of the Konteur's lamplight, which would bleach them. */
   const onStage = (x: number, z: number, r: number): boolean =>
@@ -367,7 +368,7 @@ function buildTree(
     decor += dt * (calm ? CALM_PACE : 1);
     const parallax = calm ? 0.2 : 1;
     t += (target - t) * (1 - Math.exp(-dt * 4.5));
-    treeCam(t, camera.aspect, cam, look);
+    treeCam(t, camera.aspect, cam, look, stage.canvas.clientHeight);
     konteur.place(camera.aspect);
     const fov = fitFov(50, camera.aspect);
     if (diving) {
