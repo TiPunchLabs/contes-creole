@@ -42,6 +42,56 @@ const TRUNK_UP = [1.15, 1.7, 2.2, 2.6, 2.95, 3.3];
 const TRUNK_SNIFF = [0.6, 0.5, 0.5, 0.75, 1.3, 1.9];
 
 /**
+ * One ear, for the right side (mirrored for the left): a leaf with a thick root that sinks into
+ * the temple, a broad rounded top, a lobe that hangs lower and narrower, and a rim that curls
+ * back. Its hollow is painted pink on the front face, inside a wide rim of skin.
+ */
+function earLeaf(skin: THREE.Color, pink: THREE.Color): THREE.BufferGeometry {
+  const geo = painted(SMOOTH, (p, out) => {
+    const hollow =
+      ramp(0.25, 0.75, p.z) * ramp(0.78, 0.45, Math.hypot(p.x - 0.12, p.y)) * ramp(-0.35, 0.1, p.x);
+    out.copy(skin).lerp(pink, hollow * 0.8);
+  });
+  const position = geo.attributes.position;
+  const p = new THREE.Vector3();
+  for (let i = 0; i < position.count; i++) {
+    p.fromBufferAttribute(position, i);
+    const out = Math.max(0, p.x);
+    // Narrower towards the lobe, which hangs lower than the top rises.
+    const taper = 1 - 0.3 * ramp(0.1, -1, p.y);
+    const x = p.x > 0 ? p.x * 0.74 * taper : p.x * 0.2;
+    const y = p.y * (p.y > 0 ? 0.52 : 0.68) - 0.06;
+    // Thick where it leaves the head, thin at the rim, which curls back; the lobe tips forward.
+    const thick = lerp(0.19, 0.045, ramp(-0.6, 0.7, p.x));
+    const z = p.z * thick - 0.13 * out * out + 0.05 * ramp(-0.3, -1, p.y) * out;
+    position.setXYZ(i, x, y, z);
+  }
+  geo.computeVertexNormals();
+  smoothSeams(geo);
+  return geo;
+}
+
+/** Gives the vertices a sphere doubles along its seam and at its poles one shared normal. */
+function smoothSeams(geo: THREE.BufferGeometry): void {
+  const position = geo.attributes.position;
+  const normal = geo.attributes.normal;
+  const sums = new Map<string, THREE.Vector3>();
+  const key = (i: number): string =>
+    `${position.getX(i).toFixed(4)},${position.getY(i).toFixed(4)},${position.getZ(i).toFixed(4)}`;
+  const n = new THREE.Vector3();
+  for (let i = 0; i < position.count; i++) {
+    const sum = sums.get(key(i)) ?? new THREE.Vector3();
+    sums.set(key(i), sum.add(n.fromBufferAttribute(normal, i)));
+  }
+  for (let i = 0; i < position.count; i++) {
+    const sum = sums.get(key(i));
+    if (!sum) continue;
+    n.copy(sum).normalize();
+    normal.setXYZ(i, n.x, n.y, n.z);
+  }
+}
+
+/**
  * Konpè Zanba: big, heavy and slow, bakoua hat. One skin with a paler underside, short legs
  * under a low belly, a trunk and a tail of one piece. He leans into his starts and nods into his
  * stops, his steps carry him (four beats), his belly, ears, trunk and tail follow late. He
@@ -131,17 +181,13 @@ export function createZanba(): CritterView {
     ),
     ...eyes,
   );
-  // Each ear is one thick leaf, pink painted inside its front face.
-  const earGeo = painted(SMOOTH, (p, out) => {
-    const inside = ramp(0.15, 0.55, p.z) * ramp(0.92, 0.68, Math.hypot(p.x, p.y));
-    out.copy(skinColour).lerp(pinkColour, inside);
-  });
+  const earGeo = earLeaf(skinColour, pinkColour);
   const ears = [-1, 1].map((side) => {
+    // Hinged inside the temple, so the root of the ear is always sunk in the head.
     const pivot = new THREE.Group();
-    pivot.position.set(side * 0.46, 0.08, -0.06);
+    pivot.position.set(side * 0.43, 0.1, -0.12);
     const leaf = new THREE.Mesh(earGeo, hide);
-    leaf.position.set(side * 0.3, -0.08, 0);
-    leaf.scale.set(0.44, 0.53, 0.085);
+    leaf.scale.x = side;
     pivot.add(leaf);
     head.add(pivot);
     return { side, pivot, fan: { x: 0.5, v: 0 } as Spring };
