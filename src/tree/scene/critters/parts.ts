@@ -67,6 +67,56 @@ export function painted(
   return copy;
 }
 
+/** One piece of a fused shape: a geometry, its flat colour, its place and its scale. */
+export type Piece = readonly [
+  geo: THREE.BufferGeometry,
+  colour: string,
+  x: number,
+  y: number,
+  z: number,
+  sx: number,
+  sy?: number,
+  sz?: number,
+];
+
+/**
+ * Welds rigid pieces into one vertex-coloured geometry, so a head with its muzzle and cheeks or a
+ * leg with its nails costs one draw call. Pieces must be indexed; texture coordinates are dropped.
+ */
+export function fused(pieces: readonly Piece[]): THREE.BufferGeometry {
+  const total = pieces.reduce((n, [geo]) => n + geo.attributes.position.count, 0);
+  const position = new Float32Array(total * 3);
+  const normal = new Float32Array(total * 3);
+  const colours = new Float32Array(total * 3);
+  const index: number[] = [];
+  const colour = new THREE.Color();
+  const n = new THREE.Vector3();
+  let base = 0;
+  for (const [geo, hex, x, y, z, sx, sy = sx, sz = sx] of pieces) {
+    const p = geo.attributes.position;
+    const from = geo.attributes.normal;
+    colour.set(hex);
+    for (let i = 0; i < p.count; i++) {
+      const k = (base + i) * 3;
+      position[k] = p.getX(i) * sx + x;
+      position[k + 1] = p.getY(i) * sy + y;
+      position[k + 2] = p.getZ(i) * sz + z;
+      n.set(from.getX(i) / sx, from.getY(i) / sy, from.getZ(i) / sz).normalize();
+      normal.set([n.x, n.y, n.z], k);
+      colours.set([colour.r, colour.g, colour.b], k);
+    }
+    const own = geo.index;
+    if (own) for (let i = 0; i < own.count; i++) index.push(base + own.getX(i));
+    base += p.count;
+  }
+  const out = new THREE.BufferGeometry();
+  out.setAttribute("position", new THREE.BufferAttribute(position, 3));
+  out.setAttribute("normal", new THREE.BufferAttribute(normal, 3));
+  out.setAttribute("color", new THREE.BufferAttribute(colours, 3));
+  out.setIndex(index);
+  return out;
+}
+
 /** Smooth 0 → 1 step of `x` between `a` and `b`. */
 export const ramp = (a: number, b: number, x: number): number => {
   const t = clamp((x - a) / (b - a), 0, 1);
@@ -117,26 +167,52 @@ export interface Bendy {
 }
 
 /**
- * Builds a bendable limb: `rings` elliptical rings of `sides` vertices along a curve through the
- * points given to `update`. `radius(u)` returns the half widths across and through the limb at
- * u ∈ [0, 1]; `paint(u, facing)` colours it (facing: 1 on the front line, −1 on the back one).
+ * Builds a bendable limb: `rings` elliptical rings of `sides` vertices along the Catmull-Rom curve
+ * through the `joints` points given to `update`. `radius(u)` returns the half widths across and
+ * through the limb at u ∈ [0, 1]; `paint(u, facing)` colours it (facing: 1 on the front line, −1 on
+ * the back one). The curve's weights and the radii are worked out once; a frame only blends the
+ * points and writes one buffer.
  */
 export function bendy(
   material: THREE.Material,
+  joints: number,
   rings: number,
   sides: number,
   radius: (u: number) => readonly [number, number],
   paint: (u: number, facing: number, out: THREE.Color) => void,
 ): Bendy {
   const count = (rings + 1) * sides + 1;
-  const position = new Float32Array(count * 3);
-  const normal = new Float32Array(count * 3);
+  // Position and normal share one buffer: a single upload per limb and per frame.
+  const data = new Float32Array(count * 6);
   const colours = new Float32Array(count * 3);
   const colour = new THREE.Color();
   const index: number[] = [];
+  /** Per ring: the four control points it blends, their weights for the point and the tangent. */
+  const blend: { at: number[]; w: number[]; d: number[]; rx: number; rz: number }[] = [];
   for (let i = 0; i <= rings; i++) {
+    const u = i / rings;
+    const span = Math.min(joints - 2, Math.floor(u * (joints - 1)));
+    const t = u * (joints - 1) - span;
+    const [rx, rz] = radius(u);
+    blend.push({
+      at: [-1, 0, 1, 2].map((k) => Math.min(joints - 1, Math.max(0, span + k))),
+      w: [
+        (-t * t * t + 2 * t * t - t) / 2,
+        (3 * t * t * t - 5 * t * t + 2) / 2,
+        (-3 * t * t * t + 4 * t * t + t) / 2,
+        (t * t * t - t * t) / 2,
+      ],
+      d: [
+        (-3 * t * t + 4 * t - 1) / 2,
+        (9 * t * t - 10 * t) / 2,
+        (-9 * t * t + 8 * t + 1) / 2,
+        (3 * t * t - 2 * t) / 2,
+      ],
+      rx,
+      rz,
+    });
     for (let j = 0; j < sides; j++) {
-      paint(i / rings, Math.sin((j / sides) * Math.PI * 2), colour);
+      paint(u, Math.sin((j / sides) * Math.PI * 2), colour);
       colours.set([colour.r, colour.g, colour.b], (i * sides + j) * 3);
       if (i < rings) {
         const a = i * sides + j;
@@ -150,61 +226,91 @@ export function bendy(
   colours.set([colour.r, colour.g, colour.b], tip * 3);
   for (let j = 0; j < sides; j++)
     index.push(rings * sides + j, tip, rings * sides + ((j + 1) % sides));
+  /** cos and sin of each side's angle, flat. */
+  const circle = new Float32Array(sides * 2);
+  for (let j = 0; j < sides; j++) {
+    circle[j * 2] = Math.cos((j / sides) * Math.PI * 2);
+    circle[j * 2 + 1] = Math.sin((j / sides) * Math.PI * 2);
+  }
+  const buffer = new THREE.InterleavedBuffer(data, 6);
+  buffer.setUsage(THREE.DynamicDrawUsage);
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", new THREE.BufferAttribute(position, 3));
-  geometry.setAttribute("normal", new THREE.BufferAttribute(normal, 3));
+  geometry.setAttribute("position", new THREE.InterleavedBufferAttribute(buffer, 3, 0));
+  geometry.setAttribute("normal", new THREE.InterleavedBufferAttribute(buffer, 3, 3));
   geometry.setAttribute("color", new THREE.BufferAttribute(colours, 3));
   geometry.setIndex(index);
   // The limb moves every frame: one generous sphere serves culling and picking.
   geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 2);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.frustumCulled = false;
-  const curve = new THREE.CatmullRomCurve3([], false, "centripetal");
-  const c = new THREE.Vector3();
-  const t = new THREE.Vector3();
-  const s = new THREE.Vector3();
-  const f = new THREE.Vector3();
-  const across = new THREE.Vector3(1, 0, 0);
 
   return {
     mesh,
     update(points) {
-      curve.points = points as THREE.Vector3[];
+      let cx = 0;
+      let cy = 0;
+      let cz = 0;
+      let tx = 0;
+      let ty = 1;
+      let tz = 0;
       for (let i = 0; i <= rings; i++) {
-        const u = i / rings;
-        curve.getPoint(u, c);
-        curve.getTangent(u, t);
-        s.copy(across).addScaledVector(t, -across.dot(t)).normalize();
-        f.crossVectors(s, t);
-        const [rx, rz] = radius(u);
-        for (let j = 0; j < sides; j++) {
-          const a = (j / sides) * Math.PI * 2;
-          const cos = Math.cos(a);
-          const sin = Math.sin(a);
-          const k = (i * sides + j) * 3;
-          position[k] = c.x + s.x * cos * rx + f.x * sin * rz;
-          position[k + 1] = c.y + s.y * cos * rx + f.y * sin * rz;
-          position[k + 2] = c.z + s.z * cos * rx + f.z * sin * rz;
+        const ring = blend[i];
+        cx = cy = cz = tx = ty = tz = 0;
+        for (let k = 0; k < 4; k++) {
+          const p = points[ring.at[k]];
+          const w = ring.w[k];
+          const d = ring.d[k];
+          cx += p.x * w;
+          cy += p.y * w;
+          cz += p.z * w;
+          tx += p.x * d;
+          ty += p.y * d;
+          tz += p.z * d;
+        }
+        const tl = 1 / (Math.sqrt(tx * tx + ty * ty + tz * tz) || 1);
+        tx *= tl;
+        ty *= tl;
+        tz *= tl;
+        // Width axis: local x made square to the tangent; front axis: width × tangent.
+        let sx = 1 - tx * tx;
+        let sy = -tx * ty;
+        let sz = -tx * tz;
+        const sl = 1 / (Math.sqrt(sx * sx + sy * sy + sz * sz) || 1);
+        sx *= sl;
+        sy *= sl;
+        sz *= sl;
+        const fx = sy * tz - sz * ty;
+        const fy = sz * tx - sx * tz;
+        const fz = sx * ty - sy * tx;
+        const { rx, rz } = ring;
+        let k = i * sides * 6;
+        for (let j = 0; j < sides; j++, k += 6) {
+          const cos = circle[j * 2];
+          const sin = circle[j * 2 + 1];
+          data[k] = cx + sx * rx * cos + fx * rz * sin;
+          data[k + 1] = cy + sy * rx * cos + fy * rz * sin;
+          data[k + 2] = cz + sz * rx * cos + fz * rz * sin;
           // Normal of the ellipse, good enough for a matte skin.
-          const nx = (cos / rx) * s.x + (sin / rz) * f.x;
-          const ny = (cos / rx) * s.y + (sin / rz) * f.y;
-          const nz = (cos / rx) * s.z + (sin / rz) * f.z;
-          const l = Math.hypot(nx, ny, nz) || 1;
-          normal[k] = nx / l;
-          normal[k + 1] = ny / l;
-          normal[k + 2] = nz / l;
+          const a = cos / rx;
+          const b = sin / rz;
+          const nx = a * sx + b * fx;
+          const ny = a * sy + b * fy;
+          const nz = a * sz + b * fz;
+          const l = 1 / (Math.sqrt(nx * nx + ny * ny + nz * nz) || 1);
+          data[k + 3] = nx * l;
+          data[k + 4] = ny * l;
+          data[k + 5] = nz * l;
         }
       }
-      const [, rz] = radius(1);
-      const k = tip * 3;
-      position[k] = c.x + t.x * rz;
-      position[k + 1] = c.y + t.y * rz;
-      position[k + 2] = c.z + t.z * rz;
-      normal[k] = t.x;
-      normal[k + 1] = t.y;
-      normal[k + 2] = t.z;
-      geometry.attributes.position.needsUpdate = true;
-      geometry.attributes.normal.needsUpdate = true;
+      const reach = blend[rings].rz;
+      const k = tip * 6;
+      data[k] = cx + tx * reach;
+      data[k + 1] = cy + ty * reach;
+      data[k + 2] = cz + tz * reach;
+      data[k + 3] = tx;
+      data[k + 4] = ty;
+      data[k + 5] = tz;
+      buffer.needsUpdate = true;
     },
   };
 }
@@ -226,18 +332,22 @@ export function part(
   return m;
 }
 
-const eyeMat = mat("#2a1d16", { roughness: 0.25 });
-const shineMat = new THREE.MeshBasicMaterial({ color: "#ffffff" });
+const eyeMat = new THREE.MeshStandardMaterial({ roughness: 0.25, vertexColors: true });
+const EYE = new THREE.SphereGeometry(1, 14, 10);
+let eyeGeo: THREE.BufferGeometry | null = null;
 
-/** Glossy round eye with a highlight; scale its y to close the lid. */
+/** Glossy round eye with a highlight, one mesh in a holder; scale the holder's y to close the lid. */
 export function eye(x: number, y: number, z: number, r: number): THREE.Group {
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.add(
-    part(SPHERE, eyeMat, 0, 0, 0, r, r * 1.2, r * 0.8),
-    part(SPHERE, shineMat, r * 0.35, r * 0.45, r * 0.6, r * 0.32),
-  );
-  return g;
+  eyeGeo ??= fused([
+    [EYE, "#2a1d16", 0, 0, 0, 1, 1.2, 0.8],
+    [EYE, "#ffffff", 0.35, 0.45, 0.6, 0.32],
+  ]);
+  const ball = new THREE.Mesh(eyeGeo, eyeMat);
+  ball.scale.setScalar(r);
+  const holder = new THREE.Group();
+  holder.position.set(x, y, z);
+  holder.add(ball);
+  return holder;
 }
 
 /** Yellow / red / green madras check, repeated around Lapen's scarf. */

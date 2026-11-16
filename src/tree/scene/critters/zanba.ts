@@ -7,22 +7,25 @@ import {
   blink,
   blobShadow,
   eye,
+  fused,
   gazeYaw,
   mat,
   noise,
   painted,
-  part,
   place,
   ramp,
   springTo,
   tag,
   type CritterView,
+  type Piece,
   type Spring,
 } from "./parts";
 
 const SKIN = "#b0a2b9";
 const LIGHT = "#cdbfd2";
 const PINK = "#e9b3ad";
+const NAIL = "#f3e6d2";
+const STRAW = "#e2c07a";
 const SCALE = 0.8;
 /** Hip height and leg swing: with wander.ts's `step`, one cycle of the legs covers 0.72 m. */
 const HIP = 0.66;
@@ -42,11 +45,7 @@ const TRUNK_SNIFF = [0.6, 0.5, 0.5, 0.75, 1.3, 1.9];
  */
 export function createZanba(): CritterView {
   const group = new THREE.Group();
-  const skin = mat(SKIN);
   const hide = mat("#ffffff", { vertexColors: true });
-  const pink = mat(PINK);
-  const nail = mat("#f3e6d2");
-  const straw = mat("#e2c07a");
   const skinColour = new THREE.Color(SKIN);
   const lightColour = new THREE.Color(LIGHT);
   const pinkColour = new THREE.Color(PINK);
@@ -82,6 +81,19 @@ export function createZanba(): CritterView {
     ].map(([x, y]) => new THREE.Vector2(x, y)),
     26,
   );
+  const legWithNails = fused([
+    [legGeo, SKIN, 0, 0, 0, 1],
+    ...[-1, 0, 1].map((k): Piece => [
+      SPHERE,
+      NAIL,
+      k * 0.11,
+      -0.6,
+      0.25 - Math.abs(k) * 0.035,
+      0.055,
+      0.05,
+      0.04,
+    ]),
+  ]);
   const legs = (
     [
       [0.41, 0.5, 0],
@@ -92,9 +104,7 @@ export function createZanba(): CritterView {
   ).map(([x, z, phase]) => {
     const g = new THREE.Group();
     g.position.set(x, HIP, z);
-    g.add(new THREE.Mesh(legGeo, skin));
-    for (const k of [-1, 0, 1])
-      g.add(part(SPHERE, nail, k * 0.11, -0.6, 0.25 - Math.abs(k) * 0.035, 0.055, 0.05, 0.04));
+    g.add(new THREE.Mesh(legWithNails, hide));
     group.add(g);
     return { g, phase };
   });
@@ -104,9 +114,14 @@ export function createZanba(): CritterView {
   body.add(head);
   const eyes = [eye(0.22, 0.1, 0.42, 0.07), eye(-0.22, 0.1, 0.42, 0.07)];
   head.add(
-    part(SMOOTH, skin, 0, 0, 0, 0.58, 0.55, 0.52),
-    part(SPHERE, pink, 0.32, -0.12, 0.35, 0.09, 0.06, 0.04),
-    part(SPHERE, pink, -0.32, -0.12, 0.35, 0.09, 0.06, 0.04),
+    new THREE.Mesh(
+      fused([
+        [SMOOTH, SKIN, 0, 0, 0, 0.58, 0.55, 0.52],
+        [SPHERE, PINK, 0.32, -0.12, 0.35, 0.09, 0.06, 0.04],
+        [SPHERE, PINK, -0.32, -0.12, 0.35, 0.09, 0.06, 0.04],
+      ]),
+      hide,
+    ),
     ...eyes,
   );
   // Each ear is one thick leaf, pink painted inside its front face.
@@ -126,6 +141,7 @@ export function createZanba(): CritterView {
   });
   const trunk = bendy(
     hide,
+    TRUNK_REST.length + 1,
     18,
     12,
     (u) => {
@@ -148,12 +164,18 @@ export function createZanba(): CritterView {
   hat.rotation.set(-0.12, 0, -0.12);
   head.add(hat);
   hat.add(
-    part(new THREE.ConeGeometry(0.34, 0.34, 36), straw, 0, 0.17, 0),
-    part(new THREE.CylinderGeometry(0.58, 0.6, 0.035, 48), straw, 0, 0.01, 0),
-    part(new THREE.CylinderGeometry(0.3, 0.32, 0.06, 36), mat("#c4572e"), 0, 0.06, 0),
+    new THREE.Mesh(
+      fused([
+        [new THREE.ConeGeometry(0.34, 0.34, 36), STRAW, 0, 0.17, 0, 1],
+        [new THREE.CylinderGeometry(0.58, 0.6, 0.035, 48), STRAW, 0, 0.01, 0, 1],
+        [new THREE.CylinderGeometry(0.3, 0.32, 0.06, 36), "#c4572e", 0, 0.06, 0, 1],
+      ]),
+      hide,
+    ),
   );
   const tail = bendy(
     hide,
+    3,
     8,
     8,
     (u) => {

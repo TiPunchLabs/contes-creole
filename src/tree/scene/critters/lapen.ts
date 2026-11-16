@@ -7,6 +7,7 @@ import {
   blink,
   blobShadow,
   eye,
+  fused,
   gazeYaw,
   liftShadow,
   madrasTexture,
@@ -48,7 +49,6 @@ export function createLapen(): CritterView {
   const fur = mat(FUR);
   const skin = mat("#ffffff", { vertexColors: true });
   const cream = mat(CREAM);
-  const pink = mat(PINK);
   const madras = mat("#ffffff", { map: madrasTexture() });
   const furColour = new THREE.Color(FUR);
   const creamColour = new THREE.Color(CREAM);
@@ -75,14 +75,15 @@ export function createLapen(): CritterView {
   scarf.rotation.x = Math.PI / 2 - 0.15;
   body.add(torso, tail, scarf, part(SPHERE, madras, 0.1, 0.88, 0.27, 0.07, 0.1, 0.05));
 
+  const legGeo = fused([
+    [SMOOTH, FUR, 0, 0.02, -0.02, 0.18, 0.24, 0.26],
+    [SPHERE, CREAM, 0, -0.235, 0.17, 0.1, 0.065, 0.23],
+  ]);
   // Haunch and long foot on one pivot: the feet leave the ground with him and tuck in the air.
   const legs = [-1, 1].map((side) => {
     const leg = new THREE.Group();
     leg.position.set(side * 0.19, 0.3, -0.02);
-    leg.add(
-      part(SMOOTH, fur, 0, 0.02, -0.02, 0.18, 0.24, 0.26),
-      part(SPHERE, cream, side * 0.01, -0.235, 0.17, 0.1, 0.065, 0.23),
-    );
+    leg.add(new THREE.Mesh(legGeo, skin));
     body.add(leg);
     return leg;
   });
@@ -100,17 +101,23 @@ export function createLapen(): CritterView {
   body.add(head);
   const eyes = [eye(0.125, 0.05, 0.245, 0.055), eye(-0.125, 0.05, 0.245, 0.055)];
   head.add(
-    part(SMOOTH, fur, 0, 0, 0, 0.31, 0.29, 0.29),
-    part(SPHERE, cream, 0, -0.085, 0.2, 0.165, 0.115, 0.13),
-    part(SPHERE, pink, 0, -0.025, 0.32, 0.05, 0.038, 0.035),
-    part(SPHERE, pink, 0.2, -0.08, 0.185, 0.06, 0.04, 0.03),
-    part(SPHERE, pink, -0.2, -0.08, 0.185, 0.06, 0.04, 0.03),
+    new THREE.Mesh(
+      fused([
+        [SMOOTH, FUR, 0, 0, 0, 0.31, 0.29, 0.29],
+        [SPHERE, CREAM, 0, -0.085, 0.2, 0.165, 0.115, 0.13],
+        [SPHERE, PINK, 0, -0.025, 0.32, 0.05, 0.038, 0.035],
+        [SPHERE, PINK, 0.2, -0.08, 0.185, 0.06, 0.04, 0.03],
+        [SPHERE, PINK, -0.2, -0.08, 0.185, 0.06, 0.04, 0.03],
+      ]),
+      skin,
+    ),
     ...eyes,
   );
   // Each ear is one bent blade, pink inside; root, middle and tip are laid out every frame.
   const ears = [-1, 1].map((side) => {
     const ear = bendy(
       skin,
+      3,
       10,
       12,
       (u) => [0.035 + 0.07 * Math.sin(Math.PI * clamp(u * 0.88 + 0.1, 0, 1)), 0.036 - u * 0.016],
