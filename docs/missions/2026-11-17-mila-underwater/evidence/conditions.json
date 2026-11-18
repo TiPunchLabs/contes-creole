@@ -1,0 +1,62 @@
+{
+  "renderer": "ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2)",
+  "browser": "chromium 157.0.8103.78",
+  "channel": "chrome",
+  "headedPerf": true,
+  "builds": {
+    "baseline": "d60c1a66dfe0c1e5068b6cd97650aad65ab74d67",
+    "final": "3d09931b0a4af564e96bba0a8e4c8ff9cbe291a9",
+    "superseded": "f92d8e28ca85e37e9cb532f2fae41b9f17671ffe (after-f92d8e2 round, kept under Q/after* but not used)",
+    "correctionsRound": "f645de058f6ac4f451021b83ec0afa47d2ce49a7 (Q/o-dist, LABEL o-f645de0)"
+  },
+  "launchArgs": {
+    "capped": ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"],
+    "uncapped": [
+      "--enable-gpu",
+      "--ignore-gpu-blocklist",
+      "--use-gl=angle",
+      "--use-angle=gl-egl",
+      "--disable-gpu-vsync",
+      "--disable-frame-rate-limit"
+    ]
+  },
+  "env": {
+    "__EGL_VENDOR_LIBRARY_FILENAMES": "/usr/share/glvnd/egl_vendor.d/10_nvidia.json"
+  },
+  "viewports": {
+    "desktop": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "deviceScaleFactor": 1
+    },
+    "tablet": {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "deviceScaleFactor": 1
+    },
+    "mobile": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "deviceScaleFactor": 2,
+      "isMobile": true,
+      "hasTouch": true
+    }
+  },
+  "supersededConditionsNote": "The earlier headless f92d8e2 round recorded conditions.renderer = ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2) and browser chromium 157.0.8103.78 (headless).",
+  "commands": [
+    "perf (headed): QA_CHANNEL=chrome DISPLAY=:0 HEADED=1 PERF_RUNS=1 PERF_PASSES=capped.desktop,capped.mobile,uncapped.desktop nice -n 19 node qa/mila-underwater.mjs, alternating B F x3, OUT=$Q/perf-headed/<B|F>-r<n>/ (SITE 4198 baseline, 4197 final)",
+    "links (headed, uncapped): HEADED=1 ONLY=links OUT=$Q/links/<build>/",
+    "final headless: ONLY=shots,motion,leak,journey,trans OUT=$Q/final/; ONLY=text OUT=$Q/final-text/; REDUCED=1 ONLY=shots,motion VPS=desktop,mobile OUT=$Q/final-reduced/; CPU_THROTTLE=8 ONLY=low VPS=desktop,mobile OUT=$Q/final-low/; ONLY=determinism OUT=$Q/final-det/ and $Q/baseline-det/; qa/mila.mjs, mila-nav.mjs, mila-lang.mjs OUT=$Q/final-regress/<suite>/",
+    "baseline material reused from Q/baseline, Q/baseline-text, Q/baseline-reduced, Q/baseline-regress (d60c1a6 runs of the previous session)",
+    "corrections round: headless ONLY=shots,motion VPS=desktop,mobile / journey / trans OUT=$Q/o/; regress OUT=$Q/o-regress/; headed HEADED=1 ONLY=links OUT=$Q/o/; headed PERF_RUNS=1 PERF_PASSES=capped.desktop,capped.mobile,uncapped.desktop alternating baseline then final OUT=$Q/o-perf/<B|F>/; all nice -n 19"
+  ],
+  "timing": "perf-headed round: 2451 s wall, system-wide busy cores avg 1.82 of 16 (all processes on the machine, from /proc/stat); headless functional chain: 4911 s wall",
+  "note": "All processes started under nice -n 19; one browser at a time.",
+  "timing2": "corrections round: headless chain 3556 s, whole round 4452 s wall"
+}

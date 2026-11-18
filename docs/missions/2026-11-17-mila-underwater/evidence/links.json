@@ -1,0 +1,90 @@
+{
+  "baseline": {
+    "label": "baseline",
+    "date": "2026-11-18T07:05:15.605Z",
+    "headed": true,
+    "linksBeforePage1Shown": 119,
+    "linksAfterPage1Shown": 13,
+    "perPage": {
+      "Page 01": 4,
+      "Page 03": 7,
+      "Page 06": 2
+    },
+    "links": [
+      {
+        "page": "Page 01",
+        "frame": 8622,
+        "frameMs": 1.8
+      },
+      {
+        "page": "Page 01",
+        "frame": 8638,
+        "frameMs": 1.9
+      },
+      {
+        "page": "Page 01",
+        "frame": 9010,
+        "frameMs": 2.8
+      },
+      {
+        "page": "Page 01",
+        "frame": 9023,
+        "frameMs": 3
+      },
+      {
+        "page": "Page 03",
+        "frame": 15217,
+        "frameMs": 2.9
+      },
+      {
+        "page": "Page 03",
+        "frame": 15256,
+        "frameMs": 3.3
+      },
+      {
+        "page": "Page 03",
+        "frame": 15272,
+        "frameMs": 3
+      },
+      {
+        "page": "Page 03",
+        "frame": 15359,
+        "frameMs": 2.8
+      },
+      {
+        "page": "Page 03",
+        "frame": 15412,
+        "frameMs": 3.2
+      },
+      {
+        "page": "Page 03",
+        "frame": 15427,
+        "frameMs": 3.3
+      },
+      {
+        "page": "Page 03",
+        "frame": 15523,
+        "frameMs": 2.8
+      },
+      {
+        "page": "Page 06",
+        "frame": 27701,
+        "frameMs": 3
+      },
+      {
+        "page": "Page 06",
+        "frame": 30178,
+        "frameMs": 1.9
+      }
+    ]
+  },
+  "final": {
+    "label": "final",
+    "date": "2026-11-18T07:03:27.855Z",
+    "headed": true,
+    "linksBeforePage1Shown": 97,
+    "linksAfterPage1Shown": 0,
+    "perPage": {},
+    "links": []
+  }
+}

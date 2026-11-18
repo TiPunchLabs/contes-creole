@@ -1,0 +1,52 @@
+{
+  "desktop.6-7": {
+    "baseline": [7650, 7644],
+    "final": [7649, 7645],
+    "deltaMs": 0.0
+  },
+  "desktop.7-8": {
+    "baseline": [5445, 5447],
+    "final": [5430, 5448],
+    "deltaMs": -7.0
+  },
+  "desktop.8-9": {
+    "baseline": [5448, 5446],
+    "final": [5446, 5430],
+    "deltaMs": -9.0
+  },
+  "desktop.9-10": {
+    "baseline": [5845, 5846],
+    "final": [5846, 5845],
+    "deltaMs": 0.0
+  },
+  "desktop.10-11": {
+    "baseline": [7647, 7647],
+    "final": [7648, 7647],
+    "deltaMs": 0.5
+  },
+  "mobile.6-7": {
+    "baseline": [7689, 7686],
+    "final": [7677, 7680],
+    "deltaMs": -9.0
+  },
+  "mobile.7-8": {
+    "baseline": [5479, 5465],
+    "final": [5480, 5479],
+    "deltaMs": 7.5
+  },
+  "mobile.8-9": {
+    "baseline": [5481, 5461],
+    "final": [5481, 5463],
+    "deltaMs": 1.0
+  },
+  "mobile.9-10": {
+    "baseline": [5878, 5879],
+    "final": [5879, 5879],
+    "deltaMs": 0.5
+  },
+  "mobile.10-11": {
+    "baseline": [7679, 7681],
+    "final": [7681, 7680],
+    "deltaMs": 0.5
+  }
+}

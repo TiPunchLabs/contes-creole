@@ -1,0 +1,105 @@
+{
+  "label": "final-3d09931-low-t8",
+  "date": "2026-11-18T08:28:42.451Z",
+  "cpuThrottle": 8,
+  "viewports": {
+    "desktop": {
+      "atPage1": "2",
+      "pages": {
+        "7": {
+          "quality": "0",
+          "canvas": {
+            "width": 1440,
+            "height": 900,
+            "cssWidth": 1440,
+            "cssHeight": 900,
+            "dpr": 1,
+            "effectivePixelRatio": 1
+          }
+        },
+        "8": {
+          "quality": "0",
+          "canvas": {
+            "width": 1440,
+            "height": 900,
+            "cssWidth": 1440,
+            "cssHeight": 900,
+            "dpr": 1,
+            "effectivePixelRatio": 1
+          }
+        },
+        "9": {
+          "quality": "0",
+          "canvas": {
+            "width": 1440,
+            "height": 900,
+            "cssWidth": 1440,
+            "cssHeight": 900,
+            "dpr": 1,
+            "effectivePixelRatio": 1
+          }
+        },
+        "10": {
+          "quality": "0",
+          "canvas": {
+            "width": 1440,
+            "height": 900,
+            "cssWidth": 1440,
+            "cssHeight": 900,
+            "dpr": 1,
+            "effectivePixelRatio": 1
+          }
+        }
+      }
+    },
+    "mobile": {
+      "atPage1": "2",
+      "pages": {
+        "7": {
+          "quality": "0",
+          "canvas": {
+            "width": 390,
+            "height": 844,
+            "cssWidth": 390,
+            "cssHeight": 844,
+            "dpr": 2,
+            "effectivePixelRatio": 1
+          }
+        },
+        "8": {
+          "quality": "0",
+          "canvas": {
+            "width": 390,
+            "height": 844,
+            "cssWidth": 390,
+            "cssHeight": 844,
+            "dpr": 2,
+            "effectivePixelRatio": 1
+          }
+        },
+        "9": {
+          "quality": "0",
+          "canvas": {
+            "width": 390,
+            "height": 844,
+            "cssWidth": 390,
+            "cssHeight": 844,
+            "dpr": 2,
+            "effectivePixelRatio": 1
+          }
+        },
+        "10": {
+          "quality": "0",
+          "canvas": {
+            "width": 390,
+            "height": 844,
+            "cssWidth": 390,
+            "cssHeight": 844,
+            "dpr": 2,
+            "effectivePixelRatio": 1
+          }
+        }
+      }
+    }
+  }
+}
