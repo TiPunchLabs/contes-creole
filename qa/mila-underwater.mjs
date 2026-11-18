@@ -9,11 +9,12 @@
 // with the DOM rects and colours of the text, desktop also in French), determinism (pairwise MAE of
 // DET_RUNS page-7 stills), links (linkProgram calls after page 1 is shown, per page, with the frame
 // time of the frame holding each; HEADED=1 UNCAP default), conch (stills around the living conch of
-// page 9 at two scales, CONCH_TAG; CONCH_REC=x,y,w,h records a clipped sequence), longframes (page 9, uncapped: per-frame
+// page 9 at two scales, CONCH_TAG; CONCH_REC=x,y,w,h records a clipped sequence), crab (page 5 and the
+// turn to page 6 at two scales), longframes (page 9, uncapped: per-frame
 // interval, rAF callback time, heap and long tasks for variants B1-B4; LF_VARIANTS, LF_RUNS, LF_SLOW_MS, LF_WIN; LF_SEQ=B2,B1,B2 explicit order, LF_PROFILE=1 CDP CPU profile, LF_TRACE=1 Chrome trace).
 // Modes: shots (fake clock, stills + "scène seule" ), motion (fake clock, frame
 // sequences, mp4 and contact sheets via ffmpeg/montage), perf (real clock, uncapped and vsync-capped,
-// 3 runs per viewport), leak (6 open/close cycles, GL objects and JS heap), journey (1 -> 12, back to
+// 3 runs per viewport), leak (LEAK_CYCLES open/close cycles, default 6, desktop and mobile: live GL objects, contexts, JS heap), journey (1 -> 12, back to
 // 6, forward to 10, resizes, language switch, console errors). GPU only: aborts on a non-NVIDIA renderer.
 // Usage: [SITE=url] [OUT=dir] [ONLY=shots,motion,perf,leak,journey] [VPS=desktop,tablet,mobile]
 //        [QA_CHANNEL=chrome] [LABEL=text] [REDUCED=1] [CPU_THROTTLE=4] [QA_INJECT_JS=js]
@@ -838,6 +839,46 @@ async function conch() {
   }
 }
 
+/** The crab of page 5: stills on the settled page and during the turn to page 6 (debris cleared first), at a normal and a doubled scale. */
+async function crab() {
+  const tag = process.env.CONCH_TAG ?? "build";
+  const browser = await launch();
+  try {
+    for (const vp of vpsFor(["desktop", "mobile"])) {
+      const base = VIEWPORTS[vp];
+      for (const dsf of [base.deviceScaleFactor, base.deviceScaleFactor * 2]) {
+        const ctx = await browser.newContext({ ...base, deviceScaleFactor: dsf });
+        const p = await ctx.newPage();
+        await p.clock.install({ time: FAKE_TIME });
+        const d = driver(p, vp === "mobile", true);
+        await load(p, true);
+        await d.open();
+        await d.wait(2000);
+        const name = (k) => `${OUT}${tag}-${vp}-x${dsf}-crab-${k}.png`;
+        await d.goTo(5);
+        await d.wait(6000);
+        await snap(p, name("p05"));
+        await press(p.locator(".mila-next"), vp === "mobile");
+        let t = 0;
+        for (const [k, at] of [
+          ["t1", 1000],
+          ["t2", 2500],
+          ["t3", 4000],
+          ["t4", 6000],
+        ]) {
+          await p.clock.runFor(at - t);
+          t = at;
+          await snap(p, name(k));
+        }
+        console.log("crab", tag, vp, dsf);
+        await ctx.close();
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+}
+
 /** Runs an ffmpeg encode of numbered PNGs at `fps`, scaled to even dimensions. */
 function encode(dir, fps, out) {
   execFileSync(
@@ -1156,36 +1197,48 @@ async function heap(cdp) {
 /** Six open -> page 8 -> back cycles: Mila GL contexts, live objects and JS heap, in the tale and on the tree. */
 async function leak() {
   const browser = await launch();
-  const out = { label: LABEL, date: new Date().toISOString(), cycles: [] };
+  const cycles = Number(process.env.LEAK_CYCLES ?? 6);
+  const out = {
+    label: LABEL,
+    date: new Date().toISOString(),
+    renderer: conditions.renderer,
+    viewports: {},
+  };
   try {
-    const { ctx, p } = await newPage(browser, "desktop", { instrument: true });
-    const cdp = await ctx.newCDPSession(p);
-    await cdp.send("HeapProfiler.enable");
-    const d = driver(p, false, false);
-    await load(p, false);
-    const sample = async () => {
-      const gl = await p.evaluate(() => window.__gl.report());
-      return {
-        contextsCreated: gl.created,
-        contextsLost: gl.lost,
-        contextsCollected: gl.collected,
-        liveGl: gl.live,
-        heap: await heap(cdp),
+    for (const vp of vpsFor(["desktop", "mobile"])) {
+      const touch = vp === "mobile";
+      const rec = [];
+      out.viewports[vp] = rec;
+      if (vp === "desktop") out.cycles = rec;
+      const { ctx, p } = await newPage(browser, vp, { instrument: true });
+      const cdp = await ctx.newCDPSession(p);
+      await cdp.send("HeapProfiler.enable");
+      const d = driver(p, touch, false);
+      await load(p, false);
+      const sample = async () => {
+        const gl = await p.evaluate(() => window.__gl.report());
+        return {
+          contextsCreated: gl.created,
+          contextsLost: gl.lost,
+          contextsCollected: gl.collected,
+          liveGl: gl.live,
+          heap: await heap(cdp),
+        };
       };
-    };
-    for (let c = 1; c <= 6; c++) {
-      await d.open();
-      await d.goTo(8);
-      await d.wait(2000);
-      const inTale = await sample();
-      await p.locator(".mila-back").click();
-      await d.wait(2000);
-      const onTree = await sample();
-      out.cycles.push({ cycle: c, inTalePage8: inTale, onTree });
-      console.log("leak cycle", c, JSON.stringify(onTree));
-      writeJSON("leak.json", out);
+      for (let c = 1; c <= cycles; c++) {
+        await d.open();
+        await d.goTo(8);
+        await d.wait(2000);
+        const inTale = await sample();
+        await press(p.locator(".mila-back"), touch);
+        await d.wait(2000);
+        const onTree = await sample();
+        rec.push({ cycle: c, inTalePage8: inTale, onTree });
+        console.log("leak", vp, "cycle", c, JSON.stringify(onTree));
+        writeJSON("leak.json", out);
+      }
+      await ctx.close();
     }
-    await ctx.close();
   } finally {
     await browser.close();
   }
@@ -1486,6 +1539,7 @@ const RUN = {
   links,
   longframes,
   conch,
+  crab,
 };
 try {
   for (const mode of MODES) {
