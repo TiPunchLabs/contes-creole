@@ -2582,6 +2582,15 @@ void main(){
   /** Size of the conch lying on the beach (the prototype's was 0.95, nearly Mila's height). */
   const CONCH_ON_SAND = 0.42;
   let liveConch: THREE.Group;
+  /**
+   * Length of the living conch's shell (metres). The prototype's was 1.35, longer than Mila is tall
+   * (1.25 m): at 0.95 it is still a very old, very large lambi, and she is the taller of the two.
+   */
+  const LIVE_CONCH = 0.95;
+  /** Its two eye stalks, which sway. */
+  const conchEyes: { stalk: THREE.Group; s: number }[] = [];
+  /** The light Mila holds her hand out to on page 9, above the living conch. */
+  const LIGHT_9 = V3(DEEP.x + 0.3, DEEP.y + 1.45, DEEP.z + 0.4);
   let pearl: THREE.Group;
   let pearlHalo: THREE.Sprite;
   function buildConches(): void {
@@ -2597,38 +2606,70 @@ void main(){
     bigConch.castShadow = true;
     bigConch.receiveShadow = true;
     scene.add(bigConch);
-    // living conch: algae-covered shell with foot and eyes
+    // The living conch: a grown lambi at rest on the sand, its foot out under the lip and its two
+    // eyes up on their stalks, turned to the pearl and to Mila. Its shell is sun-bleached under a
+    // little algae, lighter than the sea floor, and shows the camera its flared lip.
     const lg = conchGeometry({
-      outer: "#8f8455",
-      band: "#5d6a3a",
-      lipCol: "#e4a08c",
+      outer: "#d9c08e",
+      band: "#8c9a5a",
+      lipCol: "#f2a48c",
       inA: "#ffc7b0",
       inB: "#e56b78",
     });
     liveConch = new THREE.Group();
     const sh = new THREE.Mesh(lg, conchMaterial(U_liveGlow));
-    sh.scale.setScalar(1.35);
-    sh.rotation.set(0, 0.4, -Math.PI / 2 + 0.1);
+    // mirrored, so the lip opens on the side the camera of page 9 sees
+    sh.scale.set(LIVE_CONCH, LIVE_CONCH, -LIVE_CONCH);
+    sh.rotation.set(1.0, 0.25, -Math.PI / 2 + 0.16);
+    sh.position.set(0.02, 0.3 * LIVE_CONCH, 0);
+    sh.castShadow = true;
+    sh.receiveShadow = true;
     liveConch.add(sh);
-    const footM = toon("#c9734c");
-    const foot = new THREE.Mesh(new THREE.SphereGeometry(0.18, 14, 10), footM);
-    foot.scale.set(1.9, 0.45, 1.1);
-    foot.position.set(-0.15, -0.36, 0);
-    liveConch.add(foot);
-    const eyeM = toon("#f1e6c8");
-    const pupilM = toon("#1a1a1a");
+    const soft = new THREE.Group();
+    soft.scale.setScalar(LIVE_CONCH);
+    liveConch.add(soft);
+    const footM = toonSoft("#e58f66");
+    const foot = new THREE.Mesh(new THREE.SphereGeometry(0.18, 24, 14), footM);
+    foot.scale.set(2.5, 0.42, 1.2);
+    foot.position.set(-0.12, 0.05, 0);
+    foot.receiveShadow = true;
+    soft.add(foot);
+    const snout = new THREE.Mesh(new THREE.SphereGeometry(0.085, 18, 12), footM);
+    snout.scale.set(1.7, 0.85, 1.05);
+    snout.position.set(-0.52, 0.075, 0);
+    soft.add(snout);
+    const eyeM = toonSoft("#f6ecc9");
+    const pupilM = toon("#1a1210");
     for (const s of [-1, 1]) {
-      liveConch.add(
-        limb(V3(-0.55, -0.35, 0.2 + s * 0.06), V3(-0.72, -0.18, 0.22 + s * 0.1), 0.016, footM),
-      );
-      const e = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 8), eyeM);
-      e.position.set(-0.73, -0.16, 0.22 + s * 0.1);
-      liveConch.add(e);
-      const pu = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 6), pupilM);
-      pu.position.set(-0.755, -0.155, 0.22 + s * 0.1);
-      liveConch.add(pu);
+      // each stalk is rooted inside the head and turns on that root when it sways
+      const stalk = new THREE.Group();
+      stalk.position.set(-0.5, 0.1, s * 0.055);
+      const tip = V3(-0.13, 0.24, s * 0.05);
+      stalk.add(limb(V3(0, 0, 0), tip, 0.02, footM));
+      const e = new THREE.Mesh(new THREE.SphereGeometry(0.04, 14, 10), eyeM);
+      e.position.copy(tip);
+      stalk.add(e);
+      const pu = new THREE.Mesh(new THREE.SphereGeometry(0.02, 10, 8), pupilM);
+      pu.position.set(tip.x - 0.028, tip.y + 0.006, tip.z + s * 0.004);
+      stalk.add(pu);
+      soft.add(stalk);
+      conchEyes.push({ stalk, s });
     }
-    liveConch.position.set(DEEP.x + 0.6, DEEP.y + 0.55, DEEP.z + 0.4);
+    {
+      const lx = DEEP.x + 0.6;
+      const lz = DEEP.z + 0.4;
+      // on the sand at the lowest point under its foot, a finger deep: no gap, whatever the slope
+      let low = Infinity;
+      for (const [dx, dz] of [
+        [0, 0],
+        [0.35, 0],
+        [-0.35, 0],
+        [0, 0.2],
+        [0, -0.2],
+      ])
+        low = Math.min(low, groundH(lx + dx * LIVE_CONCH, lz + dz * LIVE_CONCH));
+      liveConch.position.set(lx, low - 0.015, lz);
+    }
     liveConch.rotation.y = 0.9;
     scene.add(liveConch);
     // the pearl: it stays at the bottom
@@ -2648,6 +2689,8 @@ void main(){
         color: new THREE.Color(1, 0.85, 0.85),
         transparent: true,
         depthWrite: false,
+        // a glow, not a disc: the sand it lies on must not cut it along a line
+        depthTest: false,
         blending: THREE.AdditiveBlending,
         opacity: 0.8,
       }),
@@ -4039,9 +4082,7 @@ void main(){
       (!!trans && trans.to === 10 && trans.from === 9 && trans.t > 0.3) ||
       (!!trans && trans.from === 10 && trans.to === 11 && trans.t < 0.45);
     gesture.hug = lerp(gesture.hug, hugging ? 1 : 0, Math.min(1, rdt * 2.5));
-    const lightLocal = M.body.worldToLocal(
-      V3(liveConch.position.x - 0.3, liveConch.position.y + 0.9, liveConch.position.z),
-    );
+    const lightLocal = M.body.worldToLocal(tmpV.copy(LIGHT_9));
     // arms
     const wS = M.swimW;
     const wH = (1 - wS) * M.hold;
@@ -4491,6 +4532,10 @@ void main(){
     (pearlHalo.material as THREE.SpriteMaterial).opacity = 0.7 + 0.3 * Math.sin(wtime * 2);
     pearl.position.y += Math.sin(wtime * 1.3) * 0.0006 * motion;
     U_liveGlow.value = 0.1 + (page === 9 ? 0.25 + 0.15 * Math.sin(wtime * 2) : 0);
+    for (const { stalk, s } of conchEyes) {
+      stalk.rotation.z = Math.sin(wtime * 0.7 + s) * 0.1;
+      stalk.rotation.x = Math.sin(wtime * 0.9 + s * 2) * 0.08;
+    }
 
     updateSigns(rdt, T, wtime);
     for (let i = bursts.length - 1; i >= 0; i--) {
@@ -4601,7 +4646,7 @@ void main(){
     const homes = [
       V3(crab.base.x, crab.base.y + 0.45, crab.base.z),
       V3(MEADOW.x + 0.5, MEADOW.y + 1.6, MEADOW.z - 0.5),
-      V3(liveConch.position.x - 0.3, liveConch.position.y + 0.9, liveConch.position.z),
+      LIGHT_9.clone(),
     ];
     const mp = mila.g.position;
     const up = mila.swimW > 0.5 ? 1.15 : 1.25;
