@@ -3,8 +3,12 @@
 // inside a solid (rocks, corals, the conches, the pearl, the debris, the ground). Needs a build with
 // the read-only probe of qa/mila-probe-inject.mjs. Fake clock, GPU only (functional check, not a
 // frame-rate measurement).
-// Bodies are stood in for by capsules and flattened spheres (see `PROXIES` below, written to the
-// result): a pair counts when its proxies overlap by more than TOL metres.
+// Bodies are stood in for by capsules and ellipsoids (see `PROXIES` below, written to the result).
+// Every living form is tested against every other living form, every solid and the ground; a pair
+// counts when its stand-ins overlap by more than TOL metres. The gap is computed by
+// qa/mila-clearance-gap.mjs, which never reports an overlap shallower than it is (tested there,
+// with known overlaps as controls). The result lists every pair kind with how often it came close
+// enough to be measured (`checks`), so a kind with no overlap is told apart from one never tested.
 // Usage: SITE=url OUT=dir [VPS=desktop,mobile] [TOL=0.02] [REST_SEA=20000] [REST_LAND=6000]
 //        [BACK=1] [SOLIDS=solids.json] [QA_CHANNEL=chrome] node qa/mila-clearance.mjs
 // SOLIDS: corals of a build that does not list them (a file written by a run on one that does).
@@ -20,6 +24,7 @@
 import { chromium } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { clearanceGeometry } from "./mila-clearance-gap.mjs";
 
 const SITE = process.env.SITE ?? "http://localhost:4196/";
 const OUT = (process.env.OUT ?? new URL("./out/mila-clearance/", import.meta.url).pathname).replace(
@@ -47,23 +52,49 @@ const VIEWPORTS = {
 
 /** What stands in for each body (metres, in the body's own frame unless stated). */
 const PROXIES = {
-  mila: "capsules: dress (0,0.50,0)-(0,0.86,0) r 0.19; head sphere r 0.13; thighs and shins r 0.035; upper arms r 0.025, forearms r 0.022. Hair buns, hands, feet and the conch she carries are left out",
+  mila: "capsules: dress (0,0.50,0)-(0,0.86,0) r 0.19; head ball r 0.13; thighs and shins r 0.035; upper arms r 0.025, forearms r 0.022. Hair buns, hands, feet and the conch she carries are left out. Against the ground the shins are left out too (she stands on it)",
   fish: "capsule along the body, 0.18 long, r 0.045, times the fish's size; the tail fin is left out; fish scaled under 0.3 (not yet revealed) are skipped",
   turtle:
-    "flattened sphere for the shell (r 0.37, half-height 0.11) and a sphere for the head (r 0.1); the flippers are left out",
-  crab: "flattened sphere r 0.45, half-height 0.15 (body and the root of the legs)",
+    "ellipsoid for the shell (half-axes 0.62 x 0.18 x 0.62 in the turtle's frame, turning and tilting with it) and a ball for the head (r 0.16), both times the turtle's scale; the flippers are left out",
+  crab: "ellipsoid of its shell (the dome mesh itself: 0.36 x 0.144 x 0.27, turned with the crab); legs, claws and eyes are left out",
   conches:
-    "flattened spheres from the bounding boxes of the living conch, the pearl with its valve, the conch on the sand and each piece of debris (85 % of the half-extents)",
+    "one ellipsoid per mesh of the living conch, of the pearl with its valve, of the conch on the sand and of each piece of debris: exact for a mesh that is a sphere, else 85 % of the mesh's own bounding box, turned with the mesh",
   rock: "flattened sphere: r 1.05 x mean horizontal scale, half-height 0.76 x vertical scale",
   coral:
     "flattened sphere around each coral: its branches' widest reach from the foot, half its height",
   ground:
-    "the scene's own height function; Mila's dress and head, the fish and the turtle are tested against it",
+    "the scene's own height function under 160 points of each stand-in's surface and its lowest point (straight down); a body further over the ground than the steepest slope found could rise under it is not sampled",
 };
+/** Living forms first, then the solids: a pair kind is named in this order. */
+const KINDS = [
+  "mila",
+  "fish",
+  "school",
+  "turtle",
+  "crab",
+  "liveConch",
+  "pearl",
+  "bigConch",
+  "debris",
+  "rock",
+  "coral",
+  "ground",
+];
+const LIVING = 6;
 
 /** Runs in the page: measures after every frame the scene has drawn. */
-function pageProbe(TOL, SOLIDS, WANTED) {
-  const st = { seg: null, segs: {}, shots: {}, same: {}, frames: 0, err: null, solids: null };
+function pageProbe(G, TOL, SOLIDS, WANTED, KINDS, LIVING) {
+  const st = {
+    seg: null,
+    segs: {},
+    shots: {},
+    same: {},
+    frames: 0,
+    err: null,
+    solids: null,
+    checks: {},
+    maxSlope: 0,
+  };
   window.__clr = st;
   const raf = window.requestAnimationFrame.bind(window);
   let lastV = -1;
@@ -82,76 +113,32 @@ function pageProbe(TOL, SOLIDS, WANTED) {
       }
     });
 
-  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-  const mix = (a, b, t) => [
-    a[0] + (b[0] - a[0]) * t,
-    a[1] + (b[1] - a[1]) * t,
-    a[2] + (b[2] - a[2]) * t,
-  ];
-  const cl = (x) => Math.min(1, Math.max(0, x));
-  /** Closest points of two segments: distance and the point between them. */
-  function segSeg(p1, q1, p2, q2) {
-    const d1 = sub(q1, p1);
-    const d2 = sub(q2, p2);
-    const r = sub(p1, p2);
-    const a = dot(d1, d1);
-    const e = dot(d2, d2);
-    const f = dot(d2, r);
-    let s = 0;
-    let t = 0;
-    if (a <= 1e-12 && e <= 1e-12) {
-      /* two points */
-    } else if (a <= 1e-12) t = cl(f / e);
-    else {
-      const c = dot(d1, r);
-      if (e <= 1e-12) s = cl(-c / a);
-      else {
-        const b = dot(d1, d2);
-        const den = a * e - b * b;
-        s = den > 1e-12 ? cl((b * f - c * e) / den) : 0;
-        t = (b * s + f) / e;
-        if (t < 0) {
-          t = 0;
-          s = cl(-c / a);
-        } else if (t > 1) {
-          t = 1;
-          s = cl((b - c) / a);
-        }
-      }
-    }
-    const c1 = mix(p1, q1, s);
-    const c2 = mix(p2, q2, t);
-    const d = sub(c1, c2);
-    return { d: Math.hypot(d[0], d[1], d[2]), at: mix(c1, c2, 0.5) };
-  }
-  /** Signed gap between two shapes (negative: overlap). A shape is a capsule {a,b,r} or a flattened sphere {c,r,ry}. */
-  function gap(A, B) {
-    if (A.c && !B.c) return gap(B, A);
-    if (A.c && B.c) return gap({ a: A.c, b: A.c, r: Math.min(A.r, A.ry) }, B);
-    if (!B.c) {
-      const h = segSeg(A.a, A.b, B.a, B.b);
-      return { g: h.d - A.r - B.r, at: h.at };
-    }
-    // flattened sphere: stretch the heights around its centre so it is round
-    const k = B.r / B.ry;
-    const lift = (p) => [p[0], B.c[1] + (p[1] - B.c[1]) * k, p[2]];
-    const h = segSeg(lift(A.a), lift(A.b), B.c, B.c);
-    const at = [h.at[0], B.c[1] + (h.at[1] - B.c[1]) / k, h.at[2]];
-    return { g: h.d - A.r - B.r, at };
-  }
-
   let statics = null;
   const last = new Map();
   function buildStatics(M) {
     const T = M.THREE;
-    const box = new T.Box3();
-    const flat = (o, id) => {
+    /** One ellipsoid per mesh under `o`: the sphere itself, or 85 % of the mesh's own box. */
+    const shapes = (o, only) => {
+      const out = [];
       o.updateWorldMatrix(true, true);
-      box.setFromObject(o);
-      const c = box.getCenter(new T.Vector3());
-      const s = box.getSize(new T.Vector3());
-      return { id, c: [c.x, c.y, c.z], r: 0.425 * 0.5 * (s.x + s.z), ry: 0.425 * s.y };
+      o.traverse((m) => {
+        if (!m.isMesh || !m.visible || (only && !only(m))) return;
+        const e = m.matrixWorld.elements;
+        const col = (k, f) => [e[k * 4] * f, e[k * 4 + 1] * f, e[k * 4 + 2] * f];
+        const g = m.geometry;
+        let c = new T.Vector3();
+        let half;
+        if (g.type === "SphereGeometry") half = [1, 1, 1].map(() => g.parameters.radius);
+        else {
+          if (!g.boundingBox) g.computeBoundingBox();
+          g.boundingBox.getCenter(c);
+          const s = g.boundingBox.getSize(new T.Vector3());
+          half = [s.x, s.y, s.z].map((v) => 0.425 * v);
+        }
+        c = c.applyMatrix4(m.matrixWorld);
+        out.push({ c: [c.x, c.y, c.z], ax: [col(0, half[0]), col(1, half[1]), col(2, half[2])] });
+      });
+      return out;
     };
     const rocks = M.scene.children
       .filter((o) => o.isMesh && o.material === M.rockMat)
@@ -182,22 +169,27 @@ function pageProbe(TOL, SOLIDS, WANTED) {
       ry: e.h / 2 + 0.05,
     }));
     if (!corals.length && SOLIDS) corals = SOLIDS.corals;
+    // the steepest the ground gets (rise per metre), on a 0.2 m grid of the whole scene
+    let maxSlope = 0;
+    for (let x = -40; x <= 60; x += 0.2)
+      for (let z = -70; z <= 40; z += 0.2) {
+        const h = M.groundH(x, z);
+        maxSlope = Math.max(
+          maxSlope,
+          Math.abs(M.groundH(x + 0.2, z) - h) / 0.2,
+          Math.abs(M.groundH(x, z + 0.2) - h) / 0.2,
+        );
+      }
+    st.maxSlope = maxSlope;
+    const noHalo = (m) => !m.material?.transparent || m.material.opacity > 0.5;
     statics = {
       rocks,
       corals,
-      liveConch: flat(M.liveConch, "liveConch"),
-      bigConch: flat(M.bigConch, "bigConch"),
-      pearl: (() => {
-        // the pearl and its valve, without the halo sprite
-        const parts = M.pearl.children.filter((o) => o.isMesh);
-        const b = new T.Box3();
-        M.pearl.updateWorldMatrix(true, true);
-        for (const o of parts) b.expandByObject(o);
-        const c = b.getCenter(new T.Vector3());
-        const s = b.getSize(new T.Vector3());
-        return { id: "pearl", c: [c.x, c.y, c.z], r: 0.425 * 0.5 * (s.x + s.z), ry: 0.425 * s.y };
-      })(),
-      flat,
+      liveConch: shapes(M.liveConch),
+      bigConch: shapes(M.bigConch),
+      pearl: shapes(M.pearl, noHalo),
+      maxSlope,
+      shapes,
     };
     st.solids = {
       rocks,
@@ -238,7 +230,7 @@ function pageProbe(TOL, SOLIDS, WANTED) {
           x: (v.x + 1) / 2,
           y: (1 - v.y) / 2,
           front: v.z < 1,
-          url: cv.toDataURL("image/jpeg", 0.85),
+          url: Object.keys(st.shots).length < 400 ? cv.toDataURL("image/jpeg", 0.85) : null,
           depth: -g,
           pair,
           frame: S.frames,
@@ -272,14 +264,14 @@ function pageProbe(TOL, SOLIDS, WANTED) {
     };
     const head = wp(m.head);
     const mila = [
-      { a: bp(0, 0.5, 0), b: bp(0, 0.86, 0), r: 0.19, core: true },
-      { a: head, b: head, r: 0.13, core: true },
+      { a: bp(0, 0.5, 0), b: bp(0, 0.86, 0), r: 0.19 },
+      { a: head, b: head, r: 0.13 },
     ];
     for (const L of m.legs) {
       const h = wp(L.hip);
       const k = wp(L.knee);
       const a = wp(L.ankle);
-      mila.push({ a: h, b: k, r: 0.035 }, { a: k, b: a, r: 0.035 });
+      mila.push({ a: h, b: k, r: 0.035 }, { a: k, b: a, r: 0.035, shin: true });
     }
     for (const A of m.arms) {
       const s = wp(A.sh);
@@ -287,7 +279,6 @@ function pageProbe(TOL, SOLIDS, WANTED) {
       const h = wp(A.hand);
       mila.push({ a: s, b: e, r: 0.025 }, { a: e, b: h, r: 0.022 });
     }
-    const mc = bp(0, 0.62, 0);
     // fish
     const swimmers = [];
     for (const [mesh, name] of [
@@ -339,80 +330,96 @@ function pageProbe(TOL, SOLIDS, WANTED) {
     }
     // turtle
     M.turtle.updateWorldMatrix(true, false);
-    const ts = M.turtle.scale.x;
+    const te = M.turtle.matrixWorld.elements;
     const tp = (x, y, z) => {
       tmp.set(x, y, z).applyMatrix4(M.turtle.matrixWorld);
       return [tmp.x, tmp.y, tmp.z];
     };
+    const tcol = (k, f) => [te[k * 4] * f, te[k * 4 + 1] * f, te[k * 4 + 2] * f];
     const th = tp(0, 0.07, 0.78);
     const turtle = [
-      { c: tp(0, 0.09, 0.05), r: 0.62 * ts, ry: 0.18 * ts },
-      { a: th, b: th, r: 0.16 * ts },
+      { c: tp(0, 0.09, 0.05), ax: [tcol(0, 0.62), tcol(1, 0.18), tcol(2, 0.62)] },
+      { a: th, b: th, r: 0.16 * M.turtle.scale.x },
     ];
-    const tc = turtle[0].c;
-    // crab, debris
-    const cp = M.crab.g.position;
-    const crab = { c: [cp.x, cp.y, cp.z], r: 0.45, ry: 0.15 };
-    const debris = M.debris
-      .filter((d) => d.mesh.visible && d.mesh.scale.x > 0.75)
-      .map((d, i) => statics.flat(d.mesh, `debris${i}`));
-    const near = (p, q, d) =>
-      Math.abs(p[0] - q[0]) < d && Math.abs(p[1] - q[1]) < d && Math.abs(p[2] - q[2]) < d;
-    const test = (cat, pair, A, B) => {
-      const h = gap(A, B);
-      if (h.g < -TOL) note(cat, pair, h.g, h.at, M);
-    };
-    const fixed = [
-      ["liveConch", [statics.liveConch]],
-      ["pearl", [statics.pearl]],
-      ["bigConch", [statics.bigConch]],
-      ["debris", debris],
-      ["rock", statics.rocks],
-      ["coral", statics.corals],
-    ];
-    // Mila against everything
-    for (const f of swimmers)
-      if (near(f.p, mc, 1.6)) for (const c of mila) test(`mila-${f.kind}`, f.id, c, f);
-    for (const c of mila) {
-      for (const t of turtle) test("mila-turtle", "turtle", c, t);
-      test("mila-crab", "crab", c, crab);
-      for (const [name, list] of fixed)
-        for (const s of list) if (near(s.c, mc, s.r + 1.6)) test(`mila-${name}`, s.id, c, s);
-      if (c.core)
-        for (const p of [c.a, c.b]) {
-          const g = p[1] - c.r - M.groundH(p[0], p[2]);
-          if (g < -TOL) note("mila-ground", "ground", g, p, M);
+    // crab: its shell is the first mesh of its group
+    const dome = M.crab.g.children.find((o) => o.isMesh);
+    const crab = statics.shapes(M.crab.g, (o) => o === dome);
+    // the bodies of this frame: living forms, then solids
+    const bodies = [];
+    const add = (kind, id, parts, groundParts) => {
+      const b = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity];
+      for (const p of parts) {
+        p.box ??= G.box(p);
+        for (let k = 0; k < 3; k++) {
+          b[k] = Math.min(b[k], p.box[k]);
+          b[k + 3] = Math.max(b[k + 3], p.box[k + 3]);
         }
-    }
-    // fish against fish, the turtle, the solids and the ground
-    for (let i = 0; i < swimmers.length; i++) {
-      const f = swimmers[i];
-      for (let j = i + 1; j < swimmers.length; j++) {
-        const o = swimmers[j];
-        if (near(f.p, o.p, 0.45))
-          test(f.kind === o.kind ? `${f.kind}-${f.kind}` : "fish-school", `${f.id}+${o.id}`, f, o);
       }
-      if (near(f.p, tc, 1.2)) for (const t of turtle) test(`${f.kind}-turtle`, f.id, f, t);
-      for (const [name, list] of fixed) {
-        if (name === "bigConch" || name === "debris") continue;
-        for (const s of list)
-          if (near(s.c, f.p, s.r + 0.4)) test(`${f.kind}-${name}`, `${f.id}+${s.id}`, f, s);
+      bodies.push({ kind, rank: KINDS.indexOf(kind), id, parts, box: b, groundParts });
+    };
+    add(
+      "mila",
+      "mila",
+      mila,
+      mila.filter((c) => !c.shin),
+    );
+    for (const f of swimmers) add(f.kind, f.id, [f]);
+    add("turtle", "turtle", turtle);
+    add("crab", "crab", crab);
+    add("liveConch", "liveConch", statics.liveConch);
+    add("pearl", "pearl", statics.pearl);
+    add("bigConch", "bigConch", statics.bigConch);
+    M.debris
+      .filter((d) => d.mesh.visible && d.mesh.scale.x > 0.75)
+      .forEach((d) => add("debris", `debris${M.debris.indexOf(d)}`, statics.shapes(d.mesh)));
+    for (const s of statics.rocks) add("rock", s.id, [s]);
+    for (const s of statics.corals) add("coral", s.id, [s]);
+    // a pair is measured once the boxes around its two bodies are within NEAR metres
+    const NEAR = 0.3;
+    const seen = (cat, g) => {
+      const c = (st.checks[cat] ??= { measured: 0, closest: Infinity });
+      c.measured++;
+      if (g < c.closest) c.closest = g;
+    };
+    for (let i = 0; i < bodies.length && bodies[i].rank < LIVING; i++) {
+      const A = bodies[i];
+      for (let j = i + 1; j < bodies.length; j++) {
+        const B = bodies[j];
+        const a = A.box;
+        const b = B.box;
+        if (
+          a[0] > b[3] + NEAR ||
+          b[0] > a[3] + NEAR ||
+          a[1] > b[4] + NEAR ||
+          b[1] > a[4] + NEAR ||
+          a[2] > b[5] + NEAR ||
+          b[2] > a[5] + NEAR
+        )
+          continue;
+        const cat = `${A.kind}-${B.kind}`;
+        let least = Infinity;
+        for (const p of A.parts)
+          for (const q of B.parts) {
+            const h = G.gap(p, q, -TOL);
+            least = Math.min(least, h.g);
+            if (h.g < -TOL) note(cat, `${A.id}+${B.id}`, h.g, h.at, M);
+          }
+        seen(cat, least);
       }
-      const g = f.p[1] - f.r - M.groundH(f.p[0], f.p[2]);
-      if (g < -TOL) note(`${f.kind}-ground`, f.id, g, f.p, M);
+      // the ground, unless the body is higher over it than the ground could rise under it
+      const cx = (A.box[0] + A.box[3]) / 2;
+      const cz = (A.box[2] + A.box[5]) / 2;
+      const reach = Math.hypot(A.box[3] - cx, A.box[5] - cz);
+      if (A.box[1] - M.groundH(cx, cz) > statics.maxSlope * reach) continue;
+      const cat = `${A.kind}-ground`;
+      let least = Infinity;
+      for (const p of A.groundParts ?? A.parts) {
+        const h = G.overGround(p, M.groundH);
+        least = Math.min(least, h.g);
+        if (h.g < -TOL) note(cat, A.id, h.g, h.at, M);
+      }
+      seen(cat, least);
     }
-    // the turtle and the crab against the solids
-    for (const t of turtle) {
-      for (const name of ["rock", "coral"])
-        for (const s of statics[`${name}s`])
-          if (near(s.c, tc, s.r + 1.2)) test(`turtle-${name}`, s.id, t, s);
-      const p = t.c ?? t.a;
-      const g = p[1] - (t.ry ?? t.r) - M.groundH(p[0], p[2]);
-      if (g < -TOL) note("turtle-ground", "turtle", g, p, M);
-    }
-    for (const d of debris) test("crab-debris", d.id, crab, d);
-    for (const s of statics.rocks) if (near(s.c, crab.c, s.r + 1)) test("crab-rock", s.id, crab, s);
-    test("crab-bigConch", "bigConch", crab, statics.bigConch);
   }
 }
 
@@ -447,7 +454,8 @@ try {
         }))
       : [];
     await p.addInitScript(
-      `(${pageProbe.toString()})(${TOL}, ${JSON.stringify(SOLIDS)}, ${JSON.stringify(wanted)})`,
+      `(${pageProbe.toString()})((${clearanceGeometry.toString()})(), ${TOL}, ` +
+        `${JSON.stringify(SOLIDS)}, ${JSON.stringify(wanted)}, ${JSON.stringify(KINDS)}, ${LIVING})`,
     );
     await p.goto(SITE);
     for (let i = 0; i < 200 && !(await p.locator(".loader.is-done").count()); i++) await run(250);
@@ -495,6 +503,7 @@ try {
       ...Object.entries(res.same).map(([key, s]) => [key, s, "same"]),
     ];
     for (const [key, s, dir] of pictures) {
+      if (!s.url) continue;
       const [segName, cat] = key.split("|");
       const file = `${OUT}${dir}/${vp}-${segName}-${cat}.jpg`;
       writeFileSync(file, Buffer.from(s.url.split(",")[1], "base64"));
@@ -544,6 +553,21 @@ try {
         rocks: res.solids?.rocks.length,
         corals: res.solids?.corals.length,
       },
+      steepestGround: res.maxSlope,
+      // Every kind of pair the check looks at. `measured`: times a pair of that kind was within
+      // 0.3 m (boxes) and its gap was computed, over the whole run; 0 means the two were never that
+      // near. `closest`: the smallest gap found, metres; for a gap over -TOL it is a lower bound
+      // (the search stops once the pair is known to be clear), exact between two capsules.
+      checks: Object.fromEntries(
+        KINDS.slice(0, LIVING).flatMap((a, i) =>
+          KINDS.slice(i)
+            .filter((b) => a !== b || a === "fish" || a === "school")
+            .map((b) => {
+              const c = res.checks[`${a}-${b}`];
+              return [`${a}-${b}`, { measured: c?.measured ?? 0, closest: c?.closest ?? null }];
+            }),
+        ),
+      ),
       segments: res.segs,
       shots: res.shots,
       same: res.same,
@@ -565,6 +589,13 @@ try {
         `${segs.reduce((n, s) => n + (s.jolts ?? 0), 0)}, not numbers: ` +
         `${segs.reduce((n, s) => n + (s.notNumbers ?? 0), 0)}`,
     );
+    console.log(`  steepest ground ${res.maxSlope.toFixed(2)}; pair kinds:`);
+    for (const [cat, c] of Object.entries(out.checks))
+      console.log(
+        `  ${cat.padEnd(20)} measured ${String(c.measured).padStart(7)}` +
+          (c.measured ? `, closest ${c.closest.toFixed(3)} m` : ""),
+      );
+    console.log("  overlaps deeper than the tolerance:");
     for (const [cat, t] of Object.entries(total).sort())
       console.log(
         `  ${cat.padEnd(18)} ${String(t.frames).padStart(6)} frames, deepest ${t.max.toFixed(3)} m`,
