@@ -166,6 +166,21 @@ const TURTLE_SCALE = 0.6;
 export const STAND_DEPTH = -0.85;
 
 /**
+ * How far ahead along her way (metres) Mila reads the depth. Swimming ashore she covers it in the
+ * time her body takes to come upright, so she drops her legs before the bottom reaches them.
+ */
+const FOOTING_REACH = 3;
+
+/**
+ * Whether Mila is stretched out swimming, over a sea floor at `floor` under her and at `ahead`
+ * where she is heading. Going in she swims once the bottom is out of reach; coming out she rights
+ * herself as soon as the water ahead is shallow enough to stand in, while her feet still hang.
+ */
+export function swims(floor: number, ahead: number): boolean {
+  return floor < STAND_DEPTH && ahead < STAND_DEPTH;
+}
+
+/**
  * Height of Mila's feet where her path is at `pathY` over a sea floor at `floor`. Where she can
  * stand she walks on the bottom, the water rising on her; past that depth she swims, and her path
  * cannot lift her out of the water: stretched out she lies 0.62 m above this height, just under
@@ -3918,7 +3933,20 @@ void main(){
   function animateMila(rdt: number): void {
     const M = mila;
     const target = trans ? trans.to : page;
-    const afloat = groundH(M.g.position.x, M.g.position.z) < STAND_DEPTH ? 1 : 0;
+    const at = M.g.position;
+    const here = groundH(at.x, at.z);
+    // the shallowest of her next steps: the bottom is uneven, one hollow must not lay her down again
+    let ahead = here;
+    const step = M.prev && !M.snap ? Math.hypot(at.x - M.prev.x, at.z - M.prev.z) : 0;
+    if (M.prev && step > 1e-4)
+      for (let k = 1; k <= 4; k++) {
+        const f = (FOOTING_REACH * k) / 4 / step;
+        ahead = Math.max(
+          ahead,
+          groundH(at.x + (at.x - M.prev.x) * f, at.z + (at.z - M.prev.z) * f),
+        );
+      }
+    const afloat = swims(here, ahead) ? 1 : 0;
     M.swimW = lerp(M.swimW, afloat, Math.min(1, rdt * 3.6));
     if (M.snap) {
       M.swimW = afloat;

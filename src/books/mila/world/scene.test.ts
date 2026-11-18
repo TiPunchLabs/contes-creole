@@ -13,6 +13,7 @@ import {
   milaHeight,
   SHORE_ROCKS,
   STAND_DEPTH,
+  swims,
   turtleCourse,
 } from "./scene";
 
@@ -106,6 +107,14 @@ describe("Mila between wading and swimming", () => {
       expect(Math.abs(y - last)).toBeLessThan(0.011);
       last = y;
     }
+  });
+
+  it("swims only out of her depth, and rights herself once the water ahead is shallow", () => {
+    expect(swims(-0.4, -1.2)).toBe(false);
+    expect(swims(STAND_DEPTH, -3)).toBe(false);
+    expect(swims(-1.2, -3)).toBe(true);
+    // coming ashore: still out of her depth, the shallows within reach
+    expect(swims(-2.4, -0.6)).toBe(false);
   });
 
   it("follows her path in deep water, clear of the bottom", () => {
