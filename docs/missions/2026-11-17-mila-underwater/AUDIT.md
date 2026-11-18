@@ -441,10 +441,13 @@ It also left out pairs.
   after run were never within 0.3 m, among them every pair of the turtle, the crab and the
   conch with another animal but fish–turtle and Mila–turtle).
 - Ground: the height function is read under 160 points of each shape's surface and under its
-  lowest point, straight down (never less than the depth across the slope). A body is skipped
-  only when it is higher over the ground than the steepest slope found in the scene (0.77, on a
-  0.2 m grid) could make the ground rise under it. Mila's shins are left out against the ground:
-  she stands on it.
+  lowest point, straight down (never less than the depth across the slope at that point), for
+  every living body on every frame. This is a sampled measure: the proof above holds for two
+  stand-ins, not for the ground, whose relief between the sampled points is not covered. Until
+  review 3 a body was skipped when a slope figure said the ground could not reach it; that
+  figure was not a bound (F5) and the skip is removed. `evidence/clearance-f5.md`: with every
+  body tested, no overlap on either layout. Mila's shins are left out against the ground: she
+  stands on it.
 - Still left out, as before: tail fins, flippers, Mila's hands, feet and hair buns, the crab's
   legs, claws and eyes; a coral is one rounded volume; fish under 30 % of their size (not yet
   revealed) are skipped. The ground between sampled points is not bounded.
@@ -725,3 +728,5 @@ files, used to build the "before" probe; it is registered in `.git/worktrees`), 
 Added in correction cycle 2, same media folder: the builds `clr-c2a-dist` to `clr-c2d-dist`,
 `c2-dist` (`7ea9a48`), `c2-probe-dist`; runs `clr-c2a/` to `clr-c2d/`, `peek/conch-c2`, `c2/`,
 `c2-regress/`, `c2-perf/`, `boards-c2/`.
+
+Added after review 3: the builds `clr-f5t-dist`, `clr-f5-dist` and the runs `clr-f5t/`, `clr-f5/`.

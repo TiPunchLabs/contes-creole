@@ -5,9 +5,10 @@
 // frame-rate measurement).
 // Bodies are stood in for by capsules and ellipsoids (see `PROXIES` below, written to the result).
 // Every living form is tested against every other living form, every solid and the ground; a pair
-// counts when its stand-ins overlap by more than TOL metres. The gap is computed by
-// qa/mila-clearance-gap.mjs, which never reports an overlap shallower than it is (tested there,
-// with known overlaps as controls). The result lists every pair kind with how often it came close
+// counts when its stand-ins overlap by more than TOL metres. The gap between two stand-ins is
+// computed by qa/mila-clearance-gap.mjs, which never reports an overlap shallower than it is (tested
+// there, with known overlaps as controls). The ground is different: its height is read under sampled
+// points of each stand-in on every frame, which is a measure, not a bound. The result lists every pair kind with how often it came close
 // enough to be measured (`checks`), so a kind with no overlap is told apart from one never tested.
 // Usage: SITE=url OUT=dir [VPS=desktop,mobile] [TOL=0.02] [REST_SEA=20000] [REST_LAND=6000]
 //        [BACK=1] [SOLIDS=solids.json] [QA_CHANNEL=chrome] node qa/mila-clearance.mjs
@@ -63,7 +64,7 @@ const PROXIES = {
   coral:
     "flattened sphere around each coral: its branches' widest reach from the foot, half its height",
   ground:
-    "the scene's own height function under 160 points of each stand-in's surface and its lowest point (straight down); a body further over the ground than the steepest slope found could rise under it is not sampled",
+    "the scene's own height function under 160 points of each stand-in's surface and its lowest point, straight down, for every living body on every frame. This is a sampled measure: unlike the gap between two stand-ins, it is not a bound, and ground relief between the sampled points is not covered",
 };
 /** Living forms first, then the solids: a pair kind is named in this order. */
 const KINDS = [
@@ -169,15 +170,15 @@ function pageProbe(G, TOL, SOLIDS, WANTED, KINDS, LIVING) {
       ry: e.h / 2 + 0.05,
     }));
     if (!corals.length && SOLIDS) corals = SOLIDS.corals;
-    // the steepest the ground gets (rise per metre), on a 0.2 m grid of the whole scene
+    // The steepest the ground gets (norm of the gradient, on a 0.2 m grid of the whole scene):
+    // recorded for the reader only, no test relies on it.
     let maxSlope = 0;
     for (let x = -40; x <= 60; x += 0.2)
       for (let z = -70; z <= 40; z += 0.2) {
         const h = M.groundH(x, z);
         maxSlope = Math.max(
           maxSlope,
-          Math.abs(M.groundH(x + 0.2, z) - h) / 0.2,
-          Math.abs(M.groundH(x, z + 0.2) - h) / 0.2,
+          Math.hypot(M.groundH(x + 0.2, z) - h, M.groundH(x, z + 0.2) - h) / 0.2,
         );
       }
     st.maxSlope = maxSlope;
@@ -406,11 +407,7 @@ function pageProbe(G, TOL, SOLIDS, WANTED, KINDS, LIVING) {
           }
         seen(cat, least);
       }
-      // the ground, unless the body is higher over it than the ground could rise under it
-      const cx = (A.box[0] + A.box[3]) / 2;
-      const cz = (A.box[2] + A.box[5]) / 2;
-      const reach = Math.hypot(A.box[3] - cx, A.box[5] - cz);
-      if (A.box[1] - M.groundH(cx, cz) > statics.maxSlope * reach) continue;
+      // the ground: every living body on every frame, with no early rejection
       const cat = `${A.kind}-ground`;
       let least = Infinity;
       for (const p of A.groundParts ?? A.parts) {
