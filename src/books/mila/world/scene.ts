@@ -3847,19 +3847,35 @@ void main(){
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(arr, 3));
-    const m = new THREE.Points(
-      g,
-      new THREE.PointsMaterial({
-        map: glowTex,
-        color: new THREE.Color(2, 1.5, 0.6),
-        size: 0.14,
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      }),
-    );
+    const material = burstMaterial();
+    addSeaFog(material, SEA);
+    const m = new THREE.Points(g, material);
     scene.add(m);
     bursts.push({ m, vel, t: 0 });
+  }
+
+  /** The glowing grains of a burst; each burst fades its own copy. */
+  function burstMaterial(): THREE.PointsMaterial {
+    return new THREE.PointsMaterial({
+      map: glowTex,
+      color: new THREE.Color(2, 1.5, 0.6),
+      size: 0.14,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+  }
+
+  /**
+   * One hidden grain, so the bursts' shader program is built at the start (see `warmUp`) and kept
+   * while no burst is alive.
+   */
+  function buildBurstSeed(): void {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(3), 3));
+    const seed = new THREE.Points(g, burstMaterial());
+    seed.visible = false;
+    scene.add(seed);
   }
 
   /* =====================================================================
@@ -4464,6 +4480,77 @@ void main(){
     composer?.render();
   }
 
+  /**
+   * Draws one frame with everything shown and nothing culled, through the same passes as the tale,
+   * so every shader program (colour and shadow) is built here rather than during the page turn
+   * that first brings its object into view. `renderer.compile` cannot do it: the programs depend
+   * on the render target the composer draws into.
+   */
+  function warmUp(): void {
+    const hidden: THREE.Object3D[] = [];
+    const culled: THREE.Object3D[] = [];
+    const unmeasured: THREE.InstancedMesh[] = [];
+    scene.traverse((o) => {
+      const inst = o as THREE.InstancedMesh;
+      if (inst.isInstancedMesh && inst.boundingSphere === null) unmeasured.push(inst);
+      if (!o.visible && !(o as Partial<THREE.Light>).isLight) {
+        hidden.push(o);
+        o.visible = true;
+      }
+      if (o.frustumCulled) {
+        culled.push(o);
+        o.frustumCulled = false;
+      }
+    });
+    composer?.render();
+    if (moonL.castShadow) warmUpShadows();
+    for (const o of hidden) o.visible = false;
+    for (const o of culled) o.frustumCulled = true;
+    // drawn before the first update placed their instances: their extent is measured again later
+    for (const o of unmeasured) o.boundingSphere = null;
+  }
+
+  /**
+   * Builds the shadow pass' programs. Three.js draws every caster with one shared depth material
+   * and only picks a new program when the kind of object changes (plain, instanced, skinned), with
+   * the side and map of the caster it is then drawing. Which combinations exist therefore depends
+   * on the order the casters come in, and a page turn that changes the order builds a new one.
+   * Here each combination is drawn right after a caster of another kind, twice so the order of
+   * the two in the scene does not matter.
+   */
+  function warmUpShadows(): void {
+    const kind = (o: THREE.Object3D): string =>
+      (o as Partial<THREE.InstancedMesh>).isInstancedMesh
+        ? "instanced"
+        : (o as Partial<THREE.SkinnedMesh>).isSkinnedMesh
+          ? "skinned"
+          : "plain";
+    const casters: THREE.Mesh[] = [];
+    const groups = new Map<string, THREE.Mesh[]>();
+    scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh || !m.castShadow || Array.isArray(m.material)) return;
+      casters.push(m);
+      const mat = m.material as THREE.MeshToonMaterial;
+      const key = `${kind(m)}|${mat.side}|${mat.map ? 1 : 0}`;
+      const group = groups.get(key);
+      if (group) group.push(m);
+      else groups.set(key, [m]);
+    });
+    for (const m of casters) m.castShadow = false;
+    for (const group of groups.values()) {
+      const other = casters.find((m) => kind(m) !== kind(group[0]));
+      if (!other) continue;
+      other.castShadow = true;
+      for (const m of group) m.castShadow = true;
+      composer?.render();
+      composer?.render();
+      other.castShadow = false;
+      for (const m of group) m.castShadow = false;
+    }
+    for (const m of casters) m.castShadow = true;
+  }
+
   /** The three voices: they leave the conch on page 2, join Mila as she finds them, then go home. */
   function updateSigns(dt: number, T: number, W: number): void {
     const since = T - pageStart;
@@ -4675,6 +4762,7 @@ void main(){
     mila.g.rotation.y = -Math.PI / 2;
     buildThreads();
     buildGroundMarks();
+    buildBurstSeed();
     // every fogged material takes the water's colours while the camera is under the surface
     const fogged = new Set<THREE.Material>();
     scene.traverse((o) => {
@@ -4692,7 +4780,7 @@ void main(){
     resize();
     listen(window, "resize", resize);
     timer.connect(document);
-    renderer.compile(scene, camera);
+    warmUp();
     renderer.setAnimationLoop(update);
   } catch (err) {
     release();

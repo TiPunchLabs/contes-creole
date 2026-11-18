@@ -83,8 +83,8 @@ uniform float uSea;
 ${SEA_SUN_GLSL}const vec3 SEA_SIG=vec3(.135,.058,.05);
 const vec3 SEA_DEPTH=vec3(.1,.042,.032);
 vec3 seaWater(vec3 rd,float y){
- vec3 c=mix(vec3(.012,.25,.27),vec3(.15,.72,.63),smoothstep(-.05,.9,rd.y));
- c=mix(c,vec3(.002,.05,.085),smoothstep(.12,-.8,rd.y));
+ vec3 c=mix(vec3(.01,.2,.225),vec3(.075,.42,.4),smoothstep(-.05,.9,rd.y));
+ c=mix(c,vec3(.002,.05,.085),smoothstep(.1,-.55,rd.y));
  c*=exp(SEA_DEPTH*min(y,0.));
  float mu=max(dot(rd,uSeaSun),0.);
  return c*(1.+.5*mu*mu)+vec3(1.,.78,.5)*pow(mu,10.)*.12*exp(.1*min(y,0.));
@@ -94,7 +94,7 @@ vec3 seaFog(vec3 c,vec3 v){
 #ifdef SEA_ADDITIVE
  return c*T;
 #else
- return c*T+seaWater(v/max(d,1e-4),cameraPosition.y)*(1.-T);
+ return c*T+seaWater(v/max(d,1e-4),cameraPosition.y+.8*v.y)*(1.-T);
 #endif
 }
 `;
