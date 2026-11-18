@@ -11,6 +11,7 @@ import { clamp, lerp } from "@shared/math";
 import { createRng } from "@shared/random";
 import type { Ambience } from "./audio";
 import { easeIO, fbm, GLSL_NOISE, lerpAngle, smooth, vnoise, walkEase } from "./noise";
+import { overFloor, steer, swimmer, type Limb, type Solid, type Swimmer } from "./shoal";
 import { CRAB_PAGE, PAGE_COUNT } from "./text";
 import {
   addSeaFog,
@@ -346,6 +347,11 @@ interface FishData {
   sc: number;
   grp: number;
   vis: number;
+  body: Swimmer;
+  yaw: number;
+  /** Where it was on the last frame (x, z): its heading is the way it actually goes. */
+  lx: number;
+  lz: number;
 }
 
 interface SchoolFish {
@@ -355,6 +361,11 @@ interface SchoolFish {
   sp: number;
   ph: number;
   sc: number;
+  body: Swimmer;
+  yaw: number;
+  /** Where it was on the last frame (x, z): its heading is the way it actually goes. */
+  lx: number;
+  lz: number;
 }
 
 interface Flipper {
@@ -1354,8 +1365,20 @@ void main(){
     m.receiveShadow = true;
     scene.add(m);
     if (groundH(x, z) > 0.05) beachRocks.push([x, z, s]);
+    else
+      seaSolids.push({
+        x,
+        y: m.position.y,
+        z,
+        // the lumps reach a little past the unit sphere they are raised on
+        r: 1.05 * Math.max(m.scale.x, m.scale.z),
+        ry: 0.76 * s,
+        grounded: true,
+      });
   }
   const beachRocks: [number, number, number][] = [];
+  /** What the swimming animals go around: the rocks and corals of the sea, the conch, the pearl. */
+  const seaSolids: Solid[] = [];
   /**
    * Tufts of beach grass in the lee of the rocks on the sand, and fireflies under the sea grape and
    * the palms. Their own RNG: the prototype's draws, and so its layout, are untouched.
@@ -2707,6 +2730,25 @@ void main(){
     pearl.add(valve);
     pearl.position.set(DEEP.x - 0.9, groundH(DEEP.x - 0.9, DEEP.z + 0.9) + 0.2, DEEP.z + 0.9);
     scene.add(pearl);
+    const lc = liveConch.position;
+    seaSolids.push(
+      {
+        x: lc.x,
+        y: lc.y + 0.3 * LIVE_CONCH,
+        z: lc.z,
+        r: 0.62 * LIVE_CONCH,
+        ry: 0.42 * LIVE_CONCH,
+        grounded: true,
+      },
+      {
+        x: pearl.position.x,
+        y: pearl.position.y,
+        z: pearl.position.z,
+        r: 0.38,
+        ry: 0.2,
+        grounded: true,
+      },
+    );
   }
 
   /* =====================================================================
@@ -2883,6 +2925,66 @@ void main(){
   let school: THREE.InstancedMesh;
   const schoolData: SchoolFish[] = [];
   const schoolCtr = V3();
+  /** How far the school has opened around Mila (page 8): 0 gathered on its own, 1 around her. */
+  let schoolOpen = 0;
+  /** Every fish of the sea, the school included: they keep out of the solids and of each other. */
+  const shoal: Swimmer[] = [];
+  /** The turtle as the fish meet it, moved with it. */
+  const turtleSolid: Solid = { x: 0, y: 0, z: 0, r: 0.5, ry: 0.22, grounded: false };
+  /** Mila as the fish meet her: one capsule from her feet to her head, wherever she leans. */
+  const milaLimb: Limb = {
+    ax: 0,
+    ay: 0,
+    az: 0,
+    bx: 0,
+    by: 0,
+    bz: 0,
+    r: 0.3,
+    wide: 0.5,
+    vx: 0,
+    vy: 0,
+    vz: 0,
+  };
+  /**
+   * The camera's view of her under water: the fish keep out of it too, so none crosses the lens or
+   * swims in front of her, where it would read as going through her.
+   */
+  const sightLimb: Limb = {
+    ax: 0,
+    ay: 99,
+    az: 0,
+    bx: 0,
+    by: 99,
+    bz: 0,
+    r: 0.2,
+    wide: 0.4,
+    vx: 0,
+    vy: 0,
+    vz: 0,
+  };
+  const milaLimbs = [milaLimb, sightLimb];
+  /** Radius of the ball that stands in for a fish of size 1: half its body, nose to tail root. */
+  const FISH_R = 0.14;
+  /** The fish have not been placed yet: on their first frame they take their route's heading. */
+  let shoalFresh = true;
+  /**
+   * Turns a fish the way it is going: along its route when nothing is in the way (`routeYaw`),
+   * along its detour when it goes around something. A fish that is not moving keeps its heading.
+   */
+  function faceWay(
+    f: { yaw: number; lx: number; lz: number },
+    q: Swimmer,
+    routeYaw: number,
+    dt: number,
+  ): void {
+    const dx = q.x - f.lx;
+    const dz = q.z - f.lz;
+    f.lx = q.x;
+    f.lz = q.z;
+    if (shoalFresh) f.yaw = routeYaw;
+    else if (dt > 1e-5 && Math.hypot(dx, dz) > 1e-5)
+      f.yaw = lerpAngle(f.yaw, Math.atan2(dx, dz), Math.min(1, dt * 8));
+  }
   let dust: SeaDust;
   let grass: THREE.InstancedMesh;
   let tufts: THREE.InstancedMesh;
@@ -3039,12 +3141,14 @@ void main(){
       const base = V3(cx, groundH(cx, cz) - 0.05, cz);
       const limbs: THREE.BufferGeometry[] = [];
       let top = base.y;
+      let reach = 0;
       const grow = (p: V3, dir: V3, len: number, dep: number): void => {
         const e = p.clone().add(dir.clone().multiplyScalar(len));
         const part = limb(p, e, 0.05 * (1 - dep * 0.2), corM[k % 3]);
         part.updateMatrix();
         limbs.push(part.geometry.applyMatrix4(part.matrix));
         top = Math.max(top, e.y);
+        reach = Math.max(reach, Math.hypot(e.x - base.x, e.z - base.z));
         if (dep < 3)
           for (let j = 0; j < 2; j++) {
             const nd = dir
@@ -3055,6 +3159,15 @@ void main(){
           }
       };
       grow(base, V3(0, 1, 0), rr(0.35, 0.6), 0);
+      const tall = top - base.y;
+      seaSolids.push({
+        x: base.x,
+        y: base.y + tall / 2,
+        z: base.z,
+        r: reach + 0.1,
+        ry: tall / 2 + 0.1,
+        grounded: true,
+      });
       for (const g of limbs) {
         const n = g.attributes.position.count;
         const root = new Float32Array(n * 4);
@@ -3115,6 +3228,7 @@ void main(){
     });
     turtle.scale.setScalar(TURTLE_SCALE);
     scene.add(turtle);
+    seaSolids.push(turtleSolid);
     // fish
     const merged = makeFishGeo();
     const NF = isSmall ? 60 : 100;
@@ -3131,6 +3245,10 @@ void main(){
         sc: rr(0.7, 1.3),
         grp: i % 3,
         vis: i < NF * 0.35 ? 1 : 0,
+        body: swimmer(i % 2 ? 1 : -1),
+        yaw: 0,
+        lx: 0,
+        lz: 0,
       });
     }
     scene.add(fish);
@@ -3149,8 +3267,14 @@ void main(){
         sp: rr(0.7, 1.1),
         ph: rnd() * 6,
         sc: rr(0.55, 0.8),
+        body: swimmer(i % 2 ? 1 : -1),
+        yaw: 0,
+        lx: 0,
+        lz: 0,
       });
     }
+    for (const f of fishData) shoal.push(f.body);
+    for (const f of schoolData) shoal.push(f.body);
     schoolCtr.set(SCHOOL.x, SCHOOL.y + 2.6, SCHOOL.z);
     scene.add(school);
     // The prototype's plankton drew 1500 numbers here; they are still drawn so everything placed
@@ -4476,26 +4600,25 @@ void main(){
         Math.sin(wtime * (f.big ? 1.6 : 1.2) + (f.big ? 0 : 1)) * (f.big ? 0.5 : 0.25) * f.s;
       f.pv.rotation.y = Math.sin(wtime * 1.6) * 0.25 * f.s;
     });
-    // fish
+    // fish: each on its round, the school gathered or opened around Mila (page 8); `steer` then
+    // takes them around the rocks, the corals, the turtle, Mila and each other
     const reveal = page >= 7 ? (page === 7 && !trans ? smooth(1.5, 4, T - pageStart) : 1) : 0;
     const o = dummy;
-    o.scale.set(1, 1, 1);
     for (let i = 0; i < fishData.length; i++) {
       const f = fishData[i];
       f.a += dt * f.s;
       const ctr = f.grp === 2 ? DEEP : MEADOW;
-      const vis = Math.max(f.vis, reveal);
-      const x = ctr.x + Math.cos(f.a) * f.r * (f.grp === 1 ? 1.5 : 1);
-      const z = ctr.z + Math.sin(f.a) * f.r;
-      const y = ctr.y + f.y + Math.sin(wtime * 0.8 + f.ph) * 0.25;
-      o.position.set(x, y, z);
-      o.rotation.set(0, -f.a + (f.s > 0 ? 0 : Math.PI), Math.sin(wtime * 6 + f.ph) * 0.15);
-      o.scale.setScalar(f.sc * Math.max(0.001, vis));
-      o.updateMatrix();
-      fish.setMatrixAt(i, o.matrix);
+      const q = f.body;
+      q.hx = ctr.x + Math.cos(f.a) * f.r * (f.grp === 1 ? 1.5 : 1);
+      q.hz = ctr.z + Math.sin(f.a) * f.r;
+      q.r = FISH_R * f.sc * Math.max(f.vis, reveal);
+      // the bottom rises towards the shore and round the hollow: its round follows the sand
+      q.hy = overFloor(
+        ctr.y + f.y + Math.sin(wtime * 0.8 + f.ph) * 0.25,
+        groundH(q.hx, q.hz) + FISH_R * f.sc + 0.2,
+        0.3,
+      );
     }
-    fish.instanceMatrix.needsUpdate = true;
-    // the school wraps around Mila on page 8
     {
       const around = page === 8 && !trans;
       schoolCtr.lerp(
@@ -4504,23 +4627,79 @@ void main(){
           : tmpV.set(SCHOOL.x, SCHOOL.y + 2.6, SCHOOL.z),
         Math.min(1, dt * 0.6),
       );
-      const spread = around ? 1.25 : 0.75;
+      // it opens and gathers at the pace it travels, never at once
+      schoolOpen = lerp(schoolOpen, around ? 1 : 0, Math.min(1, dt * 0.6));
+      const spread = lerp(0.75, 1.25, schoolOpen);
+      const tall = lerp(0.8, 1.2, schoolOpen);
       for (let i = 0; i < schoolData.length; i++) {
         const f = schoolData[i];
         f.a += dt * f.sp * (around ? 0.9 : 0.6);
         const r = f.r * spread;
-        o.position.set(
-          schoolCtr.x + Math.cos(f.a) * r,
-          schoolCtr.y + f.h * (around ? 1.2 : 0.8) + Math.sin(wtime * 1.1 + f.ph) * 0.18,
-          schoolCtr.z + Math.sin(f.a) * r,
+        const q = f.body;
+        q.hx = schoolCtr.x + Math.cos(f.a) * r;
+        q.hz = schoolCtr.z + Math.sin(f.a) * r;
+        q.r = FISH_R * f.sc;
+        q.hy = overFloor(
+          schoolCtr.y + f.h * tall + Math.sin(wtime * 1.1 + f.ph) * 0.18,
+          groundH(q.hx, q.hz) + q.r + 0.2,
+          0.3,
         );
-        o.rotation.set(0, -f.a, Math.sin(wtime * 7 + f.ph) * 0.18);
-        o.scale.setScalar(f.sc);
-        o.updateMatrix();
-        school.setMatrixAt(i, o.matrix);
       }
-      school.instanceMatrix.needsUpdate = true;
     }
+    {
+      turtleSolid.x = turtle.position.x + Math.sin(lap.heading) * 0.06;
+      turtleSolid.y = turtle.position.y + 0.05;
+      turtleSolid.z = turtle.position.z + Math.cos(lap.heading) * 0.06;
+      const B = mila.body;
+      B.updateWorldMatrix(true, false);
+      tmpV.set(0, 0.12, 0).applyMatrix4(B.matrixWorld);
+      tmpV2.set(0, 1.14, 0).applyMatrix4(B.matrixWorld);
+      // the faster she comes, the sooner the fish give way
+      const moved = rdt > 1e-5 && !shoalFresh ? 1 / rdt : 0;
+      milaLimb.vx = (tmpV.x - milaLimb.ax) * moved;
+      milaLimb.vy = (tmpV.y - milaLimb.ay) * moved;
+      milaLimb.vz = (tmpV.z - milaLimb.az) * moved;
+      const pace = Math.min(Math.hypot(milaLimb.vx, milaLimb.vy, milaLimb.vz), 7);
+      milaLimb.wide = 0.5 + pace * 0.3;
+      milaLimb.ax = tmpV.x;
+      milaLimb.ay = tmpV.y;
+      milaLimb.az = tmpV.z;
+      milaLimb.bx = tmpV2.x;
+      milaLimb.by = tmpV2.y;
+      milaLimb.bz = tmpV2.z;
+      // her line of sight clears as the camera goes under, not all at once
+      const eye = camera.position;
+      sightLimb.r = 0.2 * under;
+      sightLimb.wide = 0.05 + 0.35 * under;
+      sightLimb.ax = eye.x;
+      sightLimb.ay = eye.y;
+      sightLimb.az = eye.z;
+      sightLimb.bx = (tmpV.x + tmpV2.x) / 2;
+      sightLimb.by = (tmpV.y + tmpV2.y) / 2;
+      sightLimb.bz = (tmpV.z + tmpV2.z) / 2;
+      steer(shoal, shoalFresh ? 0 : dt, seaSolids, milaLimbs, groundH, -0.25);
+    }
+    for (let i = 0; i < fishData.length; i++) {
+      const f = fishData[i];
+      faceWay(f, f.body, -f.a + (f.s > 0 ? 0 : Math.PI), dt);
+      o.position.set(f.body.x, f.body.y, f.body.z);
+      o.rotation.set(0, f.yaw, Math.sin(wtime * 6 + f.ph) * 0.15);
+      o.scale.setScalar(f.sc * Math.max(0.001, f.vis, reveal));
+      o.updateMatrix();
+      fish.setMatrixAt(i, o.matrix);
+    }
+    fish.instanceMatrix.needsUpdate = true;
+    for (let i = 0; i < schoolData.length; i++) {
+      const f = schoolData[i];
+      faceWay(f, f.body, -f.a, dt);
+      o.position.set(f.body.x, f.body.y, f.body.z);
+      o.rotation.set(0, f.yaw, Math.sin(wtime * 7 + f.ph) * 0.18);
+      o.scale.setScalar(f.sc);
+      o.updateMatrix();
+      school.setMatrixAt(i, o.matrix);
+    }
+    school.instanceMatrix.needsUpdate = true;
+    shoalFresh = false;
     // the sea grass parts (page 7)
     U.part.value = lerp(
       U.part.value,
