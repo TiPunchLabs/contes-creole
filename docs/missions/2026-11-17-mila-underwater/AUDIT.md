@@ -249,18 +249,56 @@ leans in, only her hair shows for about 0.8 s, she is under. Coming out, her hai
 surface for about a second, she stands up in chest-deep water and walks out in three strides.
 
 The round on the built `f645de0` (`boards-o/`, desktop and mobile layout, one frame every 0.2 s
-from 2.0 to 4.6 s, base above, corrected build below) shows the same: no frame has her feet on or
-above the water. Two things a viewer may notice, left as they are: while she wades in, the part of
+from 2.0 to 4.6 s, base above, corrected build below) was read at the time as showing the same, no frame with her feet on
+or above the water. For the exit that reading was wrong: at one frame every 0.2 s and at that size
+the sheets did not show what the probe of section 7.3 measured. Two things a viewer may notice, left as they are: while she wades in, the part of
 her under the water is seen pale through it (2.4 to 3.2 s); and for about 0.4 s (3.4 to 3.6 s
 going in, 2.8 to 3.4 s coming out) only her hair is above the surface, a small dark shape that,
 on a still, could be taken for a rock. The turtle of page 7 is in view on the first frame in both
 layouts, smaller, partly behind the grass, clear of Mila (`boards-o/*-p07-turtle-frame000.png`).
 
-Limit, stated: the beach is steep, so the walk from chest-deep to dry sand is 1.3 m and takes
+Limit, stated (and see 7.3 for what the review found afterwards): the beach is steep, so the walk from chest-deep to dry sand is 1.3 m and takes
 about 0.5 s at the pace the transition has there. Slowing it would mean re-timing the transition
 or reshaping the shore; neither was done.
 
-### 7.3 The turtle
+### 7.3 The exit again (correction cycle 1, `1638c4c`)
+
+The review of `9668453` pointed at the 3 frames the replay still flagged on the exit, and at the
+fact that the replay does not measure the rendered body. It was right, and the fault was larger
+than the replay said.
+
+Measured in the running scene (`evidence/exit-probe.md`: ankle bones, hip pivot and head, every
+frame, against the floor under them and the moving surface above them). At `f645de0`, coming out:
+she swims stretched out (body tilted 1.17 rad) until her feet's height meets the bottom at
+−0.85 m; only then does the swim weight start down (3.6 a second), and her body's tilt follows it
+with its own, slower ease (2.5 a second). She crosses the shore at the fastest point of the
+transition (about 4 m/s; the bottom climbs 2 m a second under her), so 0.25 s later her hips are
+above the surface while she still leans 1.0 rad forward, legs trailing: 28 frames (0.45 s) lying
+with her hips out of the water, 13 of them with an ankle above the surface. The 3 frames of the
+replay were the first of these. The entry has none: there the bottom falls away slowly and she
+leans in while her feet are still on it.
+
+Cause: the swim pose was decided by the depth under her alone, so on the way out she could not
+start to stand before the bottom was already under her feet.
+
+Change: she reads the depth ahead. `swims(floor, ahead)` (exported, unit-tested) is true only
+where both the bottom under her and the shallowest bottom within `FOOTING_REACH = 3` m along her
+way are out of her depth. Going in nothing changes (the water ahead is deeper). Coming out she
+starts to right herself 3 m before the shallows, in 2.6 m of water, her feet's height still held
+at −0.85 m: head out at 3.3 s, shoulders out and legs coming down through 3.4 to 3.9 s, body at
+0.29 rad when her feet touch (3.92 s), 0.17 rad when her hips clear the surface. Same probe: 0
+frames of A, B or C on either transition. Her height, her path, the camera and the timing are
+untouched; only when her body turns changed.
+
+Two dead ends on the way: a look-ahead in seconds flickered (her path's speed drops by a quarter
+where two segments of the curve meet, which pulled the shallows out of reach again for 0.1 s); a
+single probe point ahead is at the mercy of the bottom's relief. Hence metres, and the shallowest
+of four points.
+
+What stays true: she comes out fast. From her feet touching to dry sand takes 0.5 s, at a run.
+Slowing that is a matter of the transition's timing or the beach's slope, both left alone.
+
+### 7.4 The turtle
 
 Its shell was 1.38 m long and 1.1 m wide, 2.2 m across the fore flippers: longer than Mila is tall
 (1.25 m to the top of her head). `TURTLE_SCALE = 0.6`: a shell of 0.83 m, two thirds of her
@@ -332,21 +370,55 @@ confirmation, not a new table):
   over 33 ms 24 → 25, 0 → 32, 22 → 43, the longest 54 → 88, 7 → 71 and 71 → 141 ms. The same
   pattern as at `3d09931` (section 10).
 
+Round on `1638c4c` against `f645de0` and `d60c1a6` (correction cycle 1, `evidence/corrections-c1.md`;
+headless GPU Chrome for the functional checks, no frame-rate figure taken from it):
+
+- journey 24 steps per viewport, 0 failed, same console messages as the base; the three earlier
+  suites give the same totals and the same failures as the base;
+- transition lengths within 9 ms of the base and 16 ms of `f645de0`;
+- 6 → 7: the frames of `f645de0` and `1638c4c` from 2.0 to 4.6 s differ by 0.00 to 0.11 on a
+  0 to 255 scale (mean absolute difference): the entry is unchanged;
+- 10 → 11 (`boards-c1/`, three builds, desktop and mobile layout): at the base she lies on the
+  surface with her legs behind her above the water; at `f645de0` only her hair shows until 3.4 s
+  and her body appears at 3.8 s; at `1638c4c` her head and shoulders are out and upright at 3.6 s
+  and she wades from 4.0 s. On both corrected builds only her hair shows from 2.8 to 3.2 s, and
+  her dress is pale through the water while she wades;
+- in the running scene, frame by frame (`evidence/exit-probe.md`): frames lying with the hips above
+  the surface 28 → 0, with an ankle above it 13 → 0; entry 0 on both.
+
 Boards (before / after, per page and per transition, also low quality and reduced motion):
-`boards-final/` (66 files) and, for the corrections, `boards-o/`.
+`boards-final/` (66 files), for the corrections `boards-o/`, for cycle 1 `boards-c1/`.
 
 ## 10. Limits and open points
 
 - **No phone was tested.** The mobile figures are a desktop GPU in a phone-sized window. The 30 fps
   target on a real phone is not verified.
-- **Long frames in the uncapped run.** With the frame limiter off, headed, the GPU is saturated
-  (100 %, 74 of 75 W) and both builds show frames of 50 to 450 ms. The final build has more of
-  them, and page 9 has them where the base had none. What is established: the base's page 9 runs
-  at 410 fps (582 draw calls) and has none; every segment that runs near 500 fps has them, on both
-  builds (base page 7: 8 to 22 a run); they come in multiples of the display's 16.7 ms (54, 71 ms);
-  the capped runs, which are what a screen shows, have none on either build. What is not
-  established: their cause. My reading is that above about 450 fps the compositor pushes back, and
-  the final build reaches that rate on more pages; this was not isolated.
+- **Long frames in the uncapped run** (studied in correction cycle 1, `evidence/long-frames.md`;
+  headed Chrome 157, the NVIDIA renderer read before each launch, page 9, 3 s warm-up then 20 s,
+  `nice -n 19`, builds alternated). With the frame limiter off, page 9 has frames over 33 ms on
+  `1638c4c` in every run (3 to 23 in 20 s, the longest 71 to 421 ms) and none at the base (longest
+  6.9 ms). What was found:
+  - during these frames the main thread is not running our code. In a CPU profile of two runs,
+    34 stalls of 36 to 62 ms were placed in time: 1045 of 1122 ms of the first run's stalls are
+    spent inside one native WebGL call (`uniformMatrix4fv` in 16 of 21, else `uniformMatrix3fv`,
+    `uniform3f` or `drawElements`), called from three.js `renderBufferDirect`; 72 ms are
+    JavaScript;
+  - ruled out: garbage collection (no heap drop before any long frame, none in the profile); long
+    JavaScript of the scene; the frame rate alone (the base in a smaller window ran at 648 fps
+    with none; the new build slowed to the base's rate had none in 3 runs of 4);
+  - they go away with fewer pixels: the same build in a 960 × 600 window ran at 800 to 880 fps
+    with no frame over 8.2 ms in three runs;
+  - the 60 Hz capped runs, which are what a screen shows, have none beyond the single 33 to 36 ms
+    frames seen on both builds.
+    My reading (not measured on the GPU process side, no Chrome trace was taken): with the corals
+    merged the main thread sends a frame in 2.1 ms instead of 2.7 ms and now outruns the GPU at
+    1440 × 900, so a WebGL call waits for the GPU to catch up; the waits come in steps of about
+    16.7 ms. At the base the main thread was the slower of the two and never waited. The water's
+    colour is also computed per pixel now, which may add to the GPU's share; that part was not
+    separated. Nothing was changed in the product: the stall needs the limiter off and a GPU that is
+    the slower side, and making the main thread slower again would be the only "fix". One run of the
+    slowed build and one of the small-window base did show long frames, in a round where the browser
+    reported many long tasks on every build but the base: part of the effect may be the machine.
 - **Page 10 is lighter behind the text than at the base** (mean luminance of the picture there
   about 0.06 to 0.10 → 0.13 to 0.20). The text keeps 6.4 : 1 or more through the veil; the page is
   the shallow one and is meant to be the lightest, but this is a judgement for the owner.
@@ -368,3 +440,9 @@ Under `~/.local/share/contes-creole-qa/mila-underwater/`: `upstream/`, the build
 logs and the subagent's analysis scripts (`an/`, `diag/`, `fishcheck/`, `qa-test*`, `lowprobe*`).
 In the repository, git-ignored: `qa/out/` (`peek.mjs`, `wip.sh`, `linkprobe.mjs`, `casters.mjs`,
 `fishprobe.mjs`, `dive-sim.ts.txt`). Removal needs the owner's word.
+
+Added in correction cycle 1, same media folder: the builds `probe-dist` (instrumented, never
+shipped) and `c1-dist` (`1638c4c`); `probe/` (per-frame records and stills of four variants of the
+exit), `c1/`, `c1-regress/`, `boards-c1/`, `c1-lf/`, `c1-lf-cal/`, `c1-lf2/` (long-frame runs). In
+`qa/out/` (git-ignored): `probe.mjs`, `probe-table.py`, `probe.patch.txt` (the temporary
+instrumentation, removed from `scene.ts` before the commit).

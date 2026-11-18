@@ -1,5 +1,7 @@
 # Mila's height against the sea floor on the entry (6 to 7) and the exit (10 to 11)
 
+Reading note added in correction cycle 1 (2026-11-18). This replay is a simplified model: it places her feet's height and a swim weight, not her rendered body, and its "after" columns describe `f645de0`. The 3 frames it still flags on the exit are the frames 0.14 to 0.19 s after her feet meet the bottom (about 4.06 to 4.11 s here): the swim weight is still above 0.5 while the beach has already lifted her hips to the surface. They were the visible edge of a real fault that this model under-counted, because her body's tilt eases separately and more slowly than the swim weight: measured in the running scene, `f645de0` has 28 frames in which she lies forward with her hips above the surface (`exit-probe.md`). Fixed in `1638c4c`; the figures that count for the exit are those of `exit-probe.md`, not the ones below.
+
 Offline replay of the scene's own formulas (`groundH`, the centripetal Catmull-Rom path of `MILA_VIA`, `easeIO`, the swim weight eased at 3.6 a second) at 60 steps a second. Before: the rule at `3d09931` (`WADE`). After: `milaHeight` and `STAND_DEPTH` from `src/books/mila/world/scene.ts`. Heights in metres, the sea's surface at 0. A fault is: upright with her feet more than 0.15 m above the floor, or stretched out with her body (0.62 m above her feet's height) above the sea. Produced by a scratch simulation (`qa/out/dive-sim.ts.txt`, git-ignored), run through vitest.
 
 ### 6>7 (7.6 s, 60 steps a second, every 0.2 s shown)

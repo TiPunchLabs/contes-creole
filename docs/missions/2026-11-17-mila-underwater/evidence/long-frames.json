@@ -1,0 +1,975 @@
+{
+  "final": {
+    "label": "c1-lf",
+    "date": "2026-11-18T12:02:53.020Z",
+    "headed": true,
+    "slowMs": 0.85,
+    "smallWin": [1200, 750],
+    "variants": {
+      "B1": [
+        {
+          "viewport": [1440, 900],
+          "frames": 6999,
+          "meanFps": 348.71,
+          "medianFps": 357.14,
+          "p95Ms": 3.5,
+          "p99Ms": 4,
+          "maxMs": 6.6,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 582.1,
+          "triangles": 759350,
+          "meanCbMs": 2.741,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 8,
+          "longs": []
+        },
+        {
+          "viewport": [1440, 900],
+          "frames": 7694,
+          "meanFps": 384.67,
+          "medianFps": 384.62,
+          "p95Ms": 3,
+          "p99Ms": 3.5,
+          "maxMs": 6.9,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 582.4,
+          "triangles": 759484,
+          "meanCbMs": 2.486,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 8,
+          "longs": []
+        },
+        {
+          "viewport": [1440, 900],
+          "frames": 7634,
+          "meanFps": 381.68,
+          "medianFps": 384.62,
+          "p95Ms": 3.1,
+          "p99Ms": 3.5,
+          "maxMs": 6.3,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 582.5,
+          "triangles": 759517,
+          "meanCbMs": 2.502,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 12,
+          "longs": []
+        }
+      ],
+      "B2": [
+        {
+          "viewport": [1440, 900],
+          "frames": 9026,
+          "meanFps": 449.61,
+          "medianFps": 500,
+          "p95Ms": 2.9,
+          "p99Ms": 9.5,
+          "maxMs": 420,
+          "over33": 3,
+          "over50": 1,
+          "drawCalls": 309.3,
+          "triangles": 817063,
+          "meanCbMs": 2.097,
+          "breakdown": {
+            "total": 3,
+            "longCallback": 3,
+            "heapDrop": 0,
+            "longTask": 1,
+            "none": 0
+          },
+          "multiples": {
+            "2": 2,
+            "25": 1
+          },
+          "longTasksTotal": 11,
+          "longs": [
+            {
+              "intervalMs": 420,
+              "multiplesOf16_7": 25,
+              "cbMs": 2,
+              "cbPrevMs": 420.5,
+              "heapDropBytes": -172924,
+              "longTask": true
+            },
+            {
+              "intervalMs": 36.4,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.1,
+              "cbPrevMs": 39.7,
+              "heapDropBytes": -171644,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.5,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.4,
+              "cbPrevMs": 41.5,
+              "heapDropBytes": -174340,
+              "longTask": false
+            }
+          ]
+        },
+        {
+          "viewport": [1440, 900],
+          "frames": 9344,
+          "meanFps": 466.89,
+          "medianFps": 588.24,
+          "p95Ms": 2.6,
+          "p99Ms": 13.3,
+          "maxMs": 71.4,
+          "over33": 23,
+          "over50": 10,
+          "drawCalls": 308.9,
+          "triangles": 816690,
+          "meanCbMs": 2.036,
+          "breakdown": {
+            "total": 23,
+            "longCallback": 23,
+            "heapDrop": 0,
+            "longTask": 10,
+            "none": 0
+          },
+          "multiples": {
+            "2": 13,
+            "3": 9,
+            "4": 1
+          },
+          "longTasksTotal": 41,
+          "longs": [
+            {
+              "intervalMs": 36.5,
+              "multiplesOf16_7": 2,
+              "cbMs": 3.1,
+              "cbPrevMs": 35.3,
+              "heapDropBytes": -188532,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.3,
+              "multiplesOf16_7": 2,
+              "cbMs": 3,
+              "cbPrevMs": 40.5,
+              "heapDropBytes": -189508,
+              "longTask": false
+            },
+            {
+              "intervalMs": 54,
+              "multiplesOf16_7": 3,
+              "cbMs": 2.2,
+              "cbPrevMs": 59.3,
+              "heapDropBytes": -177312,
+              "longTask": true
+            },
+            {
+              "intervalMs": 53.9,
+              "multiplesOf16_7": 3,
+              "cbMs": 2,
+              "cbPrevMs": 59.3,
+              "heapDropBytes": -170624,
+              "longTask": true
+            },
+            {
+              "intervalMs": 36.8,
+              "multiplesOf16_7": 2,
+              "cbMs": 2,
+              "cbPrevMs": 38.7,
+              "heapDropBytes": -172376,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.8,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.5,
+              "cbPrevMs": 36.2,
+              "heapDropBytes": -174624,
+              "longTask": false
+            },
+            {
+              "intervalMs": 53.8,
+              "multiplesOf16_7": 3,
+              "cbMs": 1.9,
+              "cbPrevMs": 60.8,
+              "heapDropBytes": -175160,
+              "longTask": true
+            },
+            {
+              "intervalMs": 36.3,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.2,
+              "cbPrevMs": 36.8,
+              "heapDropBytes": -173352,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.2,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.1,
+              "cbPrevMs": 36.7,
+              "heapDropBytes": -173544,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.6,
+              "multiplesOf16_7": 2,
+              "cbMs": 1.9,
+              "cbPrevMs": 47,
+              "heapDropBytes": -173220,
+              "longTask": false
+            },
+            {
+              "intervalMs": 52.8,
+              "multiplesOf16_7": 3,
+              "cbMs": 2.1,
+              "cbPrevMs": 53.6,
+              "heapDropBytes": -174008,
+              "longTask": true
+            },
+            {
+              "intervalMs": 71.4,
+              "multiplesOf16_7": 4,
+              "cbMs": 2.4,
+              "cbPrevMs": 78.9,
+              "heapDropBytes": -170356,
+              "longTask": true
+            },
+            {
+              "intervalMs": 53.5,
+              "multiplesOf16_7": 3,
+              "cbMs": 2.1,
+              "cbPrevMs": 63.5,
+              "heapDropBytes": -170576,
+              "longTask": true
+            },
+            {
+              "intervalMs": 53.3,
+              "multiplesOf16_7": 3,
+              "cbMs": 2,
+              "cbPrevMs": 59.4,
+              "heapDropBytes": -173492,
+              "longTask": true
+            },
+            {
+              "intervalMs": 36.5,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.2,
+              "cbPrevMs": 46.7,
+              "heapDropBytes": -172920,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.1,
+              "multiplesOf16_7": 2,
+              "cbMs": 1.9,
+              "cbPrevMs": 38.5,
+              "heapDropBytes": -174244,
+              "longTask": false
+            },
+            {
+              "intervalMs": 53.5,
+              "multiplesOf16_7": 3,
+              "cbMs": 2.3,
+              "cbPrevMs": 62.6,
+              "heapDropBytes": -171596,
+              "longTask": true
+            },
+            {
+              "intervalMs": 36.1,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.1,
+              "cbPrevMs": 40.9,
+              "heapDropBytes": -173088,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.4,
+              "multiplesOf16_7": 2,
+              "cbMs": 3.3,
+              "cbPrevMs": 46.7,
+              "heapDropBytes": -172716,
+              "longTask": false
+            },
+            {
+              "intervalMs": 53.3,
+              "multiplesOf16_7": 3,
+              "cbMs": 2.1,
+              "cbPrevMs": 60.9,
+              "heapDropBytes": -171832,
+              "longTask": true
+            },
+            {
+              "intervalMs": 53.8,
+              "multiplesOf16_7": 3,
+              "cbMs": 2.2,
+              "cbPrevMs": 57.7,
+              "heapDropBytes": -172068,
+              "longTask": true
+            },
+            {
+              "intervalMs": 36.2,
+              "multiplesOf16_7": 2,
+              "cbMs": 1.9,
+              "cbPrevMs": 39.9,
+              "heapDropBytes": -172944,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.7,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.3,
+              "cbPrevMs": 35.9,
+              "heapDropBytes": -173296,
+              "longTask": false
+            }
+          ]
+        },
+        {
+          "viewport": [1440, 900],
+          "frames": 9042,
+          "meanFps": 452.11,
+          "medianFps": 555.56,
+          "p95Ms": 2.9,
+          "p99Ms": 8.2,
+          "maxMs": 420.8,
+          "over33": 10,
+          "over50": 6,
+          "drawCalls": 307.6,
+          "triangles": 816283,
+          "meanCbMs": 2.098,
+          "breakdown": {
+            "total": 10,
+            "longCallback": 10,
+            "heapDrop": 0,
+            "longTask": 6,
+            "none": 0
+          },
+          "multiples": {
+            "2": 4,
+            "3": 1,
+            "4": 2,
+            "6": 1,
+            "24": 1,
+            "25": 1
+          },
+          "longTasksTotal": 19,
+          "longs": [
+            {
+              "intervalMs": 35.9,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.6,
+              "cbPrevMs": 39.5,
+              "heapDropBytes": -175504,
+              "longTask": false
+            },
+            {
+              "intervalMs": 53.7,
+              "multiplesOf16_7": 3,
+              "cbMs": 2.3,
+              "cbPrevMs": 56.1,
+              "heapDropBytes": -173168,
+              "longTask": true
+            },
+            {
+              "intervalMs": 70.7,
+              "multiplesOf16_7": 4,
+              "cbMs": 2.4,
+              "cbPrevMs": 71.7,
+              "heapDropBytes": -172764,
+              "longTask": true
+            },
+            {
+              "intervalMs": 71,
+              "multiplesOf16_7": 4,
+              "cbMs": 2.2,
+              "cbPrevMs": 82.2,
+              "heapDropBytes": -173176,
+              "longTask": true
+            },
+            {
+              "intervalMs": 106.3,
+              "multiplesOf16_7": 6,
+              "cbMs": 3.2,
+              "cbPrevMs": 120.2,
+              "heapDropBytes": -172120,
+              "longTask": true
+            },
+            {
+              "intervalMs": 420.8,
+              "multiplesOf16_7": 25,
+              "cbMs": 2,
+              "cbPrevMs": 420.3,
+              "heapDropBytes": -172048,
+              "longTask": true
+            },
+            {
+              "intervalMs": 36,
+              "multiplesOf16_7": 2,
+              "cbMs": 3.7,
+              "cbPrevMs": 40.8,
+              "heapDropBytes": -169656,
+              "longTask": false
+            },
+            {
+              "intervalMs": 404.6,
+              "multiplesOf16_7": 24,
+              "cbMs": 2.2,
+              "cbPrevMs": 405.6,
+              "heapDropBytes": -167952,
+              "longTask": true
+            },
+            {
+              "intervalMs": 36.3,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.9,
+              "cbPrevMs": 37.3,
+              "heapDropBytes": -173856,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.5,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.1,
+              "cbPrevMs": 39.5,
+              "heapDropBytes": -173168,
+              "longTask": false
+            }
+          ]
+        }
+      ],
+      "B3": [
+        {
+          "viewport": [1440, 900],
+          "frames": 6357,
+          "meanFps": 316.66,
+          "medianFps": 322.58,
+          "p95Ms": 3.8,
+          "p99Ms": 4.2,
+          "maxMs": 7.2,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 308.8,
+          "triangles": 816430,
+          "meanCbMs": 2.117,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 3,
+          "longs": []
+        },
+        {
+          "viewport": [1440, 900],
+          "frames": 7276,
+          "meanFps": 363.78,
+          "medianFps": 370.37,
+          "p95Ms": 3.2,
+          "p99Ms": 3.5,
+          "maxMs": 5.2,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 308.7,
+          "triangles": 816428,
+          "meanCbMs": 1.736,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 3,
+          "longs": []
+        },
+        {
+          "viewport": [1440, 900],
+          "frames": 5900,
+          "meanFps": 294.97,
+          "medianFps": 344.83,
+          "p95Ms": 3.7,
+          "p99Ms": 15.8,
+          "maxMs": 210.2,
+          "over33": 18,
+          "over50": 8,
+          "drawCalls": 308.6,
+          "triangles": 816322,
+          "meanCbMs": 2.36,
+          "breakdown": {
+            "total": 18,
+            "longCallback": 18,
+            "heapDrop": 0,
+            "longTask": 8,
+            "none": 0
+          },
+          "multiples": {
+            "2": 10,
+            "3": 2,
+            "5": 2,
+            "11": 2,
+            "12": 1,
+            "13": 1
+          },
+          "longTasksTotal": 101,
+          "longs": [
+            {
+              "intervalMs": 176.7,
+              "multiplesOf16_7": 11,
+              "cbMs": 2,
+              "cbPrevMs": 184.4,
+              "heapDropBytes": -187988,
+              "longTask": true
+            },
+            {
+              "intervalMs": 37.4,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.3,
+              "cbPrevMs": 35.5,
+              "heapDropBytes": -188892,
+              "longTask": false
+            },
+            {
+              "intervalMs": 210.2,
+              "multiplesOf16_7": 13,
+              "cbMs": 3.2,
+              "cbPrevMs": 214.5,
+              "heapDropBytes": -190296,
+              "longTask": true
+            },
+            {
+              "intervalMs": 37.6,
+              "multiplesOf16_7": 2,
+              "cbMs": 3.8,
+              "cbPrevMs": 42.5,
+              "heapDropBytes": -190864,
+              "longTask": false
+            },
+            {
+              "intervalMs": 55.3,
+              "multiplesOf16_7": 3,
+              "cbMs": 2,
+              "cbPrevMs": 60.7,
+              "heapDropBytes": -174784,
+              "longTask": true
+            },
+            {
+              "intervalMs": 175.5,
+              "multiplesOf16_7": 11,
+              "cbMs": 2.7,
+              "cbPrevMs": 174.9,
+              "heapDropBytes": -172352,
+              "longTask": true
+            },
+            {
+              "intervalMs": 54.8,
+              "multiplesOf16_7": 3,
+              "cbMs": 2.3,
+              "cbPrevMs": 62.2,
+              "heapDropBytes": -171856,
+              "longTask": true
+            },
+            {
+              "intervalMs": 89.4,
+              "multiplesOf16_7": 5,
+              "cbMs": 2.2,
+              "cbPrevMs": 88.1,
+              "heapDropBytes": -173000,
+              "longTask": true
+            },
+            {
+              "intervalMs": 193.2,
+              "multiplesOf16_7": 12,
+              "cbMs": 2.7,
+              "cbPrevMs": 193.7,
+              "heapDropBytes": -172964,
+              "longTask": true
+            },
+            {
+              "intervalMs": 88.9,
+              "multiplesOf16_7": 5,
+              "cbMs": 2.1,
+              "cbPrevMs": 100.7,
+              "heapDropBytes": -172056,
+              "longTask": true
+            },
+            {
+              "intervalMs": 37.2,
+              "multiplesOf16_7": 2,
+              "cbMs": 3.7,
+              "cbPrevMs": 45.8,
+              "heapDropBytes": -172636,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.9,
+              "multiplesOf16_7": 2,
+              "cbMs": 3.7,
+              "cbPrevMs": 43.3,
+              "heapDropBytes": -173896,
+              "longTask": false
+            },
+            {
+              "intervalMs": 37.6,
+              "multiplesOf16_7": 2,
+              "cbMs": 3.5,
+              "cbPrevMs": 36,
+              "heapDropBytes": -174868,
+              "longTask": false
+            },
+            {
+              "intervalMs": 37.5,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.1,
+              "cbPrevMs": 48.3,
+              "heapDropBytes": -172488,
+              "longTask": false
+            },
+            {
+              "intervalMs": 37.2,
+              "multiplesOf16_7": 2,
+              "cbMs": 2,
+              "cbPrevMs": 35.7,
+              "heapDropBytes": -172636,
+              "longTask": false
+            },
+            {
+              "intervalMs": 37.1,
+              "multiplesOf16_7": 2,
+              "cbMs": 4.2,
+              "cbPrevMs": 34.8,
+              "heapDropBytes": -171960,
+              "longTask": false
+            },
+            {
+              "intervalMs": 37.2,
+              "multiplesOf16_7": 2,
+              "cbMs": 2.2,
+              "cbPrevMs": 35.3,
+              "heapDropBytes": -171216,
+              "longTask": false
+            },
+            {
+              "intervalMs": 37.1,
+              "multiplesOf16_7": 2,
+              "cbMs": 2,
+              "cbPrevMs": 44.5,
+              "heapDropBytes": -172768,
+              "longTask": false
+            }
+          ]
+        }
+      ],
+      "B4": [
+        {
+          "viewport": [1200, 750],
+          "frames": 7501,
+          "meanFps": 373.78,
+          "medianFps": 384.62,
+          "p95Ms": 3.2,
+          "p99Ms": 3.7,
+          "maxMs": 7,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 582.1,
+          "triangles": 759559,
+          "meanCbMs": 2.559,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 4,
+          "longs": []
+        },
+        {
+          "viewport": [1200, 750],
+          "frames": 7299,
+          "meanFps": 364.92,
+          "medianFps": 370.37,
+          "p95Ms": 3.5,
+          "p99Ms": 4.3,
+          "maxMs": 7.5,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 581.9,
+          "triangles": 759430,
+          "meanCbMs": 2.613,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 4,
+          "longs": []
+        },
+        {
+          "viewport": [1200, 750],
+          "frames": 6291,
+          "meanFps": 314.55,
+          "medianFps": 344.83,
+          "p95Ms": 3.9,
+          "p99Ms": 11.6,
+          "maxMs": 89.8,
+          "over33": 7,
+          "over50": 3,
+          "drawCalls": 581.4,
+          "triangles": 758819,
+          "meanCbMs": 3.042,
+          "breakdown": {
+            "total": 7,
+            "longCallback": 7,
+            "heapDrop": 0,
+            "longTask": 4,
+            "none": 0
+          },
+          "multiples": {
+            "2": 4,
+            "3": 2,
+            "5": 1
+          },
+          "longTasksTotal": 59,
+          "longs": [
+            {
+              "intervalMs": 54.2,
+              "multiplesOf16_7": 3,
+              "cbMs": 3.9,
+              "cbPrevMs": 58.4,
+              "heapDropBytes": -242424,
+              "longTask": true
+            },
+            {
+              "intervalMs": 37.6,
+              "multiplesOf16_7": 2,
+              "cbMs": 4.3,
+              "cbPrevMs": 37.3,
+              "heapDropBytes": -239008,
+              "longTask": false
+            },
+            {
+              "intervalMs": 36.8,
+              "multiplesOf16_7": 2,
+              "cbMs": 4.1,
+              "cbPrevMs": 50,
+              "heapDropBytes": -243584,
+              "longTask": true
+            },
+            {
+              "intervalMs": 89.8,
+              "multiplesOf16_7": 5,
+              "cbMs": 2.8,
+              "cbPrevMs": 100.8,
+              "heapDropBytes": -245436,
+              "longTask": true
+            },
+            {
+              "intervalMs": 37.4,
+              "multiplesOf16_7": 2,
+              "cbMs": 3.2,
+              "cbPrevMs": 46.6,
+              "heapDropBytes": -245460,
+              "longTask": false
+            },
+            {
+              "intervalMs": 54,
+              "multiplesOf16_7": 3,
+              "cbMs": 2.7,
+              "cbPrevMs": 56.2,
+              "heapDropBytes": -245916,
+              "longTask": true
+            },
+            {
+              "intervalMs": 37.1,
+              "multiplesOf16_7": 2,
+              "cbMs": 3.8,
+              "cbPrevMs": 43.9,
+              "heapDropBytes": -242048,
+              "longTask": false
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "calibration": {
+    "label": "c1-lf-cal",
+    "date": "2026-11-18T11:57:01.280Z",
+    "headed": true,
+    "slowMs": 0.4,
+    "smallWin": [960, 600],
+    "variants": {
+      "B1": [
+        {
+          "viewport": [1440, 900],
+          "frames": 7271,
+          "meanFps": 362.35,
+          "medianFps": 384.62,
+          "p95Ms": 3.6,
+          "p99Ms": 4.3,
+          "maxMs": 6.9,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 582,
+          "triangles": 759240,
+          "meanCbMs": 2.635,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 7,
+          "longs": []
+        }
+      ],
+      "B2": [
+        {
+          "viewport": [1440, 900],
+          "frames": 10129,
+          "meanFps": 504.3,
+          "medianFps": 588.24,
+          "p95Ms": 2.4,
+          "p99Ms": 3.5,
+          "maxMs": 385.9,
+          "over33": 4,
+          "over50": 4,
+          "drawCalls": 308.7,
+          "triangles": 816453,
+          "meanCbMs": 1.877,
+          "breakdown": {
+            "total": 4,
+            "longCallback": 4,
+            "heapDrop": 0,
+            "longTask": 4,
+            "none": 0
+          },
+          "multiples": {
+            "9": 1,
+            "22": 2,
+            "23": 1
+          },
+          "longTasksTotal": 19,
+          "longs": [
+            {
+              "intervalMs": 367.9,
+              "multiplesOf16_7": 22,
+              "cbMs": 2.4,
+              "cbPrevMs": 376.1,
+              "heapDropBytes": -169848,
+              "longTask": true
+            },
+            {
+              "intervalMs": 157.9,
+              "multiplesOf16_7": 9,
+              "cbMs": 3.1,
+              "cbPrevMs": 167.3,
+              "heapDropBytes": -172564,
+              "longTask": true
+            },
+            {
+              "intervalMs": 385.9,
+              "multiplesOf16_7": 23,
+              "cbMs": 2.3,
+              "cbPrevMs": 392.1,
+              "heapDropBytes": -173904,
+              "longTask": true
+            },
+            {
+              "intervalMs": 369.5,
+              "multiplesOf16_7": 22,
+              "cbMs": 2.3,
+              "cbPrevMs": 381.4,
+              "heapDropBytes": -171928,
+              "longTask": true
+            }
+          ]
+        }
+      ],
+      "B3": [
+        {
+          "viewport": [1440, 900],
+          "frames": 8626,
+          "meanFps": 429.55,
+          "medianFps": 434.78,
+          "p95Ms": 3,
+          "p99Ms": 3.6,
+          "maxMs": 7,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 308.8,
+          "triangles": 816517,
+          "meanCbMs": 1.771,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 5,
+          "longs": []
+        }
+      ],
+      "B4": [
+        {
+          "viewport": [960, 600],
+          "frames": 12999,
+          "meanFps": 647.84,
+          "medianFps": 666.67,
+          "p95Ms": 1.9,
+          "p99Ms": 2.2,
+          "maxMs": 5.5,
+          "over33": 0,
+          "over50": 0,
+          "drawCalls": 286.3,
+          "triangles": 402681,
+          "meanCbMs": 1.448,
+          "breakdown": {
+            "total": 0,
+            "longCallback": 0,
+            "heapDrop": 0,
+            "longTask": 0,
+            "none": 0
+          },
+          "multiples": {},
+          "longTasksTotal": 4,
+          "longs": []
+        }
+      ]
+    }
+  }
+}

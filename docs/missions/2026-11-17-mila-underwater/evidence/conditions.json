@@ -7,7 +7,8 @@
     "baseline": "d60c1a66dfe0c1e5068b6cd97650aad65ab74d67",
     "final": "3d09931b0a4af564e96bba0a8e4c8ff9cbe291a9",
     "superseded": "f92d8e28ca85e37e9cb532f2fae41b9f17671ffe (after-f92d8e2 round, kept under Q/after* but not used)",
-    "correctionsRound": "f645de058f6ac4f451021b83ec0afa47d2ce49a7 (Q/o-dist, LABEL o-f645de0)"
+    "correctionsRound": "f645de058f6ac4f451021b83ec0afa47d2ce49a7 (Q/o-dist, LABEL o-f645de0)",
+    "c1": "1638c4c26c2a433970522f672650a23447e3fe8b (Q/c1-dist, LABEL c1-1638c4c)"
   },
   "launchArgs": {
     "capped": ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"],
@@ -54,7 +55,10 @@
     "links (headed, uncapped): HEADED=1 ONLY=links OUT=$Q/links/<build>/",
     "final headless: ONLY=shots,motion,leak,journey,trans OUT=$Q/final/; ONLY=text OUT=$Q/final-text/; REDUCED=1 ONLY=shots,motion VPS=desktop,mobile OUT=$Q/final-reduced/; CPU_THROTTLE=8 ONLY=low VPS=desktop,mobile OUT=$Q/final-low/; ONLY=determinism OUT=$Q/final-det/ and $Q/baseline-det/; qa/mila.mjs, mila-nav.mjs, mila-lang.mjs OUT=$Q/final-regress/<suite>/",
     "baseline material reused from Q/baseline, Q/baseline-text, Q/baseline-reduced, Q/baseline-regress (d60c1a6 runs of the previous session)",
-    "corrections round: headless ONLY=shots,motion VPS=desktop,mobile / journey / trans OUT=$Q/o/; regress OUT=$Q/o-regress/; headed HEADED=1 ONLY=links OUT=$Q/o/; headed PERF_RUNS=1 PERF_PASSES=capped.desktop,capped.mobile,uncapped.desktop alternating baseline then final OUT=$Q/o-perf/<B|F>/; all nice -n 19"
+    "corrections round: headless ONLY=shots,motion VPS=desktop,mobile / journey / trans OUT=$Q/o/; regress OUT=$Q/o-regress/; headed HEADED=1 ONLY=links OUT=$Q/o/; headed PERF_RUNS=1 PERF_PASSES=capped.desktop,capped.mobile,uncapped.desktop alternating baseline then final OUT=$Q/o-perf/<B|F>/; all nice -n 19",
+    "c1 functional (headless, nice 19): MOTION_FROMS=6,10 MOTION_SEQ=0 VPS=desktop,mobile ONLY=motion; ONLY=journey; ONLY=trans; qa/mila*.mjs regress; OUT=$Q/c1, $Q/c1-regress",
+    "c1 long frames (headed, nice 19): HEADED=1 ONLY=longframes LF_RUNS=1 (calibration, Q/c1-lf-cal) then LF_RUNS=3 LF_SLOW_MS=0.85 LF_WIN=1200x750 (Q/c1-lf)",
+    "round C (headed, nice 19): HEADED=1 ONLY=longframes LF_SEQ=B2,B1,B2 LF_PROFILE=1 OUT=$Q/c1-lf2/c1c/ (CDP profiler, clock pairs); LF_SEQ=B5,B5,B5 LF_WIN=960x600 OUT=$Q/c1-lf2/c2/; c1 and c1b sets unaligned/unused; 12 browser runs; C3 trace not run"
   ],
   "timing": "perf-headed round: 2451 s wall, system-wide busy cores avg 1.82 of 16 (all processes on the machine, from /proc/stat); headless functional chain: 4911 s wall",
   "note": "All processes started under nice -n 19; one browser at a time.",
