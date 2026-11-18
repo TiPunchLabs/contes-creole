@@ -156,6 +156,28 @@ export function turtleCourse(ta: number): { x: number; z: number; heading: numbe
   };
 }
 const TURTLE_R = 2.6;
+/**
+ * Size of the turtle against its model, whose shell is 1.4 m long, more than Mila is tall (1.25 m).
+ * At 0.6 the shell is 0.83 m, a grown green turtle's, two thirds of her height.
+ */
+const TURTLE_SCALE = 0.6;
+
+/** Sea-floor height down to which Mila stands on the bottom: there the water reaches her chest. */
+export const STAND_DEPTH = -0.85;
+
+/**
+ * Height of Mila's feet where her path is at `pathY` over a sea floor at `floor`. Where she can
+ * stand she walks on the bottom, the water rising on her; past that depth she swims, and her path
+ * cannot lift her out of the water: stretched out she lies 0.62 m above this height, just under
+ * the surface, her head breaking it. The two meet at `STAND_DEPTH`, so going in she only has to
+ * lean forward, and coming out to put her feet down.
+ */
+export function milaHeight(pathY: number, floor: number): number {
+  if (floor >= STAND_DEPTH) return floor;
+  // over deep water she keeps clear of the bottom; none of it where her feet have just left it
+  const clear = 0.35 * smooth(STAND_DEPTH, STAND_DEPTH - 0.6, floor);
+  return Math.max(Math.min(pathY, STAND_DEPTH), floor + clear);
+}
 
 /** Pages where Mila holds the conch to her ear. */
 const HOLD_PAGES = new Set([0, 1, 2, 3, 4, 5, 11, 12]);
@@ -3033,6 +3055,7 @@ void main(){
     turtle.traverse((obj) => {
       if (obj instanceof THREE.Mesh) obj.castShadow = true;
     });
+    turtle.scale.setScalar(TURTLE_SCALE);
     scene.add(turtle);
     // fish
     const merged = makeFishGeo();
@@ -3655,8 +3678,6 @@ void main(){
   /** Time constants (seconds) of the camera's ease in position and in angle. */
   const CAM_EASE = { move: 0.3, turn: 0.45 };
   const CAM_RIDE = { move: 0.1, turn: 0.16 };
-  /** Sea-floor heights between which Mila goes from swimming to standing on the bottom. */
-  const WADE = { from: -0.95, stand: -0.62 };
   /**
    * Her gestures with the light: `reach` holds her open hand out to the pearl's light (page 9),
    * `fist` closes it on nothing, `hug` folds her arms on the three voices (page 10).
@@ -3897,8 +3918,7 @@ void main(){
   function animateMila(rdt: number): void {
     const M = mila;
     const target = trans ? trans.to : page;
-    const afloat =
-      M.g.position.y < -0.25 && groundH(M.g.position.x, M.g.position.z) < WADE.stand ? 1 : 0;
+    const afloat = groundH(M.g.position.x, M.g.position.z) < STAND_DEPTH ? 1 : 0;
     M.swimW = lerp(M.swimW, afloat, Math.min(1, rdt * 3.6));
     if (M.snap) {
       M.swimW = afloat;
@@ -4318,12 +4338,7 @@ void main(){
       mila.g.position.y = MILA_AT[page].p.y + (mila.swimW > 0.1 ? Math.sin(wtime * 1.2) * 0.08 : 0);
     {
       const gp = mila.g.position;
-      const gh = groundH(gp.x, gp.z);
-      if (gh > WADE.from) {
-        // Where the water is shallow her feet find the bottom: she wades in and out, upright,
-        // instead of swimming over the sand or walking on the water.
-        gp.y = lerp(Math.max(gp.y, gh + 0.35), gh, smooth(WADE.from, WADE.stand, gh));
-      } else gp.y = Math.max(gp.y, gh + 0.35);
+      gp.y = milaHeight(gp.y, groundH(gp.x, gp.z));
     }
     updateGround();
     U.wind.value = lerp(U.wind.value, mila.swimW * 1.2 + mila.walk * 0.4, rdt * 2);
