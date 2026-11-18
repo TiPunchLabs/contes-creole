@@ -306,6 +306,108 @@ height, the size of a grown green turtle (carapace about 0.8 to 1.1 m), 1.3 m ac
 Its lap, heading, height above the meadow and swimming motion are unchanged
 (`turtleCourse`, still covered by its test).
 
+### 7.5 No living form through a solid one (O4, `a425401`)
+
+Inventory, read from `scene.ts` at `1638c4c`:
+
+| Living form                       | How it moves                                                                                            | Solids it can meet                                                                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mila                              | scripted: a curve from page to page (`MILA_AT`, `MILA_VIA`), her height set by `milaHeight`             | rocks of the beach and of the sea, corals, the conch on the sand, the debris, the crab, the turtle, the living conch, the pearl, the fish, the ground |
+| 100 fish (60 in the phone layout) | each on a round of its own about the meadow or the hollow, at its own height and speed, both ways round | each other, the school, Mila, the turtle, 28 rocks of the sea, 16 corals, the living conch, the pearl, the sea floor                                  |
+| the school, 140 fish (90)         | rounds about a centre that goes to Mila on page 8 and back                                              | the same                                                                                                                                              |
+| the turtle                        | scripted lap of the meadow (`turtleCourse`)                                                             | fish, Mila, rocks, corals, the sea floor                                                                                                              |
+| the crab                          | scripted: sways in place, then walks 1.2 m once freed                                                   | the debris, Mila, the rocks of its cove                                                                                                               |
+| the living conch                  | at rest (its eye stalks sway since `5af99d0`)                                                           | fish, Mila                                                                                                                                            |
+| the fireflies on the beach        | points of light with no body                                                                            | not checked: nothing to overlap                                                                                                                       |
+
+The sea grass and the beach grass bend and part; they are not treated as solids. The fisherman in
+his canoe is far out, nothing comes near him.
+
+Measure (`qa/mila-clearance.mjs`, on a build with the read-only probe of
+`qa/mila-probe-inject.mjs`): after every drawn frame of every page and every turn, forwards and
+back, each body is replaced by capsules or flattened spheres (listed in
+`evidence/clearance.md`) and every pair is tested; an overlap deeper than 0.02 m counts. Before
+(`1638c4c`, desktop, 16 652 frames):
+
+- fish in the sea floor on 13 025 frames (up to 0.76 m deep), in rocks on 9 495 (0.87 m), in
+  corals on 4 652 (0.43 m): their rounds are circles at a fixed height over a bottom that rises;
+- fish of the school in each other on 13 885 frames (0.07 m), other fish in each other on 639;
+- fish in the turtle on 231 frames (0.26 m);
+- fish in Mila on 89 frames (0.13 m) and fish of the school in her on 86 (0.18 m);
+- nothing for Mila against the turtle, the crab, the rocks, the corals, the conches, the pearl,
+  the debris or the ground, nor for the turtle and the crab against anything: the scripted paths
+  were already clear of each other and of the solids, so none of them was changed.
+
+It also showed the school jumping open by two thirds in one frame when Mila arrives on page 8
+(a fish moved 1.09 m between two frames).
+
+What was done (`shoal.ts`, pure and unit-tested; called once a frame from the scene's own loop):
+
+- every fish keeps its round as its route and carries an offset from it. Within a berth of a
+  solid (0.45 m, more for a fast fish) the offset grows away from it, a little to the fish's own
+  side so that dead ahead is not a dead end, upwards over what stands on the bottom, and as fast
+  as its route brings it in; once the way is free the offset fades in about 1.4 s;
+- a last step each frame puts back outside whatever is still inside a solid, a limb or a
+  neighbour: turning away makes the motion smooth, this step makes the result certain;
+- solids: the rocks of the sea and the corals (flattened spheres recorded where they are built),
+  the living conch, the pearl, the turtle (moved with it), Mila (one capsule from feet to head,
+  wherever she leans; the faster she comes the sooner the fish move, and they move sideways out
+  of her way, not along with her);
+- neighbours: fish make room for each other from 0.1 m beyond touching;
+- routes follow the sea floor by a rounded bend (`overFloor`), and stay under the surface;
+- under water the fish also keep out of the camera's line of sight to Mila: a fish between the
+  lens and her read as passing through her, and one crossing the lens filled the picture;
+- the school opens and gathers at the pace its centre travels;
+- a fish turns the way it actually goes; a paused sea leaves every fish where it is.
+
+No random draw, no timer, no second loop: the same routes and frame times give the same sea.
+Under reduced motion the sea's clock is slowed and the fish with it.
+
+Dropped on the way: a fixed berth and push (a fish at 3 m/s reached the rock before it had turned
+and was stopped short); lifting the routes over the rocks as if they were hills (the rim of a rock
+is a wall, the fish popped up).
+
+After (`a425401`): no overlap deeper than 0.02 m in any pair on any frame, desktop and phone
+layout (figures and frames in `evidence/clearance.md`). Limits: the stand-ins leave out tail
+fins, the turtle's flippers, Mila's hands, feet and hair buns; a coral is one rounded volume, so
+fish go around it, not between its branches; when Mila swims through the school at speed
+(turns 7 → 8, 8 → 9, 9 → 10 and back) the fish in her way move aside fast, up to 0.09 m of change
+between two frames, which may read as a start.
+
+### 7.6 The living conch (O5, `5af99d0`)
+
+The owner's "bernard-l'ermite" is the living conch (`liveConch`, section BIG FOREGROUND CONCH,
+LIVING CONCH, PEARL): the shell with a foot and two eyes at the bottom of the hollow, beside the
+pearl. It is in view for about two seconds as Mila arrives on page 9 (from 5.0 s into the turn
+8 → 9); once the camera of page 9 has drawn in on her hand, only its eyes and a corner of its
+shell remain at the bottom left on desktop, and nothing on the phone layout, where only a part
+of it shows at the left edge on arrival. Pages 8 and 10 themselves do not show it, and the
+captures at 0.9 and 1.8 s of the turn 9 → 10 do not either.
+
+Found at normal size and enlarged (`evidence/corrections-o4.md`, boards `boards-o4/conch-*`):
+
+1. the shell hung above the sand: it was placed 0.55 m over the height of the hollow's centre,
+   not over the sand under it;
+2. the foot was a separate flat disc under and beside the shell, touching nothing;
+3. the eye stalks started 6 cm beyond the end of the foot, in open water;
+4. the shell showed the camera its back: an olive cone, dark on the dark floor, its lip and its
+   pink mouth (whose glow pulses on page 9) turned to the far side;
+5. it was 1.35 m long, longer than Mila is tall;
+6. the pearl's glow beside it was cut along a straight line where the sand crossed it;
+7. it did not move at all.
+
+Changed, at the source: the creature is rebuilt on the sand (lowest point of the floor under its
+foot, a finger deep); foot and head are one body under the lip, the stalks are rooted in the head
+and sway slowly; the shell is lighter (sun-bleached with a little algae) and mirrored so the lip
+opens on the camera's side, rolled to show its mouth; 0.95 m long; the pearl's glow is drawn
+without the depth test. Its place, its heading (towards the pearl and Mila) and its role are
+kept; the light Mila reaches for on page 9 stays at the same point. O4 applies: the fish go
+around it.
+
+Not changed: its place. On the settled page 9 it is still mostly out of the frame; bringing it in
+would mean moving it about 0.7 m or changing the camera, which this correction keeps. That is a
+decision for the owner.
+
 ## 8. How it was measured
 
 Script: `qa/mila-underwater.mjs` (Playwright, channel `chrome`; modes and switches in its header
@@ -386,8 +488,54 @@ headless GPU Chrome for the functional checks, no frame-rate figure taken from i
 - in the running scene, frame by frame (`evidence/exit-probe.md`): frames lying with the hips above
   the surface 28 → 0, with an ankle above it 13 → 0; entry 0 on both.
 
+Round on `a425401` against `1638c4c` (O4 and O5; `evidence/clearance.md`,
+`evidence/corrections-o4.md`):
+
+- clearance, every page and turn forwards and back, tolerance 0.02 m, counted after each scene
+  frame on instrumented builds of both commits (frames with an overlap, deepest overlap):
+
+  | Pair            | Desktop before | Mobile layout before | After, both |
+  | --------------- | -------------- | -------------------- | ----------- |
+  | fish – floor    | 13 021, 0.77 m | 1 976, 0.30 m        | 0           |
+  | fish – rock     | 9 493, 0.86 m  | 7 828, 1.23 m        | 0           |
+  | fish – coral    | 4 652, 0.43 m  | 6 208, 0.46 m        | 0           |
+  | school – school | 13 884, 0.07 m | 7 262, 0.06 m        | 0           |
+  | fish – fish     | 643, 0.09 m    | 449, 0.09 m          | 0           |
+  | fish – turtle   | 232, 0.26 m    | 353, 0.30 m          | 0           |
+  | Mila – fish     | 90, 0.13 m     | 94, 0.13 m           | 0           |
+  | Mila – school   | 80, 0.20 m     | 89, 0.22 m           | 0           |
+  | fish – school   | 24, 0.06 m     | none                 | 0           |
+
+  about 16 600 frames a run; a third run of the new build with 40 s on each sea page: 0 as well.
+  The 23 other pair kinds (Mila, turtle, crab and school against every solid) had no overlap on
+  either build;
+
+- largest move of a fish between two frames over the whole tale 1.09 m → 0.12 m, largest change
+  of that move 1.11 m → 0.09 m (turn figures are inflated on both builds by uneven fake-clock
+  steps; page 8 alone: 0.064 m and 0.022 m);
+- worst frames, before beside after at the same instant (`boards-o4/clearance-*.png`, looked at
+  in the main session, both layouts): before, a fish or the school lies over Mila's head or dress
+  on pages 7 to 9 and in the turns; after, the ringed place shows her alone. The overlaps with
+  rocks, corals, the floor and the turtle were out of the picture or hidden at their worst frame
+  on the old build too, so those pairs show no visible difference;
+- page 8 (`boards-o4/motion-*`, recordings ×1 and ×0.25 in `o4/motion-before|after`): the school
+  passes beside, above and below her and still reads as one school; nothing frozen or shaking at
+  83 ms sampling; the school opens over about a second after arrival instead of in one frame;
+- the living conch, before and after at normal and doubled size (`boards-o4/conch-*`), and a
+  recording of its two seconds in view (`o4/conch-rec.mp4`, `-x025.mp4`);
+- journey 24 steps per viewport, 0 failed; the three earlier suites give the base's totals and
+  failures; turn lengths within 8.5 ms of `1638c4c`;
+- headed, capped (three alternated runs per build): median 59.88 fps on both builds and both
+  layouts, p95 16.8 to 17.3 ms; draw calls and programs unchanged. The new build has three single
+  frames of 33 to 35 ms on desktop where the old had none: noise-sized, as in the earlier rounds;
+- headed, uncapped, page 9 (three runs): the frame's JavaScript goes from 1.96 to 2.53 ms
+  (+0.57 ms, the steering of 240 fish; 0.43 ms in a Node benchmark), mean rate 485 → 376 fps
+  (−22 %). In the same runs the frames over 33 ms go from 20 / 19 / 10 to 0 / 0 / 0 (longest
+  228 → 8.7 ms). See section 10.
+
 Boards (before / after, per page and per transition, also low quality and reduced motion):
-`boards-final/` (66 files), for the corrections `boards-o/`, for cycle 1 `boards-c1/`.
+`boards-final/` (66 files), for the corrections `boards-o/`, for cycle 1 `boards-c1/`, for O4 and
+O5 `boards-o4/`.
 
 ## 10. Limits and open points
 
@@ -419,6 +567,16 @@ Boards (before / after, per page and per transition, also low quality and reduce
     the slower side, and making the main thread slower again would be the only "fix". One run of the
     slowed build and one of the small-window base did show long frames, in a round where the browser
     reported many long tasks on every build but the base: part of the effect may be the machine.
+- **The fish cost 0.57 ms a frame** (O4). With the limiter off that is 22 % of page 9's frame rate
+  (485 → 376 fps), more than the 10 % the mission allows for a segment; at the capped 60 Hz, which
+  is what a screen shows, nothing changes (median 59.88 fps, p95 unchanged), and 0.57 ms is 3.4 %
+  of a 16.7 ms frame. The long frames of the point above are gone in the same runs, which fits
+  the reading given there (the main thread no longer outruns the GPU) but was not sought. On a
+  slow phone CPU the steering would cost more than on this laptop: not measured.
+- **Fish are kept out of the line from the camera to Mila** under water (O4): a fish in front of
+  her read as passing through her. This is a choice of the executor beyond the letter of O4.
+- **The living conch is out of the picture on the settled page 9** (O5, section 7.6), and its
+  pupils and second eye are not told apart at normal size.
 - **Page 10 is lighter behind the text than at the base** (mean luminance of the picture there
   about 0.06 to 0.10 → 0.13 to 0.20). The text keeps 6.4 : 1 or more through the veil; the page is
   the shallow one and is meant to be the lightest, but this is a judgement for the owner.
@@ -446,3 +604,10 @@ shipped) and `c1-dist` (`1638c4c`); `probe/` (per-frame records and stills of fo
 exit), `c1/`, `c1-regress/`, `boards-c1/`, `c1-lf/`, `c1-lf-cal/`, `c1-lf2/` (long-frame runs). In
 `qa/out/` (git-ignored): `probe.mjs`, `probe-table.py`, `probe.patch.txt` (the temporary
 instrumentation, removed from `scene.ts` before the commit).
+
+Added for O4 and O5, same media folder: `wt/` (a git worktree at `1638c4c` with instrumented scene
+files, used to build the "before" probe; it is registered in `.git/worktrees`), the builds
+`clr-base-dist`, `clr-a1-dist` to `clr-a7-dist`, `conch-dist`, `o4-dist` (`a425401`),
+`o4-probe-dist`; runs `clr-base/`, `clr-a1/` to `clr-a7/`, `peek/a1`, `peek/o5`, `peek/conch-*`,
+`o4/`, `o4-regress/`, `o4-perf/`, `o4-lf/`, `boards-o4/`. In `qa/out/` (git-ignored): `clr.sh`,
+`conch.sh`, `conch.mjs`, `shoal-bench.test.ts.txt`.
