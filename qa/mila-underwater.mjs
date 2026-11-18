@@ -8,7 +8,8 @@
 // 7-10 under CPU_THROTTLE with the scene's data-quality level), text (fake-clock stills of pages 7-10
 // with the DOM rects and colours of the text, desktop also in French), determinism (pairwise MAE of
 // DET_RUNS page-7 stills), links (linkProgram calls after page 1 is shown, per page, with the frame
-// time of the frame holding each; HEADED=1 UNCAP default).
+// time of the frame holding each; HEADED=1 UNCAP default), longframes (page 9, uncapped: per-frame
+// interval, rAF callback time, heap and long tasks for variants B1-B4; LF_VARIANTS, LF_RUNS, LF_SLOW_MS, LF_WIN; LF_SEQ=B2,B1,B2 explicit order, LF_PROFILE=1 CDP CPU profile, LF_TRACE=1 Chrome trace).
 // Modes: shots (fake clock, stills + "scène seule" ), motion (fake clock, frame
 // sequences, mp4 and contact sheets via ffmpeg/montage), perf (real clock, uncapped and vsync-capped,
 // 3 runs per viewport), leak (6 open/close cycles, GL objects and JS heap), journey (1 -> 12, back to
@@ -439,11 +440,12 @@ async function newPage(browser, vp, { fake = false, instrument = false, throttle
 }
 
 /** Loads the site, and on a fake clock freezes time just after the loader so only runFor advances it. */
+let siteOverride = null;
 async function load(p, fake) {
   if (fake) {
     // paused before the first byte: only runFor moves time, so the load duration cannot leak in
     await p.clock.pauseAt(new Date(FAKE_TIME.getTime() + 1000));
-    await p.goto(SITE);
+    await p.goto(siteOverride ?? SITE);
     for (let i = 0; i < 600 && !(await p.locator(".loader.is-done").count()); i++) {
       await p.clock.runFor(100);
       await p.waitForTimeout(20);
@@ -454,7 +456,7 @@ async function load(p, fake) {
     await p.clock.runFor(Math.max(0, 65000 - now));
     return;
   }
-  await p.goto(SITE);
+  await p.goto(siteOverride ?? SITE);
   await p.waitForSelector(".loader.is-done", { state: "attached", timeout: 30000 });
   await p.waitForTimeout(1500);
 }
@@ -543,6 +545,234 @@ async function determinism() {
   }
 }
 
+/** Frame-interval study on page 9 (uncapped): per-frame interval, rAF callback time, JS heap, long tasks. */
+async function longframes() {
+  const variants = (process.env.LF_VARIANTS ?? "B1,B2,B3,B4").split(",");
+  const runs = Number(process.env.LF_RUNS ?? 3);
+  const sites = {
+    old: process.env.LF_SITE_OLD ?? "http://localhost:4198/",
+    new: process.env.LF_SITE_NEW ?? "http://localhost:4197/",
+  };
+  const slowMs = Number(process.env.LF_SLOW_MS ?? 0.4);
+  const smallWin = (process.env.LF_WIN ?? "960x600").split("x").map(Number);
+  const spec = {
+    B1: { site: "old" },
+    B2: { site: "new" },
+    B3: { site: "new", slow: slowMs },
+    B4: { site: "old", win: smallWin },
+    B5: { site: "new", win: smallWin },
+  };
+  const out = {
+    label: LABEL,
+    date: new Date().toISOString(),
+    headed: process.env.HEADED === "1",
+    slowMs,
+    smallWin,
+    variants: {},
+  };
+  const seq = process.env.LF_SEQ
+    ? process.env.LF_SEQ.split(",").map((v, i) => [v, i])
+    : Array.from({ length: runs }, (_, r) => variants.map((v) => [v, r])).flat();
+  const PROF = process.env.LF_PROFILE === "1";
+  const TRACE = process.env.LF_TRACE === "1";
+  for (const [v, r] of seq) {
+    const sp = spec[v];
+    siteOverride = sites[sp.site];
+    const browser = await launch([...UNCAPPED, "--enable-precise-memory-info"]);
+    try {
+      const ctx = await browser.newContext({
+        ...VIEWPORTS.desktop,
+        ...(sp.win ? { viewport: { width: sp.win[0], height: sp.win[1] } } : {}),
+      });
+      const p = await ctx.newPage();
+      await p.addInitScript(INSTRUMENT);
+      await p.addInitScript((slow) => {
+        const raf = window.requestAnimationFrame.bind(window);
+        const fr = { t: [], cb: [], heap: [], idx: new Map() };
+        const tasks = [];
+        window.__lf = { fr, tasks, mark: 0 };
+        try {
+          new PerformanceObserver((l) => {
+            for (const e of l.getEntries()) tasks.push([e.startTime, e.duration]);
+          }).observe({ type: "longtask", buffered: true });
+        } catch {
+          /* longtask unsupported */
+        }
+        window.requestAnimationFrame = (cb) =>
+          raf((t) => {
+            if (slow) {
+              const end = performance.now() + slow;
+              while (performance.now() < end);
+            }
+            const s0 = performance.now();
+            let i = fr.idx.get(t);
+            if (i === undefined) {
+              i = fr.t.length;
+              fr.idx.set(t, i);
+              if (fr.idx.size > 64) fr.idx.delete(fr.idx.keys().next().value);
+              fr.t.push(t);
+              fr.cb.push(0);
+              fr.heap.push(performance.memory ? performance.memory.usedJSHeapSize : -1);
+            }
+            try {
+              return cb(t);
+            } finally {
+              fr.cb[i] += performance.now() - s0;
+            }
+          });
+      }, sp.slow ?? 0);
+      const d = driver(p, false, false);
+      await load(p, false);
+      await d.open();
+      await d.goTo(9);
+      await d.wait(3000);
+      await p.evaluate(() => {
+        window.__lf.mark = window.__lf.fr.t.length;
+        window.__gl.start();
+      });
+      let cdp = null;
+      let pageStart = null;
+      let clockPairs = null;
+      if (PROF || TRACE) cdp = await ctx.newCDPSession(p);
+      if (PROF) {
+        await cdp.send("Profiler.enable");
+        await cdp.send("Profiler.setSamplingInterval", { interval: 200 });
+        await cdp.send("Profiler.start");
+        await cdp.send("Performance.enable");
+        pageStart = await p.evaluate(() => performance.now());
+        clockPairs = [];
+        for (let k = 0; k < 7; k++) {
+          const a = await p.evaluate(() => performance.now());
+          const m = await cdp.send("Performance.getMetrics");
+          const b = await p.evaluate(() => performance.now());
+          clockPairs.push({ a, b, ts: m.metrics.find((x) => x.name === "Timestamp")?.value });
+        }
+      }
+      if (TRACE) {
+        await cdp.send("Tracing.start", {
+          transferMode: "ReturnAsStream",
+          categories: "gpu,toplevel,blink.user_timing,v8,disabled-by-default-gpu.service",
+        });
+        pageStart = await p.evaluate(() => performance.now());
+      }
+      if (process.env.HEADED === "1" && r === 0) nvidiaSample(`longframes ${v}`);
+      await d.wait(20000);
+      const tag = `${v}-r${r + 1}`;
+      if (PROF) {
+        const { profile } = await cdp.send("Profiler.stop");
+        writeFileSync(
+          `${OUT}profile-${tag}.cpuprofile`,
+          JSON.stringify({ pageStart, clockPairs, profile }),
+        );
+      }
+      if (TRACE) {
+        const done = new Promise((res) => cdp.once("Tracing.tracingComplete", res));
+        await cdp.send("Tracing.end");
+        const { stream } = await done;
+        let text = "";
+        for (;;) {
+          const chunk = await cdp.send("IO.read", { handle: stream });
+          text += chunk.data;
+          if (chunk.eof) break;
+        }
+        writeFileSync(`${OUT}trace-${tag}.json`, text);
+        writeFileSync(`${OUT}trace-${tag}.meta.json`, JSON.stringify({ pageStart }));
+      }
+      const data = await p.evaluate(() => {
+        const seg = window.__gl.stop();
+        const { fr, tasks, mark } = window.__lf;
+        return {
+          t: fr.t.slice(mark),
+          cb: fr.cb.slice(mark),
+          heap: fr.heap.slice(mark),
+          tasks,
+          seg,
+          vw: innerWidth,
+          vh: innerHeight,
+        };
+      });
+      const iv = [];
+      for (let i = 1; i < data.t.length; i++) iv.push(data.t[i] - data.t[i - 1]);
+      const stats = frameStats([data.seg]);
+      const longs = [];
+      iv.forEach((x, k) => {
+        if (x <= 33.3) return;
+        const i = k + 1;
+        const t0 = data.t[i - 1];
+        const t1 = data.t[i];
+        longs.push({
+          t0: round(t0, 3),
+          t1: round(t1, 3),
+          intervalMs: round(x),
+          multiplesOf16_7: Math.round(x / 16.7),
+          cbMs: round(data.cb[i]),
+          cbPrevMs: round(data.cb[i - 1]),
+          heapDropBytes: data.heap[i - 1] > 0 ? data.heap[i - 1] - data.heap[i] : null,
+          longTask: data.tasks.some(([s, du]) => s < t1 && s + du > t0),
+        });
+      });
+      const flag = (l) => ({
+        cb: l.cbMs > 10 || l.cbPrevMs > 10,
+        heap: (l.heapDropBytes ?? 0) > 65536,
+        task: l.longTask,
+      });
+      const breakdown = {
+        total: longs.length,
+        longCallback: 0,
+        heapDrop: 0,
+        longTask: 0,
+        none: 0,
+      };
+      for (const l of longs) {
+        const f = flag(l);
+        if (f.cb) breakdown.longCallback++;
+        if (f.heap) breakdown.heapDrop++;
+        if (f.task) breakdown.longTask++;
+        if (!f.cb && !f.heap && !f.task) breakdown.none++;
+      }
+      const mean = iv.reduce((a, b) => a + b, 0) / iv.length;
+      const rec = {
+        viewport: [data.vw, data.vh],
+        frames: iv.length,
+        meanFps: round(1000 / mean),
+        medianFps: round(1000 / median(iv)),
+        p95Ms: round(quantile(iv, 0.95)),
+        p99Ms: round(quantile(iv, 0.99)),
+        maxMs: round(Math.max(...iv)),
+        over33: iv.filter((x) => x > 33.3).length,
+        over50: iv.filter((x) => x > 50).length,
+        drawCalls: stats.drawCalls,
+        triangles: stats.triangles,
+        meanCbMs: round(data.cb.reduce((a, b) => a + b, 0) / data.cb.length, 3),
+        breakdown,
+        multiples: longs.reduce(
+          (m, l) => ((m[l.multiplesOf16_7] = (m[l.multiplesOf16_7] ?? 0) + 1), m),
+          {},
+        ),
+        longTasksTotal: data.tasks.length,
+        longs,
+      };
+      (out.variants[v] ??= []).push(rec);
+      console.log(
+        "longframes",
+        v,
+        `run ${r + 1}`,
+        rec.viewport.join("x"),
+        "mean",
+        rec.meanFps,
+        "over33",
+        rec.over33,
+        JSON.stringify(breakdown),
+      );
+      writeJSON("longframes.json", out);
+      await ctx.close();
+    } finally {
+      await browser.close();
+    }
+  }
+  siteOverride = null;
+}
+
 /** Runs an ffmpeg encode of numbered PNGs at `fps`, scaled to even dimensions. */
 function encode(dir, fps, out) {
   execFileSync(
@@ -606,6 +836,11 @@ async function motion() {
       await d.wait(4000);
       for (let from = 6; from <= 10; from++) {
         const to = from + 1;
+        if (!MOTION_FROMS.includes(from)) {
+          await d.next();
+          await d.wait(6000);
+          continue;
+        }
         const dir = `${OUT}${vp}-t${pad(from)}-${pad(to)}`;
         mkdirSync(dir, { recursive: true });
         let k = 0;
@@ -623,7 +858,7 @@ async function motion() {
         }
         finishSequence(dir, `${vp}-t${pad(from)}-${pad(to)}`, 5);
         console.log("transition", vp, from, to, `${k} frames`);
-        if (to >= 7 && to <= 10) {
+        if (to >= 7 && to <= 10 && process.env.MOTION_SEQ !== "0") {
           await d.wait(5000);
           const sdir = `${OUT}${vp}-p${pad(to)}-seq`;
           mkdirSync(sdir, { recursive: true });
@@ -641,6 +876,8 @@ async function motion() {
     await browser.close();
   }
 }
+/** Pages a motion run captures the turn from (MOTION_FROMS, default 6,7,8,9,10; MOTION_SEQ=0 skips the page loops). */
+const MOTION_FROMS = (process.env.MOTION_FROMS ?? "6,7,8,9,10").split(",").map(Number);
 const pad3 = (n) => String(n).padStart(3, "0");
 
 /** Cold and warm load times: goto to the loader, the last press to page 1, and goto to page 1. */
@@ -1171,7 +1408,19 @@ async function text() {
   }
 }
 
-const RUN = { shots, motion, perf, leak, journey, trans, low, text, determinism, links };
+const RUN = {
+  shots,
+  motion,
+  perf,
+  leak,
+  journey,
+  trans,
+  low,
+  text,
+  determinism,
+  links,
+  longframes,
+};
 try {
   for (const mode of MODES) {
     if (!RUN[mode]) continue;
