@@ -12,6 +12,16 @@ import { createRng } from "@shared/random";
 import type { Ambience } from "./audio";
 import { easeIO, fbm, GLSL_NOISE, lerpAngle, smooth, vnoise, walkEase } from "./noise";
 import { CRAB_PAGE, PAGE_COUNT } from "./text";
+import {
+  addSeaFog,
+  createSeaDust,
+  SEA_GLSL,
+  SEA_SUN_GLSL,
+  seaLight,
+  SWAY_GLSL,
+  type SeaDust,
+  type SeaUniforms,
+} from "./underwater";
 
 /** What the scene needs from the page around it. */
 export interface SceneHooks {
@@ -474,6 +484,15 @@ export function createMilaScene(
     calm: { value: 0 },
     swimD: { value: 0 },
   };
+  /** The water's own uniforms (see `underwater.ts`); `uSea` is the camera's `under`. */
+  const SEA: SeaUniforms = {
+    uSea: U.under,
+    uSeaSun: { value: seaLight(U.moonDir.value) },
+    uFlow: { value: 0 },
+    uSway: { value: reduceMotion ? 0.3 : 1 },
+  };
+  /** Decorative motion runs at this share of the world's pace (calmer under reduced motion). */
+  const FLOW_RATE = reduceMotion ? 0.3 : 1;
   /** How wet the sheet is (0..1): it peaks just after a page turn. */
   const U_wash = { value: 0 };
   /** Seconds since the last animated page turn. */
@@ -732,11 +751,16 @@ export function createMilaScene(
   SCHOOL.y = groundH(SCHOOL.x, SCHOOL.z);
   U.partC.value.copy(MEADOW);
 
-  /** Underwater caustics on a lit material. */
+  /**
+   * Underwater caustics on a lit material: the net of light the swell throws on the sea floor.
+   * It lies along the light's own path, only on faces turned to it, drifts slowly, and thins out
+   * with distance into an even glow.
+   */
   function addCaustics(mat: THREE.Material): void {
     mat.onBeforeCompile = (sh) => {
-      sh.uniforms.uTime = U.time;
+      sh.uniforms.uFlow = SEA.uFlow;
       sh.uniforms.uCaus = U.caus;
+      sh.uniforms.uSeaSun = SEA.uSeaSun;
       sh.vertexShader =
         "varying vec3 vWP;\n" +
         sh.vertexShader.replace(
@@ -744,7 +768,8 @@ export function createMilaScene(
           "#include <project_vertex>\n vWP=(modelMatrix*vec4(transformed,1.)).xyz;",
         );
       sh.fragmentShader =
-        "varying vec3 vWP;\nuniform float uTime;uniform float uCaus;\n" +
+        "varying vec3 vWP;\nuniform float uFlow;uniform float uCaus;\n" +
+        SEA_SUN_GLSL +
         `
 float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;float inten=.005;
  for(int n=0;n<4;n++){float tt=t*(1.-(3.5/float(n+1)));i=p+vec2(cos(tt-i.x)+sin(tt+i.y),sin(tt-i.y)+cos(tt+i.x));
@@ -755,7 +780,19 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
           "#include <opaque_fragment>",
           `
  float uw=smoothstep(0.05,-0.8,vWP.y);
- if(uw>0.){ float cs=caust(vWP.xz*.55,uTime*.55)*uCaus; outgoingLight += vec3(.55,.95,.85)*cs*uw*exp(vWP.y*.09)*.55; outgoingLight*=mix(vec3(1.),vec3(.55,.95,.95),uw*.6);}
+ if(uw>0.){
+  // Adapted from Abyssal Garden (MIT, see underwater.ts), source/src/shaders.js lines 243-251
+  // and 372: the pattern is cast along the light, kept to the faces that look at it, and eased
+  // to its mean far away, where it would only shimmer.
+  vec2 cq=vWP.xz-uSeaSun.xz*(vWP.y/uSeaSun.y);
+  float cd=length(vWP-cameraPosition);
+  float lit=smoothstep(.05,.5,dot(inverseTransformDirection(normal,viewMatrix),uSeaSun));
+  float cpat=.72+.28*sin(cq.x*.23+uFlow*.11)*sin(cq.y*.19-uFlow*.09);
+  float cs=mix(caust(cq*.55,uFlow*.42)*cpat,.08,smoothstep(9.,26.,cd))*uCaus*lit;
+  vec3 cc=mix(vec3(1.,.86,.62),vec3(.55,.95,.85),smoothstep(-1.,-9.,vWP.y));
+  outgoingLight+=cc*cs*uw*exp(vWP.y*.07)*.72;
+  // the deeper the floor, the more red the light has lost on its way down
+  outgoingLight*=mix(vec3(1.),exp(vec3(.1,.026,.018)*vWP.y)*1.06,uw);}
 #include <opaque_fragment>`,
         );
     };
@@ -816,10 +853,11 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
     const caustics = mat.onBeforeCompile;
     mat.onBeforeCompile = (sh, r) => {
       caustics.call(mat, sh, r);
+      sh.uniforms.uTime = U.time;
       sh.fragmentShader = sh.fragmentShader
         .replace(
           "varying vec3 vWP;",
-          "varying vec3 vWP;\nfloat shoreZ(float x){return 1.5+sin(x*.13)*1.+sin(x*.05+.4)*1.2;}",
+          "varying vec3 vWP;\nuniform float uTime;\nfloat shoreZ(float x){return 1.5+sin(x*.13)*1.+sin(x*.05+.4)*1.2;}",
         )
         .replace(
           "#include <color_fragment>",
@@ -844,10 +882,18 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
       depthWrite: false,
       depthTest: false,
       fog: false,
-      uniforms: { uMoon: U.moonDir, uTime: U.time, uUnder: U.under, uSong: U.song },
+      uniforms: {
+        uMoon: U.moonDir,
+        uTime: U.time,
+        uUnder: U.under,
+        uSong: U.song,
+        uSea: SEA.uSea,
+        uSeaSun: SEA.uSeaSun,
+      },
       vertexShader: `varying vec3 vDir;void main(){vDir=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
       fragmentShader:
         GLSL_NOISE +
+        SEA_GLSL +
         `
 uniform vec3 uMoon;uniform float uTime,uUnder,uSong;varying vec3 vDir;
 void main(){
@@ -883,7 +929,7 @@ void main(){
  c=mix(c,mc,disc);
  c+=lin(vec3(1.,.74,.46))*(exp(-md*12.)*.22+exp(-md*35.)*.35)*(1.-disc);
  c=mix(c,lin(vec3(.02,.09,.12)),smoothstep(.0,-.06,h));
- c=mix(c,lin(vec3(.05,.33,.36)),uUnder);
+ if(uUnder>0.)c=mix(c,seaWater(d,cameraPosition.y),uUnder);
  gl_FragColor=vec4(c,1.);
 }`,
     });
@@ -2757,8 +2803,31 @@ void main(){
   let school: THREE.InstancedMesh;
   const schoolData: SchoolFish[] = [];
   const schoolCtr = V3();
-  let plankton: THREE.Points;
+  let dust: SeaDust;
+  let grass: THREE.InstancedMesh;
+  let tufts: THREE.InstancedMesh;
   const rays: THREE.Mesh[] = [];
+  /** Where the conch Mila carries is: the dust near it takes its pink. */
+  const U_conchAt = { value: V3(0, 99, 0) };
+  /** Width of the sea-grass blades: wider when the adaptive quality keeps half of them. */
+  const U_wide = { value: 1 };
+  /**
+   * Follows the adaptive quality in the water: less dust below the top level; at the lowest, half
+   * the sea grass (wider blades fill in) and every other shaft. Colour, depth and light stay.
+   */
+  function thinSea(level: number): void {
+    const motes = dust.geometry.attributes.aSeed.count;
+    dust.geometry.setDrawRange(0, level < 2 ? Math.ceil(motes / 2) : motes);
+    const blades = grass.instanceMatrix.count;
+    grass.count = level === 0 ? Math.ceil(blades / 2) : blades;
+    const short = tufts.instanceMatrix.count;
+    tufts.count = level === 0 ? Math.ceil(short / 2) : short;
+    U_wide.value = level === 0 ? 1.6 : 1;
+    rays.forEach((r, i) => {
+      r.visible = level > 0 || i % 2 === 0;
+    });
+    canvas.dataset.quality = String(level);
+  }
   function buildMeadow(): void {
     const bg = new THREE.PlaneGeometry(0.07, 1, 1, 7);
     bg.translate(0, 0.5, 0);
@@ -2768,27 +2837,36 @@ void main(){
       bpos.setX(i, bpos.getX(i) * (1 - y * 0.6));
     }
     const mat = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide });
+    // Each blade is rooted and bends in the current all plants share (`seaSway`): its place gives
+    // it a phase, a suppleness and a delay of its own, and a tall blade gives more than a short one.
     mat.onBeforeCompile = (sh) => {
-      sh.uniforms.uTime = U.time;
+      sh.uniforms.uFlow = SEA.uFlow;
+      sh.uniforms.uSway = SEA.uSway;
       sh.uniforms.uPart = U.part;
       sh.uniforms.uPartC = U.partC;
+      sh.uniforms.uWide = U_wide;
       sh.vertexShader =
-        "uniform float uTime;uniform float uPart;uniform vec3 uPartC;\n" +
+        "uniform float uPart,uWide;uniform vec3 uPartC;\n" +
+        SWAY_GLSL +
         sh.vertexShader.replace(
           "#include <project_vertex>",
           `
-      vec4 wp=modelMatrix*instanceMatrix*vec4(transformed,1.);
+      vec4 wp=modelMatrix*instanceMatrix*vec4(transformed*vec3(uWide,1.,1.),1.);
       vec4 root=modelMatrix*instanceMatrix*vec4(0.,0.,0.,1.);
+      float tall=length(instanceMatrix[1].xyz);
+      float sd=fract(sin(dot(root.xz,vec2(12.9898,78.233)))*43758.5453);
+      float flex=mix(.6,1.3,fract(sd*7.31))*(.55+.3*tall);
+      vec2 sw=seaSway(root.xz,position.y,flex,sd)*tall;
       float hh=position.y*position.y;
-      vec2 sw=vec2(sin(uTime*1.1+root.x*.5+root.z*.3)*.5+sin(uTime*1.9+root.x*1.3)*.15, cos(uTime*.9+root.z*.6)*.3);
       vec2 away=root.xz-uPartC.xz;float dd=length(away);
-      wp.xz+=sw*hh*.9+normalize(away+1e-4)*uPart*smoothstep(3.2,.5,dd)*hh*1.5;
-      wp.y-=uPart*smoothstep(3.,.5,dd)*hh*.3;
+      wp.xz+=sw+normalize(away+1e-4)*uPart*smoothstep(3.2,.5,dd)*hh*1.5;
+      // a bent blade keeps its length: its tip comes down as it leans
+      wp.y-=uPart*smoothstep(3.,.5,dd)*hh*.3+dot(sw,sw)/(2.*max(tall*position.y,.08));
       vec4 mvPosition=viewMatrix*wp;gl_Position=projectionMatrix*mvPosition;`,
         );
     };
     const N = isSmall ? 2200 : 4200;
-    const grass = new THREE.InstancedMesh(bg, mat, N);
+    grass = new THREE.InstancedMesh(bg, mat, N);
     const o = new THREE.Object3D();
     const c = new THREE.Color();
     const pal = ["#2f8a7a", "#3fa08a", "#6f8a3a", "#879a45", "#2b7266", "#56a88f"];
@@ -2813,8 +2891,64 @@ void main(){
       grass.setColorAt(i, c.set(pal[(rnd() * pal.length) | 0]).multiplyScalar(rr(0.8, 1.15)));
     }
     scene.add(grass);
-    // branching corals and gorgonians
-    const corM = [toon("#e2785e"), toon("#b55a87"), toon("#e9a65a")];
+    // The same blade, short, in tufts: an understorey where the tall grass thins out, and a few
+    // clumps along Mila's way in the shallows, so the sand between the pages is not bare. Its own RNG:
+    // the placements drawn after this keep theirs.
+    {
+      const own = createRng(53);
+      const or = (a: number, b: number): number => a + (b - a) * own();
+      const spots: [V3, number, number, number][] = [
+        [MEADOW, 5, 14.5, isSmall ? 50 : 84],
+        [SCHOOL, 2, 9, isSmall ? 10 : 18],
+        [V3(6.8, 0, -9.5), 1.5, 7, isSmall ? 12 : 20],
+      ];
+      const roots: [number, number][] = [];
+      for (const [ctr, r0, r1, n] of spots)
+        for (let k = 0; k < n; k++) {
+          const a = own() * 6.28;
+          const r = or(r0, r1);
+          const cx = ctr.x + Math.cos(a) * r * (ctr === MEADOW ? 1.2 : 1);
+          const cz = ctr.z + Math.sin(a) * r;
+          const blades = 9 + ((own() * 10) | 0);
+          for (let j = 0; j < blades; j++) {
+            const ba = own() * 6.28;
+            const br = Math.sqrt(own()) * 0.42;
+            roots.push([cx + Math.cos(ba) * br, cz + Math.sin(ba) * br]);
+          }
+        }
+      tufts = new THREE.InstancedMesh(bg, mat, roots.length);
+      const tpal = ["#8fae4a", "#6f9a4e", "#a3b85c", "#5f8f5a", "#7aa86a"];
+      roots.forEach(([x, z], i) => {
+        o.position.set(x, groundH(x, z) - 0.03, z);
+        o.rotation.set(or(-0.3, 0.3), own() * 6.28, or(-0.3, 0.3));
+        o.scale.set(or(1.0, 1.6), or(0.22, 0.6), 1);
+        o.updateMatrix();
+        tufts.setMatrixAt(i, o.matrix);
+        tufts.setColorAt(i, c.set(tpal[(own() * tpal.length) | 0]).multiplyScalar(or(0.8, 1.1)));
+      });
+      scene.add(tufts);
+    }
+    // Branching corals and gorgonians. All the limbs of one colour make one mesh; each vertex knows
+    // the foot of its coral and how tall it stands, so the branches give a little in the current.
+    const corM = ["#e2785e", "#b55a87", "#e9a65a"].map((color) => {
+      const m = toon(color);
+      m.onBeforeCompile = (sh) => {
+        sh.uniforms.uFlow = SEA.uFlow;
+        sh.uniforms.uSway = SEA.uSway;
+        sh.vertexShader =
+          "attribute vec4 aRoot;\n" +
+          SWAY_GLSL +
+          sh.vertexShader.replace(
+            "#include <begin_vertex>",
+            `#include <begin_vertex>
+      float ch=clamp((position.y-aRoot.y)/aRoot.w,0.,1.);
+      transformed.xz+=seaSway(aRoot.xz,ch,.17,fract(aRoot.x*3.7+aRoot.z*1.3))*aRoot.w;`,
+          );
+      };
+      m.customProgramCacheKey = () => "coral";
+      return m;
+    });
+    const corG: THREE.BufferGeometry[][] = [[], [], []];
     for (let k = 0, tries = 0; k < 16 && tries < 200; tries++) {
       const a = rnd() * 6.28;
       const r = rr(2, 9);
@@ -2823,11 +2957,14 @@ void main(){
       if (!isClear(cx, cz)) continue;
       k++;
       const base = V3(cx, groundH(cx, cz) - 0.05, cz);
-      const cg = new THREE.Group();
-      const m = corM[k % 3];
+      const limbs: THREE.BufferGeometry[] = [];
+      let top = base.y;
       const grow = (p: V3, dir: V3, len: number, dep: number): void => {
         const e = p.clone().add(dir.clone().multiplyScalar(len));
-        cg.add(limb(p, e, 0.05 * (1 - dep * 0.2), m));
+        const part = limb(p, e, 0.05 * (1 - dep * 0.2), corM[k % 3]);
+        part.updateMatrix();
+        limbs.push(part.geometry.applyMatrix4(part.matrix));
+        top = Math.max(top, e.y);
         if (dep < 3)
           for (let j = 0; j < 2; j++) {
             const nd = dir
@@ -2838,8 +2975,21 @@ void main(){
           }
       };
       grow(base, V3(0, 1, 0), rr(0.35, 0.6), 0);
-      scene.add(cg);
+      for (const g of limbs) {
+        const n = g.attributes.position.count;
+        const root = new Float32Array(n * 4);
+        for (let i = 0; i < n; i++) root.set([base.x, base.y, base.z, top - base.y], i * 4);
+        g.setAttribute("aRoot", new THREE.BufferAttribute(root, 4));
+        corG[k % 3].push(g);
+      }
     }
+    corG.forEach((parts, i) => {
+      if (!parts.length) return;
+      const coral = new THREE.Mesh(mergeGeometries(parts), corM[i]);
+      parts.forEach((g) => g.dispose());
+      coral.castShadow = true;
+      scene.add(coral);
+    });
     // turtle
     turtle = new THREE.Group();
     const tm = toon("#7d8a52");
@@ -2922,43 +3072,37 @@ void main(){
     }
     schoolCtr.set(SCHOOL.x, SCHOOL.y + 2.6, SCHOOL.z);
     scene.add(school);
-    // plankton and light shafts
-    const NP = 500;
-    const pp = new Float32Array(NP * 3);
-    for (let i = 0; i < NP; i++) {
-      pp[i * 3] = rr(-6, 24);
-      pp[i * 3 + 1] = rr(-14, -0.5);
-      pp[i * 3 + 2] = rr(-46, -4);
-    }
-    const pg = new THREE.BufferGeometry();
-    pg.setAttribute("position", new THREE.BufferAttribute(pp, 3));
-    plankton = new THREE.Points(
-      pg,
-      new THREE.PointsMaterial({
-        map: glowTex,
-        color: new THREE.Color(0.7, 1, 0.9),
-        size: 0.12,
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-        opacity: 0,
-      }),
-    );
-    scene.add(plankton);
+    // The prototype's plankton drew 1500 numbers here; they are still drawn so everything placed
+    // after it keeps its place.
+    for (let i = 0; i < 1500; i++) rnd();
+    dust = createSeaDust(createRng(41), isSmall ? 320 : 640, SEA, U_conchAt, U.glow);
+    dust.renderOrder = 3;
+    scene.add(dust);
+    // Shafts of moonlight: soft sheets hanging from the surface along the light's own slant. Each
+    // turns about that axis to face the camera, so they all lean the same way from every page.
     const rayM = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
-      uniforms: { uTime: U.time, uUnder: U.under },
-      vertexShader: QUAD_VERTEX,
-      fragmentShader: `uniform float uTime,uUnder;varying vec2 vUv;void main(){float a=smoothstep(0.,.5,vUv.x)*smoothstep(1.,.5,vUv.x)*pow(vUv.y,1.6);
-      a*=.5+.5*sin(uTime*.6+vUv.x*6.);gl_FragColor=vec4(vec3(.55,.95,.85)*a*.22*uUnder,1.);}`,
+      uniforms: { uFlow: SEA.uFlow, uUnder: U.under, uSeaSun: SEA.uSeaSun },
+      vertexShader: `uniform vec3 uSeaSun;varying vec2 vUv;varying float vD,vPh;
+      void main(){vUv=uv;vec3 base=modelMatrix[3].xyz;vPh=base.x*1.7+base.z;
+       vec3 side=normalize(cross(uSeaSun,cameraPosition-base));
+       vec3 wp=base+uSeaSun*position.y+side*position.x;vD=length(wp-cameraPosition);
+       gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}`,
+      fragmentShader: `uniform float uFlow,uUnder;varying vec2 vUv;varying float vD,vPh;
+      void main(){float x=vUv.x*2.-1.;
+       float a=exp(-x*x*4.)*(1.-x*x)*pow(vUv.y,1.5)*smoothstep(1.,.9,vUv.y);
+       a*=(.7+.3*sin(uFlow*.33+vPh))*smoothstep(1.5,6.,vD)*exp(-vD*.045);
+       gl_FragColor=vec4(mix(vec3(.5,.95,.85),vec3(1.,.88,.66),vUv.y)*a*.2*uUnder,1.);}`,
     });
     for (let i = 0; i < 9; i++) {
-      const r = new THREE.Mesh(new THREE.PlaneGeometry(rr(1.5, 3), 16), rayM);
-      r.position.set(rr(2, 18), -8, rr(-38, -10));
-      r.rotation.set(0, rnd() * 3, 0.25);
+      const r = new THREE.Mesh(new THREE.PlaneGeometry(rr(1.5, 3), 18).translate(0, -9, 0), rayM);
+      // the light slants towards the shore as it goes down: the shafts start further out to sea
+      r.position.set(rr(2, 18), -0.15, rr(-38, -10) - 7);
+      rnd();
+      r.frustumCulled = false;
       scene.add(r);
       rays.push(r);
     }
@@ -3979,6 +4123,7 @@ void main(){
         }
         perf.n = 0;
         perf.sum = 0;
+        thinSea(perf.level);
         if (avg < 0.026 || perf.level === 0) perf.done = true;
       }
     }
@@ -3988,6 +4133,7 @@ void main(){
     const dt = rdt * motion;
     wtime += dt;
     U.time.value = wtime;
+    SEA.uFlow.value += dt * FLOW_RATE;
     const T = timer.getElapsed();
 
     // camera
@@ -4123,7 +4269,10 @@ void main(){
     hemi.intensity = lerp(1.05, 1.5, under);
     fillL.intensity = lerp(0.85, 0.2, under);
     moonL.intensity = lerp(2.3, 1.2, under);
-    (plankton.material as THREE.PointsMaterial).opacity = under * 0.8;
+    heldConchWorld(U_conchAt.value);
+    dust.visible = under > 0;
+    dust.material.uniforms.uPx.value =
+      (hh * renderer.getPixelRatio()) / (2 * Math.tan((camera.fov * Math.PI) / 360));
     fireflies.material.uniforms.uTime.value = wtime;
     fireflies.material.uniforms.uOpacity.value = (1 - under) * 0.85;
     updateBoat(wtime);
@@ -4131,7 +4280,10 @@ void main(){
 
     // the shadow follows the action
     const focus = CAMS[page] ? CAMS[page].subj : HOME;
-    moonL.position.copy(focus).addScaledVector(U.moonDir.value, 40);
+    // under water the light comes down the way the sea bends it, as the caustics and shafts do
+    moonL.position
+      .copy(focus)
+      .addScaledVector(tmpV.copy(U.moonDir.value).lerp(SEA.uSeaSun.value, under).normalize(), 40);
     moonL.target.position.copy(focus);
 
     // living world
@@ -4275,10 +4427,6 @@ void main(){
       page === 7 && !trans && T - pageStart > 0.8 ? 1 : 0,
       rdt * 0.8,
     );
-    rays.forEach((r, i) => {
-      r.rotation.z = 0.25 + Math.sin(wtime * 0.2 + i) * 0.08;
-    });
-    plankton.rotation.y = wtime * 0.005;
 
     // pearl
     (pearlHalo.material as THREE.SpriteMaterial).opacity = 0.7 + 0.3 * Math.sin(wtime * 2);
@@ -4527,6 +4675,16 @@ void main(){
     mila.g.rotation.y = -Math.PI / 2;
     buildThreads();
     buildGroundMarks();
+    // every fogged material takes the water's colours while the camera is under the surface
+    const fogged = new Set<THREE.Material>();
+    scene.traverse((o) => {
+      const { material } = o as Partial<THREE.Mesh>;
+      if (!material) return;
+      for (const m of Array.isArray(material) ? material : [material])
+        if ("fog" in m && m.fog === true) fogged.add(m);
+    });
+    fogged.forEach((m) => addSeaFog(m, SEA));
+    thinSea(perf.level);
     composer = buildPost();
     const c0 = adaptForAspect(CAMS[0]);
     camState.pos.copy(c0.pos);
