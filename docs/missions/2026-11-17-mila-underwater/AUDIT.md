@@ -308,6 +308,10 @@ Its lap, heading, height above the meadow and swimming motion are unchanged
 
 ### 7.5 No living form through a solid one (O4, `a425401`)
 
+The figures of this section come from the first clearance check, whose test of two stand-in
+shapes could miss an overlap (review 2, F2). Section 7.7 gives the corrected check, its figures
+on both builds, and what it found that this one had missed.
+
 Inventory, read from `scene.ts` at `1638c4c`:
 
 | Living form                       | How it moves                                                                                            | Solids it can meet                                                                                                                                    |
@@ -396,8 +400,9 @@ Found at normal size and enlarged (`evidence/corrections-o4.md`, boards `boards-
 6. the pearl's glow beside it was cut along a straight line where the sand crossed it;
 7. it did not move at all.
 
-Changed, at the source: the creature is rebuilt on the sand (lowest point of the floor under its
-foot, a finger deep); foot and head are one body under the lip, the stalks are rooted in the head
+Changed, at the source: the creature is rebuilt on the sand (at `5af99d0` at the lowest point of
+the floor under its foot, which left the foot up to 6 cm in the sand on the slope; since
+`7ea9a48` it lies along the slope, section 7.7); foot and head are one body under the lip, the stalks are rooted in the head
 and sway slowly; the shell is lighter (sun-bleached with a little algae) and mirrored so the lip
 opens on the camera's side, rolled to show its mouth; 0.95 m long; the pearl's glow is drawn
 without the depth test. Its place, its heading (towards the pearl and Mila) and its role are
@@ -407,6 +412,93 @@ around it.
 Not changed: its place. On the settled page 9 it is still mostly out of the frame; bringing it in
 would mean moving it about 0.7 m or changing the camera, which this correction keeps. That is a
 decision for the owner.
+
+### 7.7 Correction cycle 2 (review 2; `ad2d9db`, `7ea9a48`, checker `2e04279`)
+
+**The clearance check (F2).** The first check compared two flattened spheres by shrinking one to
+a ball, and stretched a capsule's axis without its radius: both could call clear a pair that
+overlapped (the reviewer's two cases: +0.20 m reported for 0.10 m of overlap, +0.14 m for 0.03 m).
+It also left out pairs.
+
+- The gap is now computed in `qa/mila-clearance-gap.mjs` from support functions: for a direction
+  `n`, how far the two shapes stand apart across `n`; the true signed gap is the largest of these
+  over all directions. Whatever directions the search tries, the figure it returns is therefore
+  never above the true gap: an overlap cannot be missed or reported shallower than it is; a poor
+  search could only raise false alarms. Between two capsules the exact segment distance is used.
+- `qa/mila-clearance-gap.test.mjs` (run by `pnpm test`): the reviewer's two cases must be found
+  and come out at −0.100 and −0.030 m; balls and capsules exact; a tilted ellipsoid; 1 500 random
+  pairs, in which every pair with a surface point of one more than the tolerance inside the other
+  is reported, and no gap exceeds the distance between any two sampled surface points; the ground
+  on a slope.
+- Shapes are capsules and ellipsoids that turn with their body (the turtle's shell banks with
+  it; the crab's shell is its dome mesh; the conches, the pearl and the debris are one ellipsoid
+  per mesh).
+- Pairs: every living form (Mila, each fish, each fish of the school, the turtle, the crab, the
+  living conch) against every other living form, every solid (pearl, conch on the sand, debris,
+  rocks, corals) and the ground: 53 kinds. A pair is measured when the boxes around its two
+  bodies come within 0.3 m; the result lists for each kind how many times that happened and the
+  closest approach, so "no overlap" is told apart from "never near" (37 kinds on the desktop
+  after run were never within 0.3 m, among them every pair of the turtle, the crab and the
+  conch with another animal but fish–turtle and Mila–turtle).
+- Ground: the height function is read under 160 points of each shape's surface and under its
+  lowest point, straight down (never less than the depth across the slope). A body is skipped
+  only when it is higher over the ground than the steepest slope found in the scene (0.77, on a
+  0.2 m grid) could make the ground rise under it. Mila's shins are left out against the ground:
+  she stands on it.
+- Still left out, as before: tail fins, flippers, Mila's hands, feet and hair buns, the crab's
+  legs, claws and eyes; a coral is one rounded volume; fish under 30 % of their size (not yet
+  revealed) are skipped. The ground between sampled points is not bounded.
+
+**What the corrected check found** (`evidence/clearance.md`, every page and turn, forwards and
+back, about 16 600 frames a run):
+
+| Pair            | Before `1638c4c`, desktop: frames, deepest | Before, mobile layout | After `7ea9a48`, both |
+| --------------- | ------------------------------------------ | --------------------- | --------------------- |
+| fish – ground   | 13 071, 0.77 m                             | 2 115, 0.30 m         | 0                     |
+| fish – rock     | 9 482, 0.66 m                              | 7 819, 0.93 m         | 0                     |
+| fish – coral    | 4 515, 0.43 m                              | 6 144, 0.47 m         | 0                     |
+| school – school | 13 857, 0.07 m                             | 7 264, 0.06 m         | 0                     |
+| fish – fish     | 626, 0.09 m                                | 448, 0.09 m           | 0                     |
+| fish – turtle   | 278, 0.14 m                                | 387, 0.13 m           | 0                     |
+| Mila – fish     | 53, 0.13 m                                 | 92, 0.13 m            | 0                     |
+| Mila – school   | 77, 0.20 m                                 | 87, 0.20 m            | 0                     |
+| fish – school   | 16, 0.06 m                                 | none                  | 0                     |
+| crab – ground   | every frame, 0.032 m                       | every frame, 0.032 m  | 0                     |
+
+Closest approaches after (desktop / mobile layout): Mila–fish +0.38 / +0.34 m, Mila–school
++0.35 / +0.40, fish–turtle +0.16 / +0.14, fish–rock +0.28 / +0.19, fish–coral +0.45 / +0.43,
+fish–ground +0.07 / +0.09, fish–fish +0.009 / +0.012, school–school +0.020 / +0.037,
+crab–ground +0.008, living conch–ground −0.008 (8 mm into the sand, inside the tolerance).
+
+Two real overlaps had been missed, both with the ground, which the first check did not test for
+these two animals:
+
+- the crab's shell was 3 cm in the sand on every frame, at the base as well (its middle stood
+  0.12 m over the sand, its shell is 0.144 m thick below the middle), and its feet 3 cm under
+  it. It now stands at 0.16 m: shell 8 mm clear, feet on the sand;
+- the living conch's foot, as rebuilt at `5af99d0`, was up to 6 cm in the sand: it was set level
+  at the lowest of five heights on a floor that slopes. It now lies along the plane through nine
+  heights under its foot, lifted just enough for its rounded underside to touch. Its place and
+  heading are unchanged; it leans with the sand.
+
+**The fish solver (F3).** One pass over the pairs could push a fish back into a neighbour
+already dealt with, and the walls applied afterwards could undo a separation (the reviewer's
+cases: three fish on one spot end 0.075 m into each other; two under the surface 0.05 m).
+`settle` in `shoal.ts` now alternates: the overlapping pairs are moved apart, then every fish is
+put out of the solids and the limbs and between floor and surface (these walls a few turns among
+themselves, and sideways out from under the middle of a grounded solid, where the way down is
+the floor), and again while two fish still overlap, for at most 12 rounds; the walls come last
+in every round. Two fish dead on each other part along a direction of their own, mostly level,
+instead of always up and down. What 12 rounds cannot untangle, or what the walls leave no room
+for, is taken up by the next frame; this is stated in the function's comment instead of the
+earlier "never inside any of them". Tests: the reviewer's two cases, twelve fish on one spot
+against the floor, a rock and a limb, and a packed school of sixty travelling over a rock (40
+tests in the folder, 12 for the solver).
+
+Cost: one list of close pairs (nearer than touching plus 0.24 m) is made per frame and serves
+both the turning away and the settling, in place of two sweeps over all 28 680 pairs; it is
+made again only if a fish has been moved more than 0.12 m since. In Node, 240 fish and 58
+solids: 0.43 ms a step before, 0.31 ms after (same machine, same routes).
 
 ## 8. How it was measured
 
@@ -533,9 +625,27 @@ Round on `a425401` against `1638c4c` (O4 and O5; `evidence/clearance.md`,
   (−22 %). In the same runs the frames over 33 ms go from 20 / 19 / 10 to 0 / 0 / 0 (longest
   228 → 8.7 ms). See section 10.
 
+Round on `7ea9a48` (correction cycle 2; `evidence/clearance.md`, `evidence/leak-c2.md`,
+`evidence/corrections-c2.md`; cut short at the owner's request, so one run of each):
+
+- clearance with the corrected check, desktop and mobile layout: figures in section 7.7; no
+  overlap deeper than 0.02 m in any of the 53 pair kinds on the new build;
+- 5 open/close cycles: live GL objects identical on every cycle in the tale (desktop 40 textures,
+  1487 buffers, 874 vertex arrays, 66 programs; mobile 38, 1487, 387, 56), zero on the tree,
+  contexts created = lost; JS heap +0.44 MB a cycle in the tale and +0.29 on the tree (desktop),
+  +0.39 and +0.22 (mobile), as on `3d09931` (0.41 and 0.26);
+- journey 24 steps per viewport, 0 failed; `mila.mjs` 143/150 as the base (`mila-nav` and
+  `mila-lang` not run); turn lengths within 10.5 ms of `a425401`;
+- one headed capped run: desktop median 59.88 fps, p95 16.8 ms; mobile layout median 57.47 fps,
+  p95 18.2 ms, an even cadence with no frame over 21.3 ms (59.88 in the earlier runs; one run
+  cannot tell noise from a 4 % loss); draw calls, programs and quality level unchanged;
+- stills of the crab and the conch before and after (`boards-c2/`): the crab's shell is clear of
+  the sand with its feet on it; the conch's floor is too dark to judge contact by eye, the
+  measure is the evidence (8 mm in).
+
 Boards (before / after, per page and per transition, also low quality and reduced motion):
 `boards-final/` (66 files), for the corrections `boards-o/`, for cycle 1 `boards-c1/`, for O4 and
-O5 `boards-o4/`.
+O5 `boards-o4/`, for cycle 2 `boards-c2/`.
 
 ## 10. Limits and open points
 
@@ -611,3 +721,7 @@ files, used to build the "before" probe; it is registered in `.git/worktrees`), 
 `o4-probe-dist`; runs `clr-base/`, `clr-a1/` to `clr-a7/`, `peek/a1`, `peek/o5`, `peek/conch-*`,
 `o4/`, `o4-regress/`, `o4-perf/`, `o4-lf/`, `boards-o4/`. In `qa/out/` (git-ignored): `clr.sh`,
 `conch.sh`, `conch.mjs`, `shoal-bench.test.ts.txt`.
+
+Added in correction cycle 2, same media folder: the builds `clr-c2a-dist` to `clr-c2d-dist`,
+`c2-dist` (`7ea9a48`), `c2-probe-dist`; runs `clr-c2a/` to `clr-c2d/`, `peek/conch-c2`, `c2/`,
+`c2-regress/`, `c2-perf/`, `boards-c2/`.

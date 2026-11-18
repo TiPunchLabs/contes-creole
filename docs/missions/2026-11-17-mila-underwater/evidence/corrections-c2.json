@@ -1,0 +1,876 @@
+{
+  "perf": {
+    "label": "c2-7ea9a48",
+    "date": "2026-11-18T17:27:36.857Z",
+    "headed": true,
+    "renderer": "ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2)",
+    "browser": "chromium 157.0.8103.78",
+    "cpuThrottle": 0,
+    "passes": {
+      "capped.desktop": {
+        "launchFlags": [
+          "--enable-gpu",
+          "--ignore-gpu-blocklist",
+          "--use-gl=angle",
+          "--use-angle=gl-egl"
+        ],
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "deviceScaleFactor": 1,
+        "runs": [
+          {
+            "coldLoad": {
+              "gotoToLoaderDoneMs": 1952,
+              "openPressToPage1Ms": 2899,
+              "gotoToPage1Ms": 9189,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "warmLoad": {
+              "gotoToLoaderDoneMs": 2056,
+              "openPressToPage1Ms": 2415,
+              "gotoToPage1Ms": 8814,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "transition6to7": {
+              "frames": 456,
+              "seconds": 7.6,
+              "medianFps": 59.88,
+              "meanFps": 59.76,
+              "p95Ms": 16.8,
+              "p99Ms": 16.8,
+              "maxMs": 33.4,
+              "over33ms": 1,
+              "over50ms": 0,
+              "drawCalls": 229.5,
+              "triangles": 724685
+            },
+            "page7": {
+              "frames": 1195,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.79,
+              "p95Ms": 16.8,
+              "p99Ms": 16.8,
+              "maxMs": 33.4,
+              "over33ms": 2,
+              "over50ms": 0,
+              "drawCalls": 295.3,
+              "triangles": 717514,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 1487,
+                "vertexArrays": 874,
+                "programs": 66,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 7
+            },
+            "canvas": {
+              "width": 1440,
+              "height": 900,
+              "cssWidth": 1440,
+              "cssHeight": 900,
+              "dpr": 1,
+              "effectivePixelRatio": 1
+            },
+            "page9": {
+              "frames": 1197,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.9,
+              "p95Ms": 16.8,
+              "p99Ms": 16.8,
+              "maxMs": 18.6,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 309.7,
+              "triangles": 829510,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 1487,
+                "vertexArrays": 904,
+                "programs": 66,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 9
+            },
+            "transitionsAll": {
+              "frames": 1911,
+              "seconds": 31.9,
+              "medianFps": 59.88,
+              "meanFps": 59.83,
+              "p95Ms": 16.8,
+              "p99Ms": 16.8,
+              "maxMs": 33.4,
+              "over33ms": 2,
+              "over50ms": 0,
+              "drawCalls": 255.7,
+              "triangles": 752336
+            },
+            "transitionsUnderwater": {
+              "frames": 998,
+              "seconds": 16.7,
+              "medianFps": 59.88,
+              "meanFps": 59.83,
+              "p95Ms": 16.8,
+              "p99Ms": 16.8,
+              "maxMs": 33.4,
+              "over33ms": 1,
+              "over50ms": 0,
+              "drawCalls": 263.9,
+              "triangles": 870875
+            },
+            "wallSeconds": 131
+          }
+        ],
+        "median": {
+          "coldLoad": {
+            "gotoToLoaderDoneMs": 1952,
+            "openPressToPage1Ms": 2899,
+            "gotoToPage1Ms": 9189,
+            "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+          },
+          "warmLoad": {
+            "gotoToLoaderDoneMs": 2056,
+            "openPressToPage1Ms": 2415,
+            "gotoToPage1Ms": 8814,
+            "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+          },
+          "transition6to7": {
+            "frames": 456,
+            "seconds": 7.6,
+            "medianFps": 59.88,
+            "meanFps": 59.76,
+            "p95Ms": 16.8,
+            "p99Ms": 16.8,
+            "maxMs": 33.4,
+            "over33ms": 1,
+            "over50ms": 0,
+            "drawCalls": 229.5,
+            "triangles": 724685
+          },
+          "page7": {
+            "frames": 1195,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.79,
+            "p95Ms": 16.8,
+            "p99Ms": 16.8,
+            "maxMs": 33.4,
+            "over33ms": 2,
+            "over50ms": 0,
+            "drawCalls": 295.3,
+            "triangles": 717514,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 1487,
+              "vertexArrays": 874,
+              "programs": 66,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 7
+          },
+          "canvas": {
+            "width": 1440,
+            "height": 900,
+            "cssWidth": 1440,
+            "cssHeight": 900,
+            "dpr": 1,
+            "effectivePixelRatio": 1
+          },
+          "page9": {
+            "frames": 1197,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.9,
+            "p95Ms": 16.8,
+            "p99Ms": 16.8,
+            "maxMs": 18.6,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 309.7,
+            "triangles": 829510,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 1487,
+              "vertexArrays": 904,
+              "programs": 66,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 9
+          },
+          "transitionsAll": {
+            "frames": 1911,
+            "seconds": 31.9,
+            "medianFps": 59.88,
+            "meanFps": 59.83,
+            "p95Ms": 16.8,
+            "p99Ms": 16.8,
+            "maxMs": 33.4,
+            "over33ms": 2,
+            "over50ms": 0,
+            "drawCalls": 255.7,
+            "triangles": 752336
+          },
+          "transitionsUnderwater": {
+            "frames": 998,
+            "seconds": 16.7,
+            "medianFps": 59.88,
+            "meanFps": 59.83,
+            "p95Ms": 16.8,
+            "p99Ms": 16.8,
+            "maxMs": 33.4,
+            "over33ms": 1,
+            "over50ms": 0,
+            "drawCalls": 263.9,
+            "triangles": 870875
+          },
+          "wallSeconds": 131
+        }
+      },
+      "capped.mobile": {
+        "launchFlags": [
+          "--enable-gpu",
+          "--ignore-gpu-blocklist",
+          "--use-gl=angle",
+          "--use-angle=gl-egl"
+        ],
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "deviceScaleFactor": 2,
+        "runs": [
+          {
+            "coldLoad": {
+              "gotoToLoaderDoneMs": 1820,
+              "openPressToPage1Ms": 2664,
+              "gotoToPage1Ms": 8858,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "warmLoad": {
+              "gotoToLoaderDoneMs": 1975,
+              "openPressToPage1Ms": 2282,
+              "gotoToPage1Ms": 8621,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "transition6to7": {
+              "frames": 444,
+              "seconds": 7.7,
+              "medianFps": 57.47,
+              "meanFps": 57.68,
+              "p95Ms": 18.3,
+              "p99Ms": 18.7,
+              "maxMs": 18.9,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 156.7,
+              "triangles": 324297
+            },
+            "page7": {
+              "frames": 1164,
+              "seconds": 20,
+              "medianFps": 57.47,
+              "meanFps": 58.22,
+              "p95Ms": 18.2,
+              "p99Ms": 18.5,
+              "maxMs": 21.2,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 163,
+              "triangles": 379705,
+              "liveGl": {
+                "textures": 38,
+                "buffers": 1487,
+                "vertexArrays": 387,
+                "programs": 56,
+                "framebuffers": 16,
+                "renderbuffers": 2
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 7
+            },
+            "canvas": {
+              "width": 546,
+              "height": 1181,
+              "cssWidth": 390,
+              "cssHeight": 844,
+              "dpr": 2,
+              "effectivePixelRatio": 1.4
+            },
+            "page9": {
+              "frames": 1156,
+              "seconds": 20,
+              "medianFps": 57.47,
+              "meanFps": 57.88,
+              "p95Ms": 18.2,
+              "p99Ms": 18.4,
+              "maxMs": 18.7,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 159.5,
+              "triangles": 423486,
+              "liveGl": {
+                "textures": 38,
+                "buffers": 1487,
+                "vertexArrays": 387,
+                "programs": 56,
+                "framebuffers": 16,
+                "renderbuffers": 2
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 9
+            },
+            "transitionsAll": {
+              "frames": 1863,
+              "seconds": 32.2,
+              "medianFps": 57.47,
+              "meanFps": 57.82,
+              "p95Ms": 18.2,
+              "p99Ms": 18.5,
+              "maxMs": 21.3,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 171.3,
+              "triangles": 387711
+            },
+            "transitionsUnderwater": {
+              "frames": 974,
+              "seconds": 16.8,
+              "medianFps": 57.47,
+              "meanFps": 57.86,
+              "p95Ms": 18.2,
+              "p99Ms": 18.4,
+              "maxMs": 21.3,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 179.9,
+              "triangles": 475894
+            },
+            "wallSeconds": 131
+          }
+        ],
+        "median": {
+          "coldLoad": {
+            "gotoToLoaderDoneMs": 1820,
+            "openPressToPage1Ms": 2664,
+            "gotoToPage1Ms": 8858,
+            "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+          },
+          "warmLoad": {
+            "gotoToLoaderDoneMs": 1975,
+            "openPressToPage1Ms": 2282,
+            "gotoToPage1Ms": 8621,
+            "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+          },
+          "transition6to7": {
+            "frames": 444,
+            "seconds": 7.7,
+            "medianFps": 57.47,
+            "meanFps": 57.68,
+            "p95Ms": 18.3,
+            "p99Ms": 18.7,
+            "maxMs": 18.9,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 156.7,
+            "triangles": 324297
+          },
+          "page7": {
+            "frames": 1164,
+            "seconds": 20,
+            "medianFps": 57.47,
+            "meanFps": 58.22,
+            "p95Ms": 18.2,
+            "p99Ms": 18.5,
+            "maxMs": 21.2,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 163,
+            "triangles": 379705,
+            "liveGl": {
+              "textures": 38,
+              "buffers": 1487,
+              "vertexArrays": 387,
+              "programs": 56,
+              "framebuffers": 16,
+              "renderbuffers": 2
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 7
+          },
+          "canvas": {
+            "width": 546,
+            "height": 1181,
+            "cssWidth": 390,
+            "cssHeight": 844,
+            "dpr": 2,
+            "effectivePixelRatio": 1.4
+          },
+          "page9": {
+            "frames": 1156,
+            "seconds": 20,
+            "medianFps": 57.47,
+            "meanFps": 57.88,
+            "p95Ms": 18.2,
+            "p99Ms": 18.4,
+            "maxMs": 18.7,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 159.5,
+            "triangles": 423486,
+            "liveGl": {
+              "textures": 38,
+              "buffers": 1487,
+              "vertexArrays": 387,
+              "programs": 56,
+              "framebuffers": 16,
+              "renderbuffers": 2
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 9
+          },
+          "transitionsAll": {
+            "frames": 1863,
+            "seconds": 32.2,
+            "medianFps": 57.47,
+            "meanFps": 57.82,
+            "p95Ms": 18.2,
+            "p99Ms": 18.5,
+            "maxMs": 21.3,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 171.3,
+            "triangles": 387711
+          },
+          "transitionsUnderwater": {
+            "frames": 974,
+            "seconds": 16.8,
+            "medianFps": 57.47,
+            "meanFps": 57.86,
+            "p95Ms": 18.2,
+            "p99Ms": 18.4,
+            "maxMs": 21.3,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 179.9,
+            "triangles": 475894
+          },
+          "wallSeconds": 131
+        }
+      }
+    }
+  },
+  "journey": {
+    "label": "c2",
+    "date": "2026-11-18T16:56:58.549Z",
+    "viewports": {
+      "desktop": {
+        "steps": [
+          {
+            "name": "open-page-1",
+            "ok": true,
+            "detail": "3285 ms"
+          },
+          {
+            "name": "next-to-02",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-03",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-04",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-05",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-12",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-07",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-09",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "back-to-tree",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "reopen",
+            "ok": true,
+            "detail": ""
+          }
+        ],
+        "failedSteps": [],
+        "console": [
+          {
+            "type": "error",
+            "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "url": "http://localhost:4197/favicon.ico",
+            "page": 0
+          },
+          {
+            "type": "error",
+            "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "url": "http://localhost:4197/favicon.ico",
+            "page": 1
+          }
+        ],
+        "passed": true
+      },
+      "mobile": {
+        "steps": [
+          {
+            "name": "open-page-1",
+            "ok": true,
+            "detail": "2693 ms"
+          },
+          {
+            "name": "next-to-02",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-03",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-04",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-05",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-12",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-07",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-09",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "back-to-tree",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "reopen",
+            "ok": true,
+            "detail": ""
+          }
+        ],
+        "failedSteps": [],
+        "console": [
+          {
+            "type": "error",
+            "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "url": "http://localhost:4197/favicon.ico",
+            "page": 1
+          }
+        ],
+        "passed": true
+      }
+    },
+    "passed": true
+  },
+  "transitions": {
+    "label": "c2",
+    "date": "2026-11-18T17:03:21.045Z",
+    "viewports": {
+      "desktop": [
+        {
+          "6-7": 7644,
+          "7-8": 5428,
+          "8-9": 5447,
+          "9-10": 5846,
+          "10-11": 7649
+        },
+        {
+          "6-7": 7643,
+          "7-8": 5431,
+          "8-9": 5444,
+          "9-10": 5847,
+          "10-11": 7645
+        }
+      ],
+      "mobile": [
+        {
+          "6-7": 7679,
+          "7-8": 5464,
+          "8-9": 5462,
+          "9-10": 5879,
+          "10-11": 7681
+        },
+        {
+          "6-7": 7684,
+          "7-8": 5481,
+          "8-9": 5480,
+          "9-10": 5880,
+          "10-11": 7681
+        }
+      ]
+    }
+  },
+  "regress": {
+    "baseline": {
+      "mila": {
+        "summary": "143/150 checks passed",
+        "fails": [
+          "FAIL desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL keys no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-nav": {
+        "summary": "87/110 checks passed",
+        "fails": [
+          "FAIL survey-mila-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile swipe",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-lang": {
+        "summary": "48/60 checks passed",
+        "fails": [
+          "FAIL text no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL scene no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL session no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      }
+    },
+    "c2": {
+      "mila": {
+        "summary": "143/150 checks passed",
+        "fails": [
+          "FAIL desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL keys no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      }
+    }
+  }
+}

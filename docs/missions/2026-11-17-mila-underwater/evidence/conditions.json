@@ -9,7 +9,8 @@
     "superseded": "f92d8e28ca85e37e9cb532f2fae41b9f17671ffe (after-f92d8e2 round, kept under Q/after* but not used)",
     "correctionsRound": "f645de058f6ac4f451021b83ec0afa47d2ce49a7 (Q/o-dist, LABEL o-f645de0)",
     "c1": "1638c4c26c2a433970522f672650a23447e3fe8b (Q/c1-dist, LABEL c1-1638c4c)",
-    "o4": "a425401d2a9136df256ce6ec895a95a5cb42bf81 (Q/o4-dist; probe build Q/o4-probe-dist; before probe Q/clr-base-dist = 1638c4c)"
+    "o4": "a425401d2a9136df256ce6ec895a95a5cb42bf81 (Q/o4-dist; probe build Q/o4-probe-dist; before probe Q/clr-base-dist = 1638c4c)",
+    "c2": "7ea9a488ef328642533461d373a3b9813478375a (Q/c2-dist plain; Q/c2-probe-dist probe; branch HEAD 2e04279 has identical src/)"
   },
   "launchArgs": {
     "capped": ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"],
@@ -60,7 +61,8 @@
     "c1 functional (headless, nice 19): MOTION_FROMS=6,10 MOTION_SEQ=0 VPS=desktop,mobile ONLY=motion; ONLY=journey; ONLY=trans; qa/mila*.mjs regress; OUT=$Q/c1, $Q/c1-regress",
     "c1 long frames (headed, nice 19): HEADED=1 ONLY=longframes LF_RUNS=1 (calibration, Q/c1-lf-cal) then LF_RUNS=3 LF_SLOW_MS=0.85 LF_WIN=1200x750 (Q/c1-lf)",
     "round C (headed, nice 19): HEADED=1 ONLY=longframes LF_SEQ=B2,B1,B2 LF_PROFILE=1 OUT=$Q/c1-lf2/c1c/ (CDP profiler, clock pairs); LF_SEQ=B5,B5,B5 LF_WIN=960x600 OUT=$Q/c1-lf2/c2/; c1 and c1b sets unaligned/unused; 12 browser runs; C3 trace not run",
-    "o4 round: qa/mila-clearance.mjs on 4195 (1638c4c probe) and 4196 (a425401 probe), OUT=$Q/o4/clr-before, clr-after (SAME_AS), clr-after-long (REST_SEA=40000); motion MOTION_FROMS=6,7,8,9 on 4198 (c1) and 4197 (o4); conch mode CONCH_TAG; CONCH_REC=300,440,480,280; journey/trans/regress on 4197; headed PERF_RUNS=1 PERF_PASSES=capped.desktop,capped.mobile alternating c1 and o4 x3; headed longframes LF_VARIANTS=B1,B2 LF_SITE_OLD=4198 LF_SITE_NEW=4197; all nice -n 19, one browser at a time; qa/mila-clearance.mjs not modified"
+    "o4 round: qa/mila-clearance.mjs on 4195 (1638c4c probe) and 4196 (a425401 probe), OUT=$Q/o4/clr-before, clr-after (SAME_AS), clr-after-long (REST_SEA=40000); motion MOTION_FROMS=6,7,8,9 on 4198 (c1) and 4197 (o4); conch mode CONCH_TAG; CONCH_REC=300,440,480,280; journey/trans/regress on 4197; headed PERF_RUNS=1 PERF_PASSES=capped.desktop,capped.mobile alternating c1 and o4 x3; headed longframes LF_VARIANTS=B1,B2 LF_SITE_OLD=4198 LF_SITE_NEW=4197; all nice -n 19, one browser at a time; qa/mila-clearance.mjs not modified",
+    "c2 round: qa/mila-clearance.mjs (sound predicate) on 4195 (1638c4c probe) and 4196 (7ea9a48 probe), SAME_AS; LEAK_CYCLES=5 ONLY=leak, journey, trans on 4197 (c2-dist); conch and crab modes (CONCH_TAG) on 4198 (o4-dist, before) and 4197 (after); qa/mila.mjs on 4197; headed PERF_RUNS=1 PERF_PASSES=capped.desktop,capped.mobile on 4197 (second attempt after a warm-reload timeout); dropped: mila-nav, mila-lang, longframes pair; nice -n 19, one browser at a time"
   ],
   "timing": "perf-headed round: 2451 s wall, system-wide busy cores avg 1.82 of 16 (all processes on the machine, from /proc/stat); headless functional chain: 4911 s wall",
   "note": "All processes started under nice -n 19; one browser at a time.",

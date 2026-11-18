@@ -1,151 +1,461 @@
-# Clearance check (O4): every frame, every pair of living forms and solids
+# Clearance check (O4), round c2: sound predicate
 
-Script: qa/mila-clearance.mjs, fake clock, headless GPU Chrome (functional check, not a frame-rate measurement), nice 19. Before = 1638c4c with the read-only probe (Q/clr-base-dist, no BUILD_SHA file in that folder), after = a425401 with the probe (Q/o4-probe-dist, BUILD_SHA a425401d...). Defaults: TOL 0.02 m, REST_SEA 20000 ms, REST_LAND 6000 ms, BACK on; after-long used REST_SEA 40000. Renderer recorded in the json: ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2), browser 157.0.8103.78.
+This file replaces the round-o4 clearance.md and clearance.json, whose predicate was unsound (the numbers in those were produced by the earlier version of qa/mila-clearance.mjs). Script now: qa/mila-clearance.mjs with qa/mila-clearance-gap.mjs (commit 2e04279), every living form against every other, every solid and the ground; each pair kind lists how often it was close enough to be measured and its closest approach (negative = overlap).
 
-Tolerance: a pair counts when its proxies overlap by more than 0.02 m. Frames measured: before desktop 16651; before mobile 16645; after desktop 16610; after mobile 16629; after-long desktop 21612; after-long mobile 21632.
+Builds: before = 1638c4c with the read-only probe (Q/clr-base-dist), after = 7ea9a48 with the probe (Q/c2-probe-dist; the src/ tree of HEAD 2e04279 is identical to 7ea9a48). Settings: TOL 0.02 m, REST_SEA 20000 ms, REST_LAND 6000 ms, BACK on. Headless GPU Chrome, fake clock, nice 19 (functional check, not a frame-rate measurement). Renderer recorded in every json: ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2), 157.0.8103.78.
 
-## Proxies (what stands in for each body)
+## Summary
 
-- mila: capsules: dress (0,0.50,0)-(0,0.86,0) r 0.19; head sphere r 0.13; thighs and shins r 0.035; upper arms r 0.025, forearms r 0.022. Hair buns, hands, feet and the conch she carries are left out
-- fish: capsule along the body, 0.18 long, r 0.045, times the fish's size; the tail fin is left out; fish scaled under 0.3 (not yet revealed) are skipped
-- turtle: flattened sphere for the shell (r 0.37, half-height 0.11) and a sphere for the head (r 0.1); the flippers are left out
-- crab: flattened sphere r 0.45, half-height 0.15 (body and the root of the legs)
-- conches: flattened spheres from the bounding boxes of the living conch, the pearl with its valve, the conch on the sand and each piece of debris (85 % of the half-extents)
-- rock: flattened sphere: r 1.05 x mean horizontal scale, half-height 0.76 x vertical scale
-- coral: flattened sphere around each coral: its branches' widest reach from the foot, half its height
-- ground: the scene's own height function; Mila's dress and head, the fish and the turtle are tested against it
+- kinds that overlapped before: crab-ground, fish-coral, fish-fish, fish-ground, fish-rock, fish-school, fish-turtle, mila-fish, mila-school, school-school
+- kinds that still overlap after (either viewport): none
+- closest approaches after, within the tolerance and therefore not counted as overlaps: liveConch-ground -0.008 m (both viewports; before 0.055 m) and crab-ground +0.008 m (before: overlap 0.032 m at p06), fish-fish +0.009 / +0.012 m, school-school +0.020 / +0.037 m (see the pair-kind tables).
+- the new pair kinds crab-ground, crab-debris, liveConch-ground and liveConch-coral exist only in the new predicate; kinds with measured 0 were never close enough to be tested in that run.
 
-## Totals per pair kind
+## before desktop
 
-Cells: frames with an overlap / distinct pairs (summed over segments) / deepest overlap in metres. A dash means the kind never overlapped by more than the tolerance in that run.
+Frames 16553; steepestGround 0.772; error None; rocks and corals counted {'rocks': 39, 'corals': 16}; renderer ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2).
 
-### desktop
+| pair kind          | measured | closest (m) |
+| ------------------ | -------- | ----------- |
+| mila-fish          | 2212     | -0.132      |
+| mila-school        | 3919     | -0.200      |
+| mila-turtle        | 195      | 0.469       |
+| mila-crab          | 0        | -           |
+| mila-liveConch     | 0        | -           |
+| mila-pearl         | 0        | -           |
+| mila-bigConch      | 4315     | 0.186       |
+| mila-debris        | 0        | -           |
+| mila-rock          | 5        | 0.729       |
+| mila-coral         | 0        | -           |
+| mila-ground        | 8415     | 0.135       |
+| fish-fish          | 79735    | -0.096      |
+| fish-school        | 1561     | -0.063      |
+| fish-turtle        | 9356     | -0.144      |
+| fish-crab          | 0        | -           |
+| fish-liveConch     | 0        | -           |
+| fish-pearl         | 0        | -           |
+| fish-bigConch      | 0        | -           |
+| fish-debris        | 0        | -           |
+| fish-rock          | 58299    | -0.665      |
+| fish-coral         | 29099    | -0.430      |
+| fish-ground        | 61667    | -0.769      |
+| school-school      | 6383752  | -0.070      |
+| school-turtle      | 0        | -           |
+| school-crab        | 0        | -           |
+| school-liveConch   | 0        | -           |
+| school-pearl       | 0        | -           |
+| school-bigConch    | 0        | -           |
+| school-debris      | 0        | -           |
+| school-rock        | 0        | -           |
+| school-coral       | 0        | -           |
+| school-ground      | 0        | -           |
+| turtle-crab        | 0        | -           |
+| turtle-liveConch   | 0        | -           |
+| turtle-pearl       | 0        | -           |
+| turtle-bigConch    | 0        | -           |
+| turtle-debris      | 0        | -           |
+| turtle-rock        | 0        | -           |
+| turtle-coral       | 0        | -           |
+| turtle-ground      | 0        | -           |
+| crab-liveConch     | 0        | -           |
+| crab-pearl         | 0        | -           |
+| crab-bigConch      | 0        | -           |
+| crab-debris        | 5315     | 0.256       |
+| crab-rock          | 0        | -           |
+| crab-coral         | 0        | -           |
+| crab-ground        | 16553    | -0.032      |
+| liveConch-pearl    | 0        | -           |
+| liveConch-bigConch | 0        | -           |
+| liveConch-debris   | 0        | -           |
+| liveConch-rock     | 0        | -           |
+| liveConch-coral    | 0        | -           |
+| liveConch-ground   | 16553    | 0.055       |
 
-| pair kind     | before               | after | after-long |
-| ------------- | -------------------- | ----- | ---------- |
-| fish-coral    | 4652 / 183 / 0.426   | -     | -          |
-| fish-fish     | 643 / 71 / 0.094     | -     | -          |
-| fish-ground   | 13021 / 246 / 0.766  | -     | -          |
-| fish-rock     | 9493 / 340 / 0.863   | -     | -          |
-| fish-school   | 24 / 4 / 0.057       | -     | -          |
-| fish-turtle   | 232 / 8 / 0.262      | -     | -          |
-| mila-fish     | 90 / 6 / 0.131       | -     | -          |
-| mila-school   | 80 / 13 / 0.196      | -     | -          |
-| school-school | 13884 / 1000 / 0.069 | -     | -          |
+Overlap table (deeper than the tolerance), summed over segments:
 
-### mobile
+| pair kind     | frames with an overlap | distinct pairs | deepest (m) | at segment |
+| ------------- | ---------------------- | -------------- | ----------- | ---------- |
+| crab-ground   | 16534                  | 34             | 0.032       | p06        |
+| fish-coral    | 4515                   | 182            | 0.427       | t08-09     |
+| fish-fish     | 626                    | 71             | 0.094       | t10-11     |
+| fish-ground   | 13071                  | 257            | 0.767       | p10        |
+| fish-rock     | 9482                   | 349            | 0.663       | p10        |
+| fish-school   | 16                     | 4              | 0.060       | p08        |
+| fish-turtle   | 278                    | 9              | 0.144       | b12-11     |
+| mila-fish     | 53                     | 4              | 0.131       | p09        |
+| mila-school   | 77                     | 17             | 0.200       | b10-09     |
+| school-school | 13857                  | 1010           | 0.070       | b08-07     |
 
-| pair kind     | before             | after | after-long |
-| ------------- | ------------------ | ----- | ---------- |
-| fish-coral    | 6208 / 178 / 0.460 | -     | -          |
-| fish-fish     | 449 / 42 / 0.085   | -     | -          |
-| fish-ground   | 1976 / 29 / 0.301  | -     | -          |
-| fish-rock     | 7828 / 214 / 1.226 | -     | -          |
-| fish-turtle   | 353 / 10 / 0.301   | -     | -          |
-| mila-fish     | 94 / 6 / 0.133     | -     | -          |
-| mila-school   | 89 / 13 / 0.220    | -     | -          |
-| school-school | 7262 / 360 / 0.063 | -     | -          |
+Per segment (overlapping kinds as kind frames/distinct pairs/deepest m; fish figures: swimmers, maxStep m, fastSteps, maxJolt m, jolts). Caveat: during page turns the script advances the fake clock in uneven pieces, so step and jolt figures of the t and b segments are inflated on both builds; the page segments (p07 to p10) are the clean ones.
 
-## Pair kinds
+| segment | frames | overlaps                                                                                                                                                                                               | swimmers | maxStep | fastSteps | maxJolt | jolts |
+| ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- | --------- | ------- | ----- |
+| p01     | 375    | crab-ground 375/1/0.031; fish-coral 18/1/0.169; fish-ground 201/3/0.315; fish-rock 187/5/0.448; school-school 328/27/0.065                                                                             | 175      | 0.055   | 299       | 0.000   | -     |
+| t01-02  | 294    | crab-ground 294/1/0.031; fish-coral 37/2/0.301; fish-ground 125/2/0.136; fish-rock 57/1/0.647; school-school 241/27/0.062                                                                              | 175      | 0.143   | 275       | 0.137   | 1021  |
+| p02     | 375    | crab-ground 375/1/0.031; fish-coral 72/2/0.303; fish-ground 359/3/0.540; fish-rock 20/1/0.062; school-school 343/30/0.056                                                                              | 175      | 0.055   | 267       | 0.000   | -     |
+| t02-03  | 295    | crab-ground 295/1/0.031; fish-coral 17/1/0.176; fish-fish 2/1/0.043; fish-ground 128/2/0.233; fish-rock 150/6/0.604; school-school 281/27/0.056                                                        | 175      | 0.163   | 314       | 0.111   | 1657  |
+| p03     | 375    | crab-ground 375/1/0.031; fish-coral 21/1/0.276; fish-fish 3/1/0.043; fish-ground 202/3/0.258; fish-rock 30/1/0.171; school-school 320/23/0.060                                                         | 175      | 0.055   | 296       | 0.000   | -     |
+| t03-04  | 559    | crab-ground 559/1/0.031; fish-coral 146/5/0.292; fish-ground 196/2/0.663; fish-rock 219/5/0.517; school-school 518/43/0.065                                                                            | 175      | 0.144   | 457       | 0.136   | 1215  |
+| p04     | 375    | crab-ground 375/1/0.031; fish-fish 8/1/0.049; fish-ground 155/4/0.299; fish-rock 28/1/0.136; school-school 277/20/0.050                                                                                | 175      | 0.055   | 264       | 0.000   | -     |
+| t04-05  | 490    | crab-ground 490/1/0.031; fish-coral 64/3/0.266; fish-ground 202/3/0.586; fish-rock 224/6/0.498; school-school 424/31/0.058                                                                             | 175      | 0.165   | 592       | 0.132   | 2134  |
+| p05     | 375    | crab-ground 375/1/0.031; fish-coral 85/2/0.370; fish-ground 202/2/0.291; fish-rock 80/2/0.253; school-school 325/25/0.055                                                                              | 175      | 0.055   | 270       | 0.000   | -     |
+| t05-06  | 467    | crab-ground 448/1/0.031; fish-coral 20/1/0.268; fish-fish 5/1/0.026; fish-ground 234/3/0.368; fish-rock 226/6/0.615; school-school 408/26/0.059                                                        | 175      | 0.148   | 384       | 0.116   | 1020  |
+| p06     | 375    | crab-ground 375/1/0.032; fish-coral 58/3/0.305; fish-fish 13/1/0.051; fish-ground 109/2/0.143; fish-rock 43/3/0.306; school-school 328/24/0.059                                                        | 175      | 0.055   | 298       | 0.000   | -     |
+| t06-07  | 495    | crab-ground 495/1/0.032; fish-coral 55/4/0.251; fish-fish 51/5/0.056; fish-ground 475/13/0.563; fish-rock 265/12/0.659; school-school 375/30/0.063                                                     | 175      | 0.184   | 1396      | 0.133   | 1702  |
+| p07     | 1250   | crab-ground 1250/1/0.032; fish-coral 462/16/0.409; fish-fish 55/7/0.074; fish-ground 1124/18/0.666; fish-rock 1017/29/0.582; mila-fish 3/1/0.021; school-school 1109/70/0.066                          | 175      | 0.060   | 2757      | 0.001   | -     |
+| t07-08  | 356    | crab-ground 356/1/0.032; fish-coral 109/6/0.372; fish-fish 26/3/0.068; fish-ground 356/10/0.478; fish-rock 341/13/0.645; school-school 356/23/0.063                                                    | 240      | 1.078   | 1726      | 1.098   | 3297  |
+| p08     | 1250   | crab-ground 1250/1/0.032; fish-coral 505/19/0.420; fish-fish 92/9/0.087; fish-ground 1250/18/0.723; fish-rock 943/29/0.599; fish-school 16/4/0.060; mila-school 38/4/0.120; school-school 843/22/0.059 | 240      | 0.061   | 2996      | 0.001   | -     |
+| t08-09  | 356    | crab-ground 356/1/0.032; fish-coral 170/10/0.427; fish-ground 356/15/0.388; fish-rock 286/13/0.522; mila-school 8/3/0.063; school-school 325/24/0.054                                                  | 240      | 1.078   | 2210      | 1.095   | 4290  |
+| p09     | 1250   | crab-ground 1250/1/0.032; fish-coral 521/18/0.421; fish-fish 49/5/0.091; fish-ground 1250/20/0.760; fish-rock 885/33/0.566; fish-turtle 90/2/0.111; mila-fish 46/2/0.131; school-school 899/53/0.065   | 240      | 0.060   | 2957      | 0.001   | -     |
+| t09-10  | 381    | crab-ground 381/1/0.032; fish-coral 115/5/0.342; fish-fish 55/5/0.040; fish-ground 381/11/0.708; fish-rock 301/12/0.616; mila-school 18/3/0.139; school-school 318/19/0.067                            | 240      | 0.168   | 1534      | 0.149   | 3760  |
+| p10     | 1250   | crab-ground 1250/1/0.032; fish-coral 538/17/0.372; fish-fish 58/7/0.069; fish-ground 1250/20/0.767; fish-rock 893/30/0.663; fish-turtle 19/1/0.060; school-school 992/66/0.061                         | 240      | 0.060   | 2831      | 0.001   | -     |
+| t10-11  | 489    | crab-ground 489/1/0.032; fish-coral 113/6/0.280; fish-fish 42/3/0.094; fish-ground 462/11/0.749; fish-rock 376/16/0.620; school-school 383/28/0.068                                                    | 240      | 0.182   | 1662      | 0.135   | 3664  |
+| p11     | 375    | crab-ground 375/1/0.032; fish-coral 202/10/0.370; fish-fish 15/2/0.050; fish-ground 375/8/0.701; fish-rock 285/12/0.520; school-school 361/31/0.056                                                    | 240      | 0.060   | 861       | 0.001   | -     |
+| t11-12  | 367    | crab-ground 367/1/0.032; fish-coral 62/2/0.248; fish-fish 24/2/0.083; fish-ground 367/11/0.392; fish-rock 274/12/0.636; school-school 273/23/0.065                                                     | 240      | 0.170   | 1509      | 0.112   | 2160  |
+| p12     | 375    | crab-ground 375/1/0.032; fish-coral 126/9/0.286; fish-fish 49/5/0.077; fish-ground 375/10/0.590; fish-rock 302/13/0.631; school-school 350/24/0.057                                                    | 240      | 0.060   | 842       | 0.001   | -     |
+| b12-11  | 354    | crab-ground 354/1/0.032; fish-coral 166/5/0.321; fish-fish 35/3/0.072; fish-ground 354/8/0.727; fish-rock 316/14/0.590; fish-turtle 116/3/0.144; school-school 354/28/0.062                            | 240      | 0.182   | 1722      | 0.141   | 2473  |
+| b11-10  | 366    | crab-ground 366/1/0.032; fish-coral 156/8/0.276; fish-ground 366/11/0.707; fish-rock 243/12/0.600; fish-turtle 20/2/0.072; school-school 347/30/0.061                                                  | 240      | 0.172   | 1367      | 0.116   | 2635  |
+| b10-09  | 366    | crab-ground 366/1/0.032; fish-coral 71/2/0.369; fish-fish 3/1/0.052; fish-ground 366/11/0.653; fish-rock 272/13/0.533; mila-school 13/7/0.200; school-school 333/28/0.061                              | 240      | 0.186   | 1082      | 0.149   | 1705  |
+| b09-08  | 370    | crab-ground 370/1/0.032; fish-coral 184/9/0.265; fish-fish 29/5/0.079; fish-ground 351/9/0.483; fish-rock 283/15/0.553; school-school 331/27/0.063                                                     | 240      | 1.075   | 1426      | 1.092   | 1977  |
+| b08-07  | 361    | crab-ground 361/1/0.032; fish-coral 147/5/0.366; fish-ground 361/8/0.685; fish-rock 299/15/0.587; fish-turtle 33/1/0.117; mila-fish 4/1/0.042; school-school 316/31/0.070                              | 175      | 1.093   | 1955      | 1.103   | 3975  |
+| b07-06  | 363    | crab-ground 363/1/0.032; fish-coral 66/2/0.242; fish-ground 315/3/0.619; fish-rock 162/4/0.491; school-school 299/28/0.055                                                                             | 175      | 0.138   | 373       | 0.091   | 1197  |
+| b06-05  | 366    | crab-ground 366/1/0.032; fish-coral 16/1/0.161; fish-ground 173/2/0.232; fish-rock 49/2/0.256; school-school 287/27/0.054                                                                              | 175      | 0.142   | 402       | 0.118   | 1659  |
+| b05-04  | 364    | crab-ground 364/1/0.032; fish-coral 58/2/0.242; fish-fish 8/2/0.048; fish-ground 293/4/0.418; fish-rock 190/6/0.620; school-school 259/26/0.054                                                        | 175      | 0.122   | 409       | 0.101   | 1130  |
+| b04-03  | 369    | crab-ground 369/1/0.032; fish-coral 71/3/0.265; fish-fish 3/1/0.054; fish-rock 38/1/0.222; school-school 352/22/0.059                                                                                  | 175      | 0.124   | 263       | 0.074   | 617   |
+| b03-02  | 366    | crab-ground 366/1/0.032; fish-ground 144/4/0.210; fish-rock 82/3/0.196; school-school 295/24/0.049                                                                                                     | 175      | 0.167   | 229       | 0.144   | 914   |
+| b02-01  | 359    | crab-ground 359/1/0.032; fish-coral 64/2/0.282; fish-fish 1/1/0.020; fish-ground 214/3/0.264; fish-rock 116/3/0.660; school-school 307/23/0.068                                                        | 175      | 0.165   | 447       | 0.122   | 1274  |
 
-- kinds that overlapped in the before run: fish-coral, fish-fish, fish-ground, fish-rock, fish-school, fish-turtle, mila-fish, mila-school, school-school
-- kinds that overlapped in an after run (after or after-long, either viewport): none
-- kinds of the script's list that never overlapped in any of the six runs: mila-turtle, mila-crab, mila-liveConch, mila-pearl, mila-bigConch, mila-debris, mila-rock, mila-coral, mila-ground, fish-liveConch, fish-pearl, school-turtle, school-liveConch, school-pearl, school-rock, school-coral, school-ground, turtle-rock, turtle-coral, turtle-ground, crab-debris, crab-rock, crab-bigConch
+## before mobile
 
-## Per segment
+Frames 16676; steepestGround 0.772; error None; rocks and corals counted {'rocks': 39, 'corals': 16}; renderer ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2).
 
-Fish figures: swimmers; maxStep (m, largest move of a fish between two frames); fastSteps (moves over 0.05 m); maxJolt (m, largest change of that move from one frame to the next); jolts (changes over 0.01 m). Caveat: during page turns the script advances the fake clock in uneven pieces, so the step and jolt figures of the t and b segments are inflated on both builds; the page segments (p07 to p10) are the clean ones.
+| pair kind          | measured | closest (m) |
+| ------------------ | -------- | ----------- |
+| mila-fish          | 2163     | -0.133      |
+| mila-school        | 2659     | -0.204      |
+| mila-turtle        | 195      | 0.469       |
+| mila-crab          | 0        | -           |
+| mila-liveConch     | 0        | -           |
+| mila-pearl         | 0        | -           |
+| mila-bigConch      | 4358     | 0.207       |
+| mila-debris        | 0        | -           |
+| mila-rock          | 12       | 0.704       |
+| mila-coral         | 0        | -           |
+| mila-ground        | 8498     | 0.135       |
+| fish-fish          | 37050    | -0.089      |
+| fish-school        | 115      | 0.152       |
+| fish-turtle        | 6055     | -0.136      |
+| fish-crab          | 0        | -           |
+| fish-liveConch     | 715      | 0.533       |
+| fish-pearl         | 0        | -           |
+| fish-bigConch      | 0        | -           |
+| fish-debris        | 0        | -           |
+| fish-rock          | 58353    | -0.935      |
+| fish-coral         | 46281    | -0.472      |
+| fish-ground        | 6888     | -0.306      |
+| school-school      | 2919417  | -0.064      |
+| school-turtle      | 0        | -           |
+| school-crab        | 0        | -           |
+| school-liveConch   | 0        | -           |
+| school-pearl       | 0        | -           |
+| school-bigConch    | 0        | -           |
+| school-debris      | 0        | -           |
+| school-rock        | 0        | -           |
+| school-coral       | 0        | -           |
+| school-ground      | 0        | -           |
+| turtle-crab        | 0        | -           |
+| turtle-liveConch   | 0        | -           |
+| turtle-pearl       | 0        | -           |
+| turtle-bigConch    | 0        | -           |
+| turtle-debris      | 0        | -           |
+| turtle-rock        | 0        | -           |
+| turtle-coral       | 0        | -           |
+| turtle-ground      | 0        | -           |
+| crab-liveConch     | 0        | -           |
+| crab-pearl         | 0        | -           |
+| crab-bigConch      | 0        | -           |
+| crab-debris        | 5347     | 0.256       |
+| crab-rock          | 0        | -           |
+| crab-coral         | 0        | -           |
+| crab-ground        | 16676    | -0.032      |
+| liveConch-pearl    | 0        | -           |
+| liveConch-bigConch | 0        | -           |
+| liveConch-debris   | 0        | -           |
+| liveConch-rock     | 0        | -           |
+| liveConch-coral    | 33352    | 0.483       |
+| liveConch-ground   | 16676    | 0.055       |
 
-### desktop
+Overlap table (deeper than the tolerance), summed over segments:
 
-Overlap cells: kind frames/distinct pairs/deepest m.
+| pair kind     | frames with an overlap | distinct pairs | deepest (m) | at segment |
+| ------------- | ---------------------- | -------------- | ----------- | ---------- |
+| crab-ground   | 16658                  | 34             | 0.032       | p06        |
+| fish-coral    | 6144                   | 171            | 0.470       | p05        |
+| fish-fish     | 448                    | 39             | 0.089       | t10-11     |
+| fish-ground   | 2115                   | 30             | 0.304       | b09-08     |
+| fish-rock     | 7819                   | 209            | 0.932       | t06-07     |
+| fish-turtle   | 387                    | 10             | 0.132       | t11-12     |
+| mila-fish     | 92                     | 5              | 0.131       | p07        |
+| mila-school   | 87                     | 18             | 0.204       | p08        |
+| school-school | 7264                   | 357            | 0.064       | p07        |
 
-| segment | frames before | frames after | overlaps before                                                                                                                                                                               | overlaps after | swimmers b/a | maxStep b/a   | fastSteps b/a | maxJolt b/a   | jolts b/a  |
-| ------- | ------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------ | ------------- | ------------- | ------------- | ---------- |
-| p01     | 375           | 375          | fish-coral 18/1/0.168; fish-ground 191/3/0.307; fish-rock 185/5/0.632; school-school 328/27/0.066                                                                                             | none           | 175 / 175    | 0.055 / 0.055 | 298 / 302     | 0.000 / 0.011 | - / 2      |
-| t01-02  | 297           | 297          | fish-coral 37/2/0.296; fish-ground 117/2/0.138; fish-rock 59/1/0.660; school-school 244/27/0.058                                                                                              | none           | 175 / 175    | 0.062 / 0.059 | 175 / 167     | 0.025 / 0.019 | 61 / 19    |
-| p02     | 375           | 375          | fish-coral 75/2/0.301; fish-ground 354/3/0.535; fish-rock 19/1/0.068; school-school 342/30/0.058                                                                                              | none           | 175 / 175    | 0.055 / 0.054 | 266 / 271     | 0.000 / 0.007 | - / -      |
-| t02-03  | 299           | 297          | fish-coral 18/1/0.174; fish-fish 3/1/0.040; fish-ground 124/1/0.222; fish-rock 152/6/0.646; school-school 285/26/0.056                                                                        | none           | 175 / 175    | 0.108 / 0.055 | 183 / 168     | 0.049 / 0.008 | 259 / -    |
-| p03     | 375           | 375          | fish-coral 21/1/0.271; fish-fish 3/1/0.042; fish-ground 197/3/0.254; fish-rock 30/1/0.171; school-school 321/24/0.065                                                                         | none           | 175 / 175    | 0.055 / 0.055 | 297 / 294     | 0.000 / 0.011 | - / 2      |
-| t03-04  | 561           | 560          | fish-coral 149/5/0.261; fish-ground 204/2/0.661; fish-rock 221/5/0.585; school-school 527/42/0.065                                                                                            | none           | 175 / 175    | 0.090 / 0.054 | 384 / 337     | 0.058 / 0.014 | 508 / 6    |
-| p04     | 375           | 375          | fish-fish 8/1/0.049; fish-ground 142/3/0.289; fish-rock 28/1/0.144; school-school 270/19/0.050                                                                                                | none           | 175 / 175    | 0.055 / 0.054 | 272 / 282     | 0.000 / 0.006 | - / -      |
-| t04-05  | 499           | 498          | fish-coral 66/3/0.239; fish-ground 208/3/0.587; fish-rock 228/6/0.694; school-school 434/32/0.057                                                                                             | none           | 175 / 175    | 0.056 / 0.055 | 410 / 416     | 0.019 / 0.013 | 20 / 5     |
-| p05     | 375           | 375          | fish-coral 86/2/0.367; fish-ground 188/2/0.286; fish-rock 81/2/0.259; school-school 325/24/0.058                                                                                              | none           | 175 / 175    | 0.055 / 0.054 | 272 / 269     | 0.000 / 0.010 | - / 2      |
-| t05-06  | 465           | 465          | fish-coral 24/2/0.248; fish-fish 6/2/0.030; fish-ground 240/4/0.368; fish-rock 213/6/0.648; school-school 407/28/0.061                                                                        | none           | 175 / 175    | 0.161 / 0.055 | 369 / 355     | 0.116 / 0.015 | 350 / 6    |
-| p06     | 375           | 375          | fish-coral 67/2/0.304; fish-fish 13/1/0.049; fish-ground 99/1/0.133; fish-rock 43/2/0.381; school-school 333/22/0.061                                                                         | none           | 175 / 175    | 0.055 / 0.055 | 290 / 282     | 0.000 / 0.006 | - / -      |
-| t06-07  | 500           | 497          | fish-coral 70/4/0.217; fish-fish 52/5/0.053; fish-ground 475/13/0.555; fish-rock 264/11/0.664; school-school 383/29/0.062                                                                     | none           | 175 / 175    | 0.060 / 0.068 | 1046 / 1106   | 0.006 / 0.029 | - / 12     |
-| p07     | 1250          | 1250         | fish-coral 458/17/0.381; fish-fish 55/7/0.073; fish-ground 1068/17/0.657; fish-rock 1010/29/0.676; mila-fish 3/1/0.021; school-school 1105/67/0.066                                           | none           | 175 / 175    | 0.060 / 0.061 | 2714 / 2769   | 0.001 / 0.018 | - / 23     |
-| t07-08  | 364           | 360          | fish-coral 109/5/0.343; fish-fish 29/3/0.065; fish-ground 364/9/0.471; fish-rock 349/11/0.740; mila-school 7/1/0.060; school-school 364/24/0.063                                              | none           | 240 / 240    | 1.078 / 0.069 | 1400 / 774    | 1.098 / 0.075 | 1210 / 191 |
-| p08     | 1250          | 1250         | fish-coral 531/20/0.407; fish-fish 91/9/0.087; fish-ground 1250/18/0.718; fish-rock 943/29/0.771; fish-school 24/4/0.057; mila-school 40/3/0.175; school-school 837/21/0.055                  | none           | 240 / 240    | 0.061 / 0.064 | 2934 / 2688   | 0.001 / 0.022 | - / 18     |
-| t08-09  | 362           | 359          | fish-coral 154/8/0.426; fish-ground 362/15/0.387; fish-rock 286/14/0.591; mila-fish 30/1/0.106; school-school 323/28/0.053                                                                    | none           | 240 / 240    | 1.089 / 0.069 | 1142 / 909    | 1.109 / 0.050 | 696 / 261  |
-| p09     | 1250          | 1250         | fish-coral 553/18/0.411; fish-fish 48/5/0.092; fish-ground 1250/19/0.755; fish-rock 883/33/0.835; fish-turtle 82/2/0.190; mila-fish 46/2/0.131; school-school 902/52/0.065                    | none           | 240 / 240    | 0.060 / 0.062 | 3021 / 3119   | 0.001 / 0.015 | - / 4      |
-| t09-10  | 388           | 384          | fish-coral 124/5/0.310; fish-fish 58/5/0.040; fish-ground 388/12/0.701; fish-rock 323/13/0.651; mila-school 19/3/0.188; school-school 320/18/0.066                                            | none           | 240 / 240    | 0.151 / 0.098 | 1029 / 1576   | 0.102 / 0.039 | 681 / 220  |
-| p10     | 1250          | 1250         | fish-coral 542/17/0.364; fish-fish 60/7/0.069; fish-ground 1250/20/0.766; fish-rock 893/30/0.730; fish-turtle 11/1/0.055; school-school 985/62/0.058                                          | none           | 240 / 240    | 0.060 / 0.061 | 2749 / 2744   | 0.001 / 0.019 | - / 12     |
-| t10-11  | 497           | 496          | fish-coral 123/6/0.276; fish-fish 42/3/0.094; fish-ground 459/11/0.744; fish-rock 353/16/0.863; school-school 389/32/0.069                                                                    | none           | 240 / 240    | 0.168 / 0.060 | 1252 / 1173   | 0.126 / 0.016 | 944 / 3    |
-| p11     | 375           | 375          | fish-coral 197/10/0.327; fish-fish 15/2/0.050; fish-ground 375/10/0.694; fish-rock 300/13/0.615; school-school 370/32/0.056                                                                   | none           | 240 / 240    | 0.060 / 0.060 | 829 / 849     | 0.001 / 0.019 | - / 4      |
-| t11-12  | 374           | 374          | fish-coral 77/3/0.217; fish-fish 24/2/0.086; fish-ground 374/9/0.383; fish-rock 285/11/0.660; school-school 265/25/0.052                                                                      | none           | 240 / 240    | 0.172 / 0.063 | 913 / 850     | 0.117 / 0.010 | 708 / 2    |
-| p12     | 375           | 375          | fish-coral 121/8/0.252; fish-fish 47/5/0.079; fish-ground 375/9/0.589; fish-rock 263/12/0.656; school-school 350/23/0.060                                                                     | none           | 240 / 240    | 0.060 / 0.060 | 857 / 870     | 0.001 / 0.012 | - / 4      |
-| b12-11  | 365           | 365          | fish-coral 154/5/0.275; fish-fish 46/3/0.072; fish-ground 365/7/0.725; fish-rock 326/13/0.713; fish-turtle 52/2/0.062; school-school 365/27/0.058                                             | none           | 240 / 240    | 0.171 / 0.060 | 957 / 889     | 0.126 / 0.012 | 1073 / 7   |
-| b11-10  | 369           | 365          | fish-coral 165/8/0.276; fish-ground 369/10/0.699; fish-rock 242/12/0.640; fish-turtle 52/2/0.262; school-school 352/31/0.061                                                                  | none           | 240 / 240    | 0.184 / 0.068 | 1414 / 879    | 0.114 / 0.019 | 657 / 27   |
-| b10-09  | 368           | 365          | fish-coral 83/3/0.364; fish-fish 4/1/0.051; fish-ground 368/12/0.650; fish-rock 279/10/0.678; mila-school 13/5/0.196; school-school 355/32/0.065                                              | none           | 240 / 240    | 0.187 / 0.122 | 1232 / 1605   | 0.127 / 0.094 | 981 / 185  |
-| b09-08  | 368           | 365          | fish-coral 180/9/0.242; fish-fish 21/4/0.079; fish-ground 346/7/0.289; fish-rock 281/13/0.817; school-school 300/23/0.066                                                                     | none           | 240 / 240    | 1.080 / 0.061 | 1243 / 836    | 1.098 / 0.052 | 700 / 179  |
-| b08-07  | 364           | 365          | fish-coral 156/6/0.322; fish-fish 8/1/0.048; fish-ground 364/7/0.681; fish-rock 303/13/0.728; fish-turtle 35/1/0.232; mila-fish 11/2/0.100; mila-school 1/1/0.032; school-school 319/31/0.063 | none           | 175 / 175    | 1.083 / 0.063 | 1612 / 834    | 1.094 / 0.036 | 2244 / 144 |
-| b07-06  | 367           | 366          | fish-coral 68/2/0.216; fish-ground 313/3/0.613; fish-rock 166/4/0.690; school-school 318/30/0.067                                                                                             | none           | 175 / 175    | 0.144 / 0.057 | 329 / 300     | 0.098 / 0.013 | 377 / 5    |
-| b06-05  | 366           | 368          | fish-coral 18/1/0.155; fish-ground 167/2/0.221; fish-rock 50/2/0.259; school-school 267/25/0.054                                                                                              | none           | 175 / 175    | 0.096 / 0.064 | 312 / 250     | 0.048 / 0.029 | 204 / 43   |
-| b05-04  | 371           | 366          | fish-coral 69/2/0.215; fish-fish 7/2/0.048; fish-ground 330/4/0.411; fish-rock 174/6/0.651; school-school 254/26/0.058                                                                        | none           | 175 / 175    | 0.094 / 0.055 | 321 / 195     | 0.044 / 0.019 | 128 / 4    |
-| b04-03  | 367           | 367          | fish-coral 71/3/0.241; fish-fish 3/1/0.053; fish-rock 19/3/0.281; school-school 345/16/0.059                                                                                                  | none           | 175 / 175    | 0.096 / 0.058 | 192 / 205     | 0.045 / 0.010 | 151 / -    |
-| b03-02  | 369           | 365          | fish-ground 105/3/0.152; fish-rock 118/3/0.253; school-school 308/24/0.049                                                                                                                    | none           | 175 / 175    | 0.109 / 0.055 | 223 / 297     | 0.055 / 0.014 | 211 / 6    |
-| b02-01  | 371           | 366          | fish-coral 68/2/0.268; fish-ground 240/2/0.257; fish-rock 124/3/0.666; school-school 292/21/0.066                                                                                             | none           | 175 / 175    | 0.094 / 0.055 | 324 / 310     | 0.035 / 0.014 | 107 / 3    |
+Per segment (overlapping kinds as kind frames/distinct pairs/deepest m; fish figures: swimmers, maxStep m, fastSteps, maxJolt m, jolts). Caveat: during page turns the script advances the fake clock in uneven pieces, so step and jolt figures of the t and b segments are inflated on both builds; the page segments (p07 to p10) are the clean ones.
 
-### mobile
+| segment | frames | overlaps                                                                                                                                                                                            | swimmers | maxStep | fastSteps | maxJolt | jolts |
+| ------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | --------- | ------- | ----- |
+| p01     | 376    | crab-ground 376/1/0.031; fish-coral 189/4/0.393; fish-rock 141/4/0.679; school-school 77/7/0.047                                                                                                    | 111      | 0.042   | -         | 0.020   | 17    |
+| t01-02  | 301    | crab-ground 301/1/0.031; fish-coral 30/1/0.137; fish-ground 38/1/0.039; fish-rock 71/3/0.662; school-school 118/9/0.060                                                                             | 111      | 0.110   | 46        | 0.073   | 385   |
+| p02     | 375    | crab-ground 375/1/0.031; fish-coral 16/1/0.064; school-school 174/7/0.059                                                                                                                           | 111      | 0.042   | -         | 0.000   | -     |
+| t02-03  | 296    | crab-ground 296/1/0.031; fish-coral 204/3/0.445; fish-rock 127/3/0.457; school-school 77/6/0.045                                                                                                    | 111      | 0.070   | 14        | 0.038   | 199   |
+| p03     | 375    | crab-ground 375/1/0.031; fish-rock 142/3/0.531; school-school 190/9/0.061                                                                                                                           | 111      | 0.042   | -         | 0.000   | -     |
+| t03-04  | 559    | crab-ground 559/1/0.031; fish-coral 49/3/0.204; fish-ground 116/1/0.282; fish-rock 79/2/0.291; school-school 178/9/0.060                                                                            | 111      | 0.088   | 37        | 0.052   | 369   |
+| p04     | 375    | crab-ground 375/1/0.031; fish-coral 242/4/0.268; fish-rock 170/2/0.461; school-school 81/7/0.045                                                                                                    | 111      | 0.043   | -         | 0.000   | -     |
+| t04-05  | 499    | crab-ground 499/1/0.031; fish-coral 60/3/0.261; fish-ground 117/1/0.095; fish-rock 80/2/0.463; school-school 336/11/0.060                                                                           | 111      | 0.083   | 32        | 0.055   | 423   |
+| p05     | 375    | crab-ground 375/1/0.031; fish-coral 88/2/0.470; fish-rock 61/1/0.109; school-school 364/13/0.060                                                                                                    | 111      | 0.043   | -         | 0.000   | -     |
+| t05-06  | 470    | crab-ground 452/1/0.031; fish-coral 218/7/0.331; fish-rock 168/4/0.694; school-school 380/12/0.060                                                                                                  | 111      | 0.127   | 22        | 0.085   | 349   |
+| p06     | 375    | crab-ground 375/1/0.032; fish-ground 54/1/0.071; school-school 313/13/0.060                                                                                                                         | 111      | 0.042   | -         | 0.000   | -     |
+| t06-07  | 506    | crab-ground 506/1/0.032; fish-coral 305/8/0.298; fish-fish 17/2/0.026; fish-rock 308/10/0.932; fish-turtle 9/1/0.032; school-school 271/13/0.060                                                    | 111      | 0.131   | 763       | 0.090   | 903   |
+| p07     | 1250   | crab-ground 1250/1/0.032; fish-coral 615/12/0.401; fish-fish 53/3/0.050; fish-ground 323/4/0.253; fish-rock 602/16/0.868; mila-fish 67/4/0.131; school-school 921/28/0.064                          | 111      | 0.064   | 1679      | 0.001   | -     |
+| t07-08  | 361    | crab-ground 361/1/0.032; fish-coral 75/4/0.404; fish-fish 5/1/0.063; fish-rock 144/5/0.247; mila-school 7/2/0.092; school-school 96/7/0.047                                                         | 150      | 1.060   | 750       | 1.061   | 669   |
+| p08     | 1250   | crab-ground 1250/1/0.032; fish-coral 632/14/0.463; fish-fish 51/5/0.058; fish-ground 161/2/0.123; fish-rock 822/20/0.866; fish-turtle 38/1/0.078; mila-school 43/3/0.204; school-school 145/8/0.047 | 150      | 0.064   | 1680      | 0.001   | -     |
+| t08-09  | 358    | crab-ground 358/1/0.032; fish-coral 55/2/0.415; fish-ground 147/2/0.297; fish-rock 257/6/0.589; school-school 100/5/0.060                                                                           | 150      | 1.058   | 770       | 1.060   | 911   |
+| p09     | 1250   | crab-ground 1250/1/0.032; fish-coral 509/13/0.464; fish-fish 20/2/0.043; fish-ground 164/3/0.146; fish-rock 789/16/0.834; fish-turtle 59/1/0.105; mila-fish 25/1/0.127; school-school 566/25/0.056  | 150      | 0.064   | 1884      | 0.001   | -     |
+| t09-10  | 385    | crab-ground 385/1/0.032; fish-coral 165/4/0.468; fish-fish 56/4/0.072; fish-ground 80/1/0.255; fish-rock 101/4/0.835; fish-turtle 59/2/0.080; mila-school 19/6/0.203; school-school 206/11/0.050    | 150      | 0.184   | 633       | 0.133   | 302   |
+| p10     | 1251   | crab-ground 1251/1/0.032; fish-coral 566/14/0.416; fish-fish 83/6/0.089; fish-ground 269/4/0.219; fish-rock 797/16/0.760; school-school 567/27/0.059                                                | 150      | 0.064   | 1777      | 0.001   | -     |
+| t10-11  | 500    | crab-ground 500/1/0.032; fish-coral 97/4/0.382; fish-fish 28/3/0.089; fish-ground 178/1/0.218; fish-rock 360/11/0.687; fish-turtle 20/1/0.089; school-school 231/15/0.063                           | 150      | 0.121   | 813       | 0.068   | 520   |
+| p11     | 377    | crab-ground 377/1/0.032; fish-coral 280/11/0.373; fish-fish 5/1/0.062; fish-rock 137/7/0.828; school-school 113/6/0.049                                                                             | 150      | 0.172   | 561       | 0.152   | 348   |
+| t11-12  | 375    | crab-ground 375/1/0.032; fish-coral 20/2/0.057; fish-fish 55/3/0.082; fish-rock 288/10/0.673; fish-turtle 76/2/0.132; school-school 262/13/0.058                                                    | 150      | 0.198   | 582       | 0.150   | 582   |
+| p12     | 375    | crab-ground 375/1/0.032; fish-coral 216/7/0.414; fish-fish 15/2/0.021; fish-ground 2/1/0.022; fish-rock 235/7/0.490; school-school 122/9/0.056                                                      | 150      | 0.064   | 510       | 0.001   | -     |
+| b12-11  | 364    | crab-ground 364/1/0.032; fish-coral 278/6/0.470; fish-fish 50/5/0.083; fish-ground 60/1/0.104; fish-rock 290/8/0.816; school-school 78/7/0.052                                                      | 150      | 0.141   | 631       | 0.108   | 740   |
+| b11-10  | 375    | crab-ground 375/1/0.032; fish-coral 167/5/0.346; fish-fish 10/2/0.039; fish-rock 296/12/0.693; school-school 138/11/0.049                                                                           | 150      | 0.192   | 630       | 0.131   | 397   |
+| b10-09  | 369    | crab-ground 369/1/0.032; fish-coral 141/5/0.230; fish-ground 41/1/0.242; fish-rock 264/9/0.806; fish-turtle 51/1/0.128; mila-school 12/5/0.174; school-school 241/13/0.053                          | 150      | 0.101   | 613       | 0.071   | 396   |
+| b09-08  | 372    | crab-ground 372/1/0.032; fish-coral 122/5/0.363; fish-ground 105/2/0.304; fish-rock 161/5/0.915; mila-school 5/1/0.060; school-school 132/6/0.051                                                   | 150      | 1.064   | 868       | 1.064   | 1292  |
+| b08-07  | 372    | crab-ground 372/1/0.032; fish-coral 195/9/0.410; fish-ground 74/2/0.126; fish-rock 261/8/0.834; mila-school 1/1/0.033; school-school 130/9/0.053                                                    | 111      | 1.054   | 782       | 1.065   | 855   |
+| b07-06  | 369    | crab-ground 369/1/0.032; fish-coral 23/1/0.105; fish-ground 99/1/0.087; fish-rock 99/3/0.623; school-school 150/9/0.057                                                                             | 111      | 0.045   | -         | 0.016   | 13    |
+| b06-05  | 368    | crab-ground 368/1/0.032; fish-coral 94/4/0.454; fish-rock 42/1/0.107; school-school 17/1/0.045                                                                                                      | 111      | 0.065   | 4         | 0.028   | 54    |
+| b05-04  | 368    | crab-ground 368/1/0.032; fish-coral 153/3/0.422; fish-rock 176/3/0.377; fish-turtle 75/1/0.132; school-school 125/6/0.045                                                                           | 111      | 0.084   | 55        | 0.056   | 456   |
+| b04-03  | 366    | crab-ground 366/1/0.032; fish-coral 29/1/0.169; fish-rock 86/2/0.185; school-school 155/11/0.059                                                                                                    | 111      | 0.075   | 14        | 0.036   | 149   |
+| b03-02  | 370    | crab-ground 370/1/0.032; fish-coral 90/5/0.199; fish-ground 87/1/0.148; fish-rock 174/4/0.380; school-school 159/8/0.062                                                                            | 111      | 0.074   | 17        | 0.047   | 354   |
+| b02-01  | 369    | crab-ground 369/1/0.032; fish-coral 221/4/0.412; fish-rock 91/2/0.302; school-school 51/6/0.037                                                                                                     | 111      | 0.106   | 80        | 0.056   | 355   |
 
-Overlap cells: kind frames/distinct pairs/deepest m.
+## after desktop
 
-| segment | frames before | frames after | overlaps before                                                                                                                                                           | overlaps after | swimmers b/a | maxStep b/a   | fastSteps b/a | maxJolt b/a   | jolts b/a |
-| ------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------ | ------------- | ------------- | ------------- | --------- |
-| p01     | 375           | 375          | fish-coral 190/4/0.365; fish-rock 139/4/0.775; school-school 75/7/0.048                                                                                                   | none           | 111 / 111    | 0.042 / 0.042 | - / -         | 0.000 / 0.006 | - / -     |
-| t01-02  | 299           | 299          | fish-coral 31/1/0.126; fish-ground 31/1/0.033; fish-rock 75/3/0.739; school-school 121/9/0.062                                                                            | none           | 111 / 111    | 0.051 / 0.046 | 1 / -         | 0.028 / 0.009 | 38 / -    |
-| p02     | 375           | 375          | fish-coral 18/1/0.059; school-school 166/7/0.056                                                                                                                          | none           | 111 / 111    | 0.042 / 0.042 | - / -         | 0.000 / 0.009 | - / -     |
-| t02-03  | 299           | 297          | fish-coral 207/3/0.394; fish-rock 129/3/0.571; school-school 83/6/0.046                                                                                                   | none           | 111 / 111    | 0.042 / 0.042 | - / -         | 0.004 / 0.004 | - / -     |
-| p03     | 375           | 375          | fish-rock 142/3/0.568; school-school 193/9/0.061                                                                                                                          | none           | 111 / 111    | 0.042 / 0.046 | - / -         | 0.000 / 0.007 | - / -     |
-| t03-04  | 561           | 561          | fish-coral 52/3/0.153; fish-ground 111/1/0.274; fish-rock 73/2/0.391; school-school 180/9/0.057                                                                           | none           | 111 / 111    | 0.042 / 0.042 | - / -         | 0.005 / 0.005 | - / -     |
-| p04     | 375           | 375          | fish-coral 243/4/0.237; fish-rock 177/2/0.520; school-school 75/7/0.047                                                                                                   | none           | 111 / 111    | 0.043 / 0.042 | - / -         | 0.000 / 0.008 | - / -     |
-| t04-05  | 501           | 500          | fish-coral 67/4/0.221; fish-ground 108/1/0.093; fish-rock 81/2/0.593; school-school 345/12/0.058                                                                          | none           | 111 / 111    | 0.057 / 0.043 | 5 / -         | 0.040 / 0.013 | 107 / 10  |
-| p05     | 375           | 375          | fish-coral 81/2/0.460; fish-rock 59/1/0.122; school-school 357/13/0.062                                                                                                   | none           | 111 / 111    | 0.043 / 0.043 | - / -         | 0.000 / 0.005 | - / -     |
-| t05-06  | 468           | 466          | fish-coral 229/7/0.333; fish-rock 166/4/0.783; school-school 378/12/0.063                                                                                                 | none           | 111 / 111    | 0.055 / 0.045 | 1 / -         | 0.024 / 0.005 | 21 / -    |
-| p06     | 375           | 375          | fish-ground 46/1/0.056; school-school 315/13/0.061                                                                                                                        | none           | 111 / 111    | 0.042 / 0.042 | - / -         | 0.000 / 0.005 | - / -     |
-| t06-07  | 499           | 500          | fish-coral 306/8/0.229; fish-fish 17/3/0.045; fish-rock 321/11/1.226; fish-turtle 12/1/0.067; school-school 280/13/0.062                                                  | none           | 111 / 111    | 0.064 / 0.154 | 671 / 633     | 0.001 / 0.135 | - / 8     |
-| p07     | 1250          | 1250         | fish-coral 608/13/0.388; fish-fish 50/3/0.051; fish-ground 290/4/0.252; fish-rock 614/16/1.194; mila-fish 64/4/0.133; school-school 919/28/0.060                          | none           | 111 / 111    | 0.064 / 0.064 | 1696 / 1712   | 0.001 / 0.015 | - / 4     |
-| t07-08  | 362           | 362          | fish-coral 102/5/0.384; fish-fish 6/1/0.068; fish-rock 123/5/0.333; mila-fish 4/1/0.089; mila-school 16/1/0.219; school-school 107/7/0.052                                | none           | 150 / 150    | 1.063 / 0.080 | 720 / 462     | 1.063 / 0.079 | 257 / 117 |
-| p08     | 1250          | 1250         | fish-coral 614/15/0.434; fish-fish 48/5/0.060; fish-ground 155/2/0.115; fish-rock 826/21/1.056; fish-turtle 32/1/0.138; mila-school 42/3/0.219; school-school 154/8/0.056 | none           | 150 / 150    | 0.064 / 0.064 | 1672 / 1681   | 0.001 / 0.012 | - / 17    |
-| t08-09  | 362           | 362          | fish-coral 79/3/0.410; fish-ground 144/2/0.291; fish-rock 268/7/0.858; mila-school 5/1/0.038; school-school 101/5/0.056                                                   | none           | 150 / 150    | 1.056 / 0.064 | 623 / 556     | 1.056 / 0.040 | 251 / 151 |
-| p09     | 1250          | 1250         | fish-coral 492/14/0.392; fish-fish 19/2/0.040; fish-ground 154/3/0.138; fish-rock 769/16/1.186; fish-turtle 60/1/0.191; mila-fish 26/1/0.124; school-school 548/23/0.060  | none           | 150 / 150    | 0.064 / 0.064 | 1874 / 1906   | 0.001 / 0.011 | - / 6     |
-| t09-10  | 390           | 385          | fish-coral 184/4/0.453; fish-fish 57/4/0.073; fish-ground 75/1/0.252; fish-rock 120/5/1.036; fish-turtle 43/1/0.205; mila-school 12/3/0.220; school-school 216/12/0.048   | none           | 150 / 150    | 0.127 / 0.090 | 653 / 968     | 0.065 / 0.015 | 286 / 23  |
-| p10     | 1250          | 1250         | fish-coral 562/14/0.413; fish-fish 82/6/0.084; fish-ground 246/4/0.216; fish-rock 777/16/0.989; school-school 566/26/0.056                                                | none           | 150 / 150    | 0.064 / 0.065 | 1783 / 1797   | 0.001 / 0.018 | - / 20    |
-| t10-11  | 500           | 499          | fish-coral 110/6/0.366; fish-fish 19/3/0.085; fish-ground 175/1/0.205; fish-rock 357/11/0.925; fish-turtle 20/1/0.144; school-school 231/15/0.058                         | none           | 150 / 150    | 0.106 / 0.064 | 751 / 733     | 0.064 / 0.022 | 211 / 10  |
-| p11     | 375           | 375          | fish-coral 260/11/0.341; fish-fish 16/2/0.060; fish-rock 133/7/1.204; school-school 118/6/0.050                                                                           | none           | 150 / 150    | 0.064 / 0.064 | 511 / 519     | 0.001 / 0.013 | - / 4     |
-| t11-12  | 374           | 373          | fish-coral 45/4/0.177; fish-fish 47/3/0.085; fish-rock 284/11/0.973; fish-turtle 64/2/0.301; school-school 250/11/0.056                                                   | none           | 150 / 150    | 0.172 / 0.072 | 545 / 512     | 0.156 / 0.023 | 348 / 16  |
-| p12     | 375           | 375          | fish-coral 216/7/0.412; fish-fish 25/3/0.075; fish-rock 259/9/0.758; fish-turtle 7/1/0.130; school-school 141/11/0.062                                                    | none           | 150 / 150    | 0.064 / 0.064 | 530 / 556     | 0.001 / 0.012 | - / 6     |
-| b12-11  | 367           | 368          | fish-coral 258/6/0.458; fish-fish 53/5/0.084; fish-ground 59/1/0.098; fish-rock 270/7/1.146; school-school 70/6/0.054                                                     | none           | 150 / 150    | 0.064 / 0.068 | 576 / 591     | 0.001 / 0.016 | - / 8     |
-| b11-10  | 367           | 364          | fish-coral 161/5/0.290; fish-fish 10/2/0.046; fish-rock 287/11/1.149; school-school 132/12/0.049                                                                          | none           | 150 / 150    | 0.091 / 0.064 | 580 / 576     | 0.052 / 0.012 | 114 / 6   |
-| b10-09  | 369           | 366          | fish-coral 178/5/0.204; fish-ground 5/1/0.035; fish-rock 277/9/1.022; fish-turtle 50/1/0.251; mila-school 14/5/0.200; school-school 225/13/0.054                          | none           | 150 / 150    | 0.107 / 0.116 | 552 / 1103    | 0.067 / 0.091 | 171 / 117 |
-| b09-08  | 366           | 366          | fish-coral 80/4/0.346; fish-ground 119/1/0.301; fish-rock 185/6/1.221; school-school 119/7/0.053                                                                          | none           | 150 / 150    | 1.069 / 0.064 | 676 / 464     | 1.070 / 0.037 | 250 / 96  |
-| b08-07  | 365           | 366          | fish-coral 223/9/0.391; fish-ground 84/2/0.121; fish-rock 240/7/1.202; school-school 149/11/0.056                                                                         | none           | 111 / 111    | 1.054 / 0.064 | 531 / 430     | 1.066 / 0.038 | 180 / 91  |
-| b07-06  | 366           | 366          | fish-coral 24/1/0.078; fish-ground 79/1/0.089; fish-rock 99/3/0.743; school-school 129/8/0.057                                                                            | none           | 111 / 111    | 0.044 / 0.043 | - / -         | 0.010 / 0.006 | - / -     |
-| b06-05  | 366           | 366          | fish-coral 37/2/0.131; fish-ground 16/1/0.062; fish-rock 42/1/0.146; school-school 23/1/0.038                                                                             | none           | 111 / 111    | 0.042 / 0.043 | - / -         | 0.000 / 0.006 | - / -     |
-| b05-04  | 365           | 366          | fish-coral 217/4/0.424; fish-rock 178/3/0.500; fish-turtle 65/1/0.225; school-school 85/5/0.045                                                                           | none           | 111 / 111    | 0.043 / 0.043 | - / -         | 0.004 / 0.007 | - / -     |
-| b04-03  | 365           | 366          | fish-coral 30/1/0.123; fish-rock 86/2/0.199; school-school 206/13/0.059                                                                                                   | none           | 111 / 111    | 0.042 / 0.043 | - / -         | 0.000 / 0.005 | - / -     |
-| b03-02  | 365           | 365          | fish-coral 94/4/0.146; fish-ground 79/1/0.133; fish-rock 111/3/0.516; school-school 122/8/0.057                                                                           | none           | 111 / 111    | 0.043 / 0.043 | - / -         | 0.000 / 0.006 | - / -     |
-| b02-01  | 369           | 366          | fish-coral 210/4/0.342; fish-rock 161/3/0.420; school-school 83/7/0.048                                                                                                   | none           | 111 / 111    | 0.044 / 0.043 | - / -         | 0.010 / 0.006 | - / -     |
+Frames 16657; steepestGround 0.772; error None; rocks and corals counted {'rocks': 39, 'corals': 16}; renderer ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2).
+
+| pair kind          | measured | closest (m) |
+| ------------------ | -------- | ----------- |
+| mila-fish          | 909      | 0.384       |
+| mila-school        | 1424     | 0.345       |
+| mila-turtle        | 193      | 0.469       |
+| mila-crab          | 0        | -           |
+| mila-liveConch     | 0        | -           |
+| mila-pearl         | 0        | -           |
+| mila-bigConch      | 4360     | 0.192       |
+| mila-debris        | 0        | -           |
+| mila-rock          | 5        | 0.730       |
+| mila-coral         | 0        | -           |
+| mila-ground        | 8490     | 0.133       |
+| fish-fish          | 94913    | 0.009       |
+| fish-school        | 1478     | 0.038       |
+| fish-turtle        | 2362     | 0.155       |
+| fish-crab          | 0        | -           |
+| fish-liveConch     | 0        | -           |
+| fish-pearl         | 0        | -           |
+| fish-bigConch      | 0        | -           |
+| fish-debris        | 0        | -           |
+| fish-rock          | 20521    | 0.283       |
+| fish-coral         | 2840     | 0.450       |
+| fish-ground        | 92       | 0.071       |
+| school-school      | 6106890  | 0.020       |
+| school-turtle      | 0        | -           |
+| school-crab        | 0        | -           |
+| school-liveConch   | 0        | -           |
+| school-pearl       | 0        | -           |
+| school-bigConch    | 0        | -           |
+| school-debris      | 0        | -           |
+| school-rock        | 0        | -           |
+| school-coral       | 0        | -           |
+| school-ground      | 0        | -           |
+| turtle-crab        | 0        | -           |
+| turtle-liveConch   | 0        | -           |
+| turtle-pearl       | 0        | -           |
+| turtle-bigConch    | 0        | -           |
+| turtle-debris      | 0        | -           |
+| turtle-rock        | 0        | -           |
+| turtle-coral       | 0        | -           |
+| turtle-ground      | 0        | -           |
+| crab-liveConch     | 0        | -           |
+| crab-pearl         | 0        | -           |
+| crab-bigConch      | 0        | -           |
+| crab-debris        | 5357     | 0.254       |
+| crab-rock          | 0        | -           |
+| crab-coral         | 0        | -           |
+| crab-ground        | 16657    | 0.008       |
+| liveConch-pearl    | 0        | -           |
+| liveConch-bigConch | 0        | -           |
+| liveConch-debris   | 0        | -           |
+| liveConch-rock     | 0        | -           |
+| liveConch-coral    | 0        | -           |
+| liveConch-ground   | 16657    | -0.008      |
+
+Overlap table (deeper than the tolerance), summed over segments:
+
+| pair kind | frames with an overlap | distinct pairs | deepest (m) | at segment |
+| --------- | ---------------------- | -------------- | ----------- | ---------- |
+| none      | 0                      | 0              | -           | -          |
+
+Per segment (overlapping kinds as kind frames/distinct pairs/deepest m; fish figures: swimmers, maxStep m, fastSteps, maxJolt m, jolts). Caveat: during page turns the script advances the fake clock in uneven pieces, so step and jolt figures of the t and b segments are inflated on both builds; the page segments (p07 to p10) are the clean ones.
+
+| segment | frames | overlaps | swimmers | maxStep | fastSteps | maxJolt | jolts |
+| ------- | ------ | -------- | -------- | ------- | --------- | ------- | ----- |
+| p01     | 375    | none     | 175      | 0.055   | 302       | 0.011   | 2     |
+| t01-02  | 300    | none     | 175      | 0.071   | 186       | 0.044   | 167   |
+| p02     | 375    | none     | 175      | 0.054   | 271       | 0.007   | -     |
+| t02-03  | 299    | none     | 175      | 0.096   | 203       | 0.055   | 207   |
+| p03     | 375    | none     | 175      | 0.055   | 294       | 0.011   | 2     |
+| t03-04  | 563    | none     | 175      | 0.072   | 386       | 0.032   | 203   |
+| p04     | 375    | none     | 175      | 0.054   | 270       | 0.006   | -     |
+| t04-05  | 500    | none     | 175      | 0.085   | 437       | 0.063   | 231   |
+| p05     | 375    | none     | 175      | 0.054   | 269       | 0.010   | 2     |
+| t05-06  | 466    | none     | 175      | 0.106   | 362       | 0.058   | 294   |
+| p06     | 375    | none     | 175      | 0.055   | 296       | 0.006   | -     |
+| t06-07  | 497    | none     | 175      | 0.097   | 1139      | 0.047   | 207   |
+| p07     | 1250   | none     | 175      | 0.061   | 2803      | 0.018   | 28    |
+| t07-08  | 361    | none     | 240      | 0.080   | 790       | 0.072   | 377   |
+| p08     | 1250   | none     | 240      | 0.063   | 2724      | 0.022   | 18    |
+| t08-09  | 362    | none     | 240      | 0.117   | 971       | 0.081   | 496   |
+| p09     | 1250   | none     | 240      | 0.062   | 3118      | 0.015   | 4     |
+| t09-10  | 386    | none     | 240      | 0.086   | 1562      | 0.032   | 212   |
+| p10     | 1250   | none     | 240      | 0.061   | 2807      | 0.019   | 11    |
+| t10-11  | 498    | none     | 240      | 0.079   | 1197      | 0.051   | 415   |
+| p11     | 375    | none     | 240      | 0.060   | 862       | 0.019   | 4     |
+| t11-12  | 375    | none     | 240      | 0.094   | 856       | 0.073   | 424   |
+| p12     | 375    | none     | 240      | 0.060   | 893       | 0.012   | 4     |
+| b12-11  | 371    | none     | 240      | 0.141   | 1013      | 0.088   | 1300  |
+| b11-10  | 369    | none     | 240      | 0.100   | 941       | 0.070   | 621   |
+| b10-09  | 369    | none     | 240      | 0.126   | 1647      | 0.080   | 850   |
+| b09-08  | 368    | none     | 240      | 0.077   | 842       | 0.047   | 426   |
+| b08-07  | 368    | none     | 175      | 0.096   | 927       | 0.062   | 641   |
+| b07-06  | 369    | none     | 175      | 0.101   | 316       | 0.077   | 470   |
+| b06-05  | 367    | none     | 175      | 0.077   | 280       | 0.056   | 195   |
+| b05-04  | 368    | none     | 175      | 0.067   | 245       | 0.035   | 56    |
+| b04-03  | 367    | none     | 175      | 0.069   | 184       | 0.036   | 105   |
+| b03-02  | 367    | none     | 175      | 0.087   | 231       | 0.060   | 194   |
+| b02-01  | 367    | none     | 175      | 0.092   | 318       | 0.054   | 255   |
+
+## after mobile
+
+Frames 16661; steepestGround 0.772; error None; rocks and corals counted {'rocks': 39, 'corals': 16}; renderer ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2).
+
+| pair kind          | measured | closest (m) |
+| ------------------ | -------- | ----------- |
+| mila-fish          | 1228     | 0.339       |
+| mila-school        | 1000     | 0.404       |
+| mila-turtle        | 192      | 0.469       |
+| mila-crab          | 0        | -           |
+| mila-liveConch     | 0        | -           |
+| mila-pearl         | 0        | -           |
+| mila-bigConch      | 4355     | 0.203       |
+| mila-debris        | 0        | -           |
+| mila-rock          | 11       | 0.704       |
+| mila-coral         | 0        | -           |
+| mila-ground        | 8490     | 0.133       |
+| fish-fish          | 40625    | 0.012       |
+| fish-school        | 115      | 0.201       |
+| fish-turtle        | 2021     | 0.142       |
+| fish-crab          | 0        | -           |
+| fish-liveConch     | 0        | -           |
+| fish-pearl         | 0        | -           |
+| fish-bigConch      | 0        | -           |
+| fish-debris        | 0        | -           |
+| fish-rock          | 20516    | 0.190       |
+| fish-coral         | 3458     | 0.428       |
+| fish-ground        | 67       | 0.089       |
+| school-school      | 2800191  | 0.037       |
+| school-turtle      | 0        | -           |
+| school-crab        | 0        | -           |
+| school-liveConch   | 0        | -           |
+| school-pearl       | 0        | -           |
+| school-bigConch    | 0        | -           |
+| school-debris      | 0        | -           |
+| school-rock        | 0        | -           |
+| school-coral       | 0        | -           |
+| school-ground      | 0        | -           |
+| turtle-crab        | 0        | -           |
+| turtle-liveConch   | 0        | -           |
+| turtle-pearl       | 0        | -           |
+| turtle-bigConch    | 0        | -           |
+| turtle-debris      | 0        | -           |
+| turtle-rock        | 0        | -           |
+| turtle-coral       | 0        | -           |
+| turtle-ground      | 0        | -           |
+| crab-liveConch     | 0        | -           |
+| crab-pearl         | 0        | -           |
+| crab-bigConch      | 0        | -           |
+| crab-debris        | 5367     | 0.254       |
+| crab-rock          | 0        | -           |
+| crab-coral         | 0        | -           |
+| crab-ground        | 16661    | 0.008       |
+| liveConch-pearl    | 0        | -           |
+| liveConch-bigConch | 0        | -           |
+| liveConch-debris   | 0        | -           |
+| liveConch-rock     | 0        | -           |
+| liveConch-coral    | 16661    | 0.674       |
+| liveConch-ground   | 16661    | -0.008      |
+
+Overlap table (deeper than the tolerance), summed over segments:
+
+| pair kind | frames with an overlap | distinct pairs | deepest (m) | at segment |
+| --------- | ---------------------- | -------------- | ----------- | ---------- |
+| none      | 0                      | 0              | -           | -          |
+
+Per segment (overlapping kinds as kind frames/distinct pairs/deepest m; fish figures: swimmers, maxStep m, fastSteps, maxJolt m, jolts). Caveat: during page turns the script advances the fake clock in uneven pieces, so step and jolt figures of the t and b segments are inflated on both builds; the page segments (p07 to p10) are the clean ones.
+
+| segment | frames | overlaps | swimmers | maxStep | fastSteps | maxJolt | jolts |
+| ------- | ------ | -------- | -------- | ------- | --------- | ------- | ----- |
+| p01     | 375    | none     | 111      | 0.042   | -         | 0.006   | -     |
+| t01-02  | 299    | none     | 111      | 0.063   | 5         | 0.049   | 129   |
+| p02     | 375    | none     | 111      | 0.042   | -         | 0.009   | -     |
+| t02-03  | 299    | none     | 111      | 0.043   | -         | 0.008   | -     |
+| p03     | 375    | none     | 111      | 0.046   | -         | 0.007   | -     |
+| t03-04  | 562    | none     | 111      | 0.072   | 8         | 0.057   | 148   |
+| p04     | 375    | none     | 111      | 0.042   | -         | 0.007   | -     |
+| t04-05  | 503    | none     | 111      | 0.045   | -         | 0.019   | 16    |
+| p05     | 375    | none     | 111      | 0.043   | -         | 0.005   | -     |
+| t05-06  | 466    | none     | 111      | 0.079   | 13        | 0.058   | 238   |
+| p06     | 375    | none     | 111      | 0.042   | -         | 0.006   | -     |
+| t06-07  | 501    | none     | 111      | 0.068   | 645       | 0.050   | 124   |
+| p07     | 1250   | none     | 111      | 0.064   | 1718      | 0.017   | 4     |
+| t07-08  | 362    | none     | 150      | 0.092   | 460       | 0.077   | 124   |
+| p08     | 1250   | none     | 150      | 0.064   | 1675      | 0.015   | 13    |
+| t08-09  | 361    | none     | 150      | 0.098   | 599       | 0.081   | 512   |
+| p09     | 1250   | none     | 150      | 0.064   | 1905      | 0.013   | 8     |
+| t09-10  | 385    | none     | 150      | 0.157   | 1005      | 0.123   | 334   |
+| p10     | 1250   | none     | 150      | 0.065   | 1802      | 0.016   | 21    |
+| t10-11  | 502    | none     | 150      | 0.078   | 739       | 0.043   | 116   |
+| p11     | 375    | none     | 150      | 0.064   | 519       | 0.012   | 4     |
+| t11-12  | 375    | none     | 150      | 0.092   | 521       | 0.048   | 107   |
+| p12     | 375    | none     | 150      | 0.064   | 544       | 0.011   | 4     |
+| b12-11  | 366    | none     | 150      | 0.078   | 596       | 0.043   | 140   |
+| b11-10  | 372    | none     | 150      | 0.107   | 601       | 0.087   | 249   |
+| b10-09  | 369    | none     | 150      | 0.123   | 1164      | 0.094   | 204   |
+| b09-08  | 367    | none     | 150      | 0.075   | 458       | 0.037   | 164   |
+| b08-07  | 369    | none     | 111      | 0.075   | 445       | 0.036   | 166   |
+| b07-06  | 366    | none     | 111      | 0.045   | -         | 0.014   | 10    |
+| b06-05  | 367    | none     | 111      | 0.048   | -         | 0.019   | 16    |
+| b05-04  | 368    | none     | 111      | 0.053   | 1         | 0.021   | 43    |
+| b04-03  | 367    | none     | 111      | 0.042   | -         | 0.012   | 2     |
+| b03-02  | 368    | none     | 111      | 0.065   | 5         | 0.050   | 131   |
+| b02-01  | 367    | none     | 111      | 0.082   | 14        | 0.047   | 178   |
 
 ## Boards of worst frames (what they show)
 
-Files: Q/boards-o4/clearance-desktop.png and clearance-mobile.png (4 columns: before frame, after frame at the same segment and frame number, ringed at the same place; two deepest segments per pair kind present before; the selection is in the left column labels). Sources: Q/o4/clr-before/worst/_.jpg and Q/o4/clr-after/same/_.jpg. Looked at all desktop and mobile pairs.
+Files: Q/boards-c2/clearance-desktop.png (10 pairs) and clearance-mobile.png (9 pairs); each pair is the before frame at its deepest segment for a kind that overlapped before (mila-* kinds first), beside the after frame at the same segment and frame number, ringed at the same place. Sources: Q/c2/clr-before/worst/_.jpg and Q/c2/clr-after/same/_.jpg. I looked at both layouts in full and at three pairs enlarged.
 
-- mila-fish and mila-school (desktop p09, t08-09, b10-09, t09-10; mobile p07, p09, t09-10, p08): before, the ring sits on Mila's head, dress or body with a fish visibly overlapping her (a yellow fish at her head on p09, fish crossing her dress on t09-10 and b10-09, a fish over her dress on mobile p07). After, at the same instant the ringed place shows Mila alone: the school or fish are beside or around her, none on her. In desktop b10-09 the school opens around her where it covered her before.
-- fish-fish and school-school: before, two or more fish share a place in the ring on t10-11 (desktop), b07-06 (desktop, a yellow fish covers Mila's face in the before frame) and p09. On the t10-11, t11-12 and t05-06/p05 frames (page 11, 12 and 5-6, above the water) the ringed place is not visible in the picture in either build (the overlapping fish are under the water surface or hidden), so the pair shows nothing different. After: the same instants show separate fish or none in view.
-- fish-school (desktop p08): ring at the top right shows two fish touching before; after the two are apart.
-- fish-turtle (desktop b11-10, b08-07; mobile t11-12, b10-09): the overlap is not visible in the before frames (fish and turtle are out of view or hidden at those instants); the after frames show nothing at the place either.
-- fish-rock, fish-coral and fish-ground (desktop p09, t10-11, t08-09, p10; mobile t06-07, b09-08, p05, b12-11, t08-09): in most before frames the ring is on open water or on a place where the rock, coral or ground hides the fish, so the overlap cannot be seen in the picture; desktop p09 fish-ground ringed at Mila's wand light shows nothing identifiable in the before frame or in the after frame (the ring is on the bright light of the wand).
-- Nothing in any after frame looks like a fish inside Mila, a rock, a coral or another fish. In the after frames the pearl and conch region differs from before because of the O5 conch change, not because of fish.
-- Limits: a frame is one instant; the check is on proxies (capsules, flattened spheres), not the exact meshes, and tail fins are left out (see proxies).
+- mila-fish (desktop p09, mobile p07): before, a fish is inside Mila (a yellow-green fish through her head on desktop, enlarged; a blue fish through her dress on mobile, enlarged). After, at the same instant the ringed place shows Mila alone, no fish.
+- mila-school (desktop b10-09, mobile p08): before, the school crosses her head and body; after, the ringed place is clear and the school is around her.
+- school-school (desktop b08-07: a large yellow fish covers her face before; mobile p07): after, no fish on her. In the mobile p07 after frame (a different instant from the ringed one) two blue fish sit just above and behind her dress, beside it and not inside it (looked at enlarged).
+- fish-school p08 (desktop): the ringed place is a fish by a light before, and a single fish at the same place after; no two fish share a place in the after frame.
+- crab-ground p06 (desktop and mobile), fish-coral, fish-fish (t10-11), fish-ground, fish-rock, fish-turtle: the overlap is not visible in the before frame (the crab, coral, rock, ground or turtle are out of view, hidden or too small, or the fish is below the surface of the ground), so those pairs show nothing different in the pictures; the numbers are the evidence for them.
+- Nothing in any after frame looks like a fish inside Mila, a rock, a coral or another fish.
+- Limits: one instant per pair; stand-in shapes (capsules, ellipsoids), not the exact meshes; tail fins left out.
