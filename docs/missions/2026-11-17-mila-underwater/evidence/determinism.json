@@ -1,0 +1,60 @@
+{
+  "baseline": {
+    "files": [
+      "/home/xgueret/.local/share/contes-creole-qa/mila-underwater/baseline-det/determinism/desktop-p07-a.png",
+      "/home/xgueret/.local/share/contes-creole-qa/mila-underwater/baseline-det/determinism/desktop-p07-b.png",
+      "/home/xgueret/.local/share/contes-creole-qa/mila-underwater/baseline-det/determinism/desktop-p07-c.png"
+    ],
+    "pairs": [
+      {
+        "pair": "a-b",
+        "identical": true,
+        "mae": "0 (0)"
+      },
+      {
+        "pair": "a-c",
+        "identical": false,
+        "mae": "110.864 (0.00169167)"
+      },
+      {
+        "pair": "b-c",
+        "identical": false,
+        "mae": "110.864 (0.00169167)"
+      }
+    ],
+    "sha": [
+      "80621374ef77748815d95471228b694d11f9f4255033374016b835dc03b442e7",
+      "80621374ef77748815d95471228b694d11f9f4255033374016b835dc03b442e7",
+      "70f1135538d7b88443bbdc7e9e6b92c38e0ca9197d5108375db2782bf97da4cf"
+    ]
+  },
+  "final": {
+    "files": [
+      "/home/xgueret/.local/share/contes-creole-qa/mila-underwater/final-det/determinism/desktop-p07-a.png",
+      "/home/xgueret/.local/share/contes-creole-qa/mila-underwater/final-det/determinism/desktop-p07-b.png",
+      "/home/xgueret/.local/share/contes-creole-qa/mila-underwater/final-det/determinism/desktop-p07-c.png"
+    ],
+    "pairs": [
+      {
+        "pair": "a-b",
+        "identical": false,
+        "mae": "74.2432 (0.00113288)"
+      },
+      {
+        "pair": "a-c",
+        "identical": false,
+        "mae": "74.2432 (0.00113288)"
+      },
+      {
+        "pair": "b-c",
+        "identical": true,
+        "mae": "0 (0)"
+      }
+    ],
+    "sha": [
+      "256b8e4aa6f8768f7e80bcdb21ae200b911bba0ff22edc0c27081e31ae291d3a",
+      "629e4ffe4806e1fb894ac3242ef17196178eafa7fc69adb2c77ad4a80c90c3db",
+      "629e4ffe4806e1fb894ac3242ef17196178eafa7fc69adb2c77ad4a80c90c3db"
+    ]
+  }
+}

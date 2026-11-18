@@ -1,0 +1,470 @@
+{
+  "baseline": {
+    "label": "baseline-d60c1a6",
+    "date": "2026-11-18T01:21:39.396Z",
+    "cycles": [
+      {
+        "cycle": 1,
+        "inTalePage8": {
+          "contextsCreated": 1,
+          "contextsLost": 0,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 865,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 15.58,
+            "totalMB": 17.84
+          }
+        },
+        "onTree": {
+          "contextsCreated": 1,
+          "contextsLost": 1,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 10.09,
+            "totalMB": 12.59
+          }
+        }
+      },
+      {
+        "cycle": 2,
+        "inTalePage8": {
+          "contextsCreated": 2,
+          "contextsLost": 1,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 865,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 16.33,
+            "totalMB": 18.84
+          }
+        },
+        "onTree": {
+          "contextsCreated": 2,
+          "contextsLost": 2,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 10.39,
+            "totalMB": 12.84
+          }
+        }
+      },
+      {
+        "cycle": 3,
+        "inTalePage8": {
+          "contextsCreated": 3,
+          "contextsLost": 2,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 865,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 16.94,
+            "totalMB": 18.59
+          }
+        },
+        "onTree": {
+          "contextsCreated": 3,
+          "contextsLost": 3,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 10.67,
+            "totalMB": 12.84
+          }
+        }
+      },
+      {
+        "cycle": 4,
+        "inTalePage8": {
+          "contextsCreated": 4,
+          "contextsLost": 3,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 865,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 17.54,
+            "totalMB": 19.34
+          }
+        },
+        "onTree": {
+          "contextsCreated": 4,
+          "contextsLost": 4,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 10.9,
+            "totalMB": 13.84
+          }
+        }
+      },
+      {
+        "cycle": 5,
+        "inTalePage8": {
+          "contextsCreated": 5,
+          "contextsLost": 4,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 865,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 18.08,
+            "totalMB": 19.59
+          }
+        },
+        "onTree": {
+          "contextsCreated": 5,
+          "contextsLost": 5,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 11.13,
+            "totalMB": 13.59
+          }
+        }
+      },
+      {
+        "cycle": 6,
+        "inTalePage8": {
+          "contextsCreated": 6,
+          "contextsLost": 5,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 865,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 18.72,
+            "totalMB": 20.84
+          }
+        },
+        "onTree": {
+          "contextsCreated": 6,
+          "contextsLost": 6,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 11.45,
+            "totalMB": 14.09
+          }
+        }
+      }
+    ]
+  },
+  "after": {
+    "label": "final-3d09931",
+    "date": "2026-11-18T08:01:27.874Z",
+    "cycles": [
+      {
+        "cycle": 1,
+        "inTalePage8": {
+          "contextsCreated": 1,
+          "contextsLost": 0,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 14.59,
+            "totalMB": 16.34
+          }
+        },
+        "onTree": {
+          "contextsCreated": 1,
+          "contextsLost": 1,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 10.17,
+            "totalMB": 11.84
+          }
+        }
+      },
+      {
+        "cycle": 2,
+        "inTalePage8": {
+          "contextsCreated": 2,
+          "contextsLost": 1,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 15.12,
+            "totalMB": 17.34
+          }
+        },
+        "onTree": {
+          "contextsCreated": 2,
+          "contextsLost": 2,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 10.51,
+            "totalMB": 12.34
+          }
+        }
+      },
+      {
+        "cycle": 3,
+        "inTalePage8": {
+          "contextsCreated": 3,
+          "contextsLost": 2,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 15.53,
+            "totalMB": 16.84
+          }
+        },
+        "onTree": {
+          "contextsCreated": 3,
+          "contextsLost": 3,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 10.81,
+            "totalMB": 13.34
+          }
+        }
+      },
+      {
+        "cycle": 4,
+        "inTalePage8": {
+          "contextsCreated": 4,
+          "contextsLost": 3,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 15.95,
+            "totalMB": 17.59
+          }
+        },
+        "onTree": {
+          "contextsCreated": 4,
+          "contextsLost": 4,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 11.05,
+            "totalMB": 13.34
+          }
+        }
+      },
+      {
+        "cycle": 5,
+        "inTalePage8": {
+          "contextsCreated": 5,
+          "contextsLost": 4,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 16.3,
+            "totalMB": 18.09
+          }
+        },
+        "onTree": {
+          "contextsCreated": 5,
+          "contextsLost": 5,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 11.28,
+            "totalMB": 13.84
+          }
+        }
+      },
+      {
+        "cycle": 6,
+        "inTalePage8": {
+          "contextsCreated": 6,
+          "contextsLost": 5,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "heap": {
+            "usedMB": 16.65,
+            "totalMB": 18.09
+          }
+        },
+        "onTree": {
+          "contextsCreated": 6,
+          "contextsLost": 6,
+          "contextsCollected": 0,
+          "liveGl": {
+            "textures": 0,
+            "buffers": 0,
+            "vertexArrays": 0,
+            "programs": 0,
+            "framebuffers": 0,
+            "renderbuffers": 0
+          },
+          "heap": {
+            "usedMB": 11.49,
+            "totalMB": 13.84
+          }
+        }
+      }
+    ]
+  },
+  "slopes": {
+    "baseline": {
+      "inTaleSlope": 0.616,
+      "onTreeSlope": 0.264,
+      "onTreeFirstLast": 1.36
+    },
+    "final": {
+      "inTaleSlope": 0.407,
+      "onTreeSlope": 0.261,
+      "onTreeFirstLast": 1.32
+    }
+  }
+}

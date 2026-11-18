@@ -1,0 +1,441 @@
+{
+  "journey": {
+    "label": "c1-1638c4c",
+    "date": "2026-11-18T11:07:49.865Z",
+    "viewports": {
+      "desktop": {
+        "steps": [
+          {
+            "name": "open-page-1",
+            "ok": true,
+            "detail": "2841 ms"
+          },
+          {
+            "name": "next-to-02",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-03",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-04",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-05",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-12",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-07",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-09",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "back-to-tree",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "reopen",
+            "ok": true,
+            "detail": ""
+          }
+        ],
+        "failedSteps": [],
+        "console": [
+          {
+            "type": "error",
+            "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "url": "http://localhost:4197/favicon.ico",
+            "page": 0
+          },
+          {
+            "type": "error",
+            "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "url": "http://localhost:4197/favicon.ico",
+            "page": 1
+          }
+        ],
+        "passed": true
+      },
+      "mobile": {
+        "steps": [
+          {
+            "name": "open-page-1",
+            "ok": true,
+            "detail": "2646 ms"
+          },
+          {
+            "name": "next-to-02",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-03",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-04",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-05",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-12",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-07",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-09",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "back-to-tree",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "reopen",
+            "ok": true,
+            "detail": ""
+          }
+        ],
+        "failedSteps": [],
+        "console": [
+          {
+            "type": "error",
+            "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "url": "http://localhost:4197/favicon.ico",
+            "page": 1
+          }
+        ],
+        "passed": true
+      }
+    },
+    "passed": true
+  },
+  "regress": {
+    "baseline": {
+      "mila": {
+        "summary": "143/150 checks passed",
+        "fails": [
+          "FAIL desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL keys no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-nav": {
+        "summary": "87/110 checks passed",
+        "fails": [
+          "FAIL survey-mila-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile swipe",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-lang": {
+        "summary": "48/60 checks passed",
+        "fails": [
+          "FAIL text no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL scene no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL session no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      }
+    },
+    "c1": {
+      "mila": {
+        "summary": "143/150 checks passed",
+        "fails": [
+          "FAIL desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL keys no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-nav": {
+        "summary": "87/110 checks passed",
+        "fails": [
+          "FAIL survey-mila-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile swipe",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-lang": {
+        "summary": "48/60 checks passed",
+        "fails": [
+          "FAIL text no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL scene no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL session no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      }
+    }
+  },
+  "trans": {
+    "label": "c1-1638c4c",
+    "date": "2026-11-18T11:14:11.270Z",
+    "viewports": {
+      "desktop": [
+        {
+          "6-7": 7647,
+          "7-8": 5431,
+          "8-9": 5430,
+          "9-10": 5847,
+          "10-11": 7647
+        },
+        {
+          "6-7": 7647,
+          "7-8": 5445,
+          "8-9": 5447,
+          "9-10": 5845,
+          "10-11": 7647
+        }
+      ],
+      "mobile": [
+        {
+          "6-7": 7684,
+          "7-8": 5479,
+          "8-9": 5479,
+          "9-10": 5880,
+          "10-11": 7681
+        },
+        {
+          "6-7": 7679,
+          "7-8": 5479,
+          "8-9": 5481,
+          "9-10": 5879,
+          "10-11": 7681
+        }
+      ]
+    }
+  }
+}

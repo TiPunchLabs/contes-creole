@@ -1,0 +1,3112 @@
+{
+  "journey": {
+    "label": "o-f645de0",
+    "date": "2026-11-18T09:34:59.842Z",
+    "viewports": {
+      "desktop": {
+        "steps": [
+          {
+            "name": "open-page-1",
+            "ok": true,
+            "detail": "2836 ms"
+          },
+          {
+            "name": "next-to-02",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-03",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-04",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-05",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-12",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-07",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-09",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "back-to-tree",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "reopen",
+            "ok": true,
+            "detail": ""
+          }
+        ],
+        "failedSteps": [],
+        "console": [
+          {
+            "type": "error",
+            "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "url": "http://localhost:4197/favicon.ico",
+            "page": 0
+          },
+          {
+            "type": "error",
+            "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "url": "http://localhost:4197/favicon.ico",
+            "page": 1
+          }
+        ],
+        "passed": true
+      },
+      "mobile": {
+        "steps": [
+          {
+            "name": "open-page-1",
+            "ok": true,
+            "detail": "2688 ms"
+          },
+          {
+            "name": "next-to-02",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-03",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-04",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-05",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "next-to-12",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-11",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-09",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-07",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "prev-to-06",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-07",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-08",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "forward-to-09",
+            "ok": true,
+            "detail": "story lang after fr switch: fr"
+          },
+          {
+            "name": "forward-to-10",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "back-to-tree",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "reopen",
+            "ok": true,
+            "detail": ""
+          }
+        ],
+        "failedSteps": [],
+        "console": [
+          {
+            "type": "error",
+            "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "url": "http://localhost:4197/favicon.ico",
+            "page": 1
+          }
+        ],
+        "passed": true
+      }
+    },
+    "passed": true
+  },
+  "regress": {
+    "baseline": {
+      "mila": {
+        "summary": "143/150 checks passed",
+        "fails": [
+          "FAIL desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL keys no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-nav": {
+        "summary": "87/110 checks passed",
+        "fails": [
+          "FAIL survey-mila-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile swipe",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-lang": {
+        "summary": "48/60 checks passed",
+        "fails": [
+          "FAIL text no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL scene no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL session no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      }
+    },
+    "o": {
+      "mila": {
+        "summary": "143/150 checks passed",
+        "fails": [
+          "FAIL desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL keys no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-nav": {
+        "summary": "87/110 checks passed",
+        "fails": [
+          "FAIL survey-mila-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-laptop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-tablet no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-mila-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL survey-kannot-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL journey-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL rapid-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL crab-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL swipe-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot-mobile swipe",
+          "FAIL kannot-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      },
+      "mila-lang": {
+        "summary": "48/60 checks passed",
+        "fails": [
+          "FAIL text no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found) | console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL scene no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL flight-reduced no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL session no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-desktop no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-mobile no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL layout-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-narrow no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL overflow-landscape no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "FAIL kannot no-errors \u2014 console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ]
+      }
+    }
+  },
+  "trans": {
+    "label": "o-f645de0",
+    "date": "2026-11-18T09:41:21.706Z",
+    "viewports": {
+      "desktop": [
+        {
+          "6-7": 7644,
+          "7-8": 5447,
+          "8-9": 5445,
+          "9-10": 5847,
+          "10-11": 7647
+        },
+        {
+          "6-7": 7631,
+          "7-8": 5447,
+          "8-9": 5431,
+          "9-10": 5846,
+          "10-11": 7646
+        }
+      ],
+      "mobile": [
+        {
+          "6-7": 7677,
+          "7-8": 5480,
+          "8-9": 5464,
+          "9-10": 5864,
+          "10-11": 7678
+        },
+        {
+          "6-7": 7678,
+          "7-8": 5480,
+          "8-9": 5464,
+          "9-10": 5880,
+          "10-11": 7681
+        }
+      ]
+    }
+  },
+  "links": {
+    "label": "o-f645de0",
+    "date": "2026-11-18T10:24:09.076Z",
+    "headed": true,
+    "linksBeforePage1Shown": 97,
+    "linksAfterPage1Shown": 0,
+    "perPage": {},
+    "links": []
+  },
+  "perf": {
+    "baseline": {
+      "label": "baseline-d60c1a6",
+      "date": "2026-11-18T10:25:52.465Z",
+      "headed": true,
+      "renderer": "ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2)",
+      "browser": "chromium 157.0.8103.78",
+      "cpuThrottle": 0,
+      "passes": {
+        "uncapped.desktop": {
+          "launchFlags": [
+            "--enable-gpu",
+            "--ignore-gpu-blocklist",
+            "--use-gl=angle",
+            "--use-angle=gl-egl",
+            "--disable-gpu-vsync",
+            "--disable-frame-rate-limit"
+          ],
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "deviceScaleFactor": 1,
+          "runs": [
+            {
+              "coldLoad": {
+                "gotoToLoaderDoneMs": 2096,
+                "openPressToPage1Ms": 2599,
+                "gotoToPage1Ms": 9134,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "warmLoad": {
+                "gotoToLoaderDoneMs": 1986,
+                "openPressToPage1Ms": 2325,
+                "gotoToPage1Ms": 8740,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "transition6to7": {
+                "frames": 3835,
+                "seconds": 7.7,
+                "medianFps": 666.67,
+                "meanFps": 496.77,
+                "p95Ms": 2.7,
+                "p99Ms": 18.3,
+                "maxMs": 53.9,
+                "over33ms": 7,
+                "over50ms": 2,
+                "drawCalls": 258.1,
+                "triangles": 673273
+              },
+              "page7": {
+                "frames": 10251,
+                "seconds": 20,
+                "medianFps": 625,
+                "meanFps": 512.54,
+                "p95Ms": 2.3,
+                "p99Ms": 12.1,
+                "maxMs": 54.2,
+                "over33ms": 24,
+                "over50ms": 9,
+                "drawCalls": 290.7,
+                "triangles": 695229,
+                "liveGl": {
+                  "textures": 40,
+                  "buffers": 2308,
+                  "vertexArrays": 808,
+                  "programs": 101,
+                  "framebuffers": 19,
+                  "renderbuffers": 6
+                },
+                "contexts": 1,
+                "quality": null,
+                "page": 7
+              },
+              "canvas": {
+                "width": 1440,
+                "height": 900,
+                "cssWidth": 1440,
+                "cssHeight": 900,
+                "dpr": 1,
+                "effectivePixelRatio": 1
+              },
+              "page9": {
+                "frames": 8263,
+                "seconds": 20,
+                "medianFps": 416.67,
+                "meanFps": 413.11,
+                "p95Ms": 2.8,
+                "p99Ms": 3.2,
+                "maxMs": 6.7,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 582.1,
+                "triangles": 759544,
+                "liveGl": {
+                  "textures": 40,
+                  "buffers": 2308,
+                  "vertexArrays": 1062,
+                  "programs": 101,
+                  "framebuffers": 19,
+                  "renderbuffers": 6
+                },
+                "contexts": 1,
+                "quality": null,
+                "page": 9
+              },
+              "transitionsAll": {
+                "frames": 16038,
+                "seconds": 32.2,
+                "medianFps": 588.24,
+                "meanFps": 497.81,
+                "p95Ms": 2.6,
+                "p99Ms": 12,
+                "maxMs": 71,
+                "over33ms": 22,
+                "over50ms": 7,
+                "drawCalls": 326.3,
+                "triangles": 711537
+              },
+              "transitionsUnderwater": {
+                "frames": 8050,
+                "seconds": 16.8,
+                "medianFps": 555.56,
+                "meanFps": 478.3,
+                "p95Ms": 2.7,
+                "p99Ms": 8.9,
+                "maxMs": 71,
+                "over33ms": 10,
+                "over50ms": 4,
+                "drawCalls": 380.3,
+                "triangles": 829020
+              },
+              "wallSeconds": 131
+            }
+          ],
+          "median": {
+            "coldLoad": {
+              "gotoToLoaderDoneMs": 2096,
+              "openPressToPage1Ms": 2599,
+              "gotoToPage1Ms": 9134,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "warmLoad": {
+              "gotoToLoaderDoneMs": 1986,
+              "openPressToPage1Ms": 2325,
+              "gotoToPage1Ms": 8740,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "transition6to7": {
+              "frames": 3835,
+              "seconds": 7.7,
+              "medianFps": 666.67,
+              "meanFps": 496.77,
+              "p95Ms": 2.7,
+              "p99Ms": 18.3,
+              "maxMs": 53.9,
+              "over33ms": 7,
+              "over50ms": 2,
+              "drawCalls": 258.1,
+              "triangles": 673273
+            },
+            "page7": {
+              "frames": 10251,
+              "seconds": 20,
+              "medianFps": 625,
+              "meanFps": 512.54,
+              "p95Ms": 2.3,
+              "p99Ms": 12.1,
+              "maxMs": 54.2,
+              "over33ms": 24,
+              "over50ms": 9,
+              "drawCalls": 290.7,
+              "triangles": 695229,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 2308,
+                "vertexArrays": 808,
+                "programs": 101,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": null,
+              "page": 7
+            },
+            "canvas": {
+              "width": 1440,
+              "height": 900,
+              "cssWidth": 1440,
+              "cssHeight": 900,
+              "dpr": 1,
+              "effectivePixelRatio": 1
+            },
+            "page9": {
+              "frames": 8263,
+              "seconds": 20,
+              "medianFps": 416.67,
+              "meanFps": 413.11,
+              "p95Ms": 2.8,
+              "p99Ms": 3.2,
+              "maxMs": 6.7,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 582.1,
+              "triangles": 759544,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 2308,
+                "vertexArrays": 1062,
+                "programs": 101,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": null,
+              "page": 9
+            },
+            "transitionsAll": {
+              "frames": 16038,
+              "seconds": 32.2,
+              "medianFps": 588.24,
+              "meanFps": 497.81,
+              "p95Ms": 2.6,
+              "p99Ms": 12,
+              "maxMs": 71,
+              "over33ms": 22,
+              "over50ms": 7,
+              "drawCalls": 326.3,
+              "triangles": 711537
+            },
+            "transitionsUnderwater": {
+              "frames": 8050,
+              "seconds": 16.8,
+              "medianFps": 555.56,
+              "meanFps": 478.3,
+              "p95Ms": 2.7,
+              "p99Ms": 8.9,
+              "maxMs": 71,
+              "over33ms": 10,
+              "over50ms": 4,
+              "drawCalls": 380.3,
+              "triangles": 829020
+            },
+            "wallSeconds": 131
+          }
+        },
+        "capped.desktop": {
+          "launchFlags": [
+            "--enable-gpu",
+            "--ignore-gpu-blocklist",
+            "--use-gl=angle",
+            "--use-angle=gl-egl"
+          ],
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "deviceScaleFactor": 1,
+          "runs": [
+            {
+              "coldLoad": {
+                "gotoToLoaderDoneMs": 2135,
+                "openPressToPage1Ms": 2763,
+                "gotoToPage1Ms": 9253,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "warmLoad": {
+                "gotoToLoaderDoneMs": 2114,
+                "openPressToPage1Ms": 2355,
+                "gotoToPage1Ms": 8803,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "transition6to7": {
+                "frames": 459,
+                "seconds": 7.7,
+                "medianFps": 59.88,
+                "meanFps": 59.89,
+                "p95Ms": 16.9,
+                "p99Ms": 17.2,
+                "maxMs": 17.4,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 261,
+                "triangles": 687700
+              },
+              "page7": {
+                "frames": 1194,
+                "seconds": 20,
+                "medianFps": 59.88,
+                "meanFps": 59.74,
+                "p95Ms": 16.9,
+                "p99Ms": 17.2,
+                "maxMs": 34.5,
+                "over33ms": 2,
+                "over50ms": 0,
+                "drawCalls": 290.7,
+                "triangles": 695222,
+                "liveGl": {
+                  "textures": 40,
+                  "buffers": 2308,
+                  "vertexArrays": 808,
+                  "programs": 101,
+                  "framebuffers": 19,
+                  "renderbuffers": 6
+                },
+                "contexts": 1,
+                "quality": null,
+                "page": 7
+              },
+              "canvas": {
+                "width": 1440,
+                "height": 900,
+                "cssWidth": 1440,
+                "cssHeight": 900,
+                "dpr": 1,
+                "effectivePixelRatio": 1
+              },
+              "page9": {
+                "frames": 1197,
+                "seconds": 20,
+                "medianFps": 59.88,
+                "meanFps": 59.89,
+                "p95Ms": 16.8,
+                "p99Ms": 17.1,
+                "maxMs": 20,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 580.9,
+                "triangles": 758254,
+                "liveGl": {
+                  "textures": 40,
+                  "buffers": 2308,
+                  "vertexArrays": 1062,
+                  "programs": 101,
+                  "framebuffers": 19,
+                  "renderbuffers": 6
+                },
+                "contexts": 1,
+                "quality": null,
+                "page": 9
+              },
+              "transitionsAll": {
+                "frames": 1917,
+                "seconds": 32,
+                "medianFps": 59.88,
+                "meanFps": 59.9,
+                "p95Ms": 16.8,
+                "p99Ms": 17.1,
+                "maxMs": 20.5,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 332.3,
+                "triangles": 725417
+              },
+              "transitionsUnderwater": {
+                "frames": 1000,
+                "seconds": 16.7,
+                "medianFps": 59.88,
+                "meanFps": 59.9,
+                "p95Ms": 16.8,
+                "p99Ms": 17.1,
+                "maxMs": 20.5,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 386.9,
+                "triangles": 837259
+              },
+              "wallSeconds": 131
+            }
+          ],
+          "median": {
+            "coldLoad": {
+              "gotoToLoaderDoneMs": 2135,
+              "openPressToPage1Ms": 2763,
+              "gotoToPage1Ms": 9253,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "warmLoad": {
+              "gotoToLoaderDoneMs": 2114,
+              "openPressToPage1Ms": 2355,
+              "gotoToPage1Ms": 8803,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "transition6to7": {
+              "frames": 459,
+              "seconds": 7.7,
+              "medianFps": 59.88,
+              "meanFps": 59.89,
+              "p95Ms": 16.9,
+              "p99Ms": 17.2,
+              "maxMs": 17.4,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 261,
+              "triangles": 687700
+            },
+            "page7": {
+              "frames": 1194,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.74,
+              "p95Ms": 16.9,
+              "p99Ms": 17.2,
+              "maxMs": 34.5,
+              "over33ms": 2,
+              "over50ms": 0,
+              "drawCalls": 290.7,
+              "triangles": 695222,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 2308,
+                "vertexArrays": 808,
+                "programs": 101,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": null,
+              "page": 7
+            },
+            "canvas": {
+              "width": 1440,
+              "height": 900,
+              "cssWidth": 1440,
+              "cssHeight": 900,
+              "dpr": 1,
+              "effectivePixelRatio": 1
+            },
+            "page9": {
+              "frames": 1197,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.89,
+              "p95Ms": 16.8,
+              "p99Ms": 17.1,
+              "maxMs": 20,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 580.9,
+              "triangles": 758254,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 2308,
+                "vertexArrays": 1062,
+                "programs": 101,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": null,
+              "page": 9
+            },
+            "transitionsAll": {
+              "frames": 1917,
+              "seconds": 32,
+              "medianFps": 59.88,
+              "meanFps": 59.9,
+              "p95Ms": 16.8,
+              "p99Ms": 17.1,
+              "maxMs": 20.5,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 332.3,
+              "triangles": 725417
+            },
+            "transitionsUnderwater": {
+              "frames": 1000,
+              "seconds": 16.7,
+              "medianFps": 59.88,
+              "meanFps": 59.9,
+              "p95Ms": 16.8,
+              "p99Ms": 17.1,
+              "maxMs": 20.5,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 386.9,
+              "triangles": 837259
+            },
+            "wallSeconds": 131
+          }
+        },
+        "capped.mobile": {
+          "launchFlags": [
+            "--enable-gpu",
+            "--ignore-gpu-blocklist",
+            "--use-gl=angle",
+            "--use-angle=gl-egl"
+          ],
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "runs": [
+            {
+              "coldLoad": {
+                "gotoToLoaderDoneMs": 2153,
+                "openPressToPage1Ms": 2490,
+                "gotoToPage1Ms": 9008,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "warmLoad": {
+                "gotoToLoaderDoneMs": 1941,
+                "openPressToPage1Ms": 2305,
+                "gotoToPage1Ms": 8615,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "transition6to7": {
+                "frames": 461,
+                "seconds": 7.7,
+                "medianFps": 59.88,
+                "meanFps": 59.9,
+                "p95Ms": 16.9,
+                "p99Ms": 17.3,
+                "maxMs": 17.7,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 148.6,
+                "triangles": 311006
+              },
+              "page7": {
+                "frames": 1197,
+                "seconds": 20,
+                "medianFps": 59.88,
+                "meanFps": 59.9,
+                "p95Ms": 17,
+                "p99Ms": 17.2,
+                "maxMs": 17.7,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 155.2,
+                "triangles": 366577,
+                "liveGl": {
+                  "textures": 38,
+                  "buffers": 2352,
+                  "vertexArrays": 602,
+                  "programs": 95,
+                  "framebuffers": 16,
+                  "renderbuffers": 2
+                },
+                "contexts": 1,
+                "quality": null,
+                "page": 7
+              },
+              "canvas": {
+                "width": 546,
+                "height": 1181,
+                "cssWidth": 390,
+                "cssHeight": 844,
+                "dpr": 2,
+                "effectivePixelRatio": 1.4
+              },
+              "page9": {
+                "frames": 1197,
+                "seconds": 20,
+                "medianFps": 59.88,
+                "meanFps": 59.89,
+                "p95Ms": 16.9,
+                "p99Ms": 17.2,
+                "maxMs": 17.7,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 181.8,
+                "triangles": 372103,
+                "liveGl": {
+                  "textures": 38,
+                  "buffers": 2352,
+                  "vertexArrays": 602,
+                  "programs": 95,
+                  "framebuffers": 16,
+                  "renderbuffers": 2
+                },
+                "contexts": 1,
+                "quality": null,
+                "page": 9
+              },
+              "transitionsAll": {
+                "frames": 1931,
+                "seconds": 32.2,
+                "medianFps": 59.88,
+                "meanFps": 59.9,
+                "p95Ms": 17,
+                "p99Ms": 17.3,
+                "maxMs": 17.9,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 169.1,
+                "triangles": 369131
+              },
+              "transitionsUnderwater": {
+                "frames": 1009,
+                "seconds": 16.8,
+                "medianFps": 59.88,
+                "meanFps": 59.9,
+                "p95Ms": 17,
+                "p99Ms": 17.3,
+                "maxMs": 17.9,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 183.6,
+                "triangles": 450622
+              },
+              "wallSeconds": 131
+            }
+          ],
+          "median": {
+            "coldLoad": {
+              "gotoToLoaderDoneMs": 2153,
+              "openPressToPage1Ms": 2490,
+              "gotoToPage1Ms": 9008,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "warmLoad": {
+              "gotoToLoaderDoneMs": 1941,
+              "openPressToPage1Ms": 2305,
+              "gotoToPage1Ms": 8615,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "transition6to7": {
+              "frames": 461,
+              "seconds": 7.7,
+              "medianFps": 59.88,
+              "meanFps": 59.9,
+              "p95Ms": 16.9,
+              "p99Ms": 17.3,
+              "maxMs": 17.7,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 148.6,
+              "triangles": 311006
+            },
+            "page7": {
+              "frames": 1197,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.9,
+              "p95Ms": 17,
+              "p99Ms": 17.2,
+              "maxMs": 17.7,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 155.2,
+              "triangles": 366577,
+              "liveGl": {
+                "textures": 38,
+                "buffers": 2352,
+                "vertexArrays": 602,
+                "programs": 95,
+                "framebuffers": 16,
+                "renderbuffers": 2
+              },
+              "contexts": 1,
+              "quality": null,
+              "page": 7
+            },
+            "canvas": {
+              "width": 546,
+              "height": 1181,
+              "cssWidth": 390,
+              "cssHeight": 844,
+              "dpr": 2,
+              "effectivePixelRatio": 1.4
+            },
+            "page9": {
+              "frames": 1197,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.89,
+              "p95Ms": 16.9,
+              "p99Ms": 17.2,
+              "maxMs": 17.7,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 181.8,
+              "triangles": 372103,
+              "liveGl": {
+                "textures": 38,
+                "buffers": 2352,
+                "vertexArrays": 602,
+                "programs": 95,
+                "framebuffers": 16,
+                "renderbuffers": 2
+              },
+              "contexts": 1,
+              "quality": null,
+              "page": 9
+            },
+            "transitionsAll": {
+              "frames": 1931,
+              "seconds": 32.2,
+              "medianFps": 59.88,
+              "meanFps": 59.9,
+              "p95Ms": 17,
+              "p99Ms": 17.3,
+              "maxMs": 17.9,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 169.1,
+              "triangles": 369131
+            },
+            "transitionsUnderwater": {
+              "frames": 1009,
+              "seconds": 16.8,
+              "medianFps": 59.88,
+              "meanFps": 59.9,
+              "p95Ms": 17,
+              "p99Ms": 17.3,
+              "maxMs": 17.9,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 183.6,
+              "triangles": 450622
+            },
+            "wallSeconds": 131
+          }
+        }
+      }
+    },
+    "o": {
+      "label": "o-f645de0",
+      "date": "2026-11-18T10:32:27.624Z",
+      "headed": true,
+      "renderer": "ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2)",
+      "browser": "chromium 157.0.8103.78",
+      "cpuThrottle": 0,
+      "passes": {
+        "uncapped.desktop": {
+          "launchFlags": [
+            "--enable-gpu",
+            "--ignore-gpu-blocklist",
+            "--use-gl=angle",
+            "--use-angle=gl-egl",
+            "--disable-gpu-vsync",
+            "--disable-frame-rate-limit"
+          ],
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "deviceScaleFactor": 1,
+          "runs": [
+            {
+              "coldLoad": {
+                "gotoToLoaderDoneMs": 2265,
+                "openPressToPage1Ms": 2690,
+                "gotoToPage1Ms": 9388,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "warmLoad": {
+                "gotoToLoaderDoneMs": 1971,
+                "openPressToPage1Ms": 2377,
+                "gotoToPage1Ms": 8707,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "transition6to7": {
+                "frames": 3798,
+                "seconds": 7.7,
+                "medianFps": 769.23,
+                "meanFps": 491.52,
+                "p95Ms": 5.8,
+                "p99Ms": 18.5,
+                "maxMs": 86.8,
+                "over33ms": 5,
+                "over50ms": 5,
+                "drawCalls": 228.9,
+                "triangles": 705018
+              },
+              "page7": {
+                "frames": 10019,
+                "seconds": 20,
+                "medianFps": 714.29,
+                "meanFps": 500.96,
+                "p95Ms": 2.3,
+                "p99Ms": 15.8,
+                "maxMs": 87.8,
+                "over33ms": 25,
+                "over50ms": 17,
+                "drawCalls": 295.4,
+                "triangles": 717521,
+                "liveGl": {
+                  "textures": 40,
+                  "buffers": 1483,
+                  "vertexArrays": 871,
+                  "programs": 66,
+                  "framebuffers": 19,
+                  "renderbuffers": 6
+                },
+                "contexts": 1,
+                "quality": "2",
+                "page": 7
+              },
+              "canvas": {
+                "width": 1440,
+                "height": 900,
+                "cssWidth": 1440,
+                "cssHeight": 900,
+                "dpr": 1,
+                "effectivePixelRatio": 1
+              },
+              "page9": {
+                "frames": 10030,
+                "seconds": 20,
+                "medianFps": 666.67,
+                "meanFps": 501.48,
+                "p95Ms": 2.4,
+                "p99Ms": 14.2,
+                "maxMs": 70.9,
+                "over33ms": 32,
+                "over50ms": 21,
+                "drawCalls": 308.6,
+                "triangles": 816642,
+                "liveGl": {
+                  "textures": 40,
+                  "buffers": 1483,
+                  "vertexArrays": 871,
+                  "programs": 66,
+                  "framebuffers": 19,
+                  "renderbuffers": 6
+                },
+                "contexts": 1,
+                "quality": "2",
+                "page": 9
+              },
+              "transitionsAll": {
+                "frames": 16154,
+                "seconds": 32.6,
+                "medianFps": 714.29,
+                "meanFps": 495.33,
+                "p95Ms": 2.7,
+                "p99Ms": 18.4,
+                "maxMs": 140.8,
+                "over33ms": 43,
+                "over50ms": 25,
+                "drawCalls": 255.3,
+                "triangles": 735403
+              },
+              "transitionsUnderwater": {
+                "frames": 8171,
+                "seconds": 17.1,
+                "medianFps": 714.29,
+                "meanFps": 476.81,
+                "p95Ms": 2.9,
+                "p99Ms": 18.5,
+                "maxMs": 140.8,
+                "over33ms": 27,
+                "over50ms": 16,
+                "drawCalls": 263,
+                "triangles": 859342
+              },
+              "wallSeconds": 132
+            }
+          ],
+          "median": {
+            "coldLoad": {
+              "gotoToLoaderDoneMs": 2265,
+              "openPressToPage1Ms": 2690,
+              "gotoToPage1Ms": 9388,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "warmLoad": {
+              "gotoToLoaderDoneMs": 1971,
+              "openPressToPage1Ms": 2377,
+              "gotoToPage1Ms": 8707,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "transition6to7": {
+              "frames": 3798,
+              "seconds": 7.7,
+              "medianFps": 769.23,
+              "meanFps": 491.52,
+              "p95Ms": 5.8,
+              "p99Ms": 18.5,
+              "maxMs": 86.8,
+              "over33ms": 5,
+              "over50ms": 5,
+              "drawCalls": 228.9,
+              "triangles": 705018
+            },
+            "page7": {
+              "frames": 10019,
+              "seconds": 20,
+              "medianFps": 714.29,
+              "meanFps": 500.96,
+              "p95Ms": 2.3,
+              "p99Ms": 15.8,
+              "maxMs": 87.8,
+              "over33ms": 25,
+              "over50ms": 17,
+              "drawCalls": 295.4,
+              "triangles": 717521,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 1483,
+                "vertexArrays": 871,
+                "programs": 66,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 7
+            },
+            "canvas": {
+              "width": 1440,
+              "height": 900,
+              "cssWidth": 1440,
+              "cssHeight": 900,
+              "dpr": 1,
+              "effectivePixelRatio": 1
+            },
+            "page9": {
+              "frames": 10030,
+              "seconds": 20,
+              "medianFps": 666.67,
+              "meanFps": 501.48,
+              "p95Ms": 2.4,
+              "p99Ms": 14.2,
+              "maxMs": 70.9,
+              "over33ms": 32,
+              "over50ms": 21,
+              "drawCalls": 308.6,
+              "triangles": 816642,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 1483,
+                "vertexArrays": 871,
+                "programs": 66,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 9
+            },
+            "transitionsAll": {
+              "frames": 16154,
+              "seconds": 32.6,
+              "medianFps": 714.29,
+              "meanFps": 495.33,
+              "p95Ms": 2.7,
+              "p99Ms": 18.4,
+              "maxMs": 140.8,
+              "over33ms": 43,
+              "over50ms": 25,
+              "drawCalls": 255.3,
+              "triangles": 735403
+            },
+            "transitionsUnderwater": {
+              "frames": 8171,
+              "seconds": 17.1,
+              "medianFps": 714.29,
+              "meanFps": 476.81,
+              "p95Ms": 2.9,
+              "p99Ms": 18.5,
+              "maxMs": 140.8,
+              "over33ms": 27,
+              "over50ms": 16,
+              "drawCalls": 263,
+              "triangles": 859342
+            },
+            "wallSeconds": 132
+          }
+        },
+        "capped.desktop": {
+          "launchFlags": [
+            "--enable-gpu",
+            "--ignore-gpu-blocklist",
+            "--use-gl=angle",
+            "--use-angle=gl-egl"
+          ],
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "deviceScaleFactor": 1,
+          "runs": [
+            {
+              "coldLoad": {
+                "gotoToLoaderDoneMs": 2103,
+                "openPressToPage1Ms": 2901,
+                "gotoToPage1Ms": 9357,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "warmLoad": {
+                "gotoToLoaderDoneMs": 2076,
+                "openPressToPage1Ms": 2447,
+                "gotoToPage1Ms": 8858,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "transition6to7": {
+                "frames": 458,
+                "seconds": 7.6,
+                "medianFps": 59.88,
+                "meanFps": 59.89,
+                "p95Ms": 16.9,
+                "p99Ms": 17.1,
+                "maxMs": 17.3,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 229.4,
+                "triangles": 724074
+              },
+              "page7": {
+                "frames": 1196,
+                "seconds": 20,
+                "medianFps": 59.88,
+                "meanFps": 59.84,
+                "p95Ms": 16.9,
+                "p99Ms": 17.2,
+                "maxMs": 33.3,
+                "over33ms": 1,
+                "over50ms": 0,
+                "drawCalls": 295.3,
+                "triangles": 717512,
+                "liveGl": {
+                  "textures": 40,
+                  "buffers": 1483,
+                  "vertexArrays": 871,
+                  "programs": 66,
+                  "framebuffers": 19,
+                  "renderbuffers": 6
+                },
+                "contexts": 1,
+                "quality": "2",
+                "page": 7
+              },
+              "canvas": {
+                "width": 1440,
+                "height": 900,
+                "cssWidth": 1440,
+                "cssHeight": 900,
+                "dpr": 1,
+                "effectivePixelRatio": 1
+              },
+              "page9": {
+                "frames": 1196,
+                "seconds": 20,
+                "medianFps": 59.88,
+                "meanFps": 59.84,
+                "p95Ms": 16.8,
+                "p99Ms": 17,
+                "maxMs": 34.5,
+                "over33ms": 1,
+                "over50ms": 0,
+                "drawCalls": 307.7,
+                "triangles": 815760,
+                "liveGl": {
+                  "textures": 40,
+                  "buffers": 1483,
+                  "vertexArrays": 871,
+                  "programs": 66,
+                  "framebuffers": 19,
+                  "renderbuffers": 6
+                },
+                "contexts": 1,
+                "quality": "2",
+                "page": 9
+              },
+              "transitionsAll": {
+                "frames": 1914,
+                "seconds": 32,
+                "medianFps": 59.88,
+                "meanFps": 59.86,
+                "p95Ms": 16.8,
+                "p99Ms": 17.1,
+                "maxMs": 33.4,
+                "over33ms": 1,
+                "over50ms": 0,
+                "drawCalls": 255.7,
+                "triangles": 750003
+              },
+              "transitionsUnderwater": {
+                "frames": 999,
+                "seconds": 16.7,
+                "medianFps": 59.88,
+                "meanFps": 59.9,
+                "p95Ms": 16.8,
+                "p99Ms": 17,
+                "maxMs": 19.4,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 263.6,
+                "triangles": 866502
+              },
+              "wallSeconds": 131
+            }
+          ],
+          "median": {
+            "coldLoad": {
+              "gotoToLoaderDoneMs": 2103,
+              "openPressToPage1Ms": 2901,
+              "gotoToPage1Ms": 9357,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "warmLoad": {
+              "gotoToLoaderDoneMs": 2076,
+              "openPressToPage1Ms": 2447,
+              "gotoToPage1Ms": 8858,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "transition6to7": {
+              "frames": 458,
+              "seconds": 7.6,
+              "medianFps": 59.88,
+              "meanFps": 59.89,
+              "p95Ms": 16.9,
+              "p99Ms": 17.1,
+              "maxMs": 17.3,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 229.4,
+              "triangles": 724074
+            },
+            "page7": {
+              "frames": 1196,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.84,
+              "p95Ms": 16.9,
+              "p99Ms": 17.2,
+              "maxMs": 33.3,
+              "over33ms": 1,
+              "over50ms": 0,
+              "drawCalls": 295.3,
+              "triangles": 717512,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 1483,
+                "vertexArrays": 871,
+                "programs": 66,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 7
+            },
+            "canvas": {
+              "width": 1440,
+              "height": 900,
+              "cssWidth": 1440,
+              "cssHeight": 900,
+              "dpr": 1,
+              "effectivePixelRatio": 1
+            },
+            "page9": {
+              "frames": 1196,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.84,
+              "p95Ms": 16.8,
+              "p99Ms": 17,
+              "maxMs": 34.5,
+              "over33ms": 1,
+              "over50ms": 0,
+              "drawCalls": 307.7,
+              "triangles": 815760,
+              "liveGl": {
+                "textures": 40,
+                "buffers": 1483,
+                "vertexArrays": 871,
+                "programs": 66,
+                "framebuffers": 19,
+                "renderbuffers": 6
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 9
+            },
+            "transitionsAll": {
+              "frames": 1914,
+              "seconds": 32,
+              "medianFps": 59.88,
+              "meanFps": 59.86,
+              "p95Ms": 16.8,
+              "p99Ms": 17.1,
+              "maxMs": 33.4,
+              "over33ms": 1,
+              "over50ms": 0,
+              "drawCalls": 255.7,
+              "triangles": 750003
+            },
+            "transitionsUnderwater": {
+              "frames": 999,
+              "seconds": 16.7,
+              "medianFps": 59.88,
+              "meanFps": 59.9,
+              "p95Ms": 16.8,
+              "p99Ms": 17,
+              "maxMs": 19.4,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 263.6,
+              "triangles": 866502
+            },
+            "wallSeconds": 131
+          }
+        },
+        "capped.mobile": {
+          "launchFlags": [
+            "--enable-gpu",
+            "--ignore-gpu-blocklist",
+            "--use-gl=angle",
+            "--use-angle=gl-egl"
+          ],
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "runs": [
+            {
+              "coldLoad": {
+                "gotoToLoaderDoneMs": 1883,
+                "openPressToPage1Ms": 2525,
+                "gotoToPage1Ms": 8779,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "warmLoad": {
+                "gotoToLoaderDoneMs": 1931,
+                "openPressToPage1Ms": 2322,
+                "gotoToPage1Ms": 8630,
+                "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+              },
+              "transition6to7": {
+                "frames": 460,
+                "seconds": 7.7,
+                "medianFps": 59.88,
+                "meanFps": 59.89,
+                "p95Ms": 16.9,
+                "p99Ms": 17.2,
+                "maxMs": 17.6,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 156.4,
+                "triangles": 324105
+              },
+              "page7": {
+                "frames": 1197,
+                "seconds": 20,
+                "medianFps": 59.88,
+                "meanFps": 59.89,
+                "p95Ms": 17,
+                "p99Ms": 17.3,
+                "maxMs": 17.6,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 163,
+                "triangles": 379700,
+                "liveGl": {
+                  "textures": 38,
+                  "buffers": 1483,
+                  "vertexArrays": 386,
+                  "programs": 56,
+                  "framebuffers": 16,
+                  "renderbuffers": 2
+                },
+                "contexts": 1,
+                "quality": "2",
+                "page": 7
+              },
+              "canvas": {
+                "width": 546,
+                "height": 1181,
+                "cssWidth": 390,
+                "cssHeight": 844,
+                "dpr": 2,
+                "effectivePixelRatio": 1.4
+              },
+              "page9": {
+                "frames": 1197,
+                "seconds": 20,
+                "medianFps": 59.88,
+                "meanFps": 59.89,
+                "p95Ms": 17,
+                "p99Ms": 17.3,
+                "maxMs": 17.8,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 159.5,
+                "triangles": 423482,
+                "liveGl": {
+                  "textures": 38,
+                  "buffers": 1483,
+                  "vertexArrays": 386,
+                  "programs": 56,
+                  "framebuffers": 16,
+                  "renderbuffers": 2
+                },
+                "contexts": 1,
+                "quality": "2",
+                "page": 9
+              },
+              "transitionsAll": {
+                "frames": 1929,
+                "seconds": 32.2,
+                "medianFps": 59.88,
+                "meanFps": 59.89,
+                "p95Ms": 17,
+                "p99Ms": 17.3,
+                "maxMs": 17.9,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 171.1,
+                "triangles": 387802
+              },
+              "transitionsUnderwater": {
+                "frames": 1009,
+                "seconds": 16.8,
+                "medianFps": 59.88,
+                "meanFps": 59.9,
+                "p95Ms": 17,
+                "p99Ms": 17.3,
+                "maxMs": 17.4,
+                "over33ms": 0,
+                "over50ms": 0,
+                "drawCalls": 179.8,
+                "triangles": 476019
+              },
+              "wallSeconds": 131
+            }
+          ],
+          "median": {
+            "coldLoad": {
+              "gotoToLoaderDoneMs": 1883,
+              "openPressToPage1Ms": 2525,
+              "gotoToPage1Ms": 8779,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "warmLoad": {
+              "gotoToLoaderDoneMs": 1931,
+              "openPressToPage1Ms": 2322,
+              "gotoToPage1Ms": 8630,
+              "note": "gotoToPage1Ms includes the fixed waits of the opening flow (1.5 s + 2.8 s card select)"
+            },
+            "transition6to7": {
+              "frames": 460,
+              "seconds": 7.7,
+              "medianFps": 59.88,
+              "meanFps": 59.89,
+              "p95Ms": 16.9,
+              "p99Ms": 17.2,
+              "maxMs": 17.6,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 156.4,
+              "triangles": 324105
+            },
+            "page7": {
+              "frames": 1197,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.89,
+              "p95Ms": 17,
+              "p99Ms": 17.3,
+              "maxMs": 17.6,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 163,
+              "triangles": 379700,
+              "liveGl": {
+                "textures": 38,
+                "buffers": 1483,
+                "vertexArrays": 386,
+                "programs": 56,
+                "framebuffers": 16,
+                "renderbuffers": 2
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 7
+            },
+            "canvas": {
+              "width": 546,
+              "height": 1181,
+              "cssWidth": 390,
+              "cssHeight": 844,
+              "dpr": 2,
+              "effectivePixelRatio": 1.4
+            },
+            "page9": {
+              "frames": 1197,
+              "seconds": 20,
+              "medianFps": 59.88,
+              "meanFps": 59.89,
+              "p95Ms": 17,
+              "p99Ms": 17.3,
+              "maxMs": 17.8,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 159.5,
+              "triangles": 423482,
+              "liveGl": {
+                "textures": 38,
+                "buffers": 1483,
+                "vertexArrays": 386,
+                "programs": 56,
+                "framebuffers": 16,
+                "renderbuffers": 2
+              },
+              "contexts": 1,
+              "quality": "2",
+              "page": 9
+            },
+            "transitionsAll": {
+              "frames": 1929,
+              "seconds": 32.2,
+              "medianFps": 59.88,
+              "meanFps": 59.89,
+              "p95Ms": 17,
+              "p99Ms": 17.3,
+              "maxMs": 17.9,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 171.1,
+              "triangles": 387802
+            },
+            "transitionsUnderwater": {
+              "frames": 1009,
+              "seconds": 16.8,
+              "medianFps": 59.88,
+              "meanFps": 59.9,
+              "p95Ms": 17,
+              "p99Ms": 17.3,
+              "maxMs": 17.4,
+              "over33ms": 0,
+              "over50ms": 0,
+              "drawCalls": 179.8,
+              "triangles": 476019
+            },
+            "wallSeconds": 131
+          }
+        }
+      }
+    },
+    "comparison": [
+      {
+        "pass_viewport": "uncapped.desktop",
+        "segment": "page 7",
+        "baseline": {
+          "frames": 10251,
+          "seconds": 20,
+          "medianFps": 625,
+          "meanFps": 512.54,
+          "p95Ms": 2.3,
+          "p99Ms": 12.1,
+          "maxMs": 54.2,
+          "over33ms": 24,
+          "over50ms": 9,
+          "drawCalls": 290.7,
+          "triangles": 695229,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 808,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "contexts": 1,
+          "quality": null,
+          "page": 7
+        },
+        "after": {
+          "frames": 10019,
+          "seconds": 20,
+          "medianFps": 714.29,
+          "meanFps": 500.96,
+          "p95Ms": 2.3,
+          "p99Ms": 15.8,
+          "maxMs": 87.8,
+          "over33ms": 25,
+          "over50ms": 17,
+          "drawCalls": 295.4,
+          "triangles": 717521,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "contexts": 1,
+          "quality": "2",
+          "page": 7
+        },
+        "baselineRuns": [
+          {
+            "frames": 10251,
+            "seconds": 20,
+            "medianFps": 625,
+            "meanFps": 512.54,
+            "p95Ms": 2.3,
+            "p99Ms": 12.1,
+            "maxMs": 54.2,
+            "over33ms": 24,
+            "over50ms": 9,
+            "drawCalls": 290.7,
+            "triangles": 695229,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 2308,
+              "vertexArrays": 808,
+              "programs": 101,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": null,
+            "page": 7
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 10019,
+            "seconds": 20,
+            "medianFps": 714.29,
+            "meanFps": 500.96,
+            "p95Ms": 2.3,
+            "p99Ms": 15.8,
+            "maxMs": 87.8,
+            "over33ms": 25,
+            "over50ms": 17,
+            "drawCalls": 295.4,
+            "triangles": 717521,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 1483,
+              "vertexArrays": 871,
+              "programs": 66,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 7
+          }
+        ],
+        "medianFpsChangePct": 14.3,
+        "meanFpsChangePct": -2.3,
+        "p95ChangePct": 0.0,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "uncapped.desktop",
+        "segment": "page 9",
+        "baseline": {
+          "frames": 8263,
+          "seconds": 20,
+          "medianFps": 416.67,
+          "meanFps": 413.11,
+          "p95Ms": 2.8,
+          "p99Ms": 3.2,
+          "maxMs": 6.7,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 582.1,
+          "triangles": 759544,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 1062,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "contexts": 1,
+          "quality": null,
+          "page": 9
+        },
+        "after": {
+          "frames": 10030,
+          "seconds": 20,
+          "medianFps": 666.67,
+          "meanFps": 501.48,
+          "p95Ms": 2.4,
+          "p99Ms": 14.2,
+          "maxMs": 70.9,
+          "over33ms": 32,
+          "over50ms": 21,
+          "drawCalls": 308.6,
+          "triangles": 816642,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "contexts": 1,
+          "quality": "2",
+          "page": 9
+        },
+        "baselineRuns": [
+          {
+            "frames": 8263,
+            "seconds": 20,
+            "medianFps": 416.67,
+            "meanFps": 413.11,
+            "p95Ms": 2.8,
+            "p99Ms": 3.2,
+            "maxMs": 6.7,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 582.1,
+            "triangles": 759544,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 2308,
+              "vertexArrays": 1062,
+              "programs": 101,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": null,
+            "page": 9
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 10030,
+            "seconds": 20,
+            "medianFps": 666.67,
+            "meanFps": 501.48,
+            "p95Ms": 2.4,
+            "p99Ms": 14.2,
+            "maxMs": 70.9,
+            "over33ms": 32,
+            "over50ms": 21,
+            "drawCalls": 308.6,
+            "triangles": 816642,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 1483,
+              "vertexArrays": 871,
+              "programs": 66,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 9
+          }
+        ],
+        "medianFpsChangePct": 60.0,
+        "meanFpsChangePct": 21.4,
+        "p95ChangePct": -14.3,
+        "flag": "frames >33 ms where baseline had none; frames >50 ms where baseline had none; max 70.9 ms vs 6.7 ms"
+      },
+      {
+        "pass_viewport": "uncapped.desktop",
+        "segment": "transitions all",
+        "baseline": {
+          "frames": 16038,
+          "seconds": 32.2,
+          "medianFps": 588.24,
+          "meanFps": 497.81,
+          "p95Ms": 2.6,
+          "p99Ms": 12,
+          "maxMs": 71,
+          "over33ms": 22,
+          "over50ms": 7,
+          "drawCalls": 326.3,
+          "triangles": 711537
+        },
+        "after": {
+          "frames": 16154,
+          "seconds": 32.6,
+          "medianFps": 714.29,
+          "meanFps": 495.33,
+          "p95Ms": 2.7,
+          "p99Ms": 18.4,
+          "maxMs": 140.8,
+          "over33ms": 43,
+          "over50ms": 25,
+          "drawCalls": 255.3,
+          "triangles": 735403
+        },
+        "baselineRuns": [
+          {
+            "frames": 16038,
+            "seconds": 32.2,
+            "medianFps": 588.24,
+            "meanFps": 497.81,
+            "p95Ms": 2.6,
+            "p99Ms": 12,
+            "maxMs": 71,
+            "over33ms": 22,
+            "over50ms": 7,
+            "drawCalls": 326.3,
+            "triangles": 711537
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 16154,
+            "seconds": 32.6,
+            "medianFps": 714.29,
+            "meanFps": 495.33,
+            "p95Ms": 2.7,
+            "p99Ms": 18.4,
+            "maxMs": 140.8,
+            "over33ms": 43,
+            "over50ms": 25,
+            "drawCalls": 255.3,
+            "triangles": 735403
+          }
+        ],
+        "medianFpsChangePct": 21.4,
+        "meanFpsChangePct": -0.5,
+        "p95ChangePct": 3.8,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "uncapped.desktop",
+        "segment": "transitions underwater",
+        "baseline": {
+          "frames": 8050,
+          "seconds": 16.8,
+          "medianFps": 555.56,
+          "meanFps": 478.3,
+          "p95Ms": 2.7,
+          "p99Ms": 8.9,
+          "maxMs": 71,
+          "over33ms": 10,
+          "over50ms": 4,
+          "drawCalls": 380.3,
+          "triangles": 829020
+        },
+        "after": {
+          "frames": 8171,
+          "seconds": 17.1,
+          "medianFps": 714.29,
+          "meanFps": 476.81,
+          "p95Ms": 2.9,
+          "p99Ms": 18.5,
+          "maxMs": 140.8,
+          "over33ms": 27,
+          "over50ms": 16,
+          "drawCalls": 263,
+          "triangles": 859342
+        },
+        "baselineRuns": [
+          {
+            "frames": 8050,
+            "seconds": 16.8,
+            "medianFps": 555.56,
+            "meanFps": 478.3,
+            "p95Ms": 2.7,
+            "p99Ms": 8.9,
+            "maxMs": 71,
+            "over33ms": 10,
+            "over50ms": 4,
+            "drawCalls": 380.3,
+            "triangles": 829020
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 8171,
+            "seconds": 17.1,
+            "medianFps": 714.29,
+            "meanFps": 476.81,
+            "p95Ms": 2.9,
+            "p99Ms": 18.5,
+            "maxMs": 140.8,
+            "over33ms": 27,
+            "over50ms": 16,
+            "drawCalls": 263,
+            "triangles": 859342
+          }
+        ],
+        "medianFpsChangePct": 28.6,
+        "meanFpsChangePct": -0.3,
+        "p95ChangePct": 7.4,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "uncapped.desktop",
+        "segment": "6->7",
+        "baseline": {
+          "frames": 3835,
+          "seconds": 7.7,
+          "medianFps": 666.67,
+          "meanFps": 496.77,
+          "p95Ms": 2.7,
+          "p99Ms": 18.3,
+          "maxMs": 53.9,
+          "over33ms": 7,
+          "over50ms": 2,
+          "drawCalls": 258.1,
+          "triangles": 673273
+        },
+        "after": {
+          "frames": 3798,
+          "seconds": 7.7,
+          "medianFps": 769.23,
+          "meanFps": 491.52,
+          "p95Ms": 5.8,
+          "p99Ms": 18.5,
+          "maxMs": 86.8,
+          "over33ms": 5,
+          "over50ms": 5,
+          "drawCalls": 228.9,
+          "triangles": 705018
+        },
+        "baselineRuns": [
+          {
+            "frames": 3835,
+            "seconds": 7.7,
+            "medianFps": 666.67,
+            "meanFps": 496.77,
+            "p95Ms": 2.7,
+            "p99Ms": 18.3,
+            "maxMs": 53.9,
+            "over33ms": 7,
+            "over50ms": 2,
+            "drawCalls": 258.1,
+            "triangles": 673273
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 3798,
+            "seconds": 7.7,
+            "medianFps": 769.23,
+            "meanFps": 491.52,
+            "p95Ms": 5.8,
+            "p99Ms": 18.5,
+            "maxMs": 86.8,
+            "over33ms": 5,
+            "over50ms": 5,
+            "drawCalls": 228.9,
+            "triangles": 705018
+          }
+        ],
+        "medianFpsChangePct": 15.4,
+        "meanFpsChangePct": -1.1,
+        "p95ChangePct": 114.8,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "capped.desktop",
+        "segment": "page 7",
+        "baseline": {
+          "frames": 1194,
+          "seconds": 20,
+          "medianFps": 59.88,
+          "meanFps": 59.74,
+          "p95Ms": 16.9,
+          "p99Ms": 17.2,
+          "maxMs": 34.5,
+          "over33ms": 2,
+          "over50ms": 0,
+          "drawCalls": 290.7,
+          "triangles": 695222,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 808,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "contexts": 1,
+          "quality": null,
+          "page": 7
+        },
+        "after": {
+          "frames": 1196,
+          "seconds": 20,
+          "medianFps": 59.88,
+          "meanFps": 59.84,
+          "p95Ms": 16.9,
+          "p99Ms": 17.2,
+          "maxMs": 33.3,
+          "over33ms": 1,
+          "over50ms": 0,
+          "drawCalls": 295.3,
+          "triangles": 717512,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "contexts": 1,
+          "quality": "2",
+          "page": 7
+        },
+        "baselineRuns": [
+          {
+            "frames": 1194,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.74,
+            "p95Ms": 16.9,
+            "p99Ms": 17.2,
+            "maxMs": 34.5,
+            "over33ms": 2,
+            "over50ms": 0,
+            "drawCalls": 290.7,
+            "triangles": 695222,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 2308,
+              "vertexArrays": 808,
+              "programs": 101,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": null,
+            "page": 7
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 1196,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.84,
+            "p95Ms": 16.9,
+            "p99Ms": 17.2,
+            "maxMs": 33.3,
+            "over33ms": 1,
+            "over50ms": 0,
+            "drawCalls": 295.3,
+            "triangles": 717512,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 1483,
+              "vertexArrays": 871,
+              "programs": 66,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 7
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": 0.2,
+        "p95ChangePct": 0.0,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "capped.desktop",
+        "segment": "page 9",
+        "baseline": {
+          "frames": 1197,
+          "seconds": 20,
+          "medianFps": 59.88,
+          "meanFps": 59.89,
+          "p95Ms": 16.8,
+          "p99Ms": 17.1,
+          "maxMs": 20,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 580.9,
+          "triangles": 758254,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 2308,
+            "vertexArrays": 1062,
+            "programs": 101,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "contexts": 1,
+          "quality": null,
+          "page": 9
+        },
+        "after": {
+          "frames": 1196,
+          "seconds": 20,
+          "medianFps": 59.88,
+          "meanFps": 59.84,
+          "p95Ms": 16.8,
+          "p99Ms": 17,
+          "maxMs": 34.5,
+          "over33ms": 1,
+          "over50ms": 0,
+          "drawCalls": 307.7,
+          "triangles": 815760,
+          "liveGl": {
+            "textures": 40,
+            "buffers": 1483,
+            "vertexArrays": 871,
+            "programs": 66,
+            "framebuffers": 19,
+            "renderbuffers": 6
+          },
+          "contexts": 1,
+          "quality": "2",
+          "page": 9
+        },
+        "baselineRuns": [
+          {
+            "frames": 1197,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.89,
+            "p95Ms": 16.8,
+            "p99Ms": 17.1,
+            "maxMs": 20,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 580.9,
+            "triangles": 758254,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 2308,
+              "vertexArrays": 1062,
+              "programs": 101,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": null,
+            "page": 9
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 1196,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.84,
+            "p95Ms": 16.8,
+            "p99Ms": 17,
+            "maxMs": 34.5,
+            "over33ms": 1,
+            "over50ms": 0,
+            "drawCalls": 307.7,
+            "triangles": 815760,
+            "liveGl": {
+              "textures": 40,
+              "buffers": 1483,
+              "vertexArrays": 871,
+              "programs": 66,
+              "framebuffers": 19,
+              "renderbuffers": 6
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 9
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": -0.1,
+        "p95ChangePct": 0.0,
+        "flag": "frames >33 ms where baseline had none"
+      },
+      {
+        "pass_viewport": "capped.desktop",
+        "segment": "transitions all",
+        "baseline": {
+          "frames": 1917,
+          "seconds": 32,
+          "medianFps": 59.88,
+          "meanFps": 59.9,
+          "p95Ms": 16.8,
+          "p99Ms": 17.1,
+          "maxMs": 20.5,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 332.3,
+          "triangles": 725417
+        },
+        "after": {
+          "frames": 1914,
+          "seconds": 32,
+          "medianFps": 59.88,
+          "meanFps": 59.86,
+          "p95Ms": 16.8,
+          "p99Ms": 17.1,
+          "maxMs": 33.4,
+          "over33ms": 1,
+          "over50ms": 0,
+          "drawCalls": 255.7,
+          "triangles": 750003
+        },
+        "baselineRuns": [
+          {
+            "frames": 1917,
+            "seconds": 32,
+            "medianFps": 59.88,
+            "meanFps": 59.9,
+            "p95Ms": 16.8,
+            "p99Ms": 17.1,
+            "maxMs": 20.5,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 332.3,
+            "triangles": 725417
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 1914,
+            "seconds": 32,
+            "medianFps": 59.88,
+            "meanFps": 59.86,
+            "p95Ms": 16.8,
+            "p99Ms": 17.1,
+            "maxMs": 33.4,
+            "over33ms": 1,
+            "over50ms": 0,
+            "drawCalls": 255.7,
+            "triangles": 750003
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": -0.1,
+        "p95ChangePct": 0.0,
+        "flag": "frames >33 ms where baseline had none"
+      },
+      {
+        "pass_viewport": "capped.desktop",
+        "segment": "transitions underwater",
+        "baseline": {
+          "frames": 1000,
+          "seconds": 16.7,
+          "medianFps": 59.88,
+          "meanFps": 59.9,
+          "p95Ms": 16.8,
+          "p99Ms": 17.1,
+          "maxMs": 20.5,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 386.9,
+          "triangles": 837259
+        },
+        "after": {
+          "frames": 999,
+          "seconds": 16.7,
+          "medianFps": 59.88,
+          "meanFps": 59.9,
+          "p95Ms": 16.8,
+          "p99Ms": 17,
+          "maxMs": 19.4,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 263.6,
+          "triangles": 866502
+        },
+        "baselineRuns": [
+          {
+            "frames": 1000,
+            "seconds": 16.7,
+            "medianFps": 59.88,
+            "meanFps": 59.9,
+            "p95Ms": 16.8,
+            "p99Ms": 17.1,
+            "maxMs": 20.5,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 386.9,
+            "triangles": 837259
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 999,
+            "seconds": 16.7,
+            "medianFps": 59.88,
+            "meanFps": 59.9,
+            "p95Ms": 16.8,
+            "p99Ms": 17,
+            "maxMs": 19.4,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 263.6,
+            "triangles": 866502
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": 0.0,
+        "p95ChangePct": 0.0,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "capped.desktop",
+        "segment": "6->7",
+        "baseline": {
+          "frames": 459,
+          "seconds": 7.7,
+          "medianFps": 59.88,
+          "meanFps": 59.89,
+          "p95Ms": 16.9,
+          "p99Ms": 17.2,
+          "maxMs": 17.4,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 261,
+          "triangles": 687700
+        },
+        "after": {
+          "frames": 458,
+          "seconds": 7.6,
+          "medianFps": 59.88,
+          "meanFps": 59.89,
+          "p95Ms": 16.9,
+          "p99Ms": 17.1,
+          "maxMs": 17.3,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 229.4,
+          "triangles": 724074
+        },
+        "baselineRuns": [
+          {
+            "frames": 459,
+            "seconds": 7.7,
+            "medianFps": 59.88,
+            "meanFps": 59.89,
+            "p95Ms": 16.9,
+            "p99Ms": 17.2,
+            "maxMs": 17.4,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 261,
+            "triangles": 687700
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 458,
+            "seconds": 7.6,
+            "medianFps": 59.88,
+            "meanFps": 59.89,
+            "p95Ms": 16.9,
+            "p99Ms": 17.1,
+            "maxMs": 17.3,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 229.4,
+            "triangles": 724074
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": 0.0,
+        "p95ChangePct": 0.0,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "capped.mobile",
+        "segment": "page 7",
+        "baseline": {
+          "frames": 1197,
+          "seconds": 20,
+          "medianFps": 59.88,
+          "meanFps": 59.9,
+          "p95Ms": 17,
+          "p99Ms": 17.2,
+          "maxMs": 17.7,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 155.2,
+          "triangles": 366577,
+          "liveGl": {
+            "textures": 38,
+            "buffers": 2352,
+            "vertexArrays": 602,
+            "programs": 95,
+            "framebuffers": 16,
+            "renderbuffers": 2
+          },
+          "contexts": 1,
+          "quality": null,
+          "page": 7
+        },
+        "after": {
+          "frames": 1197,
+          "seconds": 20,
+          "medianFps": 59.88,
+          "meanFps": 59.89,
+          "p95Ms": 17,
+          "p99Ms": 17.3,
+          "maxMs": 17.6,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 163,
+          "triangles": 379700,
+          "liveGl": {
+            "textures": 38,
+            "buffers": 1483,
+            "vertexArrays": 386,
+            "programs": 56,
+            "framebuffers": 16,
+            "renderbuffers": 2
+          },
+          "contexts": 1,
+          "quality": "2",
+          "page": 7
+        },
+        "baselineRuns": [
+          {
+            "frames": 1197,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.9,
+            "p95Ms": 17,
+            "p99Ms": 17.2,
+            "maxMs": 17.7,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 155.2,
+            "triangles": 366577,
+            "liveGl": {
+              "textures": 38,
+              "buffers": 2352,
+              "vertexArrays": 602,
+              "programs": 95,
+              "framebuffers": 16,
+              "renderbuffers": 2
+            },
+            "contexts": 1,
+            "quality": null,
+            "page": 7
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 1197,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.89,
+            "p95Ms": 17,
+            "p99Ms": 17.3,
+            "maxMs": 17.6,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 163,
+            "triangles": 379700,
+            "liveGl": {
+              "textures": 38,
+              "buffers": 1483,
+              "vertexArrays": 386,
+              "programs": 56,
+              "framebuffers": 16,
+              "renderbuffers": 2
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 7
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": -0.0,
+        "p95ChangePct": 0.0,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "capped.mobile",
+        "segment": "page 9",
+        "baseline": {
+          "frames": 1197,
+          "seconds": 20,
+          "medianFps": 59.88,
+          "meanFps": 59.89,
+          "p95Ms": 16.9,
+          "p99Ms": 17.2,
+          "maxMs": 17.7,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 181.8,
+          "triangles": 372103,
+          "liveGl": {
+            "textures": 38,
+            "buffers": 2352,
+            "vertexArrays": 602,
+            "programs": 95,
+            "framebuffers": 16,
+            "renderbuffers": 2
+          },
+          "contexts": 1,
+          "quality": null,
+          "page": 9
+        },
+        "after": {
+          "frames": 1197,
+          "seconds": 20,
+          "medianFps": 59.88,
+          "meanFps": 59.89,
+          "p95Ms": 17,
+          "p99Ms": 17.3,
+          "maxMs": 17.8,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 159.5,
+          "triangles": 423482,
+          "liveGl": {
+            "textures": 38,
+            "buffers": 1483,
+            "vertexArrays": 386,
+            "programs": 56,
+            "framebuffers": 16,
+            "renderbuffers": 2
+          },
+          "contexts": 1,
+          "quality": "2",
+          "page": 9
+        },
+        "baselineRuns": [
+          {
+            "frames": 1197,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.89,
+            "p95Ms": 16.9,
+            "p99Ms": 17.2,
+            "maxMs": 17.7,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 181.8,
+            "triangles": 372103,
+            "liveGl": {
+              "textures": 38,
+              "buffers": 2352,
+              "vertexArrays": 602,
+              "programs": 95,
+              "framebuffers": 16,
+              "renderbuffers": 2
+            },
+            "contexts": 1,
+            "quality": null,
+            "page": 9
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 1197,
+            "seconds": 20,
+            "medianFps": 59.88,
+            "meanFps": 59.89,
+            "p95Ms": 17,
+            "p99Ms": 17.3,
+            "maxMs": 17.8,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 159.5,
+            "triangles": 423482,
+            "liveGl": {
+              "textures": 38,
+              "buffers": 1483,
+              "vertexArrays": 386,
+              "programs": 56,
+              "framebuffers": 16,
+              "renderbuffers": 2
+            },
+            "contexts": 1,
+            "quality": "2",
+            "page": 9
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": 0.0,
+        "p95ChangePct": 0.6,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "capped.mobile",
+        "segment": "transitions all",
+        "baseline": {
+          "frames": 1931,
+          "seconds": 32.2,
+          "medianFps": 59.88,
+          "meanFps": 59.9,
+          "p95Ms": 17,
+          "p99Ms": 17.3,
+          "maxMs": 17.9,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 169.1,
+          "triangles": 369131
+        },
+        "after": {
+          "frames": 1929,
+          "seconds": 32.2,
+          "medianFps": 59.88,
+          "meanFps": 59.89,
+          "p95Ms": 17,
+          "p99Ms": 17.3,
+          "maxMs": 17.9,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 171.1,
+          "triangles": 387802
+        },
+        "baselineRuns": [
+          {
+            "frames": 1931,
+            "seconds": 32.2,
+            "medianFps": 59.88,
+            "meanFps": 59.9,
+            "p95Ms": 17,
+            "p99Ms": 17.3,
+            "maxMs": 17.9,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 169.1,
+            "triangles": 369131
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 1929,
+            "seconds": 32.2,
+            "medianFps": 59.88,
+            "meanFps": 59.89,
+            "p95Ms": 17,
+            "p99Ms": 17.3,
+            "maxMs": 17.9,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 171.1,
+            "triangles": 387802
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": -0.0,
+        "p95ChangePct": 0.0,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "capped.mobile",
+        "segment": "transitions underwater",
+        "baseline": {
+          "frames": 1009,
+          "seconds": 16.8,
+          "medianFps": 59.88,
+          "meanFps": 59.9,
+          "p95Ms": 17,
+          "p99Ms": 17.3,
+          "maxMs": 17.9,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 183.6,
+          "triangles": 450622
+        },
+        "after": {
+          "frames": 1009,
+          "seconds": 16.8,
+          "medianFps": 59.88,
+          "meanFps": 59.9,
+          "p95Ms": 17,
+          "p99Ms": 17.3,
+          "maxMs": 17.4,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 179.8,
+          "triangles": 476019
+        },
+        "baselineRuns": [
+          {
+            "frames": 1009,
+            "seconds": 16.8,
+            "medianFps": 59.88,
+            "meanFps": 59.9,
+            "p95Ms": 17,
+            "p99Ms": 17.3,
+            "maxMs": 17.9,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 183.6,
+            "triangles": 450622
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 1009,
+            "seconds": 16.8,
+            "medianFps": 59.88,
+            "meanFps": 59.9,
+            "p95Ms": 17,
+            "p99Ms": 17.3,
+            "maxMs": 17.4,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 179.8,
+            "triangles": 476019
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": 0.0,
+        "p95ChangePct": 0.0,
+        "flag": "no"
+      },
+      {
+        "pass_viewport": "capped.mobile",
+        "segment": "6->7",
+        "baseline": {
+          "frames": 461,
+          "seconds": 7.7,
+          "medianFps": 59.88,
+          "meanFps": 59.9,
+          "p95Ms": 16.9,
+          "p99Ms": 17.3,
+          "maxMs": 17.7,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 148.6,
+          "triangles": 311006
+        },
+        "after": {
+          "frames": 460,
+          "seconds": 7.7,
+          "medianFps": 59.88,
+          "meanFps": 59.89,
+          "p95Ms": 16.9,
+          "p99Ms": 17.2,
+          "maxMs": 17.6,
+          "over33ms": 0,
+          "over50ms": 0,
+          "drawCalls": 156.4,
+          "triangles": 324105
+        },
+        "baselineRuns": [
+          {
+            "frames": 461,
+            "seconds": 7.7,
+            "medianFps": 59.88,
+            "meanFps": 59.9,
+            "p95Ms": 16.9,
+            "p99Ms": 17.3,
+            "maxMs": 17.7,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 148.6,
+            "triangles": 311006
+          }
+        ],
+        "afterRuns": [
+          {
+            "frames": 460,
+            "seconds": 7.7,
+            "medianFps": 59.88,
+            "meanFps": 59.89,
+            "p95Ms": 16.9,
+            "p99Ms": 17.2,
+            "maxMs": 17.6,
+            "over33ms": 0,
+            "over50ms": 0,
+            "drawCalls": 156.4,
+            "triangles": 324105
+          }
+        ],
+        "medianFpsChangePct": 0.0,
+        "meanFpsChangePct": -0.0,
+        "p95ChangePct": 0.0,
+        "flag": "no"
+      }
+    ]
+  }
+}

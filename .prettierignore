@@ -2,3 +2,5 @@ dist/
 design/
 pnpm-lock.yaml
 .superpowers/
+# reviewers' files are kept as received
+docs/missions/*/review-*.md

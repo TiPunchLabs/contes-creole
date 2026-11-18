@@ -1,0 +1,1964 @@
+{
+  "replaces": "round-o4 clearance results (unsound predicate)",
+  "tolerance": 0.02,
+  "builds": {
+    "before": "1638c4c probe (clr-base-dist)",
+    "after": "7ea9a48 probe (c2-probe-dist)"
+  },
+  "renderer": "ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2)",
+  "runs": {
+    "before-desktop": {
+      "frames": 16553,
+      "steepestGround": 0.7717800745004411,
+      "checks": {
+        "mila-fish": {
+          "measured": 2212,
+          "closest": -0.13192000033505932
+        },
+        "mila-school": {
+          "measured": 3919,
+          "closest": -0.2004348004780918
+        },
+        "mila-turtle": {
+          "measured": 195,
+          "closest": 0.4688549068491916
+        },
+        "mila-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-bigConch": {
+          "measured": 4315,
+          "closest": 0.18567675726594146
+        },
+        "mila-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-rock": {
+          "measured": 5,
+          "closest": 0.7292952488251476
+        },
+        "mila-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-ground": {
+          "measured": 8415,
+          "closest": 0.13548816140200193
+        },
+        "fish-fish": {
+          "measured": 79735,
+          "closest": -0.09575324533195292
+        },
+        "fish-school": {
+          "measured": 1561,
+          "closest": -0.06256031607223382
+        },
+        "fish-turtle": {
+          "measured": 9356,
+          "closest": -0.14374048942809114
+        },
+        "fish-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-rock": {
+          "measured": 58299,
+          "closest": -0.665235960617899
+        },
+        "fish-coral": {
+          "measured": 29099,
+          "closest": -0.4298218730111323
+        },
+        "fish-ground": {
+          "measured": 61667,
+          "closest": -0.7688160780008566
+        },
+        "school-school": {
+          "measured": 6383752,
+          "closest": -0.06985538484305964
+        },
+        "school-turtle": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-ground": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-ground": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-debris": {
+          "measured": 5315,
+          "closest": 0.25590235239541115
+        },
+        "crab-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-ground": {
+          "measured": 16553,
+          "closest": -0.03161903767075738
+        },
+        "liveConch-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-ground": {
+          "measured": 16553,
+          "closest": 0.055080443520159506
+        }
+      },
+      "overlaps": {
+        "fish-ground": {
+          "frames": 13071,
+          "distinct": 257,
+          "deepest": 0.766548051233439,
+          "seg": "p10"
+        },
+        "school-school": {
+          "frames": 13857,
+          "distinct": 1010,
+          "deepest": 0.06985538484305964,
+          "seg": "b08-07"
+        },
+        "crab-ground": {
+          "frames": 16534,
+          "distinct": 34,
+          "deepest": 0.03161903767075738,
+          "seg": "p06"
+        },
+        "fish-rock": {
+          "frames": 9482,
+          "distinct": 349,
+          "deepest": 0.6631993989424885,
+          "seg": "p10"
+        },
+        "fish-coral": {
+          "frames": 4515,
+          "distinct": 182,
+          "deepest": 0.42705321347299474,
+          "seg": "t08-09"
+        },
+        "fish-fish": {
+          "frames": 626,
+          "distinct": 71,
+          "deepest": 0.09384160527855145,
+          "seg": "t10-11"
+        },
+        "mila-fish": {
+          "frames": 53,
+          "distinct": 4,
+          "deepest": 0.13069410000067772,
+          "seg": "p09"
+        },
+        "mila-school": {
+          "frames": 77,
+          "distinct": 17,
+          "deepest": 0.2004348004780918,
+          "seg": "b10-09"
+        },
+        "fish-school": {
+          "frames": 16,
+          "distinct": 4,
+          "deepest": 0.05960360977279266,
+          "seg": "p08"
+        },
+        "fish-turtle": {
+          "frames": 278,
+          "distinct": 9,
+          "deepest": 0.14374048942809114,
+          "seg": "b12-11"
+        }
+      },
+      "fish": {
+        "p01": {
+          "swimmers": 175,
+          "maxStep": 0.054503946885513896,
+          "fastSteps": 299,
+          "maxJolt": 0.00040890315502699337,
+          "jolts": null
+        },
+        "t01-02": {
+          "swimmers": 175,
+          "maxStep": 0.14270372741839826,
+          "fastSteps": 275,
+          "maxJolt": 0.13677794715116343,
+          "jolts": 1021
+        },
+        "p02": {
+          "swimmers": 175,
+          "maxStep": 0.0545763765425617,
+          "fastSteps": 267,
+          "maxJolt": 0.00040972966380984624,
+          "jolts": null
+        },
+        "t02-03": {
+          "swimmers": 175,
+          "maxStep": 0.16345109178150444,
+          "fastSteps": 314,
+          "maxJolt": 0.11099303384748098,
+          "jolts": 1657
+        },
+        "p03": {
+          "swimmers": 175,
+          "maxStep": 0.05459559974845005,
+          "fastSteps": 296,
+          "maxJolt": 0.0004098215647519298,
+          "jolts": null
+        },
+        "t03-04": {
+          "swimmers": 175,
+          "maxStep": 0.14443706257037026,
+          "fastSteps": 457,
+          "maxJolt": 0.1359675445962385,
+          "jolts": 1215
+        },
+        "p04": {
+          "swimmers": 175,
+          "maxStep": 0.054534290111597085,
+          "fastSteps": 264,
+          "maxJolt": 0.00040882502148013145,
+          "jolts": null
+        },
+        "t04-05": {
+          "swimmers": 175,
+          "maxStep": 0.16534606940737206,
+          "fastSteps": 592,
+          "maxJolt": 0.1323065922722363,
+          "jolts": 2134
+        },
+        "p05": {
+          "swimmers": 175,
+          "maxStep": 0.05451212387296031,
+          "fastSteps": 270,
+          "maxJolt": 0.00040803701218523067,
+          "jolts": null
+        },
+        "t05-06": {
+          "swimmers": 175,
+          "maxStep": 0.14768074044552706,
+          "fastSteps": 384,
+          "maxJolt": 0.11559426166527671,
+          "jolts": 1020
+        },
+        "p06": {
+          "swimmers": 175,
+          "maxStep": 0.05458833390936425,
+          "fastSteps": 298,
+          "maxJolt": 0.0004080525448952084,
+          "jolts": null
+        },
+        "t06-07": {
+          "swimmers": 175,
+          "maxStep": 0.1842167229993311,
+          "fastSteps": 1396,
+          "maxJolt": 0.13274952024852493,
+          "jolts": 1702
+        },
+        "p07": {
+          "swimmers": 175,
+          "maxStep": 0.06021237508115015,
+          "fastSteps": 2757,
+          "maxJolt": 0.0005223369649754161,
+          "jolts": null
+        },
+        "t07-08": {
+          "swimmers": 240,
+          "maxStep": 1.0780754273215774,
+          "fastSteps": 1726,
+          "maxJolt": 1.0980054754437834,
+          "jolts": 3297
+        },
+        "p08": {
+          "swimmers": 240,
+          "maxStep": 0.060646455179250214,
+          "fastSteps": 2996,
+          "maxJolt": 0.0007552649022099869,
+          "jolts": null
+        },
+        "t08-09": {
+          "swimmers": 240,
+          "maxStep": 1.0783706873969776,
+          "fastSteps": 2210,
+          "maxJolt": 1.0949885328426825,
+          "jolts": 4290
+        },
+        "p09": {
+          "swimmers": 240,
+          "maxStep": 0.0602280775191517,
+          "fastSteps": 2957,
+          "maxJolt": 0.0005221051158678509,
+          "jolts": null
+        },
+        "t09-10": {
+          "swimmers": 240,
+          "maxStep": 0.1682788674359871,
+          "fastSteps": 1534,
+          "maxJolt": 0.14867809228646897,
+          "jolts": 3760
+        },
+        "p10": {
+          "swimmers": 240,
+          "maxStep": 0.06023791274035714,
+          "fastSteps": 2831,
+          "maxJolt": 0.0005226143955307002,
+          "jolts": null
+        },
+        "t10-11": {
+          "swimmers": 240,
+          "maxStep": 0.18202377824020177,
+          "fastSteps": 1662,
+          "maxJolt": 0.1345497835755831,
+          "jolts": 3664
+        },
+        "p11": {
+          "swimmers": 240,
+          "maxStep": 0.06023787993157551,
+          "fastSteps": 861,
+          "maxJolt": 0.0005214462331063883,
+          "jolts": null
+        },
+        "t11-12": {
+          "swimmers": 240,
+          "maxStep": 0.16960815543700905,
+          "fastSteps": 1509,
+          "maxJolt": 0.1118912467282758,
+          "jolts": 2160
+        },
+        "p12": {
+          "swimmers": 240,
+          "maxStep": 0.060233662006650666,
+          "fastSteps": 842,
+          "maxJolt": 0.0005213619062147367,
+          "jolts": null
+        },
+        "b12-11": {
+          "swimmers": 240,
+          "maxStep": 0.1817688742212752,
+          "fastSteps": 1722,
+          "maxJolt": 0.14054174207903042,
+          "jolts": 2473
+        },
+        "b11-10": {
+          "swimmers": 240,
+          "maxStep": 0.17178679110831716,
+          "fastSteps": 1367,
+          "maxJolt": 0.11605665264054618,
+          "jolts": 2635
+        },
+        "b10-09": {
+          "swimmers": 240,
+          "maxStep": 0.18585384147440354,
+          "fastSteps": 1082,
+          "maxJolt": 0.14873508359260906,
+          "jolts": 1705
+        },
+        "b09-08": {
+          "swimmers": 240,
+          "maxStep": 1.0752919086974344,
+          "fastSteps": 1426,
+          "maxJolt": 1.091999395056228,
+          "jolts": 1977
+        },
+        "b08-07": {
+          "swimmers": 175,
+          "maxStep": 1.092956527976157,
+          "fastSteps": 1955,
+          "maxJolt": 1.1026657042547834,
+          "jolts": 3975
+        },
+        "b07-06": {
+          "swimmers": 175,
+          "maxStep": 0.13815950315455852,
+          "fastSteps": 373,
+          "maxJolt": 0.09057539234963002,
+          "jolts": 1197
+        },
+        "b06-05": {
+          "swimmers": 175,
+          "maxStep": 0.14232614803430166,
+          "fastSteps": 402,
+          "maxJolt": 0.1175981984428876,
+          "jolts": 1659
+        },
+        "b05-04": {
+          "swimmers": 175,
+          "maxStep": 0.12192595157061512,
+          "fastSteps": 409,
+          "maxJolt": 0.1010769827347616,
+          "jolts": 1130
+        },
+        "b04-03": {
+          "swimmers": 175,
+          "maxStep": 0.12372821313015127,
+          "fastSteps": 263,
+          "maxJolt": 0.07410446375448092,
+          "jolts": 617
+        },
+        "b03-02": {
+          "swimmers": 175,
+          "maxStep": 0.16726481544701194,
+          "fastSteps": 229,
+          "maxJolt": 0.14389165648872007,
+          "jolts": 914
+        },
+        "b02-01": {
+          "swimmers": 175,
+          "maxStep": 0.16541995264377607,
+          "fastSteps": 447,
+          "maxJolt": 0.12230616197806507,
+          "jolts": 1274
+        }
+      }
+    },
+    "before-mobile": {
+      "frames": 16676,
+      "steepestGround": 0.7717800745004411,
+      "checks": {
+        "mila-fish": {
+          "measured": 2163,
+          "closest": -0.13257753626463817
+        },
+        "mila-school": {
+          "measured": 2659,
+          "closest": -0.20387382810763333
+        },
+        "mila-turtle": {
+          "measured": 195,
+          "closest": 0.46886411904588954
+        },
+        "mila-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-bigConch": {
+          "measured": 4358,
+          "closest": 0.20686596114727696
+        },
+        "mila-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-rock": {
+          "measured": 12,
+          "closest": 0.7038043672034195
+        },
+        "mila-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-ground": {
+          "measured": 8498,
+          "closest": 0.13509613008486834
+        },
+        "fish-fish": {
+          "measured": 37050,
+          "closest": -0.08943309895607102
+        },
+        "fish-school": {
+          "measured": 115,
+          "closest": 0.15235343171592677
+        },
+        "fish-turtle": {
+          "measured": 6055,
+          "closest": -0.13582390966261482
+        },
+        "fish-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-liveConch": {
+          "measured": 715,
+          "closest": 0.5330476073425459
+        },
+        "fish-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-rock": {
+          "measured": 58353,
+          "closest": -0.935440211758273
+        },
+        "fish-coral": {
+          "measured": 46281,
+          "closest": -0.47186742710629304
+        },
+        "fish-ground": {
+          "measured": 6888,
+          "closest": -0.30634283740294244
+        },
+        "school-school": {
+          "measured": 2919417,
+          "closest": -0.06430109961602656
+        },
+        "school-turtle": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-ground": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-ground": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-debris": {
+          "measured": 5347,
+          "closest": 0.2559026917080258
+        },
+        "crab-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-ground": {
+          "measured": 16676,
+          "closest": -0.03161903767075738
+        },
+        "liveConch-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-coral": {
+          "measured": 33352,
+          "closest": 0.48255370611007997
+        },
+        "liveConch-ground": {
+          "measured": 16676,
+          "closest": 0.055080443520159506
+        }
+      },
+      "overlaps": {
+        "fish-coral": {
+          "frames": 6144,
+          "distinct": 171,
+          "deepest": 0.47011297518488604,
+          "seg": "p05"
+        },
+        "crab-ground": {
+          "frames": 16658,
+          "distinct": 34,
+          "deepest": 0.03161903767075738,
+          "seg": "p06"
+        },
+        "school-school": {
+          "frames": 7264,
+          "distinct": 357,
+          "deepest": 0.06369240008734862,
+          "seg": "p07"
+        },
+        "fish-rock": {
+          "frames": 7819,
+          "distinct": 209,
+          "deepest": 0.9316302346014957,
+          "seg": "t06-07"
+        },
+        "fish-ground": {
+          "frames": 2115,
+          "distinct": 30,
+          "deepest": 0.3036473918690179,
+          "seg": "b09-08"
+        },
+        "fish-fish": {
+          "frames": 448,
+          "distinct": 39,
+          "deepest": 0.08943309895607102,
+          "seg": "t10-11"
+        },
+        "fish-turtle": {
+          "frames": 387,
+          "distinct": 10,
+          "deepest": 0.13209875865857512,
+          "seg": "t11-12"
+        },
+        "mila-fish": {
+          "frames": 92,
+          "distinct": 5,
+          "deepest": 0.1306030082725021,
+          "seg": "p07"
+        },
+        "mila-school": {
+          "frames": 87,
+          "distinct": 18,
+          "deepest": 0.20387382810763333,
+          "seg": "p08"
+        }
+      },
+      "fish": {
+        "p01": {
+          "swimmers": 111,
+          "maxStep": 0.04241371809077222,
+          "fastSteps": null,
+          "maxJolt": 0.019688765105274016,
+          "jolts": 17
+        },
+        "t01-02": {
+          "swimmers": 111,
+          "maxStep": 0.10991590052919586,
+          "fastSteps": 46,
+          "maxJolt": 0.07259371040904448,
+          "jolts": 385
+        },
+        "p02": {
+          "swimmers": 111,
+          "maxStep": 0.04243161748832595,
+          "fastSteps": null,
+          "maxJolt": 0.0003497037374170698,
+          "jolts": null
+        },
+        "t02-03": {
+          "swimmers": 111,
+          "maxStep": 0.07046051791196423,
+          "fastSteps": 14,
+          "maxJolt": 0.03834210914770997,
+          "jolts": 199
+        },
+        "p03": {
+          "swimmers": 111,
+          "maxStep": 0.04247435954114177,
+          "fastSteps": null,
+          "maxJolt": 0.00034746258634454425,
+          "jolts": null
+        },
+        "t03-04": {
+          "swimmers": 111,
+          "maxStep": 0.08802776151630623,
+          "fastSteps": 37,
+          "maxJolt": 0.0517276136409068,
+          "jolts": 369
+        },
+        "p04": {
+          "swimmers": 111,
+          "maxStep": 0.042516788484986384,
+          "fastSteps": null,
+          "maxJolt": 0.0003508721265576144,
+          "jolts": null
+        },
+        "t04-05": {
+          "swimmers": 111,
+          "maxStep": 0.08303047549679803,
+          "fastSteps": 32,
+          "maxJolt": 0.05535244187889059,
+          "jolts": 423
+        },
+        "p05": {
+          "swimmers": 111,
+          "maxStep": 0.04253332789084807,
+          "fastSteps": null,
+          "maxJolt": 0.000349171477401064,
+          "jolts": null
+        },
+        "t05-06": {
+          "swimmers": 111,
+          "maxStep": 0.12702760657171744,
+          "fastSteps": 22,
+          "maxJolt": 0.08472148983781973,
+          "jolts": 349
+        },
+        "p06": {
+          "swimmers": 111,
+          "maxStep": 0.042452380120209104,
+          "fastSteps": null,
+          "maxJolt": 0.00034831183765169103,
+          "jolts": null
+        },
+        "t06-07": {
+          "swimmers": 111,
+          "maxStep": 0.13134601303096216,
+          "fastSteps": 763,
+          "maxJolt": 0.08982613981894343,
+          "jolts": 903
+        },
+        "p07": {
+          "swimmers": 111,
+          "maxStep": 0.06407625139464786,
+          "fastSteps": 1679,
+          "maxJolt": 0.0005527052802304047,
+          "jolts": null
+        },
+        "t07-08": {
+          "swimmers": 150,
+          "maxStep": 1.059904923660221,
+          "fastSteps": 750,
+          "maxJolt": 1.0606129096379726,
+          "jolts": 669
+        },
+        "p08": {
+          "swimmers": 150,
+          "maxStep": 0.06407369298636081,
+          "fastSteps": 1680,
+          "maxJolt": 0.0006925100647513743,
+          "jolts": null
+        },
+        "t08-09": {
+          "swimmers": 150,
+          "maxStep": 1.0579504860687277,
+          "fastSteps": 770,
+          "maxJolt": 1.059513223496992,
+          "jolts": 911
+        },
+        "p09": {
+          "swimmers": 150,
+          "maxStep": 0.06406938628394486,
+          "fastSteps": 1884,
+          "maxJolt": 0.0005522293105977534,
+          "jolts": null
+        },
+        "t09-10": {
+          "swimmers": 150,
+          "maxStep": 0.18400744356067084,
+          "fastSteps": 633,
+          "maxJolt": 0.13275606125857153,
+          "jolts": 302
+        },
+        "p10": {
+          "swimmers": 150,
+          "maxStep": 0.0640627575445309,
+          "fastSteps": 1777,
+          "maxJolt": 0.000552137073629974,
+          "jolts": null
+        },
+        "t10-11": {
+          "swimmers": 150,
+          "maxStep": 0.12073197250972428,
+          "fastSteps": 813,
+          "maxJolt": 0.06763746218116792,
+          "jolts": 520
+        },
+        "p11": {
+          "swimmers": 150,
+          "maxStep": 0.17167533005128235,
+          "fastSteps": 561,
+          "maxJolt": 0.15172880341639688,
+          "jolts": 348
+        },
+        "t11-12": {
+          "swimmers": 150,
+          "maxStep": 0.19756731442196984,
+          "fastSteps": 582,
+          "maxJolt": 0.15025033901181567,
+          "jolts": 582
+        },
+        "p12": {
+          "swimmers": 150,
+          "maxStep": 0.06402436417073647,
+          "fastSteps": 510,
+          "maxJolt": 0.0005514337877265053,
+          "jolts": null
+        },
+        "b12-11": {
+          "swimmers": 150,
+          "maxStep": 0.14083410862980011,
+          "fastSteps": 631,
+          "maxJolt": 0.10847069515835664,
+          "jolts": 740
+        },
+        "b11-10": {
+          "swimmers": 150,
+          "maxStep": 0.19167097541734932,
+          "fastSteps": 630,
+          "maxJolt": 0.13058181349673725,
+          "jolts": 397
+        },
+        "b10-09": {
+          "swimmers": 150,
+          "maxStep": 0.10108502441620534,
+          "fastSteps": 613,
+          "maxJolt": 0.07120902966196015,
+          "jolts": 396
+        },
+        "b09-08": {
+          "swimmers": 150,
+          "maxStep": 1.0641020747876995,
+          "fastSteps": 868,
+          "maxJolt": 1.0643898144389594,
+          "jolts": 1292
+        },
+        "b08-07": {
+          "swimmers": 111,
+          "maxStep": 1.0537848054205878,
+          "fastSteps": 782,
+          "maxJolt": 1.065103356397739,
+          "jolts": 855
+        },
+        "b07-06": {
+          "swimmers": 111,
+          "maxStep": 0.044823636552332284,
+          "fastSteps": null,
+          "maxJolt": 0.016351827652163628,
+          "jolts": 13
+        },
+        "b06-05": {
+          "swimmers": 111,
+          "maxStep": 0.0653461131386783,
+          "fastSteps": 4,
+          "maxJolt": 0.02807350667582021,
+          "jolts": 54
+        },
+        "b05-04": {
+          "swimmers": 111,
+          "maxStep": 0.08383030916505957,
+          "fastSteps": 55,
+          "maxJolt": 0.055872045878755036,
+          "jolts": 456
+        },
+        "b04-03": {
+          "swimmers": 111,
+          "maxStep": 0.07485774985682356,
+          "fastSteps": 14,
+          "maxJolt": 0.03616615413401039,
+          "jolts": 149
+        },
+        "b03-02": {
+          "swimmers": 111,
+          "maxStep": 0.07418084535204356,
+          "fastSteps": 17,
+          "maxJolt": 0.047131799316444296,
+          "jolts": 354
+        },
+        "b02-01": {
+          "swimmers": 111,
+          "maxStep": 0.1061098988434518,
+          "fastSteps": 80,
+          "maxJolt": 0.05554112172361662,
+          "jolts": 355
+        }
+      }
+    },
+    "after-desktop": {
+      "frames": 16657,
+      "steepestGround": 0.7717800745004411,
+      "checks": {
+        "mila-fish": {
+          "measured": 909,
+          "closest": 0.38371114955479857
+        },
+        "mila-school": {
+          "measured": 1424,
+          "closest": 0.3452442086704633
+        },
+        "mila-turtle": {
+          "measured": 193,
+          "closest": 0.4688616841557085
+        },
+        "mila-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-bigConch": {
+          "measured": 4360,
+          "closest": 0.19182099588422297
+        },
+        "mila-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-rock": {
+          "measured": 5,
+          "closest": 0.7295292532711635
+        },
+        "mila-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-ground": {
+          "measured": 8490,
+          "closest": 0.13250160423863494
+        },
+        "fish-fish": {
+          "measured": 94913,
+          "closest": 0.008541534540285119
+        },
+        "fish-school": {
+          "measured": 1478,
+          "closest": 0.03765941639149186
+        },
+        "fish-turtle": {
+          "measured": 2362,
+          "closest": 0.15518298460673208
+        },
+        "fish-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-rock": {
+          "measured": 20521,
+          "closest": 0.2825758532060618
+        },
+        "fish-coral": {
+          "measured": 2840,
+          "closest": 0.4504638307731099
+        },
+        "fish-ground": {
+          "measured": 92,
+          "closest": 0.07077243623286833
+        },
+        "school-school": {
+          "measured": 6106890,
+          "closest": 0.020043620164104152
+        },
+        "school-turtle": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-ground": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-ground": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-debris": {
+          "measured": 5357,
+          "closest": 0.25447278379036975
+        },
+        "crab-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-ground": {
+          "measured": 16657,
+          "closest": 0.008380962329242653
+        },
+        "liveConch-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-ground": {
+          "measured": 16657,
+          "closest": -0.007917499035581699
+        }
+      },
+      "overlaps": {},
+      "fish": {
+        "p01": {
+          "swimmers": 175,
+          "maxStep": 0.05450535303000387,
+          "fastSteps": 302,
+          "maxJolt": 0.011051028893886946,
+          "jolts": 2
+        },
+        "t01-02": {
+          "swimmers": 175,
+          "maxStep": 0.07143898710691916,
+          "fastSteps": 186,
+          "maxJolt": 0.043517814329284664,
+          "jolts": 167
+        },
+        "p02": {
+          "swimmers": 175,
+          "maxStep": 0.05442107323635142,
+          "fastSteps": 271,
+          "maxJolt": 0.0067872805459106515,
+          "jolts": null
+        },
+        "t02-03": {
+          "swimmers": 175,
+          "maxStep": 0.09638235075197336,
+          "fastSteps": 203,
+          "maxJolt": 0.055486545193452204,
+          "jolts": 207
+        },
+        "p03": {
+          "swimmers": 175,
+          "maxStep": 0.05458267241535012,
+          "fastSteps": 294,
+          "maxJolt": 0.011050480477229651,
+          "jolts": 2
+        },
+        "t03-04": {
+          "swimmers": 175,
+          "maxStep": 0.07175401881449826,
+          "fastSteps": 386,
+          "maxJolt": 0.03154704805335733,
+          "jolts": 203
+        },
+        "p04": {
+          "swimmers": 175,
+          "maxStep": 0.05448993499939346,
+          "fastSteps": 270,
+          "maxJolt": 0.006133974784364129,
+          "jolts": null
+        },
+        "t04-05": {
+          "swimmers": 175,
+          "maxStep": 0.08499244145570281,
+          "fastSteps": 437,
+          "maxJolt": 0.06294514903561792,
+          "jolts": 231
+        },
+        "p05": {
+          "swimmers": 175,
+          "maxStep": 0.05446188997499218,
+          "fastSteps": 269,
+          "maxJolt": 0.010367125102048229,
+          "jolts": 2
+        },
+        "t05-06": {
+          "swimmers": 175,
+          "maxStep": 0.1060588870783192,
+          "fastSteps": 362,
+          "maxJolt": 0.05785725128184927,
+          "jolts": 294
+        },
+        "p06": {
+          "swimmers": 175,
+          "maxStep": 0.05456623945292734,
+          "fastSteps": 296,
+          "maxJolt": 0.0064069048627960895,
+          "jolts": null
+        },
+        "t06-07": {
+          "swimmers": 175,
+          "maxStep": 0.09711992725815924,
+          "fastSteps": 1139,
+          "maxJolt": 0.0470976437012166,
+          "jolts": 207
+        },
+        "p07": {
+          "swimmers": 175,
+          "maxStep": 0.060840717923450575,
+          "fastSteps": 2803,
+          "maxJolt": 0.01771887313890701,
+          "jolts": 28
+        },
+        "t07-08": {
+          "swimmers": 240,
+          "maxStep": 0.08044434255144457,
+          "fastSteps": 790,
+          "maxJolt": 0.07206172753269395,
+          "jolts": 377
+        },
+        "p08": {
+          "swimmers": 240,
+          "maxStep": 0.06261494551097756,
+          "fastSteps": 2724,
+          "maxJolt": 0.021679146500971264,
+          "jolts": 18
+        },
+        "t08-09": {
+          "swimmers": 240,
+          "maxStep": 0.11740213581404592,
+          "fastSteps": 971,
+          "maxJolt": 0.08087346073799105,
+          "jolts": 496
+        },
+        "p09": {
+          "swimmers": 240,
+          "maxStep": 0.061852394912311974,
+          "fastSteps": 3118,
+          "maxJolt": 0.014645561363382322,
+          "jolts": 4
+        },
+        "t09-10": {
+          "swimmers": 240,
+          "maxStep": 0.08598017678517067,
+          "fastSteps": 1562,
+          "maxJolt": 0.031592065547321344,
+          "jolts": 212
+        },
+        "p10": {
+          "swimmers": 240,
+          "maxStep": 0.06093841614804002,
+          "fastSteps": 2807,
+          "maxJolt": 0.018805197606818362,
+          "jolts": 11
+        },
+        "t10-11": {
+          "swimmers": 240,
+          "maxStep": 0.07879008816545287,
+          "fastSteps": 1197,
+          "maxJolt": 0.05113723845064955,
+          "jolts": 415
+        },
+        "p11": {
+          "swimmers": 240,
+          "maxStep": 0.060253321765721124,
+          "fastSteps": 862,
+          "maxJolt": 0.019328746757408814,
+          "jolts": 4
+        },
+        "t11-12": {
+          "swimmers": 240,
+          "maxStep": 0.09408771691457923,
+          "fastSteps": 856,
+          "maxJolt": 0.07321327076363664,
+          "jolts": 424
+        },
+        "p12": {
+          "swimmers": 240,
+          "maxStep": 0.06026502821590306,
+          "fastSteps": 893,
+          "maxJolt": 0.011524021170332056,
+          "jolts": 4
+        },
+        "b12-11": {
+          "swimmers": 240,
+          "maxStep": 0.14125368206288028,
+          "fastSteps": 1013,
+          "maxJolt": 0.08800878951213194,
+          "jolts": 1300
+        },
+        "b11-10": {
+          "swimmers": 240,
+          "maxStep": 0.09981245747790021,
+          "fastSteps": 941,
+          "maxJolt": 0.07020907431377969,
+          "jolts": 621
+        },
+        "b10-09": {
+          "swimmers": 240,
+          "maxStep": 0.12573118266102154,
+          "fastSteps": 1647,
+          "maxJolt": 0.07953243031113107,
+          "jolts": 850
+        },
+        "b09-08": {
+          "swimmers": 240,
+          "maxStep": 0.07740501608136958,
+          "fastSteps": 842,
+          "maxJolt": 0.047139674402506,
+          "jolts": 426
+        },
+        "b08-07": {
+          "swimmers": 175,
+          "maxStep": 0.09643481694404356,
+          "fastSteps": 927,
+          "maxJolt": 0.06207434889792021,
+          "jolts": 641
+        },
+        "b07-06": {
+          "swimmers": 175,
+          "maxStep": 0.10106842934022318,
+          "fastSteps": 316,
+          "maxJolt": 0.07748800865162178,
+          "jolts": 470
+        },
+        "b06-05": {
+          "swimmers": 175,
+          "maxStep": 0.07724447400552485,
+          "fastSteps": 280,
+          "maxJolt": 0.05565047996417906,
+          "jolts": 195
+        },
+        "b05-04": {
+          "swimmers": 175,
+          "maxStep": 0.06739128455979719,
+          "fastSteps": 245,
+          "maxJolt": 0.03531643844532958,
+          "jolts": 56
+        },
+        "b04-03": {
+          "swimmers": 175,
+          "maxStep": 0.06893936738901148,
+          "fastSteps": 184,
+          "maxJolt": 0.036145920529602,
+          "jolts": 105
+        },
+        "b03-02": {
+          "swimmers": 175,
+          "maxStep": 0.0872897500250805,
+          "fastSteps": 231,
+          "maxJolt": 0.06040674001876972,
+          "jolts": 194
+        },
+        "b02-01": {
+          "swimmers": 175,
+          "maxStep": 0.0915132825519599,
+          "fastSteps": 318,
+          "maxJolt": 0.05363037979841316,
+          "jolts": 255
+        }
+      }
+    },
+    "after-mobile": {
+      "frames": 16661,
+      "steepestGround": 0.7717800745004411,
+      "checks": {
+        "mila-fish": {
+          "measured": 1228,
+          "closest": 0.3390901813642793
+        },
+        "mila-school": {
+          "measured": 1000,
+          "closest": 0.4043419268798507
+        },
+        "mila-turtle": {
+          "measured": 192,
+          "closest": 0.468855160636803
+        },
+        "mila-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-bigConch": {
+          "measured": 4355,
+          "closest": 0.20254649076899867
+        },
+        "mila-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-rock": {
+          "measured": 11,
+          "closest": 0.703939769950459
+        },
+        "mila-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "mila-ground": {
+          "measured": 8490,
+          "closest": 0.13338843355267385
+        },
+        "fish-fish": {
+          "measured": 40625,
+          "closest": 0.011699946325927753
+        },
+        "fish-school": {
+          "measured": 115,
+          "closest": 0.20097921281948106
+        },
+        "fish-turtle": {
+          "measured": 2021,
+          "closest": 0.1424431520328901
+        },
+        "fish-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "fish-rock": {
+          "measured": 20516,
+          "closest": 0.19000781990989735
+        },
+        "fish-coral": {
+          "measured": 3458,
+          "closest": 0.4275520658260845
+        },
+        "fish-ground": {
+          "measured": 67,
+          "closest": 0.08875046215689508
+        },
+        "school-school": {
+          "measured": 2800191,
+          "closest": 0.036607983235882366
+        },
+        "school-turtle": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "school-ground": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-crab": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "turtle-ground": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-liveConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-debris": {
+          "measured": 5367,
+          "closest": 0.2544725313489893
+        },
+        "crab-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-coral": {
+          "measured": 0,
+          "closest": null
+        },
+        "crab-ground": {
+          "measured": 16661,
+          "closest": 0.008380962329242653
+        },
+        "liveConch-pearl": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-bigConch": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-debris": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-rock": {
+          "measured": 0,
+          "closest": null
+        },
+        "liveConch-coral": {
+          "measured": 16661,
+          "closest": 0.6741024057506415
+        },
+        "liveConch-ground": {
+          "measured": 16661,
+          "closest": -0.007917499035581699
+        }
+      },
+      "overlaps": {},
+      "fish": {
+        "p01": {
+          "swimmers": 111,
+          "maxStep": 0.04241295653198827,
+          "fastSteps": null,
+          "maxJolt": 0.0062908270585801136,
+          "jolts": null
+        },
+        "t01-02": {
+          "swimmers": 111,
+          "maxStep": 0.0631902612533483,
+          "fastSteps": 5,
+          "maxJolt": 0.04912798119753832,
+          "jolts": 129
+        },
+        "p02": {
+          "swimmers": 111,
+          "maxStep": 0.042402495857242394,
+          "fastSteps": null,
+          "maxJolt": 0.008846799723100679,
+          "jolts": null
+        },
+        "t02-03": {
+          "swimmers": 111,
+          "maxStep": 0.04340819390354365,
+          "fastSteps": null,
+          "maxJolt": 0.008368868371053469,
+          "jolts": null
+        },
+        "p03": {
+          "swimmers": 111,
+          "maxStep": 0.046182031637506823,
+          "fastSteps": null,
+          "maxJolt": 0.006782615412227077,
+          "jolts": null
+        },
+        "t03-04": {
+          "swimmers": 111,
+          "maxStep": 0.07167420306708527,
+          "fastSteps": 8,
+          "maxJolt": 0.05739322374778546,
+          "jolts": 148
+        },
+        "p04": {
+          "swimmers": 111,
+          "maxStep": 0.042484752328841684,
+          "fastSteps": null,
+          "maxJolt": 0.007179757359069401,
+          "jolts": null
+        },
+        "t04-05": {
+          "swimmers": 111,
+          "maxStep": 0.044579130161557096,
+          "fastSteps": null,
+          "maxJolt": 0.019091795793855938,
+          "jolts": 16
+        },
+        "p05": {
+          "swimmers": 111,
+          "maxStep": 0.042530270958932415,
+          "fastSteps": null,
+          "maxJolt": 0.00531152564163854,
+          "jolts": null
+        },
+        "t05-06": {
+          "swimmers": 111,
+          "maxStep": 0.07903685237881927,
+          "fastSteps": 13,
+          "maxJolt": 0.05794999573756596,
+          "jolts": 238
+        },
+        "p06": {
+          "swimmers": 111,
+          "maxStep": 0.04232062884373186,
+          "fastSteps": null,
+          "maxJolt": 0.005552222416245796,
+          "jolts": null
+        },
+        "t06-07": {
+          "swimmers": 111,
+          "maxStep": 0.06792390292705952,
+          "fastSteps": 645,
+          "maxJolt": 0.049781474527125294,
+          "jolts": 124
+        },
+        "p07": {
+          "swimmers": 111,
+          "maxStep": 0.06407704869366458,
+          "fastSteps": 1718,
+          "maxJolt": 0.016841548947847444,
+          "jolts": 4
+        },
+        "t07-08": {
+          "swimmers": 150,
+          "maxStep": 0.0917897521865775,
+          "fastSteps": 460,
+          "maxJolt": 0.07732445910623159,
+          "jolts": 124
+        },
+        "p08": {
+          "swimmers": 150,
+          "maxStep": 0.06407891635860463,
+          "fastSteps": 1675,
+          "maxJolt": 0.014819040262187173,
+          "jolts": 13
+        },
+        "t08-09": {
+          "swimmers": 150,
+          "maxStep": 0.09794585153579165,
+          "fastSteps": 599,
+          "maxJolt": 0.08102192798169056,
+          "jolts": 512
+        },
+        "p09": {
+          "swimmers": 150,
+          "maxStep": 0.0641910308171287,
+          "fastSteps": 1905,
+          "maxJolt": 0.012900576706223028,
+          "jolts": 8
+        },
+        "t09-10": {
+          "swimmers": 150,
+          "maxStep": 0.15699254164173668,
+          "fastSteps": 1005,
+          "maxJolt": 0.1226358335065786,
+          "jolts": 334
+        },
+        "p10": {
+          "swimmers": 150,
+          "maxStep": 0.06480713587553871,
+          "fastSteps": 1802,
+          "maxJolt": 0.016463544291624572,
+          "jolts": 21
+        },
+        "t10-11": {
+          "swimmers": 150,
+          "maxStep": 0.07794839740473117,
+          "fastSteps": 739,
+          "maxJolt": 0.04255584724713414,
+          "jolts": 116
+        },
+        "p11": {
+          "swimmers": 150,
+          "maxStep": 0.06404127765317107,
+          "fastSteps": 519,
+          "maxJolt": 0.012402647240480739,
+          "jolts": 4
+        },
+        "t11-12": {
+          "swimmers": 150,
+          "maxStep": 0.09204001110042417,
+          "fastSteps": 521,
+          "maxJolt": 0.048024513564665354,
+          "jolts": 107
+        },
+        "p12": {
+          "swimmers": 150,
+          "maxStep": 0.06401979815001725,
+          "fastSteps": 544,
+          "maxJolt": 0.011029745816979722,
+          "jolts": 4
+        },
+        "b12-11": {
+          "swimmers": 150,
+          "maxStep": 0.07807414131237024,
+          "fastSteps": 596,
+          "maxJolt": 0.042623338698635604,
+          "jolts": 140
+        },
+        "b11-10": {
+          "swimmers": 150,
+          "maxStep": 0.10726676753400745,
+          "fastSteps": 601,
+          "maxJolt": 0.08741889235782972,
+          "jolts": 249
+        },
+        "b10-09": {
+          "swimmers": 150,
+          "maxStep": 0.12321450886693239,
+          "fastSteps": 1164,
+          "maxJolt": 0.09414422236778656,
+          "jolts": 204
+        },
+        "b09-08": {
+          "swimmers": 150,
+          "maxStep": 0.07480278766560512,
+          "fastSteps": 458,
+          "maxJolt": 0.03706062012130079,
+          "jolts": 164
+        },
+        "b08-07": {
+          "swimmers": 111,
+          "maxStep": 0.07460305782564121,
+          "fastSteps": 445,
+          "maxJolt": 0.03578682776795398,
+          "jolts": 166
+        },
+        "b07-06": {
+          "swimmers": 111,
+          "maxStep": 0.045185600737190794,
+          "fastSteps": null,
+          "maxJolt": 0.014296522015493326,
+          "jolts": 10
+        },
+        "b06-05": {
+          "swimmers": 111,
+          "maxStep": 0.04835625138895565,
+          "fastSteps": null,
+          "maxJolt": 0.019339613081090376,
+          "jolts": 16
+        },
+        "b05-04": {
+          "swimmers": 111,
+          "maxStep": 0.052629834195612346,
+          "fastSteps": 1,
+          "maxJolt": 0.021000975570668504,
+          "jolts": 43
+        },
+        "b04-03": {
+          "swimmers": 111,
+          "maxStep": 0.04228785490613432,
+          "fastSteps": null,
+          "maxJolt": 0.011708600562536111,
+          "jolts": 2
+        },
+        "b03-02": {
+          "swimmers": 111,
+          "maxStep": 0.06464040726893441,
+          "fastSteps": 5,
+          "maxJolt": 0.05028592048609317,
+          "jolts": 131
+        },
+        "b02-01": {
+          "swimmers": 111,
+          "maxStep": 0.0823683862873472,
+          "fastSteps": 14,
+          "maxJolt": 0.0474321321140655,
+          "jolts": 178
+        }
+      }
+    }
+  },
+  "stillOverlappingAfter": []
+}

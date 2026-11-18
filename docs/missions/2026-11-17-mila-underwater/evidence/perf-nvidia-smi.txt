@@ -1,0 +1,221 @@
+## page 7, desktop, baseline-d60c1a6 2026-11-18T07:10:55.459Z
+$ nvidia-smi --query-compute-apps=pid,name,used_memory --format=csv
+pid, process_name, used_gpu_memory [MiB]
+29335, /usr/share/typora/Typora --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --enable-crash-reporter=959bd725-3df1-4ef3-ad7f-f838bad84410?no_channel --user-data-dir=/home/xgueret/.config/Typora --gpu-preferences=UAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAYAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --shared-files --field-trial-handle=3?i?59680863016093219?12343278701518330398?262144 --enable-features=PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?3525117723984525085?16942284632816228702?4 --trace-process-track-uuid=3190708988185955192, 86 MiB
+110633, /usr/bin/gnome-text-editor, 50 MiB
+209455, /usr/share/code/code --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --crashpad-handler-pid=209436 --enable-crash-reporter=4f50f461-b28d-474d-9304-15d8671b356b?no_channel --user-data-dir=/home/xgueret/.config/Code --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=3?i?8602441075707455071?4607736521109645964?262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports?EarlyEstablishGpuChannel?EstablishGpuChannelAsync?GlobalShortcutsPortal?GlobalShortcutsPortalPreferredTrigger?PdfUseShowSaveFilePicker?UpdateCompositorMemoryPolicyOnScreenChange --disable-features=CalculateNativeWinOcclusion?DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?14586295133711585119?11235733863596346628?4 --trace-process-track-uuid=3190708988185955192, 128 MiB
+636602, /usr/bin/gnome-control-center, 41 MiB
+1653170, /opt/google/chrome/chrome --type=gpu-process --gpu-recent-crash-count=0 --no-sandbox --disable-dev-shm-usage --disable-breakpad --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --disable-gpu-vsync --use-angle=gl-egl --enable-unsafe-swiftshader --disable-gpu-vsync --crashpad-handler-pid=1653132 --enable-crash-reporter=? --user-data-dir=/tmp/playwright_chromiumdev_profile-gnoLtq --change-stack-guard-on-fork=enable --gpu-preferences=YAAAAAAAAAAgAAAGAAAAAAAAAAAAAGAASAAAAAAAAAABAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --use-gl=angle --shared-files --metrics-shmem-handle=4?i?7735834149922221195?13315539307984700047?262144 --field-trial-handle=3?i?3533017606543874174?15058383085891503332?262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate?AvoidUnnecessaryBeforeUnloadCheckSync?BoundaryEventDispatchTracksNodeRemoval?DestroyProfileOnBrowserClose?DialMediaRouteProvider?GlobalMediaControls?HttpsUpgrades?LensOverlay?MediaRouter?OptimizationHints?PaintHolding?RenderDocument?ThirdPartyStoragePartitioning?Translate --variations-seed-version --pseudonymization-salt-handle=7?i?4606005225956495130?16610317822403467568?4 --trace-process-track-uuid=3190708988185955192, 544 MiB
+
+$ nvidia-smi
+Wed Nov 18 03:10:55 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4060 ...    Off |   00000000:01:00.0  On |                  N/A |
+| N/A   77C    P0             74W /   75W |    1245MiB /   8188MiB |    100%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            4920      G   /usr/bin/gnome-shell                    223MiB |
+|    0   N/A  N/A           11348      G   /usr/bin/Xwayland                         2MiB |
+|    0   N/A  N/A           29335    C+G   ...rack-uuid=3190708988185955192         86MiB |
+|    0   N/A  N/A          110633    C+G   /usr/bin/gnome-text-editor               50MiB |
+|    0   N/A  N/A          209455    C+G   ...rack-uuid=3190708988185955192        128MiB |
+|    0   N/A  N/A          636602    C+G   /usr/bin/gnome-control-center            41MiB |
+|    0   N/A  N/A         1653170    C+G   ...rack-uuid=3190708988185955192        544MiB |
++-----------------------------------------------------------------------------------------+
+
+## page 7, desktop, baseline-d60c1a6 2026-11-18T07:13:08.584Z
+$ nvidia-smi --query-compute-apps=pid,name,used_memory --format=csv
+pid, process_name, used_gpu_memory [MiB]
+29335, /usr/share/typora/Typora --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --enable-crash-reporter=959bd725-3df1-4ef3-ad7f-f838bad84410?no_channel --user-data-dir=/home/xgueret/.config/Typora --gpu-preferences=UAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAYAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --shared-files --field-trial-handle=3?i?59680863016093219?12343278701518330398?262144 --enable-features=PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?3525117723984525085?16942284632816228702?4 --trace-process-track-uuid=3190708988185955192, 86 MiB
+110633, /usr/bin/gnome-text-editor, 50 MiB
+209455, /usr/share/code/code --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --crashpad-handler-pid=209436 --enable-crash-reporter=4f50f461-b28d-474d-9304-15d8671b356b?no_channel --user-data-dir=/home/xgueret/.config/Code --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=3?i?8602441075707455071?4607736521109645964?262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports?EarlyEstablishGpuChannel?EstablishGpuChannelAsync?GlobalShortcutsPortal?GlobalShortcutsPortalPreferredTrigger?PdfUseShowSaveFilePicker?UpdateCompositorMemoryPolicyOnScreenChange --disable-features=CalculateNativeWinOcclusion?DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?14586295133711585119?11235733863596346628?4 --trace-process-track-uuid=3190708988185955192, 128 MiB
+636602, /usr/bin/gnome-control-center, 41 MiB
+1656327, /opt/google/chrome/chrome --type=gpu-process --gpu-recent-crash-count=0 --no-sandbox --disable-dev-shm-usage --disable-breakpad --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --use-angle=gl-egl --enable-unsafe-swiftshader --crashpad-handler-pid=1656289 --enable-crash-reporter=? --user-data-dir=/tmp/playwright_chromiumdev_profile-oeiCiF --change-stack-guard-on-fork=enable --gpu-preferences=YAAAAAAAAAAgAAAGAAAAAAAAAAAAAGAASAAAAAAAAAABAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --use-gl=angle --shared-files --metrics-shmem-handle=4?i?610894818933753671?17459419528929096488?262144 --field-trial-handle=3?i?10802906901648432658?8520532599067159821?262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate?AvoidUnnecessaryBeforeUnloadCheckSync?BoundaryEventDispatchTracksNodeRemoval?DestroyProfileOnBrowserClose?DialMediaRouteProvider?GlobalMediaControls?HttpsUpgrades?LensOverlay?MediaRouter?OptimizationHints?PaintHolding?RenderDocument?ThirdPartyStoragePartitioning?Translate --variations-seed-version --pseudonymization-salt-handle=7?i?3406781078760009794?4234570486852075667?4 --trace-process-track-uuid=3190708988185955192, 534 MiB
+
+$ nvidia-smi
+Wed Nov 18 03:13:08 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4060 ...    Off |   00000000:01:00.0  On |                  N/A |
+| N/A   53C    P4              8W /   75W |    1242MiB /   8188MiB |     39%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            4920      G   /usr/bin/gnome-shell                    223MiB |
+|    0   N/A  N/A           11348      G   /usr/bin/Xwayland                         2MiB |
+|    0   N/A  N/A           29335    C+G   ...rack-uuid=3190708988185955192         86MiB |
+|    0   N/A  N/A          110633    C+G   /usr/bin/gnome-text-editor               50MiB |
+|    0   N/A  N/A          209455    C+G   ...rack-uuid=3190708988185955192        128MiB |
+|    0   N/A  N/A          636602    C+G   /usr/bin/gnome-control-center            41MiB |
+|    0   N/A  N/A         1656327    C+G   ...rack-uuid=3190708988185955192        534MiB |
++-----------------------------------------------------------------------------------------+
+
+## page 7, mobile, baseline-d60c1a6 2026-11-18T07:15:19.326Z
+$ nvidia-smi --query-compute-apps=pid,name,used_memory --format=csv
+pid, process_name, used_gpu_memory [MiB]
+29335, /usr/share/typora/Typora --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --enable-crash-reporter=959bd725-3df1-4ef3-ad7f-f838bad84410?no_channel --user-data-dir=/home/xgueret/.config/Typora --gpu-preferences=UAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAYAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --shared-files --field-trial-handle=3?i?59680863016093219?12343278701518330398?262144 --enable-features=PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?3525117723984525085?16942284632816228702?4 --trace-process-track-uuid=3190708988185955192, 86 MiB
+110633, /usr/bin/gnome-text-editor, 50 MiB
+209455, /usr/share/code/code --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --crashpad-handler-pid=209436 --enable-crash-reporter=4f50f461-b28d-474d-9304-15d8671b356b?no_channel --user-data-dir=/home/xgueret/.config/Code --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=3?i?8602441075707455071?4607736521109645964?262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports?EarlyEstablishGpuChannel?EstablishGpuChannelAsync?GlobalShortcutsPortal?GlobalShortcutsPortalPreferredTrigger?PdfUseShowSaveFilePicker?UpdateCompositorMemoryPolicyOnScreenChange --disable-features=CalculateNativeWinOcclusion?DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?14586295133711585119?11235733863596346628?4 --trace-process-track-uuid=3190708988185955192, 128 MiB
+636602, /usr/bin/gnome-control-center, 41 MiB
+1656327, /opt/google/chrome/chrome --type=gpu-process --gpu-recent-crash-count=0 --no-sandbox --disable-dev-shm-usage --disable-breakpad --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --use-angle=gl-egl --enable-unsafe-swiftshader --crashpad-handler-pid=1656289 --enable-crash-reporter=? --user-data-dir=/tmp/playwright_chromiumdev_profile-oeiCiF --change-stack-guard-on-fork=enable --gpu-preferences=YAAAAAAAAAAgAAAGAAAAAAAAAAAAAGAASAAAAAAAAAABAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --use-gl=angle --shared-files --metrics-shmem-handle=4?i?610894818933753671?17459419528929096488?262144 --field-trial-handle=3?i?10802906901648432658?8520532599067159821?262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate?AvoidUnnecessaryBeforeUnloadCheckSync?BoundaryEventDispatchTracksNodeRemoval?DestroyProfileOnBrowserClose?DialMediaRouteProvider?GlobalMediaControls?HttpsUpgrades?LensOverlay?MediaRouter?OptimizationHints?PaintHolding?RenderDocument?ThirdPartyStoragePartitioning?Translate --variations-seed-version --pseudonymization-salt-handle=7?i?3406781078760009794?4234570486852075667?4 --trace-process-track-uuid=3190708988185955192, 149 MiB
+
+$ nvidia-smi
+Wed Nov 18 03:15:19 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4060 ...    Off |   00000000:01:00.0  On |                  N/A |
+| N/A   46C    P8              2W /   60W |     816MiB /   8188MiB |     33%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            4920      G   /usr/bin/gnome-shell                    189MiB |
+|    0   N/A  N/A           11348      G   /usr/bin/Xwayland                         2MiB |
+|    0   N/A  N/A           29335    C+G   ...rack-uuid=3190708988185955192         86MiB |
+|    0   N/A  N/A          110633    C+G   /usr/bin/gnome-text-editor               50MiB |
+|    0   N/A  N/A          209455    C+G   ...rack-uuid=3190708988185955192        128MiB |
+|    0   N/A  N/A          636602    C+G   /usr/bin/gnome-control-center            41MiB |
+|    0   N/A  N/A         1656327    C+G   ...rack-uuid=3190708988185955192        149MiB |
++-----------------------------------------------------------------------------------------+
+
+## page 7, desktop, final-3d09931 2026-11-18T07:17:33.489Z
+$ nvidia-smi --query-compute-apps=pid,name,used_memory --format=csv
+pid, process_name, used_gpu_memory [MiB]
+29335, /usr/share/typora/Typora --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --enable-crash-reporter=959bd725-3df1-4ef3-ad7f-f838bad84410?no_channel --user-data-dir=/home/xgueret/.config/Typora --gpu-preferences=UAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAYAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --shared-files --field-trial-handle=3?i?59680863016093219?12343278701518330398?262144 --enable-features=PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?3525117723984525085?16942284632816228702?4 --trace-process-track-uuid=3190708988185955192, 86 MiB
+110633, /usr/bin/gnome-text-editor, 50 MiB
+209455, /usr/share/code/code --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --crashpad-handler-pid=209436 --enable-crash-reporter=4f50f461-b28d-474d-9304-15d8671b356b?no_channel --user-data-dir=/home/xgueret/.config/Code --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=3?i?8602441075707455071?4607736521109645964?262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports?EarlyEstablishGpuChannel?EstablishGpuChannelAsync?GlobalShortcutsPortal?GlobalShortcutsPortalPreferredTrigger?PdfUseShowSaveFilePicker?UpdateCompositorMemoryPolicyOnScreenChange --disable-features=CalculateNativeWinOcclusion?DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?14586295133711585119?11235733863596346628?4 --trace-process-track-uuid=3190708988185955192, 128 MiB
+636602, /usr/bin/gnome-control-center, 41 MiB
+1662374, /opt/google/chrome/chrome --type=gpu-process --gpu-recent-crash-count=0 --no-sandbox --disable-dev-shm-usage --disable-breakpad --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --disable-gpu-vsync --use-angle=gl-egl --enable-unsafe-swiftshader --disable-gpu-vsync --crashpad-handler-pid=1662336 --enable-crash-reporter=? --user-data-dir=/tmp/playwright_chromiumdev_profile-DCDUlF --change-stack-guard-on-fork=enable --gpu-preferences=YAAAAAAAAAAgAAAGAAAAAAAAAAAAAGAASAAAAAAAAAABAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --use-gl=angle --shared-files --metrics-shmem-handle=4?i?17883223006334816723?1842075596143955287?262144 --field-trial-handle=3?i?2786041141350446268?4914681718440776607?262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate?AvoidUnnecessaryBeforeUnloadCheckSync?BoundaryEventDispatchTracksNodeRemoval?DestroyProfileOnBrowserClose?DialMediaRouteProvider?GlobalMediaControls?HttpsUpgrades?LensOverlay?MediaRouter?OptimizationHints?PaintHolding?RenderDocument?ThirdPartyStoragePartitioning?Translate --variations-seed-version --pseudonymization-salt-handle=7?i?17990584837559413944?3336326547644947897?4 --trace-process-track-uuid=3190708988185955192, 547 MiB
+
+$ nvidia-smi
+Wed Nov 18 03:17:33 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4060 ...    Off |   00000000:01:00.0  On |                  N/A |
+| N/A   76C    P0             74W /   75W |    1235MiB /   8188MiB |     96%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            4920      G   /usr/bin/gnome-shell                    209MiB |
+|    0   N/A  N/A           11348      G   /usr/bin/Xwayland                         2MiB |
+|    0   N/A  N/A           29335    C+G   ...rack-uuid=3190708988185955192         86MiB |
+|    0   N/A  N/A          110633    C+G   /usr/bin/gnome-text-editor               50MiB |
+|    0   N/A  N/A          209455    C+G   ...rack-uuid=3190708988185955192        128MiB |
+|    0   N/A  N/A          636602    C+G   /usr/bin/gnome-control-center            41MiB |
+|    0   N/A  N/A         1662374    C+G   ...rack-uuid=3190708988185955192        541MiB |
++-----------------------------------------------------------------------------------------+
+
+## page 7, desktop, final-3d09931 2026-11-18T07:19:49.176Z
+$ nvidia-smi --query-compute-apps=pid,name,used_memory --format=csv
+pid, process_name, used_gpu_memory [MiB]
+29335, /usr/share/typora/Typora --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --enable-crash-reporter=959bd725-3df1-4ef3-ad7f-f838bad84410?no_channel --user-data-dir=/home/xgueret/.config/Typora --gpu-preferences=UAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAYAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --shared-files --field-trial-handle=3?i?59680863016093219?12343278701518330398?262144 --enable-features=PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?3525117723984525085?16942284632816228702?4 --trace-process-track-uuid=3190708988185955192, 86 MiB
+110633, /usr/bin/gnome-text-editor, 50 MiB
+209455, /usr/share/code/code --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --crashpad-handler-pid=209436 --enable-crash-reporter=4f50f461-b28d-474d-9304-15d8671b356b?no_channel --user-data-dir=/home/xgueret/.config/Code --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=3?i?8602441075707455071?4607736521109645964?262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports?EarlyEstablishGpuChannel?EstablishGpuChannelAsync?GlobalShortcutsPortal?GlobalShortcutsPortalPreferredTrigger?PdfUseShowSaveFilePicker?UpdateCompositorMemoryPolicyOnScreenChange --disable-features=CalculateNativeWinOcclusion?DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?14586295133711585119?11235733863596346628?4 --trace-process-track-uuid=3190708988185955192, 128 MiB
+636602, /usr/bin/gnome-control-center, 41 MiB
+1665827, /opt/google/chrome/chrome --type=gpu-process --gpu-recent-crash-count=0 --no-sandbox --disable-dev-shm-usage --disable-breakpad --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --use-angle=gl-egl --enable-unsafe-swiftshader --crashpad-handler-pid=1665789 --enable-crash-reporter=? --user-data-dir=/tmp/playwright_chromiumdev_profile-3yj8FE --change-stack-guard-on-fork=enable --gpu-preferences=YAAAAAAAAAAgAAAGAAAAAAAAAAAAAGAASAAAAAAAAAABAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --use-gl=angle --shared-files --metrics-shmem-handle=4?i?15153799774857277325?5917190945912422249?262144 --field-trial-handle=3?i?5155776256336399693?8239472037781608948?262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate?AvoidUnnecessaryBeforeUnloadCheckSync?BoundaryEventDispatchTracksNodeRemoval?DestroyProfileOnBrowserClose?DialMediaRouteProvider?GlobalMediaControls?HttpsUpgrades?LensOverlay?MediaRouter?OptimizationHints?PaintHolding?RenderDocument?ThirdPartyStoragePartitioning?Translate --variations-seed-version --pseudonymization-salt-handle=7?i?7029001629983569161?1653909260433481019?4 --trace-process-track-uuid=3190708988185955192, 535 MiB
+
+$ nvidia-smi
+Wed Nov 18 03:19:49 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4060 ...    Off |   00000000:01:00.0  On |                  N/A |
+| N/A   54C    P4              8W /   75W |    1231MiB /   8188MiB |     36%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            4920      G   /usr/bin/gnome-shell                    211MiB |
+|    0   N/A  N/A           11348      G   /usr/bin/Xwayland                         2MiB |
+|    0   N/A  N/A           29335    C+G   ...rack-uuid=3190708988185955192         86MiB |
+|    0   N/A  N/A          110633    C+G   /usr/bin/gnome-text-editor               50MiB |
+|    0   N/A  N/A          209455    C+G   ...rack-uuid=3190708988185955192        128MiB |
+|    0   N/A  N/A          636602    C+G   /usr/bin/gnome-control-center            41MiB |
+|    0   N/A  N/A         1665827    C+G   ...rack-uuid=3190708988185955192        535MiB |
++-----------------------------------------------------------------------------------------+
+
+## page 7, mobile, final-3d09931 2026-11-18T07:22:00.067Z
+$ nvidia-smi --query-compute-apps=pid,name,used_memory --format=csv
+pid, process_name, used_gpu_memory [MiB]
+29335, /usr/share/typora/Typora --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --enable-crash-reporter=959bd725-3df1-4ef3-ad7f-f838bad84410?no_channel --user-data-dir=/home/xgueret/.config/Typora --gpu-preferences=UAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAYAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --shared-files --field-trial-handle=3?i?59680863016093219?12343278701518330398?262144 --enable-features=PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?3525117723984525085?16942284632816228702?4 --trace-process-track-uuid=3190708988185955192, 86 MiB
+110633, /usr/bin/gnome-text-editor, 50 MiB
+209455, /usr/share/code/code --type=gpu-process --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --crashpad-handler-pid=209436 --enable-crash-reporter=4f50f461-b28d-474d-9304-15d8671b356b?no_channel --user-data-dir=/home/xgueret/.config/Code --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=3?i?8602441075707455071?4607736521109645964?262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports?EarlyEstablishGpuChannel?EstablishGpuChannelAsync?GlobalShortcutsPortal?GlobalShortcutsPortalPreferredTrigger?PdfUseShowSaveFilePicker?UpdateCompositorMemoryPolicyOnScreenChange --disable-features=CalculateNativeWinOcclusion?DropInputEventsWhilePaintHolding?LocalNetworkAccessChecks?ScreenAIOCREnabled?SpareRendererForSitePerProcess?TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7?i?14586295133711585119?11235733863596346628?4 --trace-process-track-uuid=3190708988185955192, 128 MiB
+636602, /usr/bin/gnome-control-center, 41 MiB
+1665827, /opt/google/chrome/chrome --type=gpu-process --gpu-recent-crash-count=0 --no-sandbox --disable-dev-shm-usage --disable-breakpad --ozone-platform=wayland --render-node-override=/dev/dri/renderD128 --use-angle=gl-egl --enable-unsafe-swiftshader --crashpad-handler-pid=1665789 --enable-crash-reporter=? --user-data-dir=/tmp/playwright_chromiumdev_profile-3yj8FE --change-stack-guard-on-fork=enable --gpu-preferences=YAAAAAAAAAAgAAAGAAAAAAAAAAAAAGAASAAAAAAAAAABAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --use-gl=angle --shared-files --metrics-shmem-handle=4?i?15153799774857277325?5917190945912422249?262144 --field-trial-handle=3?i?5155776256336399693?8239472037781608948?262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate?AvoidUnnecessaryBeforeUnloadCheckSync?BoundaryEventDispatchTracksNodeRemoval?DestroyProfileOnBrowserClose?DialMediaRouteProvider?GlobalMediaControls?HttpsUpgrades?LensOverlay?MediaRouter?OptimizationHints?PaintHolding?RenderDocument?ThirdPartyStoragePartitioning?Translate --variations-seed-version --pseudonymization-salt-handle=7?i?7029001629983569161?1653909260433481019?4 --trace-process-track-uuid=3190708988185955192, 154 MiB
+
+$ nvidia-smi
+Wed Nov 18 03:22:00 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4060 ...    Off |   00000000:01:00.0  On |                  N/A |
+| N/A   46C    P5              4W /   75W |     843MiB /   8188MiB |     25%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            4920      G   /usr/bin/gnome-shell                    211MiB |
+|    0   N/A  N/A           11348      G   /usr/bin/Xwayland                         2MiB |
+|    0   N/A  N/A           29335    C+G   ...rack-uuid=3190708988185955192         86MiB |
+|    0   N/A  N/A          110633    C+G   /usr/bin/gnome-text-editor               50MiB |
+|    0   N/A  N/A          209455    C+G   ...rack-uuid=3190708988185955192        128MiB |
+|    0   N/A  N/A          636602    C+G   /usr/bin/gnome-control-center            41MiB |
+|    0   N/A  N/A         1665827    C+G   ...rack-uuid=3190708988185955192        154MiB |
++-----------------------------------------------------------------------------------------+

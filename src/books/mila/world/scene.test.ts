@@ -10,7 +10,10 @@ import {
   flounce,
   HOME,
   M4,
+  milaHeight,
   SHORE_ROCKS,
+  STAND_DEPTH,
+  swims,
   turtleCourse,
 } from "./scene";
 
@@ -78,5 +81,44 @@ describe("the walk to page 4", () => {
         expect(Math.hypot(p.x - x, p.z - z)).toBeGreaterThan(s * 1.4 * 1.275 + hem);
       }
     }
+  });
+});
+
+describe("Mila between wading and swimming", () => {
+  it("stands on the bottom wherever the water is no deeper than her chest, whatever her path", () => {
+    for (const floor of [0.4, 0, -0.3, -0.62, STAND_DEPTH]) {
+      for (const pathY of [0.5, -0.1, -2]) expect(milaHeight(pathY, floor)).toBe(floor);
+    }
+  });
+
+  it("never rides above the water once the bottom is out of reach", () => {
+    for (let floor = STAND_DEPTH - 0.001; floor > -9; floor -= 0.05) {
+      for (const pathY of [0.3, 0, -0.15, -0.5]) {
+        expect(milaHeight(pathY, floor)).toBeLessThanOrEqual(STAND_DEPTH);
+      }
+    }
+  });
+
+  it("leaves the bottom, and finds it again, without a step in height", () => {
+    // a path held at the surface over a floor that falls away: the worst case of the dive
+    let last = milaHeight(-0.1, STAND_DEPTH);
+    for (let floor = STAND_DEPTH; floor > -3; floor -= 0.01) {
+      const y = milaHeight(-0.1, floor);
+      expect(Math.abs(y - last)).toBeLessThan(0.011);
+      last = y;
+    }
+  });
+
+  it("swims only out of her depth, and rights herself once the water ahead is shallow", () => {
+    expect(swims(-0.4, -1.2)).toBe(false);
+    expect(swims(STAND_DEPTH, -3)).toBe(false);
+    expect(swims(-1.2, -3)).toBe(true);
+    // coming ashore: still out of her depth, the shallows within reach
+    expect(swims(-2.4, -0.6)).toBe(false);
+  });
+
+  it("follows her path in deep water, clear of the bottom", () => {
+    expect(milaHeight(-5.5, -7.6)).toBe(-5.5);
+    expect(milaHeight(-7.5, -7.6)).toBeCloseTo(-7.25, 9);
   });
 });

@@ -1,0 +1,106 @@
+{
+  "B2 run 1": {
+    "meanFps": 465.06,
+    "over33": 22,
+    "windows": 21,
+    "catAll": {
+      "(program)": 883,
+      "native (no url)": 4756,
+      "js": 14272,
+      "(anonymous)": 91,
+      "(idle)": 82,
+      "(garbage collector)": 45
+    },
+    "catWindows": {
+      "native (no url)": 1045,
+      "js": 72,
+      "(program)": 5,
+      "(idle)": 1
+    },
+    "topSelf": [
+      ["uniformMatrix4fv", "", -1, -1, 2226],
+      ["Vd.renderBufferDirect", "main-Cs_jHWom.js", 4220, 29376, 1183],
+      ["(program)", "", -1, -1, 883],
+      ["wt", "main-Cs_jHWom.js", 4220, 41306, 815],
+      ["Tl", "main-Cs_jHWom.js", 4118, 1898, 796],
+      ["T", "main-Cs_jHWom.js", 4196, 5828, 731],
+      ["ht", "main-Cs_jHWom.js", 4220, 34659, 717],
+      ["h", "main-Cs_jHWom.js", 4169, 2274, 670],
+      ["bt", "main-Cs_jHWom.js", 4220, 38321, 601],
+      ["updateMatrixWorld", "main-Cs_jHWom.js", 1, 61440, 589],
+      ["bindVertexArray", "", -1, -1, 555],
+      ["setFromEuler", "main-Cs_jHWom.js", 1, 11223, 551],
+      ["intersectsObject", "main-Cs_jHWom.js", 1, 151961, 511],
+      ["drawElements", "", -1, -1, 468],
+      ["d", "main-Cs_jHWom.js", 3823, 11252, 370]
+    ]
+  },
+  "B2 run 3": {
+    "meanFps": 463.16,
+    "over33": 14,
+    "windows": 13,
+    "catAll": {
+      "(program)": 815,
+      "native (no url)": 4714,
+      "js": 14307,
+      "(anonymous)": 106,
+      "(idle)": 89,
+      "(garbage collector)": 45
+    },
+    "catWindows": {
+      "js": 46,
+      "(program)": 3,
+      "native (no url)": 592,
+      "(idle)": 0,
+      "(anonymous)": 0
+    },
+    "topSelf": [
+      ["uniformMatrix4fv", "", -1, -1, 2047],
+      ["Vd.renderBufferDirect", "main-Cs_jHWom.js", 4220, 29376, 1227],
+      ["(program)", "", -1, -1, 815],
+      ["wt", "main-Cs_jHWom.js", 4220, 41306, 789],
+      ["ht", "main-Cs_jHWom.js", 4220, 34659, 774],
+      ["T", "main-Cs_jHWom.js", 4196, 5828, 740],
+      ["Tl", "main-Cs_jHWom.js", 4118, 1898, 714],
+      ["bindVertexArray", "", -1, -1, 710],
+      ["h", "main-Cs_jHWom.js", 4169, 2274, 671],
+      ["drawElements", "", -1, -1, 618],
+      ["bt", "main-Cs_jHWom.js", 4220, 38321, 616],
+      ["updateMatrixWorld", "main-Cs_jHWom.js", 1, 61440, 560],
+      ["setFromEuler", "main-Cs_jHWom.js", 1, 11223, 559],
+      ["intersectsObject", "main-Cs_jHWom.js", 1, 151961, 513],
+      ["d", "main-Cs_jHWom.js", 3823, 11252, 344]
+    ]
+  },
+  "B1 control (run 2)": {
+    "meanFps": 363.23,
+    "over33": 1,
+    "windows": 1,
+    "catAll": {
+      "(program)": 789,
+      "native (no url)": 2682,
+      "js": 16334,
+      "(anonymous)": 137,
+      "(garbage collector)": 49,
+      "(idle)": 85
+    },
+    "catWindows": {},
+    "topSelf": [
+      ["Vd.renderBufferDirect", "main-BAp1VNdY.js", 4220, 29376, 1622],
+      ["T", "main-BAp1VNdY.js", 4196, 5828, 1426],
+      ["wt", "main-BAp1VNdY.js", 4220, 41306, 1027],
+      ["Tl", "main-BAp1VNdY.js", 4118, 1898, 942],
+      ["bindVertexArray", "", -1, -1, 821],
+      ["(program)", "", -1, -1, 789],
+      ["ht", "main-BAp1VNdY.js", 4220, 34659, 739],
+      ["intersectsObject", "main-BAp1VNdY.js", 1, 151961, 728],
+      ["updateMatrixWorld", "main-BAp1VNdY.js", 1, 61440, 639],
+      ["d", "main-BAp1VNdY.js", 3823, 11252, 623],
+      ["uniformMatrix4fv", "", -1, -1, 539],
+      ["h", "main-BAp1VNdY.js", 4169, 2274, 536],
+      ["bt", "main-BAp1VNdY.js", 4220, 38321, 470],
+      ["p", "main-BAp1VNdY.js", 3823, 11708, 459],
+      ["drawElements", "", -1, -1, 450]
+    ]
+  }
+}

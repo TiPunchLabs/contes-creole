@@ -1,0 +1,1444 @@
+{
+  "rows": [
+    {
+      "block": "desktop-fr-p07.heading",
+      "baseline": {
+        "pixels": 18236,
+        "bgMeanLum": 0.0706,
+        "bgP95Lum": 0.1671,
+        "bgP5Lum": 0.0247,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 7.23,
+        "fullStillMedianLum": 0.0321,
+        "contrastVsFullStillMedian": 10.62,
+        "contrastWorst": 4.02
+      },
+      "after": {
+        "pixels": 18236,
+        "bgMeanLum": 0.0899,
+        "bgP95Lum": 0.1678,
+        "bgP5Lum": 0.0283,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.23,
+        "fullStillMedianLum": 0.0468,
+        "contrastVsFullStillMedian": 9.01,
+        "contrastWorst": 4.0
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "desktop-fr-p07.num",
+      "baseline": {
+        "pixels": 896,
+        "bgMeanLum": 0.063,
+        "bgP95Lum": 0.1201,
+        "bgP5Lum": 0.035,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.67,
+        "fullStillMedianLum": 0.0408,
+        "contrastVsFullStillMedian": 7.05,
+        "contrastWorst": 3.77
+      },
+      "after": {
+        "pixels": 896,
+        "bgMeanLum": 0.0803,
+        "bgP95Lum": 0.1222,
+        "bgP5Lum": 0.0535,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 4.92,
+        "fullStillMedianLum": 0.0503,
+        "contrastVsFullStillMedian": 6.38,
+        "contrastWorst": 3.72
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "desktop-fr-p07.text",
+      "baseline": {
+        "pixels": 40068,
+        "bgMeanLum": 0.0833,
+        "bgP95Lum": 0.1915,
+        "bgP5Lum": 0.0443,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.54,
+        "fullStillMedianLum": 0.0326,
+        "contrastVsFullStillMedian": 10.55,
+        "contrastWorst": 3.61
+      },
+      "after": {
+        "pixels": 40068,
+        "bgMeanLum": 0.0917,
+        "bgP95Lum": 0.1656,
+        "bgP5Lum": 0.0557,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.15,
+        "fullStillMedianLum": 0.0375,
+        "contrastVsFullStillMedian": 9.96,
+        "contrastWorst": 4.04
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-fr-p08.heading",
+      "baseline": {
+        "pixels": 16403,
+        "bgMeanLum": 0.1135,
+        "bgP95Lum": 0.3539,
+        "bgP5Lum": 0.0357,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.33,
+        "fullStillMedianLum": 0.044,
+        "contrastVsFullStillMedian": 9.27,
+        "contrastWorst": 2.16
+      },
+      "after": {
+        "pixels": 16403,
+        "bgMeanLum": 0.1186,
+        "bgP95Lum": 0.3256,
+        "bgP5Lum": 0.0475,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.17,
+        "fullStillMedianLum": 0.0479,
+        "contrastVsFullStillMedian": 8.9,
+        "contrastWorst": 2.32
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-fr-p08.num",
+      "baseline": {
+        "pixels": 924,
+        "bgMeanLum": 0.0537,
+        "bgP95Lum": 0.0621,
+        "bgP5Lum": 0.0455,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 6.17,
+        "fullStillMedianLum": 0.0367,
+        "contrastVsFullStillMedian": 7.38,
+        "contrastWorst": 5.71
+      },
+      "after": {
+        "pixels": 924,
+        "bgMeanLum": 0.0711,
+        "bgP95Lum": 0.0797,
+        "bgP5Lum": 0.0609,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.29,
+        "fullStillMedianLum": 0.0469,
+        "contrastVsFullStillMedian": 6.61,
+        "contrastWorst": 4.94
+      },
+      "flag": "after lower than before"
+    },
+    {
+      "block": "desktop-fr-p08.text",
+      "baseline": {
+        "pixels": 48468,
+        "bgMeanLum": 0.104,
+        "bgP95Lum": 0.3191,
+        "bgP5Lum": 0.0357,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.66,
+        "fullStillMedianLum": 0.0322,
+        "contrastVsFullStillMedian": 10.61,
+        "contrastWorst": 2.36
+      },
+      "after": {
+        "pixels": 48468,
+        "bgMeanLum": 0.1072,
+        "bgP95Lum": 0.3053,
+        "bgP5Lum": 0.0411,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.55,
+        "fullStillMedianLum": 0.0343,
+        "contrastVsFullStillMedian": 10.35,
+        "contrastWorst": 2.45
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-fr-p09.heading",
+      "baseline": {
+        "pixels": 11985,
+        "bgMeanLum": 0.0399,
+        "bgP95Lum": 0.0738,
+        "bgP5Lum": 0.0218,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 9.7,
+        "fullStillMedianLum": 0.0202,
+        "contrastVsFullStillMedian": 12.42,
+        "contrastWorst": 7.04
+      },
+      "after": {
+        "pixels": 11985,
+        "bgMeanLum": 0.0499,
+        "bgP95Lum": 0.0657,
+        "bgP5Lum": 0.0386,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 8.73,
+        "fullStillMedianLum": 0.0257,
+        "contrastVsFullStillMedian": 11.51,
+        "contrastWorst": 7.53
+      },
+      "flag": "no"
+    },
+    {
+      "block": "desktop-fr-p09.num",
+      "baseline": {
+        "pixels": 924,
+        "bgMeanLum": 0.0378,
+        "bgP95Lum": 0.0487,
+        "bgP5Lum": 0.0314,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 7.3,
+        "fullStillMedianLum": 0.0256,
+        "contrastVsFullStillMedian": 8.47,
+        "contrastWorst": 6.49
+      },
+      "after": {
+        "pixels": 924,
+        "bgMeanLum": 0.0451,
+        "bgP95Lum": 0.0476,
+        "bgP5Lum": 0.0424,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 6.74,
+        "fullStillMedianLum": 0.0296,
+        "contrastVsFullStillMedian": 8.05,
+        "contrastWorst": 6.56
+      },
+      "flag": "no"
+    },
+    {
+      "block": "desktop-fr-p09.text",
+      "baseline": {
+        "pixels": 31192,
+        "bgMeanLum": 0.0288,
+        "bgP95Lum": 0.06,
+        "bgP5Lum": 0.017,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 11.07,
+        "fullStillMedianLum": 0.015,
+        "contrastVsFullStillMedian": 13.42,
+        "contrastWorst": 7.92
+      },
+      "after": {
+        "pixels": 31192,
+        "bgMeanLum": 0.0344,
+        "bgP95Lum": 0.0436,
+        "bgP5Lum": 0.0267,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 10.33,
+        "fullStillMedianLum": 0.0187,
+        "contrastVsFullStillMedian": 12.68,
+        "contrastWorst": 9.31
+      },
+      "flag": "no"
+    },
+    {
+      "block": "desktop-fr-p10.heading",
+      "baseline": {
+        "pixels": 11327,
+        "bgMeanLum": 0.0703,
+        "bgP95Lum": 0.1038,
+        "bgP5Lum": 0.0559,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 7.25,
+        "fullStillMedianLum": 0.0352,
+        "contrastVsFullStillMedian": 10.24,
+        "contrastWorst": 5.67
+      },
+      "after": {
+        "pixels": 11327,
+        "bgMeanLum": 0.1534,
+        "bgP95Lum": 0.1923,
+        "bgP5Lum": 0.1294,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 4.29,
+        "fullStillMedianLum": 0.0692,
+        "contrastVsFullStillMedian": 7.31,
+        "contrastWorst": 3.6
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "desktop-fr-p10.num",
+      "baseline": {
+        "pixels": 882,
+        "bgMeanLum": 0.07,
+        "bgP95Lum": 0.0823,
+        "bgP5Lum": 0.0575,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.34,
+        "fullStillMedianLum": 0.0492,
+        "contrastVsFullStillMedian": 6.45,
+        "contrastWorst": 4.84
+      },
+      "after": {
+        "pixels": 882,
+        "bgMeanLum": 0.1332,
+        "bgP95Lum": 0.1494,
+        "bgP5Lum": 0.1175,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 3.5,
+        "fullStillMedianLum": 0.0837,
+        "contrastVsFullStillMedian": 4.79,
+        "contrastWorst": 3.21
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "desktop-fr-p10.text",
+      "baseline": {
+        "pixels": 44044,
+        "bgMeanLum": 0.1049,
+        "bgP95Lum": 0.1467,
+        "bgP5Lum": 0.074,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.63,
+        "fullStillMedianLum": 0.0462,
+        "contrastVsFullStillMedian": 9.06,
+        "contrastWorst": 4.43
+      },
+      "after": {
+        "pixels": 44044,
+        "bgMeanLum": 0.1896,
+        "bgP95Lum": 0.2301,
+        "bgP5Lum": 0.1505,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 3.64,
+        "fullStillMedianLum": 0.0779,
+        "contrastVsFullStillMedian": 6.82,
+        "contrastWorst": 3.11
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "desktop-p07.heading",
+      "baseline": {
+        "pixels": 16027,
+        "bgMeanLum": 0.087,
+        "bgP95Lum": 0.1881,
+        "bgP5Lum": 0.0407,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.37,
+        "fullStillMedianLum": 0.0359,
+        "contrastVsFullStillMedian": 10.15,
+        "contrastWorst": 3.66
+      },
+      "after": {
+        "pixels": 16027,
+        "bgMeanLum": 0.0952,
+        "bgP95Lum": 0.1742,
+        "bgP5Lum": 0.0325,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.01,
+        "fullStillMedianLum": 0.0442,
+        "contrastVsFullStillMedian": 9.25,
+        "contrastWorst": 3.89
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-p07.num",
+      "baseline": {
+        "pixels": 896,
+        "bgMeanLum": 0.057,
+        "bgP95Lum": 0.1323,
+        "bgP5Lum": 0.0349,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.98,
+        "fullStillMedianLum": 0.0319,
+        "contrastVsFullStillMedian": 7.82,
+        "contrastWorst": 3.51
+      },
+      "after": {
+        "pixels": 896,
+        "bgMeanLum": 0.1196,
+        "bgP95Lum": 0.1767,
+        "bgP5Lum": 0.0565,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 3.78,
+        "fullStillMedianLum": 0.0848,
+        "contrastVsFullStillMedian": 4.75,
+        "contrastWorst": 2.83
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "desktop-p07.text",
+      "baseline": {
+        "pixels": 39116,
+        "bgMeanLum": 0.1017,
+        "bgP95Lum": 0.2413,
+        "bgP5Lum": 0.0479,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.75,
+        "fullStillMedianLum": 0.0384,
+        "contrastVsFullStillMedian": 9.86,
+        "contrastWorst": 2.99
+      },
+      "after": {
+        "pixels": 39116,
+        "bgMeanLum": 0.0969,
+        "bgP95Lum": 0.2265,
+        "bgP5Lum": 0.0559,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.93,
+        "fullStillMedianLum": 0.0384,
+        "contrastVsFullStillMedian": 9.87,
+        "contrastWorst": 3.15
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-p08.heading",
+      "baseline": {
+        "pixels": 14617,
+        "bgMeanLum": 0.1909,
+        "bgP95Lum": 0.5319,
+        "bgP5Lum": 0.0275,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 3.62,
+        "fullStillMedianLum": 0.0443,
+        "contrastVsFullStillMedian": 9.25,
+        "contrastWorst": 1.5
+      },
+      "after": {
+        "pixels": 14617,
+        "bgMeanLum": 0.1921,
+        "bgP95Lum": 0.4962,
+        "bgP5Lum": 0.0492,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 3.6,
+        "fullStillMedianLum": 0.0503,
+        "contrastVsFullStillMedian": 8.69,
+        "contrastWorst": 1.6
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-p08.num",
+      "baseline": {
+        "pixels": 924,
+        "bgMeanLum": 0.0536,
+        "bgP95Lum": 0.0902,
+        "bgP5Lum": 0.0414,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 6.18,
+        "fullStillMedianLum": 0.0413,
+        "contrastVsFullStillMedian": 7.01,
+        "contrastWorst": 4.57
+      },
+      "after": {
+        "pixels": 924,
+        "bgMeanLum": 0.073,
+        "bgP95Lum": 0.0831,
+        "bgP5Lum": 0.0626,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.21,
+        "fullStillMedianLum": 0.0471,
+        "contrastVsFullStillMedian": 6.6,
+        "contrastWorst": 4.81
+      },
+      "flag": "no"
+    },
+    {
+      "block": "desktop-p08.text",
+      "baseline": {
+        "pixels": 46732,
+        "bgMeanLum": 0.0954,
+        "bgP95Lum": 0.3317,
+        "bgP5Lum": 0.0368,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.99,
+        "fullStillMedianLum": 0.0334,
+        "contrastVsFullStillMedian": 10.45,
+        "contrastWorst": 2.28
+      },
+      "after": {
+        "pixels": 46732,
+        "bgMeanLum": 0.0984,
+        "bgP95Lum": 0.3189,
+        "bgP5Lum": 0.0422,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.87,
+        "fullStillMedianLum": 0.0349,
+        "contrastVsFullStillMedian": 10.27,
+        "contrastWorst": 2.36
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-p09.heading",
+      "baseline": {
+        "pixels": 7614,
+        "bgMeanLum": 0.2468,
+        "bgP95Lum": 0.3388,
+        "bgP5Lum": 0.0067,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 2.94,
+        "fullStillMedianLum": 0.1146,
+        "contrastVsFullStillMedian": 5.3,
+        "contrastWorst": 2.24
+      },
+      "after": {
+        "pixels": 7614,
+        "bgMeanLum": 0.2406,
+        "bgP95Lum": 0.3183,
+        "bgP5Lum": 0.0064,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 3.0,
+        "fullStillMedianLum": 0.1068,
+        "contrastVsFullStillMedian": 5.56,
+        "contrastWorst": 2.37
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-p09.num",
+      "baseline": {
+        "pixels": 924,
+        "bgMeanLum": 0.2215,
+        "bgP95Lum": 0.264,
+        "bgP5Lum": 0.1594,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 2.36,
+        "fullStillMedianLum": 0.1276,
+        "contrastVsFullStillMedian": 3.61,
+        "contrastWorst": 2.04
+      },
+      "after": {
+        "pixels": 924,
+        "bgMeanLum": 0.2194,
+        "bgP95Lum": 0.2602,
+        "bgP5Lum": 0.158,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 2.38,
+        "fullStillMedianLum": 0.1264,
+        "contrastVsFullStillMedian": 3.63,
+        "contrastWorst": 2.06
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-p09.text",
+      "baseline": {
+        "pixels": 28896,
+        "bgMeanLum": 0.0901,
+        "bgP95Lum": 0.3608,
+        "bgP5Lum": 0.0156,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.22,
+        "fullStillMedianLum": 0.0223,
+        "contrastVsFullStillMedian": 12.06,
+        "contrastWorst": 2.12
+      },
+      "after": {
+        "pixels": 28896,
+        "bgMeanLum": 0.0826,
+        "bgP95Lum": 0.3062,
+        "bgP5Lum": 0.0275,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.58,
+        "fullStillMedianLum": 0.0212,
+        "contrastVsFullStillMedian": 12.24,
+        "contrastWorst": 2.45
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "desktop-p10.heading",
+      "baseline": {
+        "pixels": 7802,
+        "bgMeanLum": 0.0729,
+        "bgP95Lum": 0.1074,
+        "bgP5Lum": 0.0559,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 7.09,
+        "fullStillMedianLum": 0.0354,
+        "contrastVsFullStillMedian": 10.21,
+        "contrastWorst": 5.54
+      },
+      "after": {
+        "pixels": 7802,
+        "bgMeanLum": 0.1547,
+        "bgP95Lum": 0.1953,
+        "bgP5Lum": 0.1294,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 4.26,
+        "fullStillMedianLum": 0.0673,
+        "contrastVsFullStillMedian": 7.43,
+        "contrastWorst": 3.55
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "desktop-p10.num",
+      "baseline": {
+        "pixels": 882,
+        "bgMeanLum": 0.0599,
+        "bgP95Lum": 0.0636,
+        "bgP5Lum": 0.0574,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.83,
+        "fullStillMedianLum": 0.038,
+        "contrastVsFullStillMedian": 7.28,
+        "contrastWorst": 5.64
+      },
+      "after": {
+        "pixels": 882,
+        "bgMeanLum": 0.1222,
+        "bgP95Lum": 0.1294,
+        "bgP5Lum": 0.1155,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 3.72,
+        "fullStillMedianLum": 0.071,
+        "contrastVsFullStillMedian": 5.29,
+        "contrastWorst": 3.57
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "desktop-p10.text",
+      "baseline": {
+        "pixels": 38864,
+        "bgMeanLum": 0.102,
+        "bgP95Lum": 0.1493,
+        "bgP5Lum": 0.0669,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.74,
+        "fullStillMedianLum": 0.0468,
+        "contrastVsFullStillMedian": 9.01,
+        "contrastWorst": 4.37
+      },
+      "after": {
+        "pixels": 38864,
+        "bgMeanLum": 0.1996,
+        "bgP95Lum": 0.2194,
+        "bgP5Lum": 0.1791,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 3.49,
+        "fullStillMedianLum": 0.0862,
+        "contrastVsFullStillMedian": 6.4,
+        "contrastWorst": 3.24
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "mobile-p07.heading",
+      "baseline": {
+        "pixels": 25783,
+        "bgMeanLum": 0.0596,
+        "bgP95Lum": 0.0725,
+        "bgP5Lum": 0.0518,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 7.96,
+        "fullStillMedianLum": 0.0149,
+        "contrastVsFullStillMedian": 13.44,
+        "contrastWorst": 7.12
+      },
+      "after": {
+        "pixels": 25783,
+        "bgMeanLum": 0.1077,
+        "bgP95Lum": 0.1449,
+        "bgP5Lum": 0.0894,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.53,
+        "fullStillMedianLum": 0.0202,
+        "contrastVsFullStillMedian": 12.42,
+        "contrastWorst": 4.47
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "mobile-p07.num",
+      "baseline": {
+        "pixels": 3556,
+        "bgMeanLum": 0.0734,
+        "bgP95Lum": 0.0973,
+        "bgP5Lum": 0.058,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.19,
+        "fullStillMedianLum": 0.0144,
+        "contrastVsFullStillMedian": 9.94,
+        "contrastWorst": 4.35
+      },
+      "after": {
+        "pixels": 3556,
+        "bgMeanLum": 0.1104,
+        "bgP95Lum": 0.1443,
+        "bgP5Lum": 0.0917,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 3.99,
+        "fullStillMedianLum": 0.0172,
+        "contrastVsFullStillMedian": 9.53,
+        "contrastWorst": 3.3
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "mobile-p07.text",
+      "baseline": {
+        "pixels": 120800,
+        "bgMeanLum": 0.1027,
+        "bgP95Lum": 0.2006,
+        "bgP5Lum": 0.0547,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.71,
+        "fullStillMedianLum": 0.0253,
+        "contrastVsFullStillMedian": 11.58,
+        "contrastWorst": 3.48
+      },
+      "after": {
+        "pixels": 120800,
+        "bgMeanLum": 0.1151,
+        "bgP95Lum": 0.1992,
+        "bgP5Lum": 0.0778,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.28,
+        "fullStillMedianLum": 0.0253,
+        "contrastVsFullStillMedian": 11.57,
+        "contrastWorst": 3.5
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "mobile-p08.heading",
+      "baseline": {
+        "pixels": 23482,
+        "bgMeanLum": 0.0835,
+        "bgP95Lum": 0.1537,
+        "bgP5Lum": 0.05,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.53,
+        "fullStillMedianLum": 0.0157,
+        "contrastVsFullStillMedian": 13.28,
+        "contrastWorst": 4.28
+      },
+      "after": {
+        "pixels": 23482,
+        "bgMeanLum": 0.1234,
+        "bgP95Lum": 0.1895,
+        "bgP5Lum": 0.0939,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.03,
+        "fullStillMedianLum": 0.0195,
+        "contrastVsFullStillMedian": 12.54,
+        "contrastWorst": 3.64
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "mobile-p08.num",
+      "baseline": {
+        "pixels": 3668,
+        "bgMeanLum": 0.0557,
+        "bgP95Lum": 0.0745,
+        "bgP5Lum": 0.0474,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 6.06,
+        "fullStillMedianLum": 0.0124,
+        "contrastVsFullStillMedian": 10.26,
+        "contrastWorst": 5.15
+      },
+      "after": {
+        "pixels": 3668,
+        "bgMeanLum": 0.1164,
+        "bgP95Lum": 0.1323,
+        "bgP5Lum": 0.1038,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 3.85,
+        "fullStillMedianLum": 0.0173,
+        "contrastVsFullStillMedian": 9.52,
+        "contrastWorst": 3.51
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "mobile-p08.text",
+      "baseline": {
+        "pixels": 143822,
+        "bgMeanLum": 0.1389,
+        "bgP95Lum": 0.3807,
+        "bgP5Lum": 0.0512,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 4.61,
+        "fullStillMedianLum": 0.0264,
+        "contrastVsFullStillMedian": 11.41,
+        "contrastWorst": 2.02
+      },
+      "after": {
+        "pixels": 143822,
+        "bgMeanLum": 0.1368,
+        "bgP95Lum": 0.3477,
+        "bgP5Lum": 0.0688,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 4.67,
+        "fullStillMedianLum": 0.025,
+        "contrastVsFullStillMedian": 11.63,
+        "contrastWorst": 2.19
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "mobile-p09.heading",
+      "baseline": {
+        "pixels": 12272,
+        "bgMeanLum": 0.0429,
+        "bgP95Lum": 0.064,
+        "bgP5Lum": 0.0305,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 9.38,
+        "fullStillMedianLum": 0.013,
+        "contrastVsFullStillMedian": 13.85,
+        "contrastWorst": 7.64
+      },
+      "after": {
+        "pixels": 12272,
+        "bgMeanLum": 0.064,
+        "bgP95Lum": 0.0759,
+        "bgP5Lum": 0.0561,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 7.65,
+        "fullStillMedianLum": 0.0159,
+        "contrastVsFullStillMedian": 13.24,
+        "contrastWorst": 6.93
+      },
+      "flag": "after lower than before"
+    },
+    {
+      "block": "mobile-p09.num",
+      "baseline": {
+        "pixels": 3640,
+        "bgMeanLum": 0.0393,
+        "bgP95Lum": 0.0499,
+        "bgP5Lum": 0.0326,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 7.17,
+        "fullStillMedianLum": 0.0113,
+        "contrastVsFullStillMedian": 10.45,
+        "contrastWorst": 6.41
+      },
+      "after": {
+        "pixels": 3640,
+        "bgMeanLum": 0.0754,
+        "bgP95Lum": 0.0869,
+        "bgP5Lum": 0.0687,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.11,
+        "fullStillMedianLum": 0.0151,
+        "contrastVsFullStillMedian": 9.84,
+        "contrastWorst": 4.68
+      },
+      "flag": "after lower than before"
+    },
+    {
+      "block": "mobile-p09.text",
+      "baseline": {
+        "pixels": 89292,
+        "bgMeanLum": 0.0786,
+        "bgP95Lum": 0.1893,
+        "bgP5Lum": 0.0287,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.78,
+        "fullStillMedianLum": 0.0203,
+        "contrastVsFullStillMedian": 12.4,
+        "contrastWorst": 3.64
+      },
+      "after": {
+        "pixels": 89292,
+        "bgMeanLum": 0.0781,
+        "bgP95Lum": 0.1473,
+        "bgP5Lum": 0.031,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.81,
+        "fullStillMedianLum": 0.0197,
+        "contrastVsFullStillMedian": 12.51,
+        "contrastWorst": 4.42
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "mobile-p10.heading",
+      "baseline": {
+        "pixels": 12508,
+        "bgMeanLum": 0.0672,
+        "bgP95Lum": 0.0805,
+        "bgP5Lum": 0.0589,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 7.44,
+        "fullStillMedianLum": 0.016,
+        "contrastVsFullStillMedian": 13.22,
+        "contrastWorst": 6.68
+      },
+      "after": {
+        "pixels": 12508,
+        "bgMeanLum": 0.1274,
+        "bgP95Lum": 0.1444,
+        "bgP5Lum": 0.1109,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 4.92,
+        "fullStillMedianLum": 0.0239,
+        "contrastVsFullStillMedian": 11.8,
+        "contrastWorst": 4.49
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "mobile-p10.num",
+      "baseline": {
+        "pixels": 3472,
+        "bgMeanLum": 0.0696,
+        "bgP95Lum": 0.092,
+        "bgP5Lum": 0.062,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.36,
+        "fullStillMedianLum": 0.014,
+        "contrastVsFullStillMedian": 10.01,
+        "contrastWorst": 4.51
+      },
+      "after": {
+        "pixels": 3472,
+        "bgMeanLum": 0.1071,
+        "bgP95Lum": 0.1268,
+        "bgP5Lum": 0.0972,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 4.08,
+        "fullStillMedianLum": 0.0173,
+        "contrastVsFullStillMedian": 9.51,
+        "contrastWorst": 3.62
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "mobile-p10.text",
+      "baseline": {
+        "pixels": 118631,
+        "bgMeanLum": 0.0622,
+        "bgP95Lum": 0.0715,
+        "bgP5Lum": 0.0526,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 7.77,
+        "fullStillMedianLum": 0.018,
+        "contrastVsFullStillMedian": 12.81,
+        "contrastWorst": 7.18
+      },
+      "after": {
+        "pixels": 118631,
+        "bgMeanLum": 0.1741,
+        "bgP95Lum": 0.1959,
+        "bgP5Lum": 0.1475,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 3.89,
+        "fullStillMedianLum": 0.0364,
+        "contrastVsFullStillMedian": 10.09,
+        "contrastWorst": 3.55
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "tablet-p07.heading",
+      "baseline": {
+        "pixels": 8432,
+        "bgMeanLum": 0.0951,
+        "bgP95Lum": 0.1891,
+        "bgP5Lum": 0.0404,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.01,
+        "fullStillMedianLum": 0.0416,
+        "contrastVsFullStillMedian": 9.52,
+        "contrastWorst": 3.65
+      },
+      "after": {
+        "pixels": 8432,
+        "bgMeanLum": 0.0833,
+        "bgP95Lum": 0.1525,
+        "bgP5Lum": 0.0294,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.54,
+        "fullStillMedianLum": 0.0414,
+        "contrastVsFullStillMedian": 9.54,
+        "contrastWorst": 4.3
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "tablet-p07.num",
+      "baseline": {
+        "pixels": 960,
+        "bgMeanLum": 0.0712,
+        "bgP95Lum": 0.2196,
+        "bgP5Lum": 0.046,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.28,
+        "fullStillMedianLum": 0.0332,
+        "contrastVsFullStillMedian": 7.7,
+        "contrastWorst": 2.38
+      },
+      "after": {
+        "pixels": 960,
+        "bgMeanLum": 0.1421,
+        "bgP95Lum": 0.2062,
+        "bgP5Lum": 0.0909,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 3.33,
+        "fullStillMedianLum": 0.0891,
+        "contrastVsFullStillMedian": 4.61,
+        "contrastWorst": 2.5
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "tablet-p07.text",
+      "baseline": {
+        "pixels": 34830,
+        "bgMeanLum": 0.1121,
+        "bgP95Lum": 0.2126,
+        "bgP5Lum": 0.0575,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.38,
+        "fullStillMedianLum": 0.0446,
+        "contrastVsFullStillMedian": 9.22,
+        "contrastWorst": 3.32
+      },
+      "after": {
+        "pixels": 34830,
+        "bgMeanLum": 0.1073,
+        "bgP95Lum": 0.206,
+        "bgP5Lum": 0.0609,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.54,
+        "fullStillMedianLum": 0.0414,
+        "contrastVsFullStillMedian": 9.54,
+        "contrastWorst": 3.41
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "tablet-p08.heading",
+      "baseline": {
+        "pixels": 7684,
+        "bgMeanLum": 0.2677,
+        "bgP95Lum": 0.5342,
+        "bgP5Lum": 0.0391,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 2.74,
+        "fullStillMedianLum": 0.1481,
+        "contrastVsFullStillMedian": 4.4,
+        "contrastWorst": 1.49
+      },
+      "after": {
+        "pixels": 7684,
+        "bgMeanLum": 0.2572,
+        "bgP95Lum": 0.5002,
+        "bgP5Lum": 0.0575,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 2.84,
+        "fullStillMedianLum": 0.1357,
+        "contrastVsFullStillMedian": 4.69,
+        "contrastWorst": 1.58
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "tablet-p08.num",
+      "baseline": {
+        "pixels": 990,
+        "bgMeanLum": 0.067,
+        "bgP95Lum": 0.1312,
+        "bgP5Lum": 0.0402,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.48,
+        "fullStillMedianLum": 0.0416,
+        "contrastVsFullStillMedian": 6.99,
+        "contrastWorst": 3.53
+      },
+      "after": {
+        "pixels": 990,
+        "bgMeanLum": 0.0796,
+        "bgP95Lum": 0.12,
+        "bgP5Lum": 0.0576,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 4.94,
+        "fullStillMedianLum": 0.0491,
+        "contrastVsFullStillMedian": 6.46,
+        "contrastWorst": 3.77
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "tablet-p08.text",
+      "baseline": {
+        "pixels": 41634,
+        "bgMeanLum": 0.1569,
+        "bgP95Lum": 0.4166,
+        "bgP5Lum": 0.038,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 4.21,
+        "fullStillMedianLum": 0.0504,
+        "contrastVsFullStillMedian": 8.68,
+        "contrastWorst": 1.87
+      },
+      "after": {
+        "pixels": 41634,
+        "bgMeanLum": 0.1529,
+        "bgP95Lum": 0.3917,
+        "bgP5Lum": 0.0457,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 4.3,
+        "fullStillMedianLum": 0.0474,
+        "contrastVsFullStillMedian": 8.95,
+        "contrastWorst": 1.97
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "tablet-p09.heading",
+      "baseline": {
+        "pixels": 4012,
+        "bgMeanLum": 0.1062,
+        "bgP95Lum": 0.2447,
+        "bgP5Lum": 0.0079,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.58,
+        "fullStillMedianLum": 0.0809,
+        "contrastVsFullStillMedian": 6.66,
+        "contrastWorst": 2.96
+      },
+      "after": {
+        "pixels": 4012,
+        "bgMeanLum": 0.1175,
+        "bgP95Lum": 0.2459,
+        "bgP5Lum": 0.0091,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 5.2,
+        "fullStillMedianLum": 0.0806,
+        "contrastVsFullStillMedian": 6.68,
+        "contrastWorst": 2.95
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "tablet-p09.num",
+      "baseline": {
+        "pixels": 990,
+        "bgMeanLum": 0.1224,
+        "bgP95Lum": 0.2524,
+        "bgP5Lum": 0.0263,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 3.71,
+        "fullStillMedianLum": 0.0902,
+        "contrastVsFullStillMedian": 4.57,
+        "contrastWorst": 2.12
+      },
+      "after": {
+        "pixels": 990,
+        "bgMeanLum": 0.1301,
+        "bgP95Lum": 0.2502,
+        "bgP5Lum": 0.041,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 3.56,
+        "fullStillMedianLum": 0.1058,
+        "contrastVsFullStillMedian": 4.11,
+        "contrastWorst": 2.13
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "tablet-p09.text",
+      "baseline": {
+        "pixels": 25731,
+        "bgMeanLum": 0.05,
+        "bgP95Lum": 0.2304,
+        "bgP5Lum": 0.0163,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 8.72,
+        "fullStillMedianLum": 0.0182,
+        "contrastVsFullStillMedian": 12.79,
+        "contrastWorst": 3.11
+      },
+      "after": {
+        "pixels": 25731,
+        "bgMeanLum": 0.0486,
+        "bgP95Lum": 0.1734,
+        "bgP5Lum": 0.0266,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 8.84,
+        "fullStillMedianLum": 0.0186,
+        "contrastVsFullStillMedian": 12.71,
+        "contrastWorst": 3.9
+      },
+      "flag": "after under 4.5"
+    },
+    {
+      "block": "tablet-p10.heading",
+      "baseline": {
+        "pixels": 4114,
+        "bgMeanLum": 0.0642,
+        "bgP95Lum": 0.0859,
+        "bgP5Lum": 0.0544,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 7.63,
+        "fullStillMedianLum": 0.0334,
+        "contrastVsFullStillMedian": 10.45,
+        "contrastWorst": 6.42
+      },
+      "after": {
+        "pixels": 4114,
+        "bgMeanLum": 0.1491,
+        "bgP95Lum": 0.18,
+        "bgP5Lum": 0.1294,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 4.38,
+        "fullStillMedianLum": 0.0691,
+        "contrastVsFullStillMedian": 7.32,
+        "contrastWorst": 3.79
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "tablet-p10.num",
+      "baseline": {
+        "pixels": 945,
+        "bgMeanLum": 0.0611,
+        "bgP95Lum": 0.0653,
+        "bgP5Lum": 0.0574,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 5.77,
+        "fullStillMedianLum": 0.038,
+        "contrastVsFullStillMedian": 7.28,
+        "contrastWorst": 5.56
+      },
+      "after": {
+        "pixels": 945,
+        "bgMeanLum": 0.1236,
+        "bgP95Lum": 0.1321,
+        "bgP5Lum": 0.1155,
+        "textColor": "rgb(240, 196, 106)",
+        "textAlpha": 1.0,
+        "textLum": 0.5905,
+        "contrastVsMean": 3.69,
+        "fullStillMedianLum": 0.0709,
+        "contrastVsFullStillMedian": 5.3,
+        "contrastWorst": 3.52
+      },
+      "flag": "after lower than before; after under 4.5"
+    },
+    {
+      "block": "tablet-p10.text",
+      "baseline": {
+        "pixels": 34533,
+        "bgMeanLum": 0.0922,
+        "bgP95Lum": 0.1465,
+        "bgP5Lum": 0.057,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 6.13,
+        "fullStillMedianLum": 0.0391,
+        "contrastVsFullStillMedian": 9.79,
+        "contrastWorst": 4.44
+      },
+      "after": {
+        "pixels": 34533,
+        "bgMeanLum": 0.1938,
+        "bgP95Lum": 0.2148,
+        "bgP5Lum": 0.1706,
+        "textColor": "rgb(243, 233, 214)",
+        "textAlpha": 1.0,
+        "textLum": 0.8219,
+        "contrastVsMean": 3.58,
+        "fullStillMedianLum": 0.0766,
+        "contrastVsFullStillMedian": 6.89,
+        "contrastWorst": 3.29
+      },
+      "flag": "after lower than before; after under 4.5"
+    }
+  ]
+}

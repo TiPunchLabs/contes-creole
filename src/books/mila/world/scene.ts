@@ -11,7 +11,18 @@ import { clamp, lerp } from "@shared/math";
 import { createRng } from "@shared/random";
 import type { Ambience } from "./audio";
 import { easeIO, fbm, GLSL_NOISE, lerpAngle, smooth, vnoise, walkEase } from "./noise";
+import { overFloor, steer, swimmer, type Limb, type Solid, type Swimmer } from "./shoal";
 import { CRAB_PAGE, PAGE_COUNT } from "./text";
+import {
+  addSeaFog,
+  createSeaDust,
+  SEA_GLSL,
+  SEA_SUN_GLSL,
+  seaLight,
+  SWAY_GLSL,
+  type SeaDust,
+  type SeaUniforms,
+} from "./underwater";
 
 /** What the scene needs from the page around it. */
 export interface SceneHooks {
@@ -146,6 +157,43 @@ export function turtleCourse(ta: number): { x: number; z: number; heading: numbe
   };
 }
 const TURTLE_R = 2.6;
+/**
+ * Size of the turtle against its model, whose shell is 1.4 m long, more than Mila is tall (1.25 m).
+ * At 0.6 the shell is 0.83 m, a grown green turtle's, two thirds of her height.
+ */
+const TURTLE_SCALE = 0.6;
+
+/** Sea-floor height down to which Mila stands on the bottom: there the water reaches her chest. */
+export const STAND_DEPTH = -0.85;
+
+/**
+ * How far ahead along her way (metres) Mila reads the depth. Swimming ashore she covers it in the
+ * time her body takes to come upright, so she drops her legs before the bottom reaches them.
+ */
+const FOOTING_REACH = 3;
+
+/**
+ * Whether Mila is stretched out swimming, over a sea floor at `floor` under her and at `ahead`
+ * where she is heading. Going in she swims once the bottom is out of reach; coming out she rights
+ * herself as soon as the water ahead is shallow enough to stand in, while her feet still hang.
+ */
+export function swims(floor: number, ahead: number): boolean {
+  return floor < STAND_DEPTH && ahead < STAND_DEPTH;
+}
+
+/**
+ * Height of Mila's feet where her path is at `pathY` over a sea floor at `floor`. Where she can
+ * stand she walks on the bottom, the water rising on her; past that depth she swims, and her path
+ * cannot lift her out of the water: stretched out she lies 0.62 m above this height, just under
+ * the surface, her head breaking it. The two meet at `STAND_DEPTH`, so going in she only has to
+ * lean forward, and coming out to put her feet down.
+ */
+export function milaHeight(pathY: number, floor: number): number {
+  if (floor >= STAND_DEPTH) return floor;
+  // over deep water she keeps clear of the bottom; none of it where her feet have just left it
+  const clear = 0.35 * smooth(STAND_DEPTH, STAND_DEPTH - 0.6, floor);
+  return Math.max(Math.min(pathY, STAND_DEPTH), floor + clear);
+}
 
 /** Pages where Mila holds the conch to her ear. */
 const HOLD_PAGES = new Set([0, 1, 2, 3, 4, 5, 11, 12]);
@@ -299,6 +347,11 @@ interface FishData {
   sc: number;
   grp: number;
   vis: number;
+  body: Swimmer;
+  yaw: number;
+  /** Where it was on the last frame (x, z): its heading is the way it actually goes. */
+  lx: number;
+  lz: number;
 }
 
 interface SchoolFish {
@@ -308,6 +361,11 @@ interface SchoolFish {
   sp: number;
   ph: number;
   sc: number;
+  body: Swimmer;
+  yaw: number;
+  /** Where it was on the last frame (x, z): its heading is the way it actually goes. */
+  lx: number;
+  lz: number;
 }
 
 interface Flipper {
@@ -474,6 +532,15 @@ export function createMilaScene(
     calm: { value: 0 },
     swimD: { value: 0 },
   };
+  /** The water's own uniforms (see `underwater.ts`); `uSea` is the camera's `under`. */
+  const SEA: SeaUniforms = {
+    uSea: U.under,
+    uSeaSun: { value: seaLight(U.moonDir.value) },
+    uFlow: { value: 0 },
+    uSway: { value: reduceMotion ? 0.3 : 1 },
+  };
+  /** Decorative motion runs at this share of the world's pace (calmer under reduced motion). */
+  const FLOW_RATE = reduceMotion ? 0.3 : 1;
   /** How wet the sheet is (0..1): it peaks just after a page turn. */
   const U_wash = { value: 0 };
   /** Seconds since the last animated page turn. */
@@ -732,11 +799,16 @@ export function createMilaScene(
   SCHOOL.y = groundH(SCHOOL.x, SCHOOL.z);
   U.partC.value.copy(MEADOW);
 
-  /** Underwater caustics on a lit material. */
+  /**
+   * Underwater caustics on a lit material: the net of light the swell throws on the sea floor.
+   * It lies along the light's own path, only on faces turned to it, drifts slowly, and thins out
+   * with distance into an even glow.
+   */
   function addCaustics(mat: THREE.Material): void {
     mat.onBeforeCompile = (sh) => {
-      sh.uniforms.uTime = U.time;
+      sh.uniforms.uFlow = SEA.uFlow;
       sh.uniforms.uCaus = U.caus;
+      sh.uniforms.uSeaSun = SEA.uSeaSun;
       sh.vertexShader =
         "varying vec3 vWP;\n" +
         sh.vertexShader.replace(
@@ -744,7 +816,8 @@ export function createMilaScene(
           "#include <project_vertex>\n vWP=(modelMatrix*vec4(transformed,1.)).xyz;",
         );
       sh.fragmentShader =
-        "varying vec3 vWP;\nuniform float uTime;uniform float uCaus;\n" +
+        "varying vec3 vWP;\nuniform float uFlow;uniform float uCaus;\n" +
+        SEA_SUN_GLSL +
         `
 float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;float inten=.005;
  for(int n=0;n<4;n++){float tt=t*(1.-(3.5/float(n+1)));i=p+vec2(cos(tt-i.x)+sin(tt+i.y),sin(tt-i.y)+cos(tt+i.x));
@@ -755,7 +828,19 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
           "#include <opaque_fragment>",
           `
  float uw=smoothstep(0.05,-0.8,vWP.y);
- if(uw>0.){ float cs=caust(vWP.xz*.55,uTime*.55)*uCaus; outgoingLight += vec3(.55,.95,.85)*cs*uw*exp(vWP.y*.09)*.55; outgoingLight*=mix(vec3(1.),vec3(.55,.95,.95),uw*.6);}
+ if(uw>0.){
+  // Adapted from Abyssal Garden (MIT, see underwater.ts), source/src/shaders.js lines 243-251
+  // and 372: the pattern is cast along the light, kept to the faces that look at it, and eased
+  // to its mean far away, where it would only shimmer.
+  vec2 cq=vWP.xz-uSeaSun.xz*(vWP.y/uSeaSun.y);
+  float cd=length(vWP-cameraPosition);
+  float lit=smoothstep(.05,.5,dot(inverseTransformDirection(normal,viewMatrix),uSeaSun));
+  float cpat=.72+.28*sin(cq.x*.23+uFlow*.11)*sin(cq.y*.19-uFlow*.09);
+  float cs=mix(caust(cq*.55,uFlow*.42)*cpat,.08,smoothstep(9.,26.,cd))*uCaus*lit;
+  vec3 cc=mix(vec3(1.,.86,.62),vec3(.55,.95,.85),smoothstep(-1.,-9.,vWP.y));
+  outgoingLight+=cc*cs*uw*exp(vWP.y*.07)*.72;
+  // the deeper the floor, the more red the light has lost on its way down
+  outgoingLight*=mix(vec3(1.),exp(vec3(.1,.026,.018)*vWP.y)*1.06,uw);}
 #include <opaque_fragment>`,
         );
     };
@@ -816,10 +901,11 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
     const caustics = mat.onBeforeCompile;
     mat.onBeforeCompile = (sh, r) => {
       caustics.call(mat, sh, r);
+      sh.uniforms.uTime = U.time;
       sh.fragmentShader = sh.fragmentShader
         .replace(
           "varying vec3 vWP;",
-          "varying vec3 vWP;\nfloat shoreZ(float x){return 1.5+sin(x*.13)*1.+sin(x*.05+.4)*1.2;}",
+          "varying vec3 vWP;\nuniform float uTime;\nfloat shoreZ(float x){return 1.5+sin(x*.13)*1.+sin(x*.05+.4)*1.2;}",
         )
         .replace(
           "#include <color_fragment>",
@@ -844,10 +930,18 @@ float caust(vec2 uv,float t){vec2 p=mod(uv*1.1,6.2831)-250.;vec2 i=p;float c=1.;
       depthWrite: false,
       depthTest: false,
       fog: false,
-      uniforms: { uMoon: U.moonDir, uTime: U.time, uUnder: U.under, uSong: U.song },
+      uniforms: {
+        uMoon: U.moonDir,
+        uTime: U.time,
+        uUnder: U.under,
+        uSong: U.song,
+        uSea: SEA.uSea,
+        uSeaSun: SEA.uSeaSun,
+      },
       vertexShader: `varying vec3 vDir;void main(){vDir=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
       fragmentShader:
         GLSL_NOISE +
+        SEA_GLSL +
         `
 uniform vec3 uMoon;uniform float uTime,uUnder,uSong;varying vec3 vDir;
 void main(){
@@ -883,7 +977,7 @@ void main(){
  c=mix(c,mc,disc);
  c+=lin(vec3(1.,.74,.46))*(exp(-md*12.)*.22+exp(-md*35.)*.35)*(1.-disc);
  c=mix(c,lin(vec3(.02,.09,.12)),smoothstep(.0,-.06,h));
- c=mix(c,lin(vec3(.05,.33,.36)),uUnder);
+ if(uUnder>0.)c=mix(c,seaWater(d,cameraPosition.y),uUnder);
  gl_FragColor=vec4(c,1.);
 }`,
     });
@@ -1271,8 +1365,20 @@ void main(){
     m.receiveShadow = true;
     scene.add(m);
     if (groundH(x, z) > 0.05) beachRocks.push([x, z, s]);
+    else
+      seaSolids.push({
+        x,
+        y: m.position.y,
+        z,
+        // the lumps reach a little past the unit sphere they are raised on
+        r: 1.05 * Math.max(m.scale.x, m.scale.z),
+        ry: 0.76 * s,
+        grounded: true,
+      });
   }
   const beachRocks: [number, number, number][] = [];
+  /** What the swimming animals go around: the rocks and corals of the sea, the conch, the pearl. */
+  const seaSolids: Solid[] = [];
   /**
    * Tufts of beach grass in the lee of the rocks on the sand, and fireflies under the sea grape and
    * the palms. Their own RNG: the prototype's draws, and so its layout, are untouched.
@@ -2499,6 +2605,15 @@ void main(){
   /** Size of the conch lying on the beach (the prototype's was 0.95, nearly Mila's height). */
   const CONCH_ON_SAND = 0.42;
   let liveConch: THREE.Group;
+  /**
+   * Length of the living conch's shell (metres). The prototype's was 1.35, longer than Mila is tall
+   * (1.25 m): at 0.95 it is still a very old, very large lambi, and she is the taller of the two.
+   */
+  const LIVE_CONCH = 0.95;
+  /** Its two eye stalks, which sway. */
+  const conchEyes: { stalk: THREE.Group; s: number }[] = [];
+  /** The light Mila holds her hand out to on page 9, above the living conch. */
+  const LIGHT_9 = V3(DEEP.x + 0.3, DEEP.y + 1.45, DEEP.z + 0.4);
   let pearl: THREE.Group;
   let pearlHalo: THREE.Sprite;
   function buildConches(): void {
@@ -2514,39 +2629,99 @@ void main(){
     bigConch.castShadow = true;
     bigConch.receiveShadow = true;
     scene.add(bigConch);
-    // living conch: algae-covered shell with foot and eyes
+    // The living conch: a grown lambi at rest on the sand, its foot out under the lip and its two
+    // eyes up on their stalks, turned to the pearl and to Mila. Its shell is sun-bleached under a
+    // little algae, lighter than the sea floor, and shows the camera its flared lip.
     const lg = conchGeometry({
-      outer: "#8f8455",
-      band: "#5d6a3a",
-      lipCol: "#e4a08c",
+      outer: "#d9c08e",
+      band: "#8c9a5a",
+      lipCol: "#f2a48c",
       inA: "#ffc7b0",
       inB: "#e56b78",
     });
     liveConch = new THREE.Group();
     const sh = new THREE.Mesh(lg, conchMaterial(U_liveGlow));
-    sh.scale.setScalar(1.35);
-    sh.rotation.set(0, 0.4, -Math.PI / 2 + 0.1);
+    // mirrored, so the lip opens on the side the camera of page 9 sees
+    sh.scale.set(LIVE_CONCH, LIVE_CONCH, -LIVE_CONCH);
+    sh.rotation.set(1.0, 0.25, -Math.PI / 2 + 0.16);
+    sh.position.set(0.02, 0.3 * LIVE_CONCH, 0);
+    sh.castShadow = true;
+    sh.receiveShadow = true;
     liveConch.add(sh);
-    const footM = toon("#c9734c");
-    const foot = new THREE.Mesh(new THREE.SphereGeometry(0.18, 14, 10), footM);
-    foot.scale.set(1.9, 0.45, 1.1);
-    foot.position.set(-0.15, -0.36, 0);
-    liveConch.add(foot);
-    const eyeM = toon("#f1e6c8");
-    const pupilM = toon("#1a1a1a");
+    const soft = new THREE.Group();
+    soft.scale.setScalar(LIVE_CONCH);
+    liveConch.add(soft);
+    const footM = toonSoft("#e58f66");
+    const foot = new THREE.Mesh(new THREE.SphereGeometry(0.18, 24, 14), footM);
+    foot.scale.set(2.5, 0.42, 1.2);
+    foot.position.set(-0.12, 0.05, 0);
+    foot.receiveShadow = true;
+    soft.add(foot);
+    const snout = new THREE.Mesh(new THREE.SphereGeometry(0.085, 18, 12), footM);
+    snout.scale.set(1.7, 0.85, 1.05);
+    snout.position.set(-0.52, 0.075, 0);
+    soft.add(snout);
+    const eyeM = toonSoft("#f6ecc9");
+    const pupilM = toon("#1a1210");
     for (const s of [-1, 1]) {
-      liveConch.add(
-        limb(V3(-0.55, -0.35, 0.2 + s * 0.06), V3(-0.72, -0.18, 0.22 + s * 0.1), 0.016, footM),
-      );
-      const e = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 8), eyeM);
-      e.position.set(-0.73, -0.16, 0.22 + s * 0.1);
-      liveConch.add(e);
-      const pu = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 6), pupilM);
-      pu.position.set(-0.755, -0.155, 0.22 + s * 0.1);
-      liveConch.add(pu);
+      // each stalk is rooted inside the head and turns on that root when it sways
+      const stalk = new THREE.Group();
+      stalk.position.set(-0.5, 0.1, s * 0.055);
+      const tip = V3(-0.13, 0.24, s * 0.05);
+      stalk.add(limb(V3(0, 0, 0), tip, 0.02, footM));
+      const e = new THREE.Mesh(new THREE.SphereGeometry(0.04, 14, 10), eyeM);
+      e.position.copy(tip);
+      stalk.add(e);
+      const pu = new THREE.Mesh(new THREE.SphereGeometry(0.02, 10, 8), pupilM);
+      pu.position.set(tip.x - 0.028, tip.y + 0.006, tip.z + s * 0.004);
+      stalk.add(pu);
+      soft.add(stalk);
+      conchEyes.push({ stalk, s });
     }
-    liveConch.position.set(DEEP.x + 0.6, DEEP.y + 0.55, DEEP.z + 0.4);
-    liveConch.rotation.y = 0.9;
+    {
+      const lx = DEEP.x + 0.6;
+      const lz = DEEP.z + 0.4;
+      const yaw = 0.9;
+      // It lies along the slope of the sand under its foot: the plane through nine heights taken
+      // under the foot, in the creature's own frame (u along its body, w across).
+      const u0 = foot.position.x * LIVE_CONCH;
+      const a = 0.18 * foot.scale.x * LIVE_CONCH * 0.8;
+      const b = 0.18 * foot.scale.z * LIVE_CONCH * 0.8;
+      const heightAt = (u: number, w: number): number =>
+        groundH(
+          lx + u * Math.cos(yaw) + w * Math.sin(yaw),
+          lz - u * Math.sin(yaw) + w * Math.cos(yaw),
+        );
+      const taken: { u: number; w: number; h: number }[] = [];
+      for (const du of [-a, 0, a])
+        for (const dw of [-b, 0, b]) taken.push({ u: du, w: dw, h: heightAt(u0 + du, dw) });
+      const mean = (pick: (t: { u: number; w: number; h: number }) => boolean): number => {
+        const some = taken.filter(pick);
+        return some.reduce((sum, t) => sum + t.h, 0) / some.length;
+      };
+      const slopeU = (mean((t) => t.u > 0) - mean((t) => t.u < 0)) / (2 * a);
+      const slopeW = (mean((t) => t.w > 0) - mean((t) => t.w < 0)) / (2 * b);
+      const middle = mean(() => true);
+      // The sand is not flat and the foot is rounded underneath: how far the foot has to be
+      // lifted off that plane for its underside to touch the sand without going into it.
+      const thick = 0.18 * foot.scale.y * LIVE_CONCH;
+      const lift = Math.max(
+        ...taken.map((t) => {
+          const out = (t.u / (a / 0.8)) ** 2 + (t.w / (b / 0.8)) ** 2;
+          const rise = thick * (1 - Math.sqrt(Math.max(0, 1 - out)));
+          return t.h - (middle + slopeU * t.u + slopeW * t.w) - rise;
+        }),
+      );
+      const up = V3(-slopeU, 1, -slopeW).normalize();
+      liveConch.quaternion
+        .setFromAxisAngle(V3(0, 1, 0), yaw)
+        .multiply(new THREE.Quaternion().setFromUnitVectors(V3(0, 1, 0), up));
+      // the underside of the foot rests on the sand, a few millimetres in
+      const under = thick - foot.position.y * LIVE_CONCH;
+      liveConch.position
+        .set(lx, middle - slopeU * u0, lz)
+        .add(up.applyAxisAngle(V3(0, 1, 0), yaw).multiplyScalar(under + lift - 0.008));
+    }
     scene.add(liveConch);
     // the pearl: it stays at the bottom
     pearl = new THREE.Group();
@@ -2565,6 +2740,8 @@ void main(){
         color: new THREE.Color(1, 0.85, 0.85),
         transparent: true,
         depthWrite: false,
+        // a glow, not a disc: the sand it lies on must not cut it along a line
+        depthTest: false,
         blending: THREE.AdditiveBlending,
         opacity: 0.8,
       }),
@@ -2581,6 +2758,25 @@ void main(){
     pearl.add(valve);
     pearl.position.set(DEEP.x - 0.9, groundH(DEEP.x - 0.9, DEEP.z + 0.9) + 0.2, DEEP.z + 0.9);
     scene.add(pearl);
+    const lc = liveConch.position;
+    seaSolids.push(
+      {
+        x: lc.x,
+        y: lc.y + 0.3 * LIVE_CONCH,
+        z: lc.z,
+        r: 0.62 * LIVE_CONCH,
+        ry: 0.42 * LIVE_CONCH,
+        grounded: true,
+      },
+      {
+        x: pearl.position.x,
+        y: pearl.position.y,
+        z: pearl.position.z,
+        r: 0.38,
+        ry: 0.2,
+        grounded: true,
+      },
+    );
   }
 
   /* =====================================================================
@@ -2594,6 +2790,8 @@ void main(){
     freedAt: number;
   };
   const debris: Debris[] = [];
+  /** Height of the crab's middle over the sand: its shell clears it and its feet reach it (metres). */
+  const CRAB_OVER_SAND = 0.16;
   function buildCrab(): void {
     const g = new THREE.Group();
     const shell = toon("#d0532f");
@@ -2688,7 +2886,7 @@ void main(){
     g.scale.setScalar(1.8);
     const cx = 14.6;
     const cz = 4.15;
-    g.position.set(cx, groundH(cx, cz) + 0.12, cz);
+    g.position.set(cx, groundH(cx, cz) + CRAB_OVER_SAND, cz);
     g.rotation.y = -1.9;
     scene.add(g);
     crab = { g, legs, claws, base: g.position.clone(), freedAt: 0 };
@@ -2757,8 +2955,91 @@ void main(){
   let school: THREE.InstancedMesh;
   const schoolData: SchoolFish[] = [];
   const schoolCtr = V3();
-  let plankton: THREE.Points;
+  /** How far the school has opened around Mila (page 8): 0 gathered on its own, 1 around her. */
+  let schoolOpen = 0;
+  /** Every fish of the sea, the school included: they keep out of the solids and of each other. */
+  const shoal: Swimmer[] = [];
+  /** The turtle as the fish meet it, moved with it. */
+  const turtleSolid: Solid = { x: 0, y: 0, z: 0, r: 0.5, ry: 0.22, grounded: false };
+  /** Mila as the fish meet her: one capsule from her feet to her head, wherever she leans. */
+  const milaLimb: Limb = {
+    ax: 0,
+    ay: 0,
+    az: 0,
+    bx: 0,
+    by: 0,
+    bz: 0,
+    r: 0.3,
+    wide: 0.5,
+    vx: 0,
+    vy: 0,
+    vz: 0,
+  };
+  /**
+   * The camera's view of her under water: the fish keep out of it too, so none crosses the lens or
+   * swims in front of her, where it would read as going through her.
+   */
+  const sightLimb: Limb = {
+    ax: 0,
+    ay: 99,
+    az: 0,
+    bx: 0,
+    by: 99,
+    bz: 0,
+    r: 0.2,
+    wide: 0.4,
+    vx: 0,
+    vy: 0,
+    vz: 0,
+  };
+  const milaLimbs = [milaLimb, sightLimb];
+  /** Radius of the ball that stands in for a fish of size 1: half its body, nose to tail root. */
+  const FISH_R = 0.14;
+  /** The fish have not been placed yet: on their first frame they take their route's heading. */
+  let shoalFresh = true;
+  /**
+   * Turns a fish the way it is going: along its route when nothing is in the way (`routeYaw`),
+   * along its detour when it goes around something. A fish that is not moving keeps its heading.
+   */
+  function faceWay(
+    f: { yaw: number; lx: number; lz: number },
+    q: Swimmer,
+    routeYaw: number,
+    dt: number,
+  ): void {
+    const dx = q.x - f.lx;
+    const dz = q.z - f.lz;
+    f.lx = q.x;
+    f.lz = q.z;
+    if (shoalFresh) f.yaw = routeYaw;
+    else if (dt > 1e-5 && Math.hypot(dx, dz) > 1e-5)
+      f.yaw = lerpAngle(f.yaw, Math.atan2(dx, dz), Math.min(1, dt * 8));
+  }
+  let dust: SeaDust;
+  let grass: THREE.InstancedMesh;
+  let tufts: THREE.InstancedMesh;
   const rays: THREE.Mesh[] = [];
+  /** Where the conch Mila carries is: the dust near it takes its pink. */
+  const U_conchAt = { value: V3(0, 99, 0) };
+  /** Width of the sea-grass blades: wider when the adaptive quality keeps half of them. */
+  const U_wide = { value: 1 };
+  /**
+   * Follows the adaptive quality in the water: less dust below the top level; at the lowest, half
+   * the sea grass (wider blades fill in) and every other shaft. Colour, depth and light stay.
+   */
+  function thinSea(level: number): void {
+    const motes = dust.geometry.attributes.aSeed.count;
+    dust.geometry.setDrawRange(0, level < 2 ? Math.ceil(motes / 2) : motes);
+    const blades = grass.instanceMatrix.count;
+    grass.count = level === 0 ? Math.ceil(blades / 2) : blades;
+    const short = tufts.instanceMatrix.count;
+    tufts.count = level === 0 ? Math.ceil(short / 2) : short;
+    U_wide.value = level === 0 ? 1.6 : 1;
+    rays.forEach((r, i) => {
+      r.visible = level > 0 || i % 2 === 0;
+    });
+    canvas.dataset.quality = String(level);
+  }
   function buildMeadow(): void {
     const bg = new THREE.PlaneGeometry(0.07, 1, 1, 7);
     bg.translate(0, 0.5, 0);
@@ -2768,27 +3049,36 @@ void main(){
       bpos.setX(i, bpos.getX(i) * (1 - y * 0.6));
     }
     const mat = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide });
+    // Each blade is rooted and bends in the current all plants share (`seaSway`): its place gives
+    // it a phase, a suppleness and a delay of its own, and a tall blade gives more than a short one.
     mat.onBeforeCompile = (sh) => {
-      sh.uniforms.uTime = U.time;
+      sh.uniforms.uFlow = SEA.uFlow;
+      sh.uniforms.uSway = SEA.uSway;
       sh.uniforms.uPart = U.part;
       sh.uniforms.uPartC = U.partC;
+      sh.uniforms.uWide = U_wide;
       sh.vertexShader =
-        "uniform float uTime;uniform float uPart;uniform vec3 uPartC;\n" +
+        "uniform float uPart,uWide;uniform vec3 uPartC;\n" +
+        SWAY_GLSL +
         sh.vertexShader.replace(
           "#include <project_vertex>",
           `
-      vec4 wp=modelMatrix*instanceMatrix*vec4(transformed,1.);
+      vec4 wp=modelMatrix*instanceMatrix*vec4(transformed*vec3(uWide,1.,1.),1.);
       vec4 root=modelMatrix*instanceMatrix*vec4(0.,0.,0.,1.);
+      float tall=length(instanceMatrix[1].xyz);
+      float sd=fract(sin(dot(root.xz,vec2(12.9898,78.233)))*43758.5453);
+      float flex=mix(.6,1.3,fract(sd*7.31))*(.55+.3*tall);
+      vec2 sw=seaSway(root.xz,position.y,flex,sd)*tall;
       float hh=position.y*position.y;
-      vec2 sw=vec2(sin(uTime*1.1+root.x*.5+root.z*.3)*.5+sin(uTime*1.9+root.x*1.3)*.15, cos(uTime*.9+root.z*.6)*.3);
       vec2 away=root.xz-uPartC.xz;float dd=length(away);
-      wp.xz+=sw*hh*.9+normalize(away+1e-4)*uPart*smoothstep(3.2,.5,dd)*hh*1.5;
-      wp.y-=uPart*smoothstep(3.,.5,dd)*hh*.3;
+      wp.xz+=sw+normalize(away+1e-4)*uPart*smoothstep(3.2,.5,dd)*hh*1.5;
+      // a bent blade keeps its length: its tip comes down as it leans
+      wp.y-=uPart*smoothstep(3.,.5,dd)*hh*.3+dot(sw,sw)/(2.*max(tall*position.y,.08));
       vec4 mvPosition=viewMatrix*wp;gl_Position=projectionMatrix*mvPosition;`,
         );
     };
     const N = isSmall ? 2200 : 4200;
-    const grass = new THREE.InstancedMesh(bg, mat, N);
+    grass = new THREE.InstancedMesh(bg, mat, N);
     const o = new THREE.Object3D();
     const c = new THREE.Color();
     const pal = ["#2f8a7a", "#3fa08a", "#6f8a3a", "#879a45", "#2b7266", "#56a88f"];
@@ -2813,8 +3103,64 @@ void main(){
       grass.setColorAt(i, c.set(pal[(rnd() * pal.length) | 0]).multiplyScalar(rr(0.8, 1.15)));
     }
     scene.add(grass);
-    // branching corals and gorgonians
-    const corM = [toon("#e2785e"), toon("#b55a87"), toon("#e9a65a")];
+    // The same blade, short, in tufts: an understorey where the tall grass thins out, and a few
+    // clumps along Mila's way in the shallows, so the sand between the pages is not bare. Its own RNG:
+    // the placements drawn after this keep theirs.
+    {
+      const own = createRng(53);
+      const or = (a: number, b: number): number => a + (b - a) * own();
+      const spots: [V3, number, number, number][] = [
+        [MEADOW, 5, 14.5, isSmall ? 50 : 84],
+        [SCHOOL, 2, 9, isSmall ? 10 : 18],
+        [V3(6.8, 0, -9.5), 1.5, 7, isSmall ? 12 : 20],
+      ];
+      const roots: [number, number][] = [];
+      for (const [ctr, r0, r1, n] of spots)
+        for (let k = 0; k < n; k++) {
+          const a = own() * 6.28;
+          const r = or(r0, r1);
+          const cx = ctr.x + Math.cos(a) * r * (ctr === MEADOW ? 1.2 : 1);
+          const cz = ctr.z + Math.sin(a) * r;
+          const blades = 9 + ((own() * 10) | 0);
+          for (let j = 0; j < blades; j++) {
+            const ba = own() * 6.28;
+            const br = Math.sqrt(own()) * 0.42;
+            roots.push([cx + Math.cos(ba) * br, cz + Math.sin(ba) * br]);
+          }
+        }
+      tufts = new THREE.InstancedMesh(bg, mat, roots.length);
+      const tpal = ["#8fae4a", "#6f9a4e", "#a3b85c", "#5f8f5a", "#7aa86a"];
+      roots.forEach(([x, z], i) => {
+        o.position.set(x, groundH(x, z) - 0.03, z);
+        o.rotation.set(or(-0.3, 0.3), own() * 6.28, or(-0.3, 0.3));
+        o.scale.set(or(1.0, 1.6), or(0.22, 0.6), 1);
+        o.updateMatrix();
+        tufts.setMatrixAt(i, o.matrix);
+        tufts.setColorAt(i, c.set(tpal[(own() * tpal.length) | 0]).multiplyScalar(or(0.8, 1.1)));
+      });
+      scene.add(tufts);
+    }
+    // Branching corals and gorgonians. All the limbs of one colour make one mesh; each vertex knows
+    // the foot of its coral and how tall it stands, so the branches give a little in the current.
+    const corM = ["#e2785e", "#b55a87", "#e9a65a"].map((color) => {
+      const m = toon(color);
+      m.onBeforeCompile = (sh) => {
+        sh.uniforms.uFlow = SEA.uFlow;
+        sh.uniforms.uSway = SEA.uSway;
+        sh.vertexShader =
+          "attribute vec4 aRoot;\n" +
+          SWAY_GLSL +
+          sh.vertexShader.replace(
+            "#include <begin_vertex>",
+            `#include <begin_vertex>
+      float ch=clamp((position.y-aRoot.y)/aRoot.w,0.,1.);
+      transformed.xz+=seaSway(aRoot.xz,ch,.17,fract(aRoot.x*3.7+aRoot.z*1.3))*aRoot.w;`,
+          );
+      };
+      m.customProgramCacheKey = () => "coral";
+      return m;
+    });
+    const corG: THREE.BufferGeometry[][] = [[], [], []];
     for (let k = 0, tries = 0; k < 16 && tries < 200; tries++) {
       const a = rnd() * 6.28;
       const r = rr(2, 9);
@@ -2823,11 +3169,16 @@ void main(){
       if (!isClear(cx, cz)) continue;
       k++;
       const base = V3(cx, groundH(cx, cz) - 0.05, cz);
-      const cg = new THREE.Group();
-      const m = corM[k % 3];
+      const limbs: THREE.BufferGeometry[] = [];
+      let top = base.y;
+      let reach = 0;
       const grow = (p: V3, dir: V3, len: number, dep: number): void => {
         const e = p.clone().add(dir.clone().multiplyScalar(len));
-        cg.add(limb(p, e, 0.05 * (1 - dep * 0.2), m));
+        const part = limb(p, e, 0.05 * (1 - dep * 0.2), corM[k % 3]);
+        part.updateMatrix();
+        limbs.push(part.geometry.applyMatrix4(part.matrix));
+        top = Math.max(top, e.y);
+        reach = Math.max(reach, Math.hypot(e.x - base.x, e.z - base.z));
         if (dep < 3)
           for (let j = 0; j < 2; j++) {
             const nd = dir
@@ -2838,8 +3189,30 @@ void main(){
           }
       };
       grow(base, V3(0, 1, 0), rr(0.35, 0.6), 0);
-      scene.add(cg);
+      const tall = top - base.y;
+      seaSolids.push({
+        x: base.x,
+        y: base.y + tall / 2,
+        z: base.z,
+        r: reach + 0.1,
+        ry: tall / 2 + 0.1,
+        grounded: true,
+      });
+      for (const g of limbs) {
+        const n = g.attributes.position.count;
+        const root = new Float32Array(n * 4);
+        for (let i = 0; i < n; i++) root.set([base.x, base.y, base.z, top - base.y], i * 4);
+        g.setAttribute("aRoot", new THREE.BufferAttribute(root, 4));
+        corG[k % 3].push(g);
+      }
     }
+    corG.forEach((parts, i) => {
+      if (!parts.length) return;
+      const coral = new THREE.Mesh(mergeGeometries(parts), corM[i]);
+      parts.forEach((g) => g.dispose());
+      coral.castShadow = true;
+      scene.add(coral);
+    });
     // turtle
     turtle = new THREE.Group();
     const tm = toon("#7d8a52");
@@ -2883,7 +3256,9 @@ void main(){
     turtle.traverse((obj) => {
       if (obj instanceof THREE.Mesh) obj.castShadow = true;
     });
+    turtle.scale.setScalar(TURTLE_SCALE);
     scene.add(turtle);
+    seaSolids.push(turtleSolid);
     // fish
     const merged = makeFishGeo();
     const NF = isSmall ? 60 : 100;
@@ -2900,6 +3275,10 @@ void main(){
         sc: rr(0.7, 1.3),
         grp: i % 3,
         vis: i < NF * 0.35 ? 1 : 0,
+        body: swimmer(i % 2 ? 1 : -1),
+        yaw: 0,
+        lx: 0,
+        lz: 0,
       });
     }
     scene.add(fish);
@@ -2918,47 +3297,47 @@ void main(){
         sp: rr(0.7, 1.1),
         ph: rnd() * 6,
         sc: rr(0.55, 0.8),
+        body: swimmer(i % 2 ? 1 : -1),
+        yaw: 0,
+        lx: 0,
+        lz: 0,
       });
     }
+    for (const f of fishData) shoal.push(f.body);
+    for (const f of schoolData) shoal.push(f.body);
     schoolCtr.set(SCHOOL.x, SCHOOL.y + 2.6, SCHOOL.z);
     scene.add(school);
-    // plankton and light shafts
-    const NP = 500;
-    const pp = new Float32Array(NP * 3);
-    for (let i = 0; i < NP; i++) {
-      pp[i * 3] = rr(-6, 24);
-      pp[i * 3 + 1] = rr(-14, -0.5);
-      pp[i * 3 + 2] = rr(-46, -4);
-    }
-    const pg = new THREE.BufferGeometry();
-    pg.setAttribute("position", new THREE.BufferAttribute(pp, 3));
-    plankton = new THREE.Points(
-      pg,
-      new THREE.PointsMaterial({
-        map: glowTex,
-        color: new THREE.Color(0.7, 1, 0.9),
-        size: 0.12,
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-        opacity: 0,
-      }),
-    );
-    scene.add(plankton);
+    // The prototype's plankton drew 1500 numbers here; they are still drawn so everything placed
+    // after it keeps its place.
+    for (let i = 0; i < 1500; i++) rnd();
+    dust = createSeaDust(createRng(41), isSmall ? 320 : 640, SEA, U_conchAt, U.glow);
+    dust.renderOrder = 3;
+    scene.add(dust);
+    // Shafts of moonlight: soft sheets hanging from the surface along the light's own slant. Each
+    // turns about that axis to face the camera, so they all lean the same way from every page.
     const rayM = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
-      uniforms: { uTime: U.time, uUnder: U.under },
-      vertexShader: QUAD_VERTEX,
-      fragmentShader: `uniform float uTime,uUnder;varying vec2 vUv;void main(){float a=smoothstep(0.,.5,vUv.x)*smoothstep(1.,.5,vUv.x)*pow(vUv.y,1.6);
-      a*=.5+.5*sin(uTime*.6+vUv.x*6.);gl_FragColor=vec4(vec3(.55,.95,.85)*a*.22*uUnder,1.);}`,
+      uniforms: { uFlow: SEA.uFlow, uUnder: U.under, uSeaSun: SEA.uSeaSun },
+      vertexShader: `uniform vec3 uSeaSun;varying vec2 vUv;varying float vD,vPh;
+      void main(){vUv=uv;vec3 base=modelMatrix[3].xyz;vPh=base.x*1.7+base.z;
+       vec3 side=normalize(cross(uSeaSun,cameraPosition-base));
+       vec3 wp=base+uSeaSun*position.y+side*position.x;vD=length(wp-cameraPosition);
+       gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}`,
+      fragmentShader: `uniform float uFlow,uUnder;varying vec2 vUv;varying float vD,vPh;
+      void main(){float x=vUv.x*2.-1.;
+       float a=exp(-x*x*4.)*(1.-x*x)*pow(vUv.y,1.5)*smoothstep(1.,.9,vUv.y);
+       a*=(.7+.3*sin(uFlow*.33+vPh))*smoothstep(1.5,6.,vD)*exp(-vD*.045);
+       gl_FragColor=vec4(mix(vec3(.5,.95,.85),vec3(1.,.88,.66),vUv.y)*a*.2*uUnder,1.);}`,
     });
     for (let i = 0; i < 9; i++) {
-      const r = new THREE.Mesh(new THREE.PlaneGeometry(rr(1.5, 3), 16), rayM);
-      r.position.set(rr(2, 18), -8, rr(-38, -10));
-      r.rotation.set(0, rnd() * 3, 0.25);
+      const r = new THREE.Mesh(new THREE.PlaneGeometry(rr(1.5, 3), 18).translate(0, -9, 0), rayM);
+      // the light slants towards the shore as it goes down: the shafts start further out to sea
+      r.position.set(rr(2, 18), -0.15, rr(-38, -10) - 7);
+      rnd();
+      r.frustumCulled = false;
       scene.add(r);
       rays.push(r);
     }
@@ -3511,8 +3890,6 @@ void main(){
   /** Time constants (seconds) of the camera's ease in position and in angle. */
   const CAM_EASE = { move: 0.3, turn: 0.45 };
   const CAM_RIDE = { move: 0.1, turn: 0.16 };
-  /** Sea-floor heights between which Mila goes from swimming to standing on the bottom. */
-  const WADE = { from: -0.95, stand: -0.62 };
   /**
    * Her gestures with the light: `reach` holds her open hand out to the pearl's light (page 9),
    * `fist` closes it on nothing, `hug` folds her arms on the three voices (page 10).
@@ -3703,19 +4080,35 @@ void main(){
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(arr, 3));
-    const m = new THREE.Points(
-      g,
-      new THREE.PointsMaterial({
-        map: glowTex,
-        color: new THREE.Color(2, 1.5, 0.6),
-        size: 0.14,
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      }),
-    );
+    const material = burstMaterial();
+    addSeaFog(material, SEA);
+    const m = new THREE.Points(g, material);
     scene.add(m);
     bursts.push({ m, vel, t: 0 });
+  }
+
+  /** The glowing grains of a burst; each burst fades its own copy. */
+  function burstMaterial(): THREE.PointsMaterial {
+    return new THREE.PointsMaterial({
+      map: glowTex,
+      color: new THREE.Color(2, 1.5, 0.6),
+      size: 0.14,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+  }
+
+  /**
+   * One hidden grain, so the bursts' shader program is built at the start (see `warmUp`) and kept
+   * while no burst is alive.
+   */
+  function buildBurstSeed(): void {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(3), 3));
+    const seed = new THREE.Points(g, burstMaterial());
+    seed.visible = false;
+    scene.add(seed);
   }
 
   /* =====================================================================
@@ -3737,8 +4130,20 @@ void main(){
   function animateMila(rdt: number): void {
     const M = mila;
     const target = trans ? trans.to : page;
-    const afloat =
-      M.g.position.y < -0.25 && groundH(M.g.position.x, M.g.position.z) < WADE.stand ? 1 : 0;
+    const at = M.g.position;
+    const here = groundH(at.x, at.z);
+    // the shallowest of her next steps: the bottom is uneven, one hollow must not lay her down again
+    let ahead = here;
+    const step = M.prev && !M.snap ? Math.hypot(at.x - M.prev.x, at.z - M.prev.z) : 0;
+    if (M.prev && step > 1e-4)
+      for (let k = 1; k <= 4; k++) {
+        const f = (FOOTING_REACH * k) / 4 / step;
+        ahead = Math.max(
+          ahead,
+          groundH(at.x + (at.x - M.prev.x) * f, at.z + (at.z - M.prev.z) * f),
+        );
+      }
+    const afloat = swims(here, ahead) ? 1 : 0;
     M.swimW = lerp(M.swimW, afloat, Math.min(1, rdt * 3.6));
     if (M.snap) {
       M.swimW = afloat;
@@ -3831,9 +4236,7 @@ void main(){
       (!!trans && trans.to === 10 && trans.from === 9 && trans.t > 0.3) ||
       (!!trans && trans.from === 10 && trans.to === 11 && trans.t < 0.45);
     gesture.hug = lerp(gesture.hug, hugging ? 1 : 0, Math.min(1, rdt * 2.5));
-    const lightLocal = M.body.worldToLocal(
-      V3(liveConch.position.x - 0.3, liveConch.position.y + 0.9, liveConch.position.z),
-    );
+    const lightLocal = M.body.worldToLocal(tmpV.copy(LIGHT_9));
     // arms
     const wS = M.swimW;
     const wH = (1 - wS) * M.hold;
@@ -3979,6 +4382,7 @@ void main(){
         }
         perf.n = 0;
         perf.sum = 0;
+        thinSea(perf.level);
         if (avg < 0.026 || perf.level === 0) perf.done = true;
       }
     }
@@ -3988,6 +4392,7 @@ void main(){
     const dt = rdt * motion;
     wtime += dt;
     U.time.value = wtime;
+    SEA.uFlow.value += dt * FLOW_RATE;
     const T = timer.getElapsed();
 
     // camera
@@ -4123,7 +4528,10 @@ void main(){
     hemi.intensity = lerp(1.05, 1.5, under);
     fillL.intensity = lerp(0.85, 0.2, under);
     moonL.intensity = lerp(2.3, 1.2, under);
-    (plankton.material as THREE.PointsMaterial).opacity = under * 0.8;
+    heldConchWorld(U_conchAt.value);
+    dust.visible = under > 0;
+    dust.material.uniforms.uPx.value =
+      (hh * renderer.getPixelRatio()) / (2 * Math.tan((camera.fov * Math.PI) / 360));
     fireflies.material.uniforms.uTime.value = wtime;
     fireflies.material.uniforms.uOpacity.value = (1 - under) * 0.85;
     updateBoat(wtime);
@@ -4131,7 +4539,10 @@ void main(){
 
     // the shadow follows the action
     const focus = CAMS[page] ? CAMS[page].subj : HOME;
-    moonL.position.copy(focus).addScaledVector(U.moonDir.value, 40);
+    // under water the light comes down the way the sea bends it, as the caustics and shafts do
+    moonL.position
+      .copy(focus)
+      .addScaledVector(tmpV.copy(U.moonDir.value).lerp(SEA.uSeaSun.value, under).normalize(), 40);
     moonL.target.position.copy(focus);
 
     // living world
@@ -4150,12 +4561,7 @@ void main(){
       mila.g.position.y = MILA_AT[page].p.y + (mila.swimW > 0.1 ? Math.sin(wtime * 1.2) * 0.08 : 0);
     {
       const gp = mila.g.position;
-      const gh = groundH(gp.x, gp.z);
-      if (gh > WADE.from) {
-        // Where the water is shallow her feet find the bottom: she wades in and out, upright,
-        // instead of swimming over the sand or walking on the water.
-        gp.y = lerp(Math.max(gp.y, gh + 0.35), gh, smooth(WADE.from, WADE.stand, gh));
-      } else gp.y = Math.max(gp.y, gh + 0.35);
+      gp.y = milaHeight(gp.y, groundH(gp.x, gp.z));
     }
     updateGround();
     U.wind.value = lerp(U.wind.value, mila.swimW * 1.2 + mila.walk * 0.4, rdt * 2);
@@ -4187,7 +4593,7 @@ void main(){
       crab.g.position.copy(crab.base).add(V3(-1.15 * easeIO(k), 0, -0.25 * easeIO(k)));
       crab.g.position.y =
         groundH(crab.g.position.x, crab.g.position.z) +
-        0.12 +
+        CRAB_OVER_SAND +
         Math.abs(Math.sin(ct * 9)) * 0.015 * (1 - k);
     } else {
       crab.g.position.copy(crab.base);
@@ -4224,26 +4630,25 @@ void main(){
         Math.sin(wtime * (f.big ? 1.6 : 1.2) + (f.big ? 0 : 1)) * (f.big ? 0.5 : 0.25) * f.s;
       f.pv.rotation.y = Math.sin(wtime * 1.6) * 0.25 * f.s;
     });
-    // fish
+    // fish: each on its round, the school gathered or opened around Mila (page 8); `steer` then
+    // takes them around the rocks, the corals, the turtle, Mila and each other
     const reveal = page >= 7 ? (page === 7 && !trans ? smooth(1.5, 4, T - pageStart) : 1) : 0;
     const o = dummy;
-    o.scale.set(1, 1, 1);
     for (let i = 0; i < fishData.length; i++) {
       const f = fishData[i];
       f.a += dt * f.s;
       const ctr = f.grp === 2 ? DEEP : MEADOW;
-      const vis = Math.max(f.vis, reveal);
-      const x = ctr.x + Math.cos(f.a) * f.r * (f.grp === 1 ? 1.5 : 1);
-      const z = ctr.z + Math.sin(f.a) * f.r;
-      const y = ctr.y + f.y + Math.sin(wtime * 0.8 + f.ph) * 0.25;
-      o.position.set(x, y, z);
-      o.rotation.set(0, -f.a + (f.s > 0 ? 0 : Math.PI), Math.sin(wtime * 6 + f.ph) * 0.15);
-      o.scale.setScalar(f.sc * Math.max(0.001, vis));
-      o.updateMatrix();
-      fish.setMatrixAt(i, o.matrix);
+      const q = f.body;
+      q.hx = ctr.x + Math.cos(f.a) * f.r * (f.grp === 1 ? 1.5 : 1);
+      q.hz = ctr.z + Math.sin(f.a) * f.r;
+      q.r = FISH_R * f.sc * Math.max(f.vis, reveal);
+      // the bottom rises towards the shore and round the hollow: its round follows the sand
+      q.hy = overFloor(
+        ctr.y + f.y + Math.sin(wtime * 0.8 + f.ph) * 0.25,
+        groundH(q.hx, q.hz) + FISH_R * f.sc + 0.2,
+        0.3,
+      );
     }
-    fish.instanceMatrix.needsUpdate = true;
-    // the school wraps around Mila on page 8
     {
       const around = page === 8 && !trans;
       schoolCtr.lerp(
@@ -4252,38 +4657,94 @@ void main(){
           : tmpV.set(SCHOOL.x, SCHOOL.y + 2.6, SCHOOL.z),
         Math.min(1, dt * 0.6),
       );
-      const spread = around ? 1.25 : 0.75;
+      // it opens and gathers at the pace it travels, never at once
+      schoolOpen = lerp(schoolOpen, around ? 1 : 0, Math.min(1, dt * 0.6));
+      const spread = lerp(0.75, 1.25, schoolOpen);
+      const tall = lerp(0.8, 1.2, schoolOpen);
       for (let i = 0; i < schoolData.length; i++) {
         const f = schoolData[i];
         f.a += dt * f.sp * (around ? 0.9 : 0.6);
         const r = f.r * spread;
-        o.position.set(
-          schoolCtr.x + Math.cos(f.a) * r,
-          schoolCtr.y + f.h * (around ? 1.2 : 0.8) + Math.sin(wtime * 1.1 + f.ph) * 0.18,
-          schoolCtr.z + Math.sin(f.a) * r,
+        const q = f.body;
+        q.hx = schoolCtr.x + Math.cos(f.a) * r;
+        q.hz = schoolCtr.z + Math.sin(f.a) * r;
+        q.r = FISH_R * f.sc;
+        q.hy = overFloor(
+          schoolCtr.y + f.h * tall + Math.sin(wtime * 1.1 + f.ph) * 0.18,
+          groundH(q.hx, q.hz) + q.r + 0.2,
+          0.3,
         );
-        o.rotation.set(0, -f.a, Math.sin(wtime * 7 + f.ph) * 0.18);
-        o.scale.setScalar(f.sc);
-        o.updateMatrix();
-        school.setMatrixAt(i, o.matrix);
       }
-      school.instanceMatrix.needsUpdate = true;
     }
+    {
+      turtleSolid.x = turtle.position.x + Math.sin(lap.heading) * 0.06;
+      turtleSolid.y = turtle.position.y + 0.05;
+      turtleSolid.z = turtle.position.z + Math.cos(lap.heading) * 0.06;
+      const B = mila.body;
+      B.updateWorldMatrix(true, false);
+      tmpV.set(0, 0.12, 0).applyMatrix4(B.matrixWorld);
+      tmpV2.set(0, 1.14, 0).applyMatrix4(B.matrixWorld);
+      // the faster she comes, the sooner the fish give way
+      const moved = rdt > 1e-5 && !shoalFresh ? 1 / rdt : 0;
+      milaLimb.vx = (tmpV.x - milaLimb.ax) * moved;
+      milaLimb.vy = (tmpV.y - milaLimb.ay) * moved;
+      milaLimb.vz = (tmpV.z - milaLimb.az) * moved;
+      const pace = Math.min(Math.hypot(milaLimb.vx, milaLimb.vy, milaLimb.vz), 7);
+      milaLimb.wide = 0.5 + pace * 0.3;
+      milaLimb.ax = tmpV.x;
+      milaLimb.ay = tmpV.y;
+      milaLimb.az = tmpV.z;
+      milaLimb.bx = tmpV2.x;
+      milaLimb.by = tmpV2.y;
+      milaLimb.bz = tmpV2.z;
+      // her line of sight clears as the camera goes under, not all at once
+      const eye = camera.position;
+      sightLimb.r = 0.2 * under;
+      sightLimb.wide = 0.05 + 0.35 * under;
+      sightLimb.ax = eye.x;
+      sightLimb.ay = eye.y;
+      sightLimb.az = eye.z;
+      sightLimb.bx = (tmpV.x + tmpV2.x) / 2;
+      sightLimb.by = (tmpV.y + tmpV2.y) / 2;
+      sightLimb.bz = (tmpV.z + tmpV2.z) / 2;
+      steer(shoal, shoalFresh ? 0 : dt, seaSolids, milaLimbs, groundH, -0.25);
+    }
+    for (let i = 0; i < fishData.length; i++) {
+      const f = fishData[i];
+      faceWay(f, f.body, -f.a + (f.s > 0 ? 0 : Math.PI), dt);
+      o.position.set(f.body.x, f.body.y, f.body.z);
+      o.rotation.set(0, f.yaw, Math.sin(wtime * 6 + f.ph) * 0.15);
+      o.scale.setScalar(f.sc * Math.max(0.001, f.vis, reveal));
+      o.updateMatrix();
+      fish.setMatrixAt(i, o.matrix);
+    }
+    fish.instanceMatrix.needsUpdate = true;
+    for (let i = 0; i < schoolData.length; i++) {
+      const f = schoolData[i];
+      faceWay(f, f.body, -f.a, dt);
+      o.position.set(f.body.x, f.body.y, f.body.z);
+      o.rotation.set(0, f.yaw, Math.sin(wtime * 7 + f.ph) * 0.18);
+      o.scale.setScalar(f.sc);
+      o.updateMatrix();
+      school.setMatrixAt(i, o.matrix);
+    }
+    school.instanceMatrix.needsUpdate = true;
+    shoalFresh = false;
     // the sea grass parts (page 7)
     U.part.value = lerp(
       U.part.value,
       page === 7 && !trans && T - pageStart > 0.8 ? 1 : 0,
       rdt * 0.8,
     );
-    rays.forEach((r, i) => {
-      r.rotation.z = 0.25 + Math.sin(wtime * 0.2 + i) * 0.08;
-    });
-    plankton.rotation.y = wtime * 0.005;
 
     // pearl
     (pearlHalo.material as THREE.SpriteMaterial).opacity = 0.7 + 0.3 * Math.sin(wtime * 2);
     pearl.position.y += Math.sin(wtime * 1.3) * 0.0006 * motion;
     U_liveGlow.value = 0.1 + (page === 9 ? 0.25 + 0.15 * Math.sin(wtime * 2) : 0);
+    for (const { stalk, s } of conchEyes) {
+      stalk.rotation.z = Math.sin(wtime * 0.7 + s) * 0.1;
+      stalk.rotation.x = Math.sin(wtime * 0.9 + s * 2) * 0.08;
+    }
 
     updateSigns(rdt, T, wtime);
     for (let i = bursts.length - 1; i >= 0; i--) {
@@ -4316,6 +4777,77 @@ void main(){
     composer?.render();
   }
 
+  /**
+   * Draws one frame with everything shown and nothing culled, through the same passes as the tale,
+   * so every shader program (colour and shadow) is built here rather than during the page turn
+   * that first brings its object into view. `renderer.compile` cannot do it: the programs depend
+   * on the render target the composer draws into.
+   */
+  function warmUp(): void {
+    const hidden: THREE.Object3D[] = [];
+    const culled: THREE.Object3D[] = [];
+    const unmeasured: THREE.InstancedMesh[] = [];
+    scene.traverse((o) => {
+      const inst = o as THREE.InstancedMesh;
+      if (inst.isInstancedMesh && inst.boundingSphere === null) unmeasured.push(inst);
+      if (!o.visible && !(o as Partial<THREE.Light>).isLight) {
+        hidden.push(o);
+        o.visible = true;
+      }
+      if (o.frustumCulled) {
+        culled.push(o);
+        o.frustumCulled = false;
+      }
+    });
+    composer?.render();
+    if (moonL.castShadow) warmUpShadows();
+    for (const o of hidden) o.visible = false;
+    for (const o of culled) o.frustumCulled = true;
+    // drawn before the first update placed their instances: their extent is measured again later
+    for (const o of unmeasured) o.boundingSphere = null;
+  }
+
+  /**
+   * Builds the shadow pass' programs. Three.js draws every caster with one shared depth material
+   * and only picks a new program when the kind of object changes (plain, instanced, skinned), with
+   * the side and map of the caster it is then drawing. Which combinations exist therefore depends
+   * on the order the casters come in, and a page turn that changes the order builds a new one.
+   * Here each combination is drawn right after a caster of another kind, twice so the order of
+   * the two in the scene does not matter.
+   */
+  function warmUpShadows(): void {
+    const kind = (o: THREE.Object3D): string =>
+      (o as Partial<THREE.InstancedMesh>).isInstancedMesh
+        ? "instanced"
+        : (o as Partial<THREE.SkinnedMesh>).isSkinnedMesh
+          ? "skinned"
+          : "plain";
+    const casters: THREE.Mesh[] = [];
+    const groups = new Map<string, THREE.Mesh[]>();
+    scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh || !m.castShadow || Array.isArray(m.material)) return;
+      casters.push(m);
+      const mat = m.material as THREE.MeshToonMaterial;
+      const key = `${kind(m)}|${mat.side}|${mat.map ? 1 : 0}`;
+      const group = groups.get(key);
+      if (group) group.push(m);
+      else groups.set(key, [m]);
+    });
+    for (const m of casters) m.castShadow = false;
+    for (const group of groups.values()) {
+      const other = casters.find((m) => kind(m) !== kind(group[0]));
+      if (!other) continue;
+      other.castShadow = true;
+      for (const m of group) m.castShadow = true;
+      composer?.render();
+      composer?.render();
+      other.castShadow = false;
+      for (const m of group) m.castShadow = false;
+    }
+    for (const m of casters) m.castShadow = true;
+  }
+
   /** The three voices: they leave the conch on page 2, join Mila as she finds them, then go home. */
   function updateSigns(dt: number, T: number, W: number): void {
     const since = T - pageStart;
@@ -4323,7 +4855,7 @@ void main(){
     const homes = [
       V3(crab.base.x, crab.base.y + 0.45, crab.base.z),
       V3(MEADOW.x + 0.5, MEADOW.y + 1.6, MEADOW.z - 0.5),
-      V3(liveConch.position.x - 0.3, liveConch.position.y + 0.9, liveConch.position.z),
+      LIGHT_9.clone(),
     ];
     const mp = mila.g.position;
     const up = mila.swimW > 0.5 ? 1.15 : 1.25;
@@ -4527,6 +5059,17 @@ void main(){
     mila.g.rotation.y = -Math.PI / 2;
     buildThreads();
     buildGroundMarks();
+    buildBurstSeed();
+    // every fogged material takes the water's colours while the camera is under the surface
+    const fogged = new Set<THREE.Material>();
+    scene.traverse((o) => {
+      const { material } = o as Partial<THREE.Mesh>;
+      if (!material) return;
+      for (const m of Array.isArray(material) ? material : [material])
+        if ("fog" in m && m.fog === true) fogged.add(m);
+    });
+    fogged.forEach((m) => addSeaFog(m, SEA));
+    thinSea(perf.level);
     composer = buildPost();
     const c0 = adaptForAspect(CAMS[0]);
     camState.pos.copy(c0.pos);
@@ -4534,7 +5077,7 @@ void main(){
     resize();
     listen(window, "resize", resize);
     timer.connect(document);
-    renderer.compile(scene, camera);
+    warmUp();
     renderer.setAnimationLoop(update);
   } catch (err) {
     release();
