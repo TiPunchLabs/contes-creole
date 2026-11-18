@@ -2681,19 +2681,47 @@ void main(){
     {
       const lx = DEEP.x + 0.6;
       const lz = DEEP.z + 0.4;
-      // on the sand at the lowest point under its foot, a finger deep: no gap, whatever the slope
-      let low = Infinity;
-      for (const [dx, dz] of [
-        [0, 0],
-        [0.35, 0],
-        [-0.35, 0],
-        [0, 0.2],
-        [0, -0.2],
-      ])
-        low = Math.min(low, groundH(lx + dx * LIVE_CONCH, lz + dz * LIVE_CONCH));
-      liveConch.position.set(lx, low - 0.015, lz);
+      const yaw = 0.9;
+      // It lies along the slope of the sand under its foot: the plane through nine heights taken
+      // under the foot, in the creature's own frame (u along its body, w across).
+      const u0 = foot.position.x * LIVE_CONCH;
+      const a = 0.18 * foot.scale.x * LIVE_CONCH * 0.8;
+      const b = 0.18 * foot.scale.z * LIVE_CONCH * 0.8;
+      const heightAt = (u: number, w: number): number =>
+        groundH(
+          lx + u * Math.cos(yaw) + w * Math.sin(yaw),
+          lz - u * Math.sin(yaw) + w * Math.cos(yaw),
+        );
+      const taken: { u: number; w: number; h: number }[] = [];
+      for (const du of [-a, 0, a])
+        for (const dw of [-b, 0, b]) taken.push({ u: du, w: dw, h: heightAt(u0 + du, dw) });
+      const mean = (pick: (t: { u: number; w: number; h: number }) => boolean): number => {
+        const some = taken.filter(pick);
+        return some.reduce((sum, t) => sum + t.h, 0) / some.length;
+      };
+      const slopeU = (mean((t) => t.u > 0) - mean((t) => t.u < 0)) / (2 * a);
+      const slopeW = (mean((t) => t.w > 0) - mean((t) => t.w < 0)) / (2 * b);
+      const middle = mean(() => true);
+      // The sand is not flat and the foot is rounded underneath: how far the foot has to be
+      // lifted off that plane for its underside to touch the sand without going into it.
+      const thick = 0.18 * foot.scale.y * LIVE_CONCH;
+      const lift = Math.max(
+        ...taken.map((t) => {
+          const out = (t.u / (a / 0.8)) ** 2 + (t.w / (b / 0.8)) ** 2;
+          const rise = thick * (1 - Math.sqrt(Math.max(0, 1 - out)));
+          return t.h - (middle + slopeU * t.u + slopeW * t.w) - rise;
+        }),
+      );
+      const up = V3(-slopeU, 1, -slopeW).normalize();
+      liveConch.quaternion
+        .setFromAxisAngle(V3(0, 1, 0), yaw)
+        .multiply(new THREE.Quaternion().setFromUnitVectors(V3(0, 1, 0), up));
+      // the underside of the foot rests on the sand, a few millimetres in
+      const under = thick - foot.position.y * LIVE_CONCH;
+      liveConch.position
+        .set(lx, middle - slopeU * u0, lz)
+        .add(up.applyAxisAngle(V3(0, 1, 0), yaw).multiplyScalar(under + lift - 0.008));
     }
-    liveConch.rotation.y = 0.9;
     scene.add(liveConch);
     // the pearl: it stays at the bottom
     pearl = new THREE.Group();
@@ -2762,6 +2790,8 @@ void main(){
     freedAt: number;
   };
   const debris: Debris[] = [];
+  /** Height of the crab's middle over the sand: its shell clears it and its feet reach it (metres). */
+  const CRAB_OVER_SAND = 0.16;
   function buildCrab(): void {
     const g = new THREE.Group();
     const shell = toon("#d0532f");
@@ -2856,7 +2886,7 @@ void main(){
     g.scale.setScalar(1.8);
     const cx = 14.6;
     const cz = 4.15;
-    g.position.set(cx, groundH(cx, cz) + 0.12, cz);
+    g.position.set(cx, groundH(cx, cz) + CRAB_OVER_SAND, cz);
     g.rotation.y = -1.9;
     scene.add(g);
     crab = { g, legs, claws, base: g.position.clone(), freedAt: 0 };
@@ -4563,7 +4593,7 @@ void main(){
       crab.g.position.copy(crab.base).add(V3(-1.15 * easeIO(k), 0, -0.25 * easeIO(k)));
       crab.g.position.y =
         groundH(crab.g.position.x, crab.g.position.z) +
-        0.12 +
+        CRAB_OVER_SAND +
         Math.abs(Math.sin(ct * 9)) * 0.015 * (1 - k);
     } else {
       crab.g.position.copy(crab.base);
