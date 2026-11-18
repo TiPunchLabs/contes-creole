@@ -8,7 +8,8 @@
 // 7-10 under CPU_THROTTLE with the scene's data-quality level), text (fake-clock stills of pages 7-10
 // with the DOM rects and colours of the text, desktop also in French), determinism (pairwise MAE of
 // DET_RUNS page-7 stills), links (linkProgram calls after page 1 is shown, per page, with the frame
-// time of the frame holding each; HEADED=1 UNCAP default), longframes (page 9, uncapped: per-frame
+// time of the frame holding each; HEADED=1 UNCAP default), conch (stills around the living conch of
+// page 9 at two scales, CONCH_TAG; CONCH_REC=x,y,w,h records a clipped sequence), longframes (page 9, uncapped: per-frame
 // interval, rAF callback time, heap and long tasks for variants B1-B4; LF_VARIANTS, LF_RUNS, LF_SLOW_MS, LF_WIN; LF_SEQ=B2,B1,B2 explicit order, LF_PROFILE=1 CDP CPU profile, LF_TRACE=1 Chrome trace).
 // Modes: shots (fake clock, stills + "scène seule" ), motion (fake clock, frame
 // sequences, mp4 and contact sheets via ffmpeg/montage), perf (real clock, uncapped and vsync-capped,
@@ -773,6 +774,70 @@ async function longframes() {
   siteOverride = null;
 }
 
+/** The living conch of page 9: stills around pages 8 to 10 at a normal and a doubled scale (CONCH_DSF), plus a clipped recording. */
+async function conch() {
+  const tag = process.env.CONCH_TAG ?? "build";
+  const rec = process.env.CONCH_REC ? process.env.CONCH_REC.split(",").map(Number) : null;
+  const browser = await launch();
+  try {
+    for (const vp of vpsFor(["desktop", "mobile"])) {
+      const base = VIEWPORTS[vp];
+      const scales = rec
+        ? [base.deviceScaleFactor * 2]
+        : [base.deviceScaleFactor, base.deviceScaleFactor * 2];
+      for (const dsf of scales) {
+        const ctx = await browser.newContext({ ...base, deviceScaleFactor: dsf });
+        const p = await ctx.newPage();
+        await p.clock.install({ time: FAKE_TIME });
+        const d = driver(p, vp === "mobile", true);
+        await load(p, true);
+        await d.open();
+        await d.wait(2000);
+        const name = (k) => `${OUT}${tag}-${vp}-x${dsf}-${k}.png`;
+        await d.goTo(8);
+        await d.wait(6000);
+        if (!rec) await snap(p, name("p08"));
+        await press(p.locator(".mila-next"), vp === "mobile");
+        if (rec) {
+          await p.clock.runFor(3400);
+          for (let i = 0; i < 62; i++) {
+            await p.waitForTimeout(150);
+            await p.screenshot({
+              path: `${OUT}${tag}-${vp}-x${dsf}-rec-${pad3(i)}.png`,
+              clip: { x: rec[0], y: rec[1], width: rec[2], height: rec[3] },
+            });
+            await p.clock.runFor(100);
+          }
+        } else {
+          await p.clock.runFor(4000);
+          for (const k of ["a1", "a2", "a3"]) {
+            await snap(p, name(k));
+            if (k !== "a3") await p.clock.runFor(500);
+          }
+          for (let i = 0; i < 400 && !(await d.pageNo().then((n) => n === 9)); i++)
+            await p.clock.runFor(50);
+          await snap(p, name("b-arrive"));
+          await p.clock.runFor(6000);
+          await snap(p, name("c-p09-6s"));
+          await press(p.locator(".mila-next"), vp === "mobile");
+          await p.clock.runFor(900);
+          await snap(p, name("d1-leave-0.9s"));
+          await p.clock.runFor(900);
+          await snap(p, name("d2-leave-1.8s"));
+          for (let i = 0; i < 400 && !(await d.pageNo().then((n) => n === 10)); i++)
+            await p.clock.runFor(50);
+          await p.clock.runFor(6000);
+          await snap(p, name("e-p10"));
+        }
+        console.log("conch", tag, vp, dsf);
+        await ctx.close();
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+}
+
 /** Runs an ffmpeg encode of numbered PNGs at `fps`, scaled to even dimensions. */
 function encode(dir, fps, out) {
   execFileSync(
@@ -1420,6 +1485,7 @@ const RUN = {
   determinism,
   links,
   longframes,
+  conch,
 };
 try {
   for (const mode of MODES) {

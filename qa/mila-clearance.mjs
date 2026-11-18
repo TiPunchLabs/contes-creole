@@ -8,6 +8,9 @@
 // Usage: SITE=url OUT=dir [VPS=desktop,mobile] [TOL=0.02] [REST_SEA=20000] [REST_LAND=6000]
 //        [BACK=1] [SOLIDS=solids.json] [QA_CHANNEL=chrome] node qa/mila-clearance.mjs
 // SOLIDS: corals of a build that does not list them (a file written by a run on one that does).
+// SAME_AS=dir: also saves, in OUT/same/, the frames at the same segment and frame number as the worst
+// frames of an earlier run in `dir` (its clearance-<vp>.json), ringed at the same place of the
+// picture: the other build at the instants where that one was at its worst.
 // Per segment it also gives the largest move of a fish between two frames (`maxStep`, metres) and the
 // number of moves over 0.05 m (`fastSteps`, 3 m/s at 60 frames a second), and the largest change of
 // that move from one frame to the next (`maxJolt`, metres; `jolts` counts those over 0.01 m): jumps,
@@ -29,6 +32,7 @@ const REST_SEA = Number(process.env.REST_SEA ?? 20000);
 const REST_LAND = Number(process.env.REST_LAND ?? 6000);
 const BACK = process.env.BACK !== "0";
 const SOLIDS = process.env.SOLIDS ? JSON.parse(readFileSync(process.env.SOLIDS, "utf8")) : null;
+const SAME_AS = process.env.SAME_AS ? process.env.SAME_AS.replace(/\/?$/, "/") : null;
 mkdirSync(`${OUT}worst`, { recursive: true });
 
 const VIEWPORTS = {
@@ -58,8 +62,8 @@ const PROXIES = {
 };
 
 /** Runs in the page: measures after every frame the scene has drawn. */
-function pageProbe(TOL, SOLIDS) {
-  const st = { seg: null, segs: {}, shots: {}, frames: 0, err: null, solids: null };
+function pageProbe(TOL, SOLIDS, WANTED) {
+  const st = { seg: null, segs: {}, shots: {}, same: {}, frames: 0, err: null, solids: null };
   window.__clr = st;
   const raf = window.requestAnimationFrame.bind(window);
   let lastV = -1;
@@ -249,6 +253,11 @@ function pageProbe(TOL, SOLIDS) {
     const S = st.segs[st.seg] ?? (st.segs[st.seg] = { frames: 0, cats: {} });
     S.frames++;
     st.frames++;
+    for (const w of WANTED)
+      if (w.seg === st.seg && w.frame === S.frames) {
+        const cv = document.querySelector(".mila-gl") ?? document.querySelector("canvas");
+        st.same[`${w.seg}|${w.cat}`] = { ...w, url: cv.toDataURL("image/jpeg", 0.85) };
+      }
     const tmp = new T.Vector3();
     const wp = (o) => {
       o.getWorldPosition(tmp);
@@ -425,7 +434,21 @@ try {
     const run = (ms) => p.clock.runFor(ms);
     // the clock first: it replaces requestAnimationFrame, which the probe then wraps
     await p.clock.install({ time: new Date("2026-11-17T12:00:00Z") });
-    await p.addInitScript(`(${pageProbe.toString()})(${TOL}, ${JSON.stringify(SOLIDS)})`);
+    const wanted = SAME_AS
+      ? Object.entries(
+          JSON.parse(readFileSync(`${SAME_AS}clearance-${vp}.json`, "utf8")).shots,
+        ).map(([key, s]) => ({
+          seg: key.split("|")[0],
+          cat: key.split("|")[1],
+          frame: s.frame,
+          x: s.x,
+          y: s.y,
+          front: s.front,
+        }))
+      : [];
+    await p.addInitScript(
+      `(${pageProbe.toString()})(${TOL}, ${JSON.stringify(SOLIDS)}, ${JSON.stringify(wanted)})`,
+    );
     await p.goto(SITE);
     for (let i = 0; i < 200 && !(await p.locator(".loader.is-done").count()); i++) await run(250);
     const renderer = await p.evaluate(() => {
@@ -466,9 +489,14 @@ try {
     await seg(null);
     const res = await p.evaluate(() => window.__clr);
     if (res.err) console.warn(`probe error: ${res.err}`);
-    for (const [key, s] of Object.entries(res.shots)) {
+    if (SAME_AS) mkdirSync(`${OUT}same`, { recursive: true });
+    const pictures = [
+      ...Object.entries(res.shots).map(([key, s]) => [key, s, "worst"]),
+      ...Object.entries(res.same).map(([key, s]) => [key, s, "same"]),
+    ];
+    for (const [key, s, dir] of pictures) {
       const [segName, cat] = key.split("|");
-      const file = `${OUT}worst/${vp}-${segName}-${cat}.jpg`;
+      const file = `${OUT}${dir}/${vp}-${segName}-${cat}.jpg`;
       writeFileSync(file, Buffer.from(s.url.split(",")[1], "base64"));
       if (s.front && s.x > 0 && s.x < 1 && s.y > 0 && s.y < 1)
         try {
@@ -491,7 +519,7 @@ try {
           console.warn(`could not ring ${file}: ${String(e).split("\n")[0]}`);
         }
       delete s.url;
-      s.file = `worst/${vp}-${segName}-${cat}.jpg`;
+      s.file = `${dir}/${vp}-${segName}-${cat}.jpg`;
     }
     for (const s of Object.values(res.segs))
       for (const c of Object.values(s.cats)) {
@@ -518,6 +546,7 @@ try {
       },
       segments: res.segs,
       shots: res.shots,
+      same: res.same,
     };
     writeFileSync(`${OUT}clearance-${vp}.json`, JSON.stringify(out, null, 1));
     const total = {};
