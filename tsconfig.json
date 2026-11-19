@@ -19,6 +19,7 @@
       "@app/*": ["./src/app/*"],
       "@shared/*": ["./src/shared/*"],
       "@tree/*": ["./src/tree/*"],
+      "@veillee/*": ["./src/veillee/*"],
       "@books/*": ["./src/books/*"]
     }
   },

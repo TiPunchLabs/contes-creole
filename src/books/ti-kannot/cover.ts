@@ -12,3 +12,6 @@ export const paintCover = imageCover({
   crop: { x0: 0, y0: 270 / 960, x1: 1, y1: 832 / 960 },
   align: { x: 0.5, y: 0.5 },
 });
+
+/** The same visual, uncropped, for the home's book. */
+export const art = { url: posterUrl, width: 640, height: 960, titleInArt: true };

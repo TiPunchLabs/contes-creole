@@ -54,17 +54,22 @@ export default tseslint.config(
     extends: [js.configs.recommended],
     languageOptions: { ecmaVersion: 2024, globals: { ...globals.node, ...globals.browser } },
   },
-  ...universe("src/tree", "^@(books|tree)(/|$)|^@app/(?!contract$)"),
-  ...universe("src/books/*", "^@(books|tree)(/|$)|^@app/(?!contract$)"),
+  ...universe("src/tree", "^@(books|tree|veillee)(/|$)|^@app/(?!contract$)"),
+  ...universe("src/veillee", "^@(books|tree|veillee)(/|$)|^@app/(?!contract$)"),
+  ...universe("src/books/*", "^@(books|tree|veillee)(/|$)|^@app/(?!contract$)"),
   layer(
     ["src/app/**/*.ts"],
-    ["tree", "books"],
+    ["tree", "veillee", "books"],
     "The app reaches books only through the registry glob.",
   ),
-  layer(["src/shared/**/*.ts"], ["app", "tree", "books"], "src/shared is a leaf toolbox."),
+  layer(
+    ["src/shared/**/*.ts"],
+    ["app", "tree", "veillee", "books"],
+    "src/shared is a leaf toolbox.",
+  ),
   layer(
     ["src/pages/**/*.ts"],
-    ["app", "tree", "books"],
+    ["app", "tree", "veillee", "books"],
     "A page stands alone: its own files and @shared only, no app shell or Three.js scene.",
   ),
 );

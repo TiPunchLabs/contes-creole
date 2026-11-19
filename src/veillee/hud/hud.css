@@ -1,0 +1,470 @@
+/* The home's HTML over the terrace scene: header, menu, book controls, catalogue. */
+.veillee-hud {
+  --v-ink: #2a1d2e;
+  --v-cream: #fbf1dc;
+  --v-plate: rgba(28, 22, 52, 0.62);
+  --v-plate-strong: rgba(24, 18, 44, 0.86);
+  position: absolute;
+  inset: 0;
+  /* Above the scene's canvas, which the stage appends after it. */
+  z-index: 1;
+  pointer-events: none;
+  font-family: var(--font-ui);
+  color: var(--v-cream);
+}
+
+.veillee-hud :is(a, button) {
+  pointer-events: auto;
+}
+
+.veillee-hud :is(a, button):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.v-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Header: brand left, permanent menu right; a Menu button on narrow screens. */
+.v-header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: max(14px, env(safe-area-inset-top)) 28px 28px;
+  background: linear-gradient(180deg, rgba(20, 16, 50, 0.55), transparent);
+}
+
+.v-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--v-cream);
+  text-decoration: none;
+  border-radius: 12px;
+}
+
+.v-brand-flower {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #ffd34d 0 12%, transparent 13%),
+    conic-gradient(from 10deg, #e5303a, #ff6d5a, #c41f30, #ff6d5a, #e5303a);
+  mask: radial-gradient(circle, #000 66%, transparent 68%);
+}
+
+.v-brand-name {
+  font: 600 italic clamp(26px, 3.2vw, 40px) / 1 var(--font-display);
+  text-shadow: 0 2px 10px rgba(30, 10, 40, 0.65);
+}
+
+.v-menu ul {
+  display: flex;
+  gap: clamp(10px, 2.4vw, 34px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v-menu a {
+  display: inline-block;
+  padding: 8px 6px;
+  border-radius: 8px;
+  color: var(--v-cream);
+  font: 500 18px/1.2 var(--font-display);
+  text-decoration: none;
+  text-shadow: 0 1px 8px rgba(20, 10, 40, 0.8);
+}
+
+.v-menu a:hover,
+.v-menu a[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-color: #f2b04a;
+  text-underline-offset: 6px;
+}
+
+.v-menu-toggle {
+  display: none;
+  padding: 8px 14px;
+  border: 1px solid rgba(251, 241, 220, 0.5);
+  border-radius: var(--radius-pill);
+  background: var(--v-plate);
+  color: var(--v-cream);
+  font: 600 17px/1 var(--font-display);
+  cursor: pointer;
+}
+
+/* Book controls. Labels bound to the pages fade while a leaf turns. */
+.v-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.v-title {
+  position: absolute;
+  margin: 0;
+  max-width: min(36vw, 420px);
+  transform: translateY(-4px);
+  color: var(--v-cream);
+  font: 600 italic clamp(20px, 2.3vw, 34px) / 1.12 var(--font-display);
+  text-shadow:
+    0 2px 6px rgba(5, 20, 30, 0.9),
+    0 0 18px rgba(5, 20, 30, 0.6);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity 0.25s;
+}
+
+.v-art {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.v-art:hover {
+  box-shadow: 0 0 0 3px rgba(255, 214, 140, 0.55);
+}
+
+.v-portrait {
+  position: absolute;
+  left: var(--text-x);
+  top: var(--text-y);
+  width: var(--text-w);
+  max-height: var(--text-h);
+  box-sizing: border-box;
+  padding: clamp(10px, 2vw, 28px) clamp(12px, 2.2vw, 30px);
+  overflow: auto;
+  color: var(--v-ink);
+  pointer-events: auto;
+  transition: opacity 0.3s;
+}
+
+.v-portrait-name {
+  margin: 0;
+  font: 700 italic clamp(22px, 2.4vw, 36px) / 1.05 var(--font-display);
+  color: #8a2f1e;
+}
+
+.v-portrait-fr {
+  margin: 4px 0 12px;
+  font: 500 italic clamp(14px, 1.2vw, 18px) / 1.2 var(--font-display);
+  color: #6d4a3a;
+}
+
+.v-portrait-text {
+  margin: 0;
+  font: 400 clamp(14px, 1.15vw, 18px) / 1.45 var(--font-read);
+}
+
+.is-turning :is(.v-title, .v-art, .v-portrait) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.v-marks {
+  position: absolute;
+  display: flex;
+  gap: 6px;
+  transform: translate(-50%, calc(-100% - 6px));
+  transition: opacity 0.25s;
+}
+
+.v-mark {
+  padding: 4px 10px;
+  border: 1px solid rgba(251, 241, 220, 0.35);
+  border-radius: var(--radius-pill);
+  background: var(--v-plate);
+  color: var(--v-cream);
+  font: 600 13px/1.2 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.v-mark[aria-current="true"] {
+  background: #f2d39a;
+  color: var(--v-ink);
+}
+
+.v-turns {
+  position: absolute;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transform: translateX(-50%);
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--v-plate);
+  pointer-events: auto;
+}
+
+.v-turns button {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(251, 241, 220, 0.14);
+  color: var(--v-cream);
+  font: 400 34px/1 var(--font-display);
+  cursor: pointer;
+}
+
+.v-turns button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.v-status {
+  margin: 0;
+  min-width: 12ch;
+  max-width: 46vw;
+  font: 500 14px/1.25 var(--font-ui);
+  text-align: center;
+}
+
+.is-inactive :is(.v-stage, .v-header) {
+  pointer-events: none;
+}
+
+.is-inactive .v-stage > *,
+.is-inactive .v-header {
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+/* Catalogue panel ("Les contes"). */
+.v-catalogue {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(14, 10, 30, 0.55);
+  pointer-events: auto;
+}
+
+.v-catalogue-card {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: calc(100% - 32px);
+  box-sizing: border-box;
+  overflow: auto;
+  padding: 26px 24px 20px;
+  border-radius: 18px;
+  background: var(--v-cream);
+  color: var(--v-ink);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.v-catalogue h2 {
+  margin: 0 0 12px;
+  font: 700 italic 30px/1.1 var(--font-display);
+}
+
+.v-universe h3 {
+  margin: 18px 0 6px;
+  font: 700 13px/1.2 var(--font-ui);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a2f1e;
+}
+
+.v-universe ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v-universe li {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(42, 29, 46, 0.15);
+}
+
+.v-cat-title {
+  font: 600 italic 20px/1.2 var(--font-display);
+}
+
+.v-cat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.v-cat-actions button {
+  padding: 8px 14px;
+  border: 1px solid #8a2f1e;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: #6a2316;
+  font: 600 15px/1 var(--font-ui);
+  cursor: pointer;
+}
+
+.v-cat-actions .v-cat-enter {
+  background: #8a2f1e;
+  color: var(--v-cream);
+}
+
+.v-catalogue-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--v-ink);
+  font: 400 30px/1 var(--font-ui);
+  cursor: pointer;
+}
+
+/* Without WebGL: the same book, as HTML pictures on a dusk background. */
+.is-flat {
+  background: linear-gradient(180deg, #2b2f7a 0%, #7a5bb5 45%, #d68ab8 70%, #f3a98a 100%);
+}
+
+.v-flat {
+  position: absolute;
+  inset: 90px 16px 100px;
+  display: grid;
+  place-items: center;
+}
+
+.v-flat figure {
+  margin: 0;
+  max-width: min(900px, 100%);
+  max-height: 100%;
+}
+
+.v-flat img,
+.v-flat canvas {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 220px);
+  height: auto;
+  border: 12px solid #f1e4c8;
+  border-radius: 6px;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.is-flat .v-art,
+.is-flat .v-marks {
+  display: none;
+}
+
+.is-flat .v-title {
+  left: 50% !important;
+  top: 70px !important;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.is-flat .v-portrait {
+  left: 50%;
+  top: auto;
+  bottom: 96px;
+  width: min(560px, calc(100% - 32px));
+  transform: translateX(-50%);
+  border-radius: 14px;
+  background: var(--v-cream);
+}
+
+@media (max-width: 760px) {
+  .v-header {
+    padding: max(10px, env(safe-area-inset-top)) 14px 22px;
+  }
+
+  .v-menu-toggle {
+    display: inline-block;
+  }
+
+  .v-menu {
+    position: absolute;
+    top: calc(100% - 12px);
+    right: 14px;
+    display: none;
+    padding: 8px 12px;
+    border-radius: 14px;
+    background: var(--v-plate-strong);
+  }
+
+  .v-menu.is-open {
+    display: block;
+  }
+
+  .v-menu ul {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .v-menu a {
+    padding: 10px 8px;
+  }
+
+  /* On phones the portrait text leaves the page for a stable card under the book. */
+  .v-portrait {
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    width: auto;
+    max-height: 30vh;
+    border-radius: 14px;
+    background: rgba(251, 241, 220, 0.95);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .v-status {
+    max-width: 52vw;
+    font-size: 13px;
+  }
+}
+
+@media (max-height: 460px) {
+  .v-header {
+    padding-top: 6px;
+    padding-bottom: 10px;
+  }
+
+  .v-brand-name {
+    font-size: 22px;
+  }
+
+  .v-turns button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .v-portrait {
+    max-height: 60vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-title,
+  .v-portrait,
+  .is-inactive .v-stage > *,
+  .is-inactive .v-header {
+    transition: none;
+  }
+}

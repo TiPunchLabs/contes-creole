@@ -7,10 +7,11 @@ const dir = (path: string): string => fileURLToPath(new URL(path, import.meta.ur
 export default defineConfig({
   build: {
     rolldownOptions: {
-      // Two pages: the tree app, and "Les contes des classes" (a static page, no Three.js).
+      // Three pages: the app (home + tales), and the static pages "Les contes des classes" and "Le projet" (no Three.js).
       input: {
         main: dir("./index.html"),
         classes: dir("./contes-des-classes/index.html"),
+        project: dir("./le-projet/index.html"),
       },
     },
   },
@@ -19,6 +20,7 @@ export default defineConfig({
       "@app": dir("./src/app"),
       "@shared": dir("./src/shared"),
       "@tree": dir("./src/tree"),
+      "@veillee": dir("./src/veillee"),
       "@books": dir("./src/books"),
     },
   },

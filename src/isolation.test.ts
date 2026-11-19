@@ -21,6 +21,10 @@ describe("universe isolation", () => {
     ["src/app/app.ts", 'import "@tree/index";'],
     ["src/app/story/parse.ts", 'import "../../books/ti-kannot/book";'],
     ["src/shared/math.ts", 'import "@app/contract";'],
+    ["src/veillee/index.ts", 'import "@books/mila/book";'],
+    ["src/veillee/scene/book.ts", 'import "../../tree/index";'],
+    ["src/veillee/index.ts", 'import "@app/registry";'],
+    ["src/app/app.ts", 'import "@veillee/index";'],
     ["src/shared/three/stage.ts", 'import "../../tree/index";'],
     ["src/pages/contes-des-classes/main.ts", 'import "@tree/invitation";'],
     ["src/pages/contes-des-classes/main.ts", 'import "../../app/app";'],
@@ -36,6 +40,9 @@ describe("universe isolation", () => {
     ["src/books/ti-kannot/world/index.ts", 'import "@shared/three/stage";'],
     ["src/app/app.ts", 'import "./contract";'],
     ["src/main.ts", 'import "@tree/index";'],
+    ["src/main.ts", 'import "@veillee/index";'],
+    ["src/veillee/scene/book.ts", 'import "../pages";'],
+    ["src/veillee/scene/book.ts", 'import "@app/contract";'],
     ["src/pages/contes-des-classes/main.ts", 'import "@shared/theme/tokens.css";'],
   ])("%s allows %s", async (file, code) => {
     expect(await violations(file, code)).toHaveLength(0);

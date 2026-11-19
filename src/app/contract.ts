@@ -87,6 +87,8 @@ export interface Bubble {
 
 export interface BookCard {
   title: string;
+  /** Short universe name (the home's bookmark); the title when absent. */
+  short?: string;
   sub: string;
   theme: string;
   /** Language of the card texts; Kréyòl when absent. */
@@ -143,6 +145,15 @@ export interface ImmersiveWorld {
   mount(container: HTMLElement, ctx: ImmersiveContext): ImmersiveHandle | Promise<ImmersiveHandle>;
 }
 
+/** A tale's official visual (poster, cover or illustration) at its own proportions. */
+export interface BookArt {
+  url: string;
+  width: number;
+  height: number;
+  /** The title is painted in the picture: the home shows no second title over it. */
+  titleInArt: boolean;
+}
+
 export interface BookManifest {
   id: string;
   order: number;
@@ -153,6 +164,8 @@ export interface BookManifest {
    * promise (an image still loading) asks for one more paint once it settles.
    */
   cover?: (ctx: CanvasRenderingContext2D, width: number, height: number) => void | Promise<void>;
+  /** The tale's official visual, uncropped: the home's book shows it as the tale's page. */
+  art?: BookArt;
   /** Lazy world module; its import also pulls the book's theme.css. Absent when !ready. */
   world?: () => Promise<{ default: BookWorld }>;
   /** Lazy world with its own reading interface, used instead of `world`; it still reads story/*.md. */
