@@ -99,16 +99,16 @@ function waterReflection(): THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial
           * smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.55, vUv.y);
         float pulse = 0.55 + 0.45 * sin(time * 6.2831853 / swell);
         vec3 color = mix(vec3(0.2, 0.75, 0.8), vec3(0.85, 1.0, 0.95), ripple);
-        gl_FragColor = vec4(color, (0.18 + ripple * 0.5) * edge * pulse * strength);
+        gl_FragColor = vec4(color, (0.25 + ripple * 0.75) * edge * pulse * strength);
         #include <colorspace_fragment>
       }`,
     transparent: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   });
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.2), material);
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.6), material);
   mesh.rotation.x = -Math.PI / 2;
-  mesh.position.set(1.25, 0.004, 0.35);
+  mesh.position.set(1.5, 0.004, 0.2);
   return mesh;
 }
 

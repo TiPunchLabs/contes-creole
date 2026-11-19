@@ -47,7 +47,7 @@ Fixed camera. All painted textures are drawn at run time on canvases (`src/veill
 - Selection index changes at once (HTML title, link name, destination); the leaf animates from the shown page to the target. Fast gestures: a new request while turning completes the current leaf quickly (×4) then turns again; multi-page jumps (bookmarks) turn one leaf with the target textures (no flip storm).
 - Input: prev/next buttons, ArrowLeft/Right (+ PageUp/Down), horizontal swipe on the book (threshold 40 px and |dx| > 1.4 |dy|), tap vs swipe distinguished (tap = < 10 px and < 450 ms). Clicks on the illustration go through an HTML button laid over its projected rectangle (accessible name = tale title + action), so the click target is real HTML.
 - Entry: only tale pages carry the entry button. Portraits show their text in place (HTML), no entry.
-- Reduced motion: the leaf does not lift; the spread changes with a 180 ms crossfade; portraits show an expressive still pose; decor clock at 0.08 (project precedent).
+- Reduced motion: the leaf does not lift; the spread changes at once (no crossfade, simpler and motion-free); portraits show an expressive still pose; decor clock at 0.08 (project precedent).
 
 ## 5. Entry transition adaptation
 
@@ -74,3 +74,10 @@ Fixed camera. All painted textures are drawn at run time on canvases (`src/veill
 - Pixel ratio ≤ 1.5 (lite ≤ 1). One shadow-casting light, 1024² map (lite 512²), only near branches cast, floor/wall/table receive.
 - Target draws < 80, triangles < 120 k. Page textures: 4 canvases of 1024x1448 alive (current + target spread), portrait canvases redrawn at 30 Hz only while their page is shown.
 - Rendering stops when the tab is hidden (`visibilitychange`) and when the shell pauses the home (tale open). `renderer.info` checked over ≥ 5 round trips (no growth of geometries/textures).
+
+## 9. Changes during S3 (executor)
+
+- The table and book are larger than first planned (book scaled ×1.3: page 0.52 × 0.70 m), and on an upright phone the table moves closer to the camera (`LAYOUT.tableTall`), so the book fills the lower half as in `vue-portrait.png`.
+- The bookmark labels are one HTML row above the ribbons (ribbon tips are too close on screen for one label each).
+- An evening-sky environment (PMREM of a painted gradient) gives the glossy tiles and boards their dusk reflections.
+- `?qa=1` exposes `window.__veillee()` (renderer.info memory and draw counts) for `qa/veillee.mjs` perf runs; nothing else changes with it.

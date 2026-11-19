@@ -34,12 +34,12 @@ function tileTexture(rng: Rng): THREE.CanvasTexture {
     for (let i = 0; i < n; i++)
       for (let j = 0; j < n; j++) {
         const v = rng();
-        c.fillStyle = `hsl(${226 + v * 14}, ${18 + v * 10}%, ${44 + v * 10}%)`;
+        c.fillStyle = `hsl(${228 + v * 12}, ${24 + v * 10}%, ${46 + v * 9}%)`;
         c.fillRect(i * s, j * s, s, s);
         dabs(c, rng, i * s, j * s, s, s, ["#8d93c4", "#5d5f98", "#b59bc3"], 10, s * 0.25, 0.12);
       }
-    c.strokeStyle = "rgba(40,36,70,0.55)";
-    c.lineWidth = 5;
+    c.strokeStyle = "rgba(40,36,70,0.28)";
+    c.lineWidth = 4;
     for (let i = 0; i <= n; i++) {
       c.beginPath();
       c.moveTo(i * s, 0);
@@ -201,7 +201,7 @@ export function createTerrace(seed: number): Terrace {
   tiles.repeat.set(2.4, 2.4);
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(10, 10.5),
-    new THREE.MeshStandardMaterial({ map: tiles, roughness: 0.32, metalness: 0.05 }),
+    new THREE.MeshStandardMaterial({ map: tiles, roughness: 0.22, metalness: 0.1 }),
   );
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(2.2, 0, -1.2);

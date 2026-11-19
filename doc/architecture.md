@@ -34,7 +34,17 @@ sources are in `design/v13/`.
   └──────────── rise (1.1 s) ◄──── Esc / back ──────┘
 ```
 
-- **Hub — Pyébwa a Konesans**: a tree of light on a tropical _morne_, drawn as a flamboyant whose
+- **Hub — La Veillée** (since 2026-11-19, `src/veillee/`): a terrace of a Guadeloupe house at dusk,
+  a child asleep in the armchair, one big 3D book of tales on the table. Painted 2D planes in depth
+  (sky, cloud sheets behind the Basse-Terre ridges, neighbourhood) and 3D volumes (terrace, child,
+  near branches casting leaf shadows, the book with a deformable turning leaf). Its pages are the
+  catalogue's published tales with their official visual (`BookManifest.art`) and editorial portraits
+  (`src/veillee/portraits/`, added as data only). It implements the shell's home contract
+  (`MountTree` / `TreeHandle`): the dive flies to the selected tale's illustration with the tree's
+  choreography. Real HTML for the menu (Accueil, Les contes, Le projet, Contact), bookmarks, arrows,
+  entry and portrait text; without WebGL the same book shows as HTML pictures. Mission folder:
+  `docs/missions/2026-11-19-accueil-veillee/`.
+- **Former hub — Pyébwa a Konesans** (`src/tree/`, kept in the repository, no longer mounted): a tree of light on a tropical _morne_, drawn as a flamboyant whose
   leaf and flower sprays grow from its branches and twigs and sway with them in one wind
   (`src/tree/scene/canopy.ts`), turned about its foot so its fullest face meets the opening view
   (`FACING`, ruling CANOPY-FACE). Scrolling climbs a camera spiral around it. Book-cards hang from
@@ -77,7 +87,8 @@ index.html
    ├─ app/                   shell: state machine (tree | dive | book | rise), registry,
    │                         story parser, reading UI, transitions, WebGL fallback
    ├─ shared/                optional toolbox: createRng, lerp/clamp/smoothstep, three helpers
-   ├─ tree/                  tree universe: scene (landscape, tree, Konteur, cards), overlay
+   ├─ veillee/               home universe: terrace scene, book, page turn, portraits, HTML hud
+   ├─ tree/                  former home (not mounted): scene (landscape, tree, Konteur, cards), overlay
    └─ books/<id>/            one folder per book: book.ts, story/<lang>.md, cover, staging,
                              theme.css, world/ (Three.js)
 ```

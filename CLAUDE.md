@@ -24,7 +24,7 @@ design/                        # reference only — never edited, excluded from 
   v13/                         # extracted sources: template.html, scene13.js, kont-data.js, konteur.png
 docs/superpowers/              # spec + plan for the universes-per-book architecture
 src/
-  main.ts                      # boot: wires the tree universe into the app shell
+  main.ts                      # boot: wires the home universe (veillee) into the app shell
   app/                         # shell shared by every universe
     app.ts                     # state machine tree | dive | book | rise, transitions, global keys
     contract.ts                # TreeUniverse, BookManifest, BookWorld, Story types + defineBook()
@@ -36,7 +36,9 @@ src/
     transition.ts, backdrop.ts, bubble.ts, fallback.ts, languages.ts, notice.ts
   shared/                      # optional toolbox: random.ts (createRng), math.ts, paging.ts (createPager), cover.ts (imageCover), three/ helpers
   pages/contes-des-classes/    # script + styles of the static "Les contes des classes" page (no Three.js)
-  tree/                        # tree universe: index.ts (mountTree), invitation.ts (class invitation slot), random-tale.ts (Konteur),
+  veillee/                     # home universe « La Veillée »: index.ts (mountVeillee), pages.ts (tales from the
+                               # catalogue + portraits), flip.ts (page turn), hud/ (HTML), portraits/, scene/
+  tree/                        # former home, kept but not mounted: index.ts (mountTree), invitation.ts (class invitation slot), random-tale.ts (Konteur),
                                # scene/, overlay/, assets/konteur.png
   books/
     ti-kannot/                 # book.ts, cover.ts (owner's poster cropped, assets/cover.webp), staging.ts, theme.css, story/{gcf,fr}.md, world/
@@ -52,7 +54,7 @@ doc/                           # architecture.md, development.md
 - English identifiers, comments and commits (Conventional Commits). Tale **content** stays in
   Kréyòl / French — never "fix" Creole spelling without asking.
 - Strict TypeScript; no `any`. Docstrings on functions, no obvious inline comments.
-- Universes: `src/tree/` and each `src/books/<id>/` are isolated (ESLint `no-restricted-imports`).
+- Universes: `src/veillee/`, `src/tree/` and each `src/books/<id>/` are isolated (ESLint `no-restricted-imports`).
   They may import only their own files, `@shared/*` and `@app/contract`. Add a book = add a folder
   with `book.ts` (+ `story/gcf.md`, `cover.ts`, `staging.ts`, `world/` when ready).
 - Tale text lives in `src/books/<id>/story/<lang>.md` (gcf required, fr, en). Format: spec §4 in

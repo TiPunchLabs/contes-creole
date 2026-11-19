@@ -421,14 +421,14 @@
     padding: 10px 8px;
   }
 
-  /* On phones the portrait text leaves the page for a stable card under the book. */
+  /* On phones the portrait text leaves the page for a stable card in the sky, above the book. */
   .v-portrait {
     left: 12px;
     right: 12px;
-    top: auto;
-    bottom: calc(84px + env(safe-area-inset-bottom));
+    top: calc(64px + env(safe-area-inset-top));
+    bottom: auto;
     width: auto;
-    max-height: 30vh;
+    max-height: 34vh;
     border-radius: 14px;
     background: rgba(251, 241, 220, 0.95);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);

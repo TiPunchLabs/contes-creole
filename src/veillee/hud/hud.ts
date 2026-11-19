@@ -45,7 +45,7 @@ export interface Hud {
   /** The entry control of a tale, focused again on return from it. */
   entryOf(bookId: string): HTMLElement | null;
   /** The scene could not start: the book's pages show as plain HTML images. */
-  showFlat(images: ReadonlyMap<string, string>): void;
+  showFlat(): void;
   dispose(): void;
 }
 
@@ -165,6 +165,7 @@ export function createHud(
   let index = 0;
   let active = true;
   let catalogueReturn: HTMLElement | null = null;
+  let placedKey = "";
 
   const page = (): Page | undefined => pages[index];
 
@@ -256,6 +257,19 @@ export function createHud(
     if (!active) return;
     if (!catalogue.hidden) {
       if (e.key === "Escape") closeCatalogue();
+      else if (e.key === "Tab") {
+        // Keep the focus inside the open panel (aria-modal).
+        const items = [...catalogue.querySelectorAll<HTMLElement>("button")];
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
       return;
     }
     if (e.key === "Escape" && menu.classList.contains("is-open")) {
@@ -325,7 +339,12 @@ export function createHud(
     setTurning(turning) {
       root.classList.toggle("is-turning", turning);
     },
-    place({ art: rect, title: t, text, ribbons }) {
+    place(placement) {
+      // Writes styles only when the projected places move (no layout work on a still frame).
+      const key = JSON.stringify(placement, (_, v) => (typeof v === "number" ? Math.round(v) : v));
+      if (key === placedKey) return;
+      placedKey = key;
+      const { art: rect, title: t, text, ribbons } = placement;
       if (rect) {
         art.style.cssText = `left:${rect.x}px;top:${rect.y}px;width:${rect.w}px;height:${rect.h}px`;
       }
@@ -349,13 +368,13 @@ export function createHud(
       const i = pages.findIndex((p) => p.id === bookId);
       return i === index && !art.hidden ? art : null;
     },
-    showFlat(images) {
+    showFlat() {
       root.classList.add("is-flat");
       flat.hidden = false;
       flat.innerHTML = pages
         .map((p) => {
           if (p.kind === "tale")
-            return `<figure hidden><img src="${esc(images.get(p.art.url) ?? p.art.url)}" alt="" width="${p.art.width}" height="${p.art.height}" /></figure>`;
+            return `<figure hidden><img src="${esc(p.art.url)}" alt="" width="${p.art.width}" height="${p.art.height}" /></figure>`;
           return `<figure hidden class="v-flat-portrait"><canvas width="500" height="675"></canvas></figure>`;
         })
         .join("");

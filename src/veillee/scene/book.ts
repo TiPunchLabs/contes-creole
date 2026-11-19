@@ -72,7 +72,9 @@ export interface Book {
   update(time: number, dt: number, calm: boolean): void;
 }
 
-type Tex = PageCanvas;
+/** A painted page; `stillPainted` once a portrait shows its reduced-motion pose. */
+type Tex = PageCanvas & { stillPainted?: boolean };
+const PORTRAIT_HZ = 24;
 
 /**
  * A grid geometry for a page, `SEG_U`×`SEG_V`, its position written by the caller. `mirror` puts
@@ -308,6 +310,7 @@ export function createBook(
   };
 
   let settled = true;
+  let paintedAt = -Infinity;
   const centre = new THREE.Vector3();
   return {
     group,
@@ -383,9 +386,16 @@ export function createBook(
       }
       assign(left.material as THREE.MeshStandardMaterial, shownLeft);
       assign(right.material as THREE.MeshStandardMaterial, shownRight);
-      for (const key of keep) {
-        const tex = cache.get(key);
-        if (tex?.animate) tex.animate(time, calm);
+      // Portrait drawings repaint at 24 Hz (a page canvas upload each time), and once when calm.
+      if (time - paintedAt >= 1 / PORTRAIT_HZ || time < paintedAt) {
+        paintedAt = time;
+        for (const key of keep) {
+          const tex = cache.get(key);
+          if (tex?.animate && (!calm || !tex.stillPainted)) {
+            tex.animate(time, calm);
+            tex.stillPainted = calm;
+          }
+        }
       }
       prune(keep);
 
