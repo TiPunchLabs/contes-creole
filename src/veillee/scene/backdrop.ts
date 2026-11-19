@@ -72,7 +72,7 @@ function cloudTexture(rng: Rng, warm: boolean): THREE.CanvasTexture {
         g.addColorStop(0, "rgba(255,255,255,0)");
         g.addColorStop(0.45, color);
         g.addColorStop(1, warm ? "#ffd7b0" : "#a37fc8");
-        c.globalAlpha = 0.35 + rng() * 0.4;
+        c.globalAlpha = 0.55 + rng() * 0.4;
         c.fillStyle = g;
         c.beginPath();
         c.ellipse(cx + dx, cy, len, thick, (rng() - 0.5) * 0.08, 0, Math.PI * 2);
@@ -206,7 +206,7 @@ export function createBackdrop(seed: number): Backdrop {
   group.add(plane(add(layerMaterial({ map: skyTexture(rng) })), 0, -40, -150, 520, 220, -10));
   group.add(
     plane(
-      add(layerMaterial({ map: cloudTexture(rng, false), scroll: 1 / 520, opacity: 0.85 })),
+      add(layerMaterial({ map: cloudTexture(rng, false), scroll: 1 / 520, opacity: 1 })),
       0,
       10,
       -125,
@@ -215,7 +215,7 @@ export function createBackdrop(seed: number): Backdrop {
       -9,
     ),
     plane(
-      add(layerMaterial({ map: cloudTexture(rng, true), scroll: -1 / 380, opacity: 0.9 })),
+      add(layerMaterial({ map: cloudTexture(rng, true), scroll: -1 / 380, opacity: 1 })),
       0,
       -2,
       -100,
