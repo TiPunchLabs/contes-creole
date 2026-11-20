@@ -193,7 +193,8 @@ try {
         const prev = document.querySelector(".v-prev");
         let k = 0;
         const id = setInterval(() => ((k++ % 6 < 3 ? next : prev) || next)?.click(), 1300);
-        setTimeout(() => clearInterval(id), 10400);
+        // Stops before the FPS window closes: no late click may follow the next step.
+        setTimeout(() => clearInterval(id), 9500);
       });
       const turn = await fps(page, 10000);
       await turning;

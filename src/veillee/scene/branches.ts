@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { createRng, type Rng } from "@shared/random";
 import { canvasTexture } from "./paint";
 
@@ -113,15 +114,24 @@ function createTwig(
   bark.position.x = length / 2;
   bark.castShadow = true;
   pivot.add(bark);
+  // The twig's leaves share one geometry (one draw, one shadow draw): they move with the twig.
+  const cards: THREE.BufferGeometry[] = [];
+  const place = new THREE.Object3D();
   for (let i = 0; i < leaves; i++) {
-    const card = new THREE.Mesh(new THREE.PlaneGeometry(0.26, 0.13), leaf);
-    const along = (0.25 + (i / leaves) * 0.75) * length;
-    card.geometry.translate(0.13, 0, 0);
-    card.position.set(along, 0, 0);
-    card.rotation.set(rng() * Math.PI, (rng() - 0.5) * 0.8, (i % 2 ? 1 : -1) * (0.5 + rng() * 0.6));
-    card.castShadow = true;
-    pivot.add(card);
+    const card = new THREE.PlaneGeometry(0.26, 0.13).translate(0.13, 0, 0);
+    place.position.set((0.25 + (i / leaves) * 0.75) * length, 0, 0);
+    place.rotation.set(
+      rng() * Math.PI,
+      (rng() - 0.5) * 0.8,
+      (i % 2 ? 1 : -1) * (0.5 + rng() * 0.6),
+    );
+    place.updateMatrix();
+    cards.push(card.applyMatrix4(place.matrix));
   }
+  const foliage = new THREE.Mesh(mergeGeometries(cards), leaf);
+  cards.forEach((g) => g.dispose());
+  foliage.castShadow = true;
+  pivot.add(foliage);
   const flowers: THREE.Group[] = [];
   if (flower)
     for (let i = 0; i < 2; i++) {
