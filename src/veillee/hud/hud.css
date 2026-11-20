@@ -142,9 +142,13 @@
   position: absolute;
   left: var(--text-x);
   top: var(--text-y);
-  width: var(--text-w);
-  max-height: var(--text-h);
+  /* On the right page, but never narrower than a readable column: the whole text, no scrolling. */
+  width: max(var(--text-w), 300px);
+  max-width: calc(100vw - var(--text-x) - 16px);
   box-sizing: border-box;
+  border-radius: 10px;
+  background: rgba(244, 232, 206, 0.9);
+  box-shadow: 0 8px 24px rgba(40, 20, 30, 0.25);
   padding: clamp(10px, 2vw, 28px) clamp(12px, 2.2vw, 30px);
   overflow: auto;
   color: var(--v-ink);
@@ -166,7 +170,7 @@
 
 .v-portrait-text {
   margin: 0;
-  font: 400 clamp(14px, 1.15vw, 18px) / 1.45 var(--font-read);
+  font: 400 clamp(15px, 1.05vw, 17px) / 1.45 var(--font-read);
 }
 
 .is-turning :is(.v-title, .v-art, .v-portrait) {
