@@ -34,7 +34,7 @@ src/
     language-panel/            # "Lang kréyòl" burger + dialog, over the tale
     reading-ui/                # text card, language switch, page counter and buttons, back button, bubble
     transition.ts, backdrop.ts, bubble.ts, fallback.ts, languages.ts, notice.ts
-  shared/                      # optional toolbox: random.ts (createRng), math.ts, paging.ts (createPager), cover.ts (imageCover), three/ helpers
+  shared/                      # optional toolbox: random.ts (createRng), math.ts, paging.ts (createPager), gesture.ts (isPhone, bindSwipe: smartphone swipes), cover.ts (imageCover), three/ helpers
   pages/contes-des-classes/    # script + styles of the static "Les contes des classes" page (no Three.js)
   tree/                        # tree universe: index.ts (mountTree), invitation.ts (class invitation slot), random-tale.ts (Konteur),
                                # scene/, overlay/, assets/konteur.png

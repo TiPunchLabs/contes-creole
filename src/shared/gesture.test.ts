@@ -20,21 +20,18 @@ function trace(points: [number, number][], ms = 200): Gesture {
 }
 
 describe("detectPhone", () => {
-  const phone = { coarsePointer: true, hover: false, shortSide: 390 };
-
   it("takes a touch screen with a short side under 600 px", () => {
-    expect(detectPhone(phone)).toBe(true);
-    expect(detectPhone({ ...phone, shortSide: 599 })).toBe(true);
+    expect(detectPhone({ touch: true, shortSide: 390 })).toBe(true);
+    expect(detectPhone({ touch: true, shortSide: 599 })).toBe(true);
   });
 
-  it("leaves tablets out by their screen, whatever the window", () => {
-    expect(detectPhone({ ...phone, shortSide: 600 })).toBe(false);
-    expect(detectPhone({ ...phone, shortSide: 744 })).toBe(false);
+  it("leaves tablets and touch laptops out by their screen, whatever the window", () => {
+    expect(detectPhone({ touch: true, shortSide: 600 })).toBe(false);
+    expect(detectPhone({ touch: true, shortSide: 744 })).toBe(false);
   });
 
-  it("leaves a mouse or trackpad computer out, even on a small screen or window", () => {
-    expect(detectPhone({ coarsePointer: false, hover: true, shortSide: 390 })).toBe(false);
-    expect(detectPhone({ coarsePointer: true, hover: true, shortSide: 390 })).toBe(false);
+  it("leaves a computer without a touch screen out, even on a small screen", () => {
+    expect(detectPhone({ touch: false, shortSide: 390 })).toBe(false);
   });
 });
 

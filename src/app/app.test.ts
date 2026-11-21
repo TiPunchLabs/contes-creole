@@ -84,9 +84,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-/** Makes the page a smartphone: finger as the primary pointer, no hover, a 390 × 844 screen. */
+/** Makes the page a smartphone: a touch screen of 390 × 844. */
 function asPhone(): void {
-  vi.stubGlobal("matchMedia", (query: string) => ({ matches: query === "(pointer: coarse)" }));
+  vi.stubGlobal("matchMedia", (query: string) => ({ matches: query === "(any-pointer: coarse)" }));
   vi.spyOn(screen, "width", "get").mockReturnValue(390);
   vi.spyOn(screen, "height", "get").mockReturnValue(844);
 }

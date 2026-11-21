@@ -8,28 +8,25 @@ export const SWIPE_MIN = 40;
 export const PHONE_SHORT_SIDE = 600;
 
 export interface PhoneEnv {
-  /** The primary pointer is a finger (`pointer: coarse`). */
-  coarsePointer: boolean;
-  /** The primary pointer can hover (`hover: hover`): a mouse or a trackpad. */
-  hover: boolean;
+  /** The device has a finger pointer (`any-pointer: coarse`), primary or not. */
+  touch: boolean;
   /** Short side of the screen (not of the window), in CSS px. */
   shortSide: number;
 }
 
 /**
- * A smartphone: finger as the primary pointer, no hover, and a small screen. The window's width
- * plays no part, so a narrow desktop window is never one; tablets fail the screen bound.
+ * A smartphone: a touch screen whose short side is small. The window's width plays no part, so a
+ * narrow desktop window is never one; tablets and touch laptops fail the screen bound. The primary
+ * pointer is not asked: some phones name their stylus first.
  */
 export function detectPhone(env: PhoneEnv): boolean {
-  return env.coarsePointer && !env.hover && env.shortSide < PHONE_SHORT_SIDE;
+  return env.touch && env.shortSide < PHONE_SHORT_SIDE;
 }
 
 /** Reads the browser facts `detectPhone` needs. */
 export function readPhoneEnv(): PhoneEnv {
-  const media = (query: string): boolean => window.matchMedia?.(query).matches ?? false;
   return {
-    coarsePointer: media("(pointer: coarse)"),
-    hover: media("(hover: hover)"),
+    touch: window.matchMedia?.("(any-pointer: coarse)").matches ?? false,
     shortSide: Math.min(screen.width, screen.height),
   };
 }
