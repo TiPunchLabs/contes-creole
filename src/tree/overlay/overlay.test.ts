@@ -118,9 +118,9 @@ describe("navigation hint", () => {
     expect(hint(container).textContent).toBe("Fais défiler · Glisse avec le doigt");
   });
 
-  it("invites a swipe to the left on smartphones, in French, until dismissed", () => {
+  it("invites a swipe on smartphones, naming no side, in French, until dismissed", () => {
     const { container, overlay } = mount(true);
-    expect(hint(container).textContent).toBe("Glisse vers la gauche pour explorer");
+    expect(hint(container).textContent).toBe("Glisse pour explorer");
     expect(hint(container).querySelector("span")?.lang).toBe("fr");
     expect(hint(container).hidden).toBe(false);
     overlay.dismissHint();

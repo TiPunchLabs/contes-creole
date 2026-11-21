@@ -324,7 +324,7 @@ async function runHome(browser) {
     "phone-detected",
     await p.evaluate(() => "phone" in document.querySelector("#app").dataset),
   );
-  check(run, "hint-invites-swipe", s.hint === "Glisse vers la gauche pour explorer", s.hint);
+  check(run, "hint-invites-swipe", s.hint === "Glisse pour explorer", s.hint);
   await p.screenshot({ path: OUT + "home-0-hint.png" });
 
   let bars = await sideways(p);
@@ -754,12 +754,7 @@ async function runEnds(browser) {
   const run = "ends";
   const { ctx, p, cdp, errors } = await open(browser, "landscape", { reducedMotion: "reduce" });
   let s = await settled(p);
-  check(
-    run,
-    "landscape-hint-invites-swipe",
-    s.hint === "Glisse vers la gauche pour explorer",
-    s.hint,
-  );
+  check(run, "landscape-hint-invites-swipe", s.hint === "Glisse pour explorer", s.hint);
   await p.screenshot({ path: OUT + "home-landscape-hint.png" });
   const bars = await sideways(p);
   check(run, "landscape-no-horizontal-scrollbar", noBar(bars), JSON.stringify(bars));

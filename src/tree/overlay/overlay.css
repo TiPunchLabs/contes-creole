@@ -108,7 +108,7 @@
   animation: tree-bob 1.8s ease-in-out infinite;
 }
 
-/* Smartphones: the arrow slides left, the way the finger goes. */
+/* Smartphones: the double arrow sways both ways, like the finger may go. */
 .tree-intro-hint.is-swipe svg {
   animation-name: tree-nudge;
 }
@@ -472,8 +472,11 @@
   100% {
     transform: translateX(0);
   }
-  50% {
-    transform: translateX(-6px);
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
   }
 }
 

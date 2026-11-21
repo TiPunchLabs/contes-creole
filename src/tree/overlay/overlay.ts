@@ -29,10 +29,10 @@ export interface Box {
 
 const MOUSE = `<svg width="18" height="26" viewBox="0 0 18 26" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="1" width="16" height="24" rx="8"/><circle cx="9" cy="8" r="2" fill="currentColor"/></svg>`;
 
-/** A finger sliding to the left: the smartphone's way through the tree. */
-const SWIPE = `<svg width="26" height="18" viewBox="0 0 26 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 9H3M9 3 3 9l6 6"/></svg>`;
+/** A finger sliding either way: the smartphone's way round the tree, no side named. */
+const SWIPE = `<svg width="26" height="18" viewBox="0 0 26 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 9H3M9 3 3 9l6 6M17 3l6 6-6 6"/></svg>`;
 const HINT = `${MOUSE}<span lang="fr">Fais défiler · Glisse avec le doigt</span>`;
-const HINT_SWIPE = `${SWIPE}<span lang="fr">Glisse vers la gauche pour explorer</span>`;
+const HINT_SWIPE = `${SWIPE}<span lang="fr">Glisse pour explorer</span>`;
 
 /** Kréyòl name of the way into a tale (the old fiche's button), kept for the card's accessible name. */
 const ENTER_TALE = "Antré adan kont-la";
@@ -77,8 +77,8 @@ function place(el: HTMLElement, box: Box): void {
  * Tree HUD: intro column with the site title, climb bar, shelf, and two keyboard entry points laid
  * over the scene: the near card (a book's tale, or the classes page for the invitation) and the
  * storyteller (a tale at random). Pointers keep hitting the 3D scene: these entry points let them
- * through and only take the focus. `swipe` (smartphones): the intro's hint invites a swipe to the
- * left instead of scrolling, the climb bar is unseen and the shelf has no scrollbar.
+ * through and only take the focus. `swipe` (smartphones): the intro's hint invites a swipe
+ * (either way) instead of scrolling, the climb bar is unseen and the shelf has no scrollbar.
  */
 export function createTreeOverlay(
   container: HTMLElement,
