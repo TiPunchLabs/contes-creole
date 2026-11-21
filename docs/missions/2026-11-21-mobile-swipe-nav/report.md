@@ -1,9 +1,9 @@
 # Report — 2026-11-21-mobile-swipe-nav
 
 Verdict: PARTIAL
-Version: a5ef0a8ed5bc9858bbd11357b70bd3d2a4f6bb59
+Version: 23bb7d8e65b9b1aa9de080ae3226792d478e6ac8
 
-`Version` is the product HEAD (`a5ef0a8`, owner feedback 1): the last commit that touches `src/`. Section 0 describes that round; sections 1 to 7 are the first delivery (`631429a`) and are superseded by section 0 wherever it says so. The delivered branch HEAD carries on top of it only the mission files, the evidence and this report.
+`Version` is the product HEAD (`23bb7d8`, owner feedback 1 then decision D4): the last commit that touches `src/`. Section 0 describes that round; sections 1 to 7 are the first delivery (`631429a`) and are superseded by section 0 wherever it says so. The delivered branch HEAD carries on top of it only the mission files, the evidence and this report.
 
 Why PARTIAL and not PASS: steps N1 to N4 are done and every technical criterion that can be checked here is verified, but three things required by the brief are not: the Codex review (step R1, routed by pilotage, not started), a test on a real phone (none was available to this session), and the two readers' understanding of the gesture (the owner's test). The first phone test by the owner happened and gave feedback 1 (section 0); its fix has not been tried on a real phone yet. CI `quality` failed once on an unrelated test, then passed on `cc48f4f` (section 0).
 
@@ -45,8 +45,18 @@ Limits and things to know:
 
 Decisions for the owner:
 
-- D4 — Direction and hint on the home. The scene now follows the finger, so the hint's "vers la gauche" leads behind the tree to the invitation first, and Ti Kannot is one swipe to the right. Options: (a) keep as is; (b) keep the direction and reword the hint (wording is the owner's; for example a hint that names no side); (c) go back to right-to-left = Ti Kannot first, with the scene moving against the finger. Recommendation: (b). Not blocking for the phone test.
+- D4 — ANSWERED by the owner on 2026-11-21, « Garder le sens, changer l'indice »; applied in `23bb7d8` (see "Decision D4 applied" below). Original text: Direction and hint on the home. The scene now follows the finger, so the hint's "vers la gauche" leads behind the tree to the invitation first, and Ti Kannot is one swipe to the right. Options: (a) keep as is; (b) keep the direction and reword the hint (wording is the owner's; for example a hint that names no side); (c) go back to right-to-left = Ti Kannot first, with the scene moving against the finger. Recommendation: (b). Not blocking for the phone test.
 - A1, better feel proposed in one line, not done: let a long or fast throw carry more than one landmark; it contradicts the brief's one scene per gesture, so it needs the owner's word.
+
+### Decision D4 applied — product `23bb7d8`
+
+- Commit `23bb7d8` feat(nav): name no side in the smartphone hint of the home (4 files: `overlay.ts`, `overlay.css`, `overlay.test.ts`, `qa/swipe.mjs`). Nothing else changed; the direction is kept (the scene follows the finger).
+- The home hint on smartphones now reads « Glisse pour explorer ». It is still removed after the first successful swipe and does not come back. Wherever this report says « Glisse vers la gauche pour explorer », read the new wording.
+- Its icon was a left arrow nudging to the left, which named a side too: it is now an arrow pointing both ways that sways both ways (still under reduced motion). Same size, colour and place. Say so if the old arrow should stay.
+- Language: the hint exists in French only (`lang="fr"`), like the computer hint « Fais défiler · Glisse avec le doigt » it replaces on phones. No Kréyòl version exists, none was written, and nothing was added to `docs/kreyol/variants.md`.
+- Verification: unit tests 438 pass; format, lint, typecheck, build pass. Real touch input (same method as above), `d4.log`: `home` and `ends` 43/43 PASS, with `hint-invites-swipe` = « Glisse pour explorer » at 390×844 and 844×390, removed after the first swipe and still removed after the turns. Captures `d4/home-0-hint.png` and `d4/home-landscape-hint.png` (portrait looked at: text and double arrow under the intro). `kannot`, `mila` and `text` were not re-run: this commit touches only the home's hint.
+- CI and Deploy Preview on `23bb7d8`: VERIFIED after waiting. `quality` pass (run 44957273751), Netlify `deploy-preview` pass; the PR head was `23bb7d8` when read. The preview answers 200 and its main script contains « Glisse pour explorer » and no longer « Glisse vers la gauche » (new=1, old=0 matching lines). The commit that adds this report on top changes no product file; its own CI run was not waited for.
+- Still NOT_VERIFIED: a real phone on this version; the reader test.
 
 ## 1. What was done
 
@@ -160,6 +170,6 @@ Technical validation of the gesture and reader understanding are two different t
 
 ## 7. Next action
 
-- Owner: try the Deploy Preview again on the phone (feedback 1, section 0) and answer D4.
+- Owner: try the Deploy Preview again on the phone (feedback 1 and D4, section 0).
 - Pilotage: route the Codex review (R1) with Playwright from the interface. `qa/swipe.mjs` is one way in; the reviewer should also drive its own cases. Review on a local build or with the Netlify bar closed.
 - Owner, before the merge decision: a real phone on the Deploy Preview (close the Netlify bar with ×), then the instruction for the two readers, as written in the brief: « Depuis l’accueil, trouve un conte, ouvre-le, lis les deux premières scènes, puis reviens à la première. »
