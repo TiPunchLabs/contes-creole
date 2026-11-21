@@ -1,0 +1,126 @@
+{
+  "site": "http://127.0.0.1:5183/",
+  "trees": ["current", "a", "b"],
+  "viewports": {},
+  "errors": [
+    "desktop/current& console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "desktop/current console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "desktop/a console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "desktop/b console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "mobile/current console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "mobile/a console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "mobile/b console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "views": [],
+  "renderer": "ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2, OpenGL ES 3.2)",
+  "scenery": {
+    "current": {
+      "landscape": {
+        "objects": 386,
+        "vertices": 98618,
+        "sum": [2436.8606, 2432.9808, 2573.5104],
+        "placed": [-39.5, 47, 46.4]
+      },
+      "sky": {
+        "objects": 18,
+        "vertices": 803,
+        "sum": [1639.3201, -300.237, 521.7477]
+      },
+      "centralVisible": true,
+      "sceneChildren": 7
+    },
+    "a": {
+      "landscape": {
+        "objects": 386,
+        "vertices": 98618,
+        "sum": [2436.8606, 2432.9808, 2573.5104],
+        "placed": [-39.5, 47, 46.4]
+      },
+      "sky": {
+        "objects": 18,
+        "vertices": 803,
+        "sum": [1639.3201, -300.237, 521.7477]
+      },
+      "centralVisible": false,
+      "sceneChildren": 8
+    },
+    "b": {
+      "landscape": {
+        "objects": 386,
+        "vertices": 98618,
+        "sum": [2436.8606, 2432.9808, 2573.5104],
+        "placed": [-39.5, 47, 46.4]
+      },
+      "sky": {
+        "objects": 18,
+        "vertices": 803,
+        "sum": [1639.3201, -300.237, 521.7477]
+      },
+      "centralVisible": false,
+      "sceneChildren": 8
+    }
+  },
+  "sceneryEqual": true,
+  "select": [
+    {
+      "vp": "desktop",
+      "tree": "current",
+      "climbBefore": 0,
+      "climbAfter": 0.275,
+      "named": "Ti Kannot é Gwo Rako — Antré adan kont-la",
+      "whole": false,
+      "opened": "ti-kannot",
+      "url": "http://127.0.0.1:5183/"
+    },
+    {
+      "vp": "desktop",
+      "tree": "a",
+      "climbBefore": 0,
+      "climbAfter": 0.275,
+      "named": "Ti Kannot é Gwo Rako — Antré adan kont-la",
+      "whole": false,
+      "opened": "ti-kannot",
+      "url": "http://127.0.0.1:5183/?tree=a"
+    },
+    {
+      "vp": "desktop",
+      "tree": "b",
+      "climbBefore": 0,
+      "climbAfter": 0.275,
+      "named": "Ti Kannot é Gwo Rako — Antré adan kont-la",
+      "whole": false,
+      "opened": "ti-kannot",
+      "url": "http://127.0.0.1:5183/?tree=b"
+    },
+    {
+      "vp": "mobile",
+      "tree": "current",
+      "climbBefore": 0,
+      "climbAfter": 0.33275,
+      "named": "Ti Kannot é Gwo Rako — Antré adan kont-la",
+      "whole": true,
+      "opened": "ti-kannot",
+      "url": "http://127.0.0.1:5183/"
+    },
+    {
+      "vp": "mobile",
+      "tree": "a",
+      "climbBefore": 0,
+      "climbAfter": 0.33275,
+      "named": "Ti Kannot é Gwo Rako — Antré adan kont-la",
+      "whole": true,
+      "opened": "ti-kannot",
+      "url": "http://127.0.0.1:5183/?tree=a"
+    },
+    {
+      "vp": "mobile",
+      "tree": "b",
+      "climbBefore": 0,
+      "climbAfter": 0.33275,
+      "named": "Ti Kannot é Gwo Rako — Antré adan kont-la",
+      "whole": true,
+      "opened": "ti-kannot",
+      "url": "http://127.0.0.1:5183/?tree=b"
+    }
+  ]
+}
