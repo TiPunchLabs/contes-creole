@@ -7,6 +7,23 @@ import { groundHeight } from "./ground";
 export const cardT = (index: number, count: number): number =>
   count <= 1 ? 0.5 : 0.2 + index * (0.68 / (count - 1));
 
+/** The climb's landmarks, in order: the opening view, then each card. */
+export const climbStops = (count: number): number[] => [
+  0,
+  ...Array.from({ length: count }, (_, i) => cardT(i, count)),
+];
+
+/**
+ * The landmark one step after (1) or before (-1) climb progress `t`; `t` itself at either end.
+ * Between two landmarks (after a wheel or a shelf move) the step goes to the nearest one that way.
+ */
+export function strideStop(stops: readonly number[], t: number, direction: 1 | -1): number {
+  const eps = 1e-3;
+  const ahead =
+    direction > 0 ? stops.filter((s) => s > t + eps) : stops.filter((s) => s < t - eps).reverse();
+  return ahead[0] ?? t;
+}
+
 /** A point that can be written to: a three.js vector, or the solver's own. */
 export interface Spot {
   x: number;

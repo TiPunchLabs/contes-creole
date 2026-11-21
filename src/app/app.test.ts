@@ -84,6 +84,93 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+/** Makes the page a smartphone: a touch screen of 390 × 844. */
+function asPhone(): void {
+  vi.stubGlobal("matchMedia", (query: string) => ({ matches: query === "(any-pointer: coarse)" }));
+  vi.spyOn(screen, "width", "get").mockReturnValue(390);
+  vi.spyOn(screen, "height", "get").mockReturnValue(844);
+}
+
+/** One finger from `from` to `to` on `el`, as pointer events. */
+function drag(el: Element, from: [number, number], to: [number, number]): void {
+  const fire = (type: string, [x, y]: [number, number]): void => {
+    el.dispatchEvent(
+      new PointerEvent(type, {
+        bubbles: true,
+        pointerId: 1,
+        isPrimary: true,
+        pointerType: "touch",
+        clientX: x,
+        clientY: y,
+      }),
+    );
+  };
+  fire("pointerdown", from);
+  fire("pointermove", [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2]);
+  fire("pointermove", to);
+  fire("pointerup", to);
+}
+
+describe("app on a smartphone", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  /** Opens the book on a smartphone and returns its reading card. */
+  async function openOnPhone(): Promise<HTMLElement> {
+    asPhone();
+    start();
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    return $(".reading-card") as HTMLElement;
+  }
+
+  it("turns one page per horizontal swipe, like the page buttons, and stops at both ends", async () => {
+    const card = await openOnPhone();
+    expect(root.hasAttribute("data-phone")).toBe(true);
+    drag(card, [300, 400], [40, 410]);
+    expect(handle.setPage).toHaveBeenLastCalledWith(1);
+    $(".reading-next")?.click();
+    expect(handle.setPage).toHaveBeenLastCalledWith(2);
+    drag(card, [300, 400], [100, 400]);
+    expect(handle.setPage).toHaveBeenCalledTimes(2);
+    expect($(".reading")?.hidden).toBe(false);
+    drag(card, [100, 400], [300, 400]);
+    expect(handle.setPage).toHaveBeenLastCalledWith(1);
+    expect($(".reading-title")?.textContent).toBe("Paj dé");
+    drag(card, [100, 400], [300, 400]);
+    drag(card, [100, 400], [300, 400]);
+    expect(handle.setPage).toHaveBeenLastCalledWith(0);
+    expect(handle.setPage).toHaveBeenCalledTimes(4);
+  });
+
+  it("keeps the page on a vertical move, which scrolls a long passage", async () => {
+    const card = await openOnPhone();
+    drag(card, [200, 600], [205, 200]);
+    expect(handle.setPage).not.toHaveBeenCalled();
+    Object.defineProperty(card, "scrollHeight", { configurable: true, value: 900 });
+    Object.defineProperty(card, "clientHeight", { configurable: true, value: 400 });
+    drag(card, [200, 600], [200, 400]);
+    expect(card.scrollTop).toBe(200);
+    expect(handle.setPage).not.toHaveBeenCalled();
+  });
+
+  it("leaves swipes that start on a control or under the language panel alone", async () => {
+    asPhone();
+    start({ loadNotes: vi.fn(async () => NOTES) });
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    drag($(".reading-next") as HTMLElement, [300, 700], [100, 700]);
+    expect(handle.setPage).not.toHaveBeenCalled();
+    $(".lang-burger")?.click();
+    drag(root, [300, 400], [100, 400]);
+    expect(handle.setPage).not.toHaveBeenCalled();
+  });
+
+  it("shows the swipe hint instead of the scroll hint", async () => {
+    await openOnPhone();
+    expect($(".reading-hint")?.textContent).toBe("Glissez pour continuer");
+  });
+});
+
 describe("app", () => {
   it("enters a ready book: dives, pauses the tree, mounts the world, shows page 1", async () => {
     start();

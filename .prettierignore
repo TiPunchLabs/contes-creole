@@ -4,3 +4,5 @@ pnpm-lock.yaml
 .superpowers/
 # reviewers' files are kept as received
 docs/missions/*/review-*.md
+# the owner brief is kept verbatim
+docs/missions/*/owner-brief.md

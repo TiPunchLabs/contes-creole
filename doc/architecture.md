@@ -85,6 +85,17 @@ index.html
 Isolation is enforced by ESLint `no-restricted-imports`: universes import only their own files,
 `@shared/*` and `@app/contract`.
 
+### Input on smartphones
+
+Wheel, keyboard and vertical finger drags drive the tree's climb and the tales' pages on computers
+and tablets. On a smartphone (`isPhone()` in `src/shared/gesture.ts`: a touch screen whose short side
+is under 600 CSS px; never the window's width) the same
+progress answers horizontal swipes instead: right to left is one scene forward, left to right one
+back, and a mostly vertical move only scrolls a long passage. `bindSwipe()` reads the touches for
+the three places that own progress: the tree (`src/tree/index.ts`, one landmark of `climbStops()`
+per swipe), the shell for books with a `world` (`src/app/app.ts`, `goPage`), and Mila's own reading
+interface (`src/books/mila/world/index.ts`, `go`). `qa/swipe.mjs` drives them with real touch input.
+
 ### Books with their own reading interface (Mila)
 
 A book normally gives the shell a `world` and Markdown stories (`story/gcf.md` required); the shell

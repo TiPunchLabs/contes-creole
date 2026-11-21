@@ -309,6 +309,18 @@
   animation: reading-bob 1.8s ease-in-out infinite;
 }
 
+/* Smartphones: the hint's arrow points left, the way the finger goes to turn the page. */
+.reading-hint.is-swipe svg {
+  transform: scaleX(-1);
+  animation-name: reading-nudge;
+}
+
+/* Smartphones: the card scrolls its long passages natively, and leaves horizontal swipes to the
+   page turn. */
+.app[data-phone] .reading-card {
+  touch-action: pan-y;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reading-hint svg {
     animation: none;
@@ -316,6 +328,16 @@
 
   .reading-card.is-changing {
     transform: none;
+  }
+}
+
+@keyframes reading-nudge {
+  0%,
+  100% {
+    transform: translateX(0) scaleX(-1);
+  }
+  50% {
+    transform: translateX(-6px) scaleX(-1);
   }
 }
 

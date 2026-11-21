@@ -104,6 +104,11 @@
   pointer-events: auto;
 }
 
+/* Smartphones: the text scrolls natively, and leaves horizontal swipes to the page turn. */
+.mila.is-phone .mila-story-scroll {
+  touch-action: pan-y;
+}
+
 /* Long pages scroll inside the veil instead of running under the controls. */
 .mila-story-scroll {
   position: relative;
