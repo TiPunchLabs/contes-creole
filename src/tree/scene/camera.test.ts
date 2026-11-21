@@ -13,8 +13,9 @@ import {
   lensShift,
   openingShot,
   openingStage,
+  ringCam,
+  ringStop,
   shortness,
-  strideStop,
   treeCam,
 } from "./camera";
 import { groundHeight } from "./ground";
@@ -46,29 +47,78 @@ describe("cardT", () => {
   });
 });
 
-describe("climbStops and strideStop", () => {
-  const stops = climbStops(3);
-
+describe("climbStops", () => {
   it("lists the opening view, then each card", () => {
-    expect(stops).toEqual([0, cardT(0, 3), cardT(1, 3), cardT(2, 3)]);
+    expect(climbStops(3)).toEqual([0, cardT(0, 3), cardT(1, 3), cardT(2, 3)]);
+  });
+});
+
+describe("ringCam", () => {
+  const stops = climbStops(3);
+  const [aspect, height] = [390 / 844, 844];
+  /** The ring's camera at `turn`: position, look-at height, lens shift and climb value. */
+  const at = (turn: number) => {
+    const out = new THREE.Vector3();
+    const look = new THREE.Vector3();
+    const shot = ringCam(turn, stops, aspect, out, look, height);
+    return { out, look, ...shot };
+  };
+
+  it("rests on the climb's own views at the opening and on each card", () => {
+    stops.forEach((t, i) => {
+      const out = new THREE.Vector3();
+      const look = new THREE.Vector3();
+      treeCam(t, aspect, out, look, height);
+      const ring = at(i);
+      expect(ring.out.distanceTo(out)).toBeLessThan(1e-9);
+      expect(ring.look.distanceTo(look)).toBeLessThan(1e-9);
+      expect(ring.t).toBeCloseTo(t, 12);
+      expect(ring.shift).toBeCloseTo(lensShift(t, aspect, height), 12);
+    });
   });
 
-  it("steps one landmark at a time, both ways", () => {
-    expect(strideStop(stops, 0, 1)).toBe(stops[1]);
-    expect(strideStop(stops, stops[1], 1)).toBe(stops[2]);
-    expect(strideStop(stops, stops[2], -1)).toBe(stops[1]);
+  it("repeats every turn, forwards and backwards, without end", () => {
+    for (const turn of [0, 1, 2.4, 3, 3.5]) {
+      for (const laps of [-7, -1, 1, 5]) {
+        const [a, b] = [at(turn), at(turn + laps * stops.length)];
+        expect(b.out.distanceTo(a.out)).toBeLessThan(1e-6);
+        expect(b.look.y).toBeCloseTo(a.look.y, 6);
+      }
+    }
   });
 
-  it("stays put at either end of the climb", () => {
-    expect(strideStop(stops, 0, -1)).toBe(0);
-    expect(strideStop(stops, stops[3], 1)).toBe(stops[3]);
-    expect(strideStop(stops, 1, 1)).toBe(1);
+  it("never jumps: a small step is a small move, across the closing of the ring too", () => {
+    const step = 0.01;
+    for (let turn = -4; turn < 4; turn += step) {
+      const [a, b] = [at(turn), at(turn + step)];
+      expect(b.out.distanceTo(a.out)).toBeLessThan(0.5);
+      expect(Math.abs(b.look.y - a.look.y)).toBeLessThan(0.2);
+      expect(Math.abs(b.shift - a.shift)).toBeLessThan(0.05);
+    }
   });
 
-  it("goes to the nearest landmark that way from in between", () => {
-    expect(strideStop(stops, 0.3, 1)).toBe(stops[2]);
-    expect(strideStop(stops, 0.3, -1)).toBe(stops[1]);
-    expect(strideStop(stops, 1, -1)).toBe(stops[3]);
+  it("keeps turning the same way round the back, above the ground, no card near", () => {
+    let angle = Math.atan2(at(3).out.z, at(3).out.x);
+    for (let f = 0.02; f <= 1; f += 0.02) {
+      const { out, t } = at(3 + f);
+      let next = Math.atan2(out.z, out.x);
+      while (next < angle - 1e-9) next += Math.PI * 2;
+      expect(next - angle).toBeLessThan(0.2);
+      angle = next;
+      expect(out.y).toBeGreaterThan(groundHeight(out.x, out.z) + 1);
+      if (f > 0.4 && f < 0.6)
+        for (const s of stops.slice(1)) expect(Math.abs(t - s)).toBeGreaterThan(0.22);
+    }
+    expect(angle - Math.atan2(at(3).out.z, at(3).out.x)).toBeLessThan(Math.PI);
+  });
+});
+
+describe("ringStop", () => {
+  it("names the landmark's position on the turn under way", () => {
+    expect(ringStop(2, 0, 4)).toBe(2);
+    expect(ringStop(2, 9, 4)).toBe(10);
+    expect(ringStop(1, -6, 4)).toBe(-7);
+    expect(ringStop(3, 0.4, 4)).toBe(-1);
   });
 });
 

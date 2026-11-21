@@ -2,7 +2,8 @@
 // touch input (CDP Input.dispatchTouchEvent): the browser's own gesture pipeline, touch-action and
 // native scroll included. No check calls a "next scene" function.
 // Usage: [SITE=url] [OUT=dir] [ONLY=home,kannot,mila,ends,text,legacy,video] [QA_CHANNEL=chrome] node qa/swipe.mjs
-//   home    phone portrait: hint, one landmark per swipe, ambiguous gestures, covers, both ends
+//   home    phone portrait: hint, the tree turning with the finger both ways and without end, one
+//           landmark per swipe, ambiguous gestures, covers, no horizontal scrollbar
 //   kannot  Ti Kannot from the home's cover: swipes against the page buttons, ends, rotation, controls
 //   mila    Mila from the home's cover, real time: the same, and swipes during a transition
 //   ends    Mila's last page and landscape phones (reduced motion, to get there quickly)
@@ -150,6 +151,8 @@ async function swipe(p, cdp, direction, options = {}) {
   const [a, b] = direction === "next" ? [0.8, 0.25] : [0.2, 0.75];
   await drag(cdp, [width * a, y], [width * b, y + 6], options);
 }
+/** On the home the tree turns with the finger: to the right the next cover comes, to the left the one before. */
+const turn = (p, cdp, to, options) => swipe(p, cdp, to === "right" ? "previous" : "next", options);
 const centre = async (locator) => {
   const box = await locator.boundingBox();
   if (!box) throw new Error("no box");
@@ -164,14 +167,19 @@ const tap = async (cdp, locator) => {
 };
 
 /* ---------- state read from the interface ---------- */
-/** The home: climb progress from the climb bar, the near card from the shelf, the hint, the open book. */
+/**
+ * The home: climb progress from the climb bar (laid out but unseen on phones), the near card from
+ * the shelf and its label's place on screen, the hint, the open book.
+ */
 const home = (p) =>
   p.evaluate(() => {
     const bar = document.querySelector(".tree-climb").getBoundingClientRect();
     const thumb = document.querySelector(".tree-climb-thumb").getBoundingClientRect();
     const hint = document.querySelector(".tree-intro-hint");
     const app = document.querySelector("#app");
+    const label = document.querySelector(".tree-book:not([hidden])")?.getBoundingClientRect();
     return {
+      labelX: label ? Math.round(label.left + label.width / 2) : null,
       t: Math.round(((thumb.top - bar.top) / (bar.height - thumb.height)) * 1000) / 1000,
       near: [...document.querySelectorAll(".tree-shelf-book")].findIndex((b) =>
         b.classList.contains("is-near"),
@@ -263,9 +271,44 @@ async function decor(p, file) {
   return p.screenshot({ clip: { x: 0, y: 70, width, height: Math.round(height * 0.3) } });
 }
 
-/** Swipes the home to the landmark of card `index` and presses its cover with a trembling finger. */
+/** Whether anything scrolls or shows a scrollbar sideways on the home, and what the shelf does. */
+const sideways = (p) =>
+  p.evaluate(() => {
+    const doc = document.documentElement;
+    const shelf = document.querySelector(".tree-shelf");
+    const wide = [...document.querySelectorAll("body *")]
+      .filter((el) => {
+        const style = getComputedStyle(el);
+        return (
+          el !== shelf &&
+          el.scrollWidth > el.clientWidth + 1 &&
+          /auto|scroll/.test(style.overflowX) &&
+          style.display !== "none"
+        );
+      })
+      .map((el) => el.className || el.tagName);
+    return {
+      page: Math.max(doc.scrollWidth, document.body.scrollWidth) - doc.clientWidth,
+      scrolled: scrollX,
+      wide,
+      shelfOverflow: shelf.scrollWidth - shelf.clientWidth,
+      shelfBar: shelf.offsetHeight - shelf.clientHeight,
+      shelfBarStyle: getComputedStyle(shelf).scrollbarWidth,
+      shelfLeft: Math.round(shelf.scrollLeft),
+      climb: getComputedStyle(document.querySelector(".tree-climb")).visibility,
+    };
+  });
+const noBar = (b) =>
+  b.page <= 0 &&
+  b.scrolled === 0 &&
+  b.wide.length === 0 &&
+  b.shelfBar === 0 &&
+  b.shelfBarStyle === "none" &&
+  b.climb === "hidden";
+
+/** Turns the home to the landmark of card `index` and presses its cover with a trembling finger. */
 async function enterByCover(p, cdp, index) {
-  for (let i = 0; i < 6 && (await settled(p)).near !== index; i++) await swipe(p, cdp, "next");
+  for (let i = 0; i < 6 && (await settled(p)).near !== index; i++) await turn(p, cdp, "right");
   await shakyTap(cdp, await centre(p.locator(".tree-book:not([hidden])")));
 }
 
@@ -284,17 +327,20 @@ async function runHome(browser) {
   check(run, "hint-invites-swipe", s.hint === "Glisse vers la gauche pour explorer", s.hint);
   await p.screenshot({ path: OUT + "home-0-hint.png" });
 
-  await swipe(p, cdp, "next");
+  let bars = await sideways(p);
+  check(run, "no-horizontal-scrollbar", noBar(bars), JSON.stringify(bars));
+
+  await turn(p, cdp, "right");
   s = await settled(p);
   check(
     run,
-    "swipe-left-reaches-first-cover",
+    "left-to-right-from-the-opening-moves-to-the-first-cover",
     s.near === 0 && Math.abs(s.t - 0.2) < 0.01,
     `t=${s.t} near=${s.near}`,
   );
   check(run, "hint-removed-after-first-navigation", s.hint === null);
   await p.screenshot({ path: OUT + "home-1-first-cover.png" });
-  await swipe(p, cdp, "next");
+  await turn(p, cdp, "right");
   s = await settled(p);
   check(
     run,
@@ -302,20 +348,54 @@ async function runHome(browser) {
     s.near === 1 && Math.abs(s.t - 0.54) < 0.01,
     `t=${s.t} near=${s.near}`,
   );
-  await swipe(p, cdp, "previous");
+  await turn(p, cdp, "left");
   s = await settled(p);
   check(
     run,
-    "swipe-right-comes-back",
+    "right-to-left-comes-back",
     s.near === 0 && Math.abs(s.t - 0.2) < 0.01,
     `t=${s.t} near=${s.near}`,
   );
 
+  // the scene follows the finger while it is down, both ways, and goes back if the finger does
   const rest = s.t;
+  await send(cdp, "touchStart", [[mid[0], height * 0.3]]);
+  for (const dx of [8, 14]) {
+    await send(cdp, "touchMove", [[mid[0] + dx, height * 0.3]]);
+    await sleep(30);
+  }
+  await sleep(700);
+  const right = await home(p);
+  for (const dx of [30, 0, -30, -60]) {
+    await send(cdp, "touchMove", [[mid[0] + dx, height * 0.3]]);
+    await sleep(30);
+  }
+  await sleep(700);
+  const left = await home(p);
+  await p.screenshot({ path: OUT + "home-2-under-the-finger.png" });
+  check(
+    run,
+    "cover-follows-the-finger-to-the-right",
+    right.labelX !== null && right.labelX > s.labelX + 10 && right.t > rest + 0.008,
+    `cover x ${s.labelX} → ${right.labelX}, t ${rest} → ${right.t}`,
+  );
+  check(
+    run,
+    "cover-follows-the-finger-to-the-left",
+    left.labelX !== null && left.labelX < s.labelX - 15 && left.t < rest - 0.03,
+    `cover x ${s.labelX} → ${left.labelX}, t ${rest} → ${left.t}`,
+  );
+  for (const dx of [-30, -10, 5]) {
+    await send(cdp, "touchMove", [[mid[0] + dx, height * 0.3]]);
+    await sleep(30);
+  }
+  await send(cdp, "touchEnd", []);
   const still = async (name) => {
     const now = await settled(p);
     check(run, name, Math.abs(now.t - rest) < 0.005 && now.book === null, `t=${now.t}`);
   };
+  await still("finger-that-comes-back-gives-the-scene-back");
+
   await drag(cdp, [mid[0], height * 0.7], [mid[0] + 10, height * 0.25]);
   await still("vertical-move-keeps-the-scene");
   await drag(cdp, [mid[0] + 80, height * 0.65], [mid[0] - 70, height * 0.4]);
@@ -324,28 +404,17 @@ async function runHome(browser) {
   await still("short-move-keeps-the-scene");
   await drag(cdp, [width * 0.8, mid[1]], [width * 0.2, mid[1]], { end: "cancel" });
   await still("cancelled-swipe-keeps-the-scene");
-  await drag(cdp, [width * 0.8, mid[1]], [width * 0.75, mid[1]], { steps: 12, ms: 300 });
   await drag2(cdp, [width * 0.8, mid[1] - 40], [width * 0.8, mid[1] + 60], [-width * 0.55, 0]);
   await still("two-finger-move-keeps-the-scene");
-  await drag(cdp, [width * 0.85, mid[1]], [width * 0.3, mid[1]], { steps: 10, ms: 500 });
-  await drag(cdp, [width * 0.3, mid[1]], [width * 0.85, mid[1]], { steps: 10, ms: 500 });
-  // out and back in one touch
-  await send(cdp, "touchStart", [[width * 0.8, mid[1]]]);
-  for (const x of [0.6, 0.4, 0.3, 0.5, 0.7, 0.78]) {
-    await send(cdp, "touchMove", [[width * x, mid[1]]]);
-    await sleep(30);
-  }
-  await send(cdp, "touchEnd", []);
-  await still("swipe-that-comes-back-keeps-the-scene");
 
-  await drag(cdp, [width * 0.95, mid[1]], [width * 0.03, mid[1] + 4], { steps: 3, ms: 30 });
+  await drag(cdp, [width * 0.03, mid[1]], [width * 0.95, mid[1] + 4], { steps: 3, ms: 30 });
   s = await settled(p);
   check(run, "fast-long-swipe-moves-one-scene", s.near === 1, `t=${s.t} near=${s.near}`);
-  await swipe(p, cdp, "previous");
+  await turn(p, cdp, "left");
   await settled(p);
 
   const cover = await centre(p.locator(".tree-book:not([hidden])"));
-  await drag(cdp, cover, [cover[0] - 190, cover[1] + 5]);
+  await drag(cdp, cover, [cover[0] + 190, cover[1] + 5]);
   s = await settled(p);
   check(
     run,
@@ -353,32 +422,62 @@ async function runHome(browser) {
     s.near === 1 && s.book === null,
     `near=${s.near} book=${s.book}`,
   );
-  await swipe(p, cdp, "previous");
-  await swipe(p, cdp, "previous");
+  await turn(p, cdp, "left");
+  await turn(p, cdp, "left");
   s = await settled(p);
-  check(run, "back-to-the-opening-view", s.t < 0.01, `t=${s.t}`);
+  check(run, "back-to-the-opening-view", s.t < 0.01 && s.near === -1, `t=${s.t} near=${s.near}`);
   check(run, "hint-stays-removed", s.hint === null);
-  await swipe(p, cdp, "previous");
-  s = await settled(p);
-  check(run, "start-of-the-climb-is-respected", s.t < 0.01, `t=${s.t}`);
-  for (let i = 0; i < 4; i++) await swipe(p, cdp, "next");
+
+  // the ring: from the opening view, to the left the tree turns round its back to the last slot
+  await turn(p, cdp, "left");
+  await p.waitForTimeout(450);
+  await p.screenshot({ path: OUT + "home-3-round-the-back.png" });
   s = await settled(p);
   check(
     run,
-    "end-of-the-climb-is-respected",
-    Math.abs(s.t - 0.88) < 0.01 && s.path === "/",
+    "right-to-left-from-the-opening-moves-too",
+    s.near === 2 && Math.abs(s.t - 0.88) < 0.01 && s.path === "/",
     `t=${s.t} near=${s.near} path=${s.path}`,
   );
-  await swipe(p, cdp, "previous");
-  await swipe(p, cdp, "previous");
+  await turn(p, cdp, "right");
   s = await settled(p);
-  check(run, "back-on-the-first-cover", s.near === 0, `near=${s.near}`);
+  check(run, "and-back-to-the-opening-view", s.t < 0.01 && s.near === -1, `t=${s.t}`);
 
-  // the shelf keeps its own horizontal scroll and its taps
+  // several full turns each way: opening view, then the three slots, again and again
+  const lap = async (to, count) => {
+    const seen = [];
+    for (let i = 0; i < count; i++) {
+      await turn(p, cdp, to);
+      seen.push((await settled(p)).near);
+    }
+    return seen.join(" ");
+  };
+  let seen = await lap("right", 9);
+  check(run, "two-full-turns-to-the-right-and-on", seen === "0 1 2 -1 0 1 2 -1 0", seen);
+  seen = await lap("left", 13);
+  check(run, "three-full-turns-to-the-left-and-on", seen === "-1 2 1 0 -1 2 1 0 -1 2 1 0 -1", seen);
+  s = await settled(p);
+  check(run, "the-turns-end-on-the-opening-view", s.t < 0.01 && s.book === null, `t=${s.t}`);
+  bars = await sideways(p);
+  check(run, "still-no-horizontal-scrollbar", noBar(bars), JSON.stringify(bars));
+
+  // the shelf keeps its own horizontal scroll (without a scrollbar) and its taps
+  const shelf = await p.locator(".tree-shelf").boundingBox();
+  const sy = shelf.y + shelf.height / 2;
+  await drag(cdp, [shelf.x + shelf.width * 0.8, sy], [shelf.x + shelf.width * 0.2, sy]);
+  await p.waitForTimeout(600);
+  bars = await sideways(p);
+  s = await settled(p);
+  check(
+    run,
+    "shelf-scrolls-under-the-finger-and-keeps-the-scene",
+    bars.shelfOverflow > 0 && bars.shelfLeft > 0 && s.t < 0.01,
+    `overflow ${bars.shelfOverflow}px, scrolled ${bars.shelfLeft}px, t=${s.t}`,
+  );
   await tap(cdp, p.locator(".tree-shelf-book").nth(1));
   s = await settled(p);
-  check(run, "shelf-still-climbs-to-a-book", s.near === 1, `near=${s.near}`);
-  await swipe(p, cdp, "previous");
+  check(run, "shelf-still-turns-to-a-book", s.near === 1, `near=${s.near}`);
+  await turn(p, cdp, "left");
   await settled(p);
 
   await shakyTap(cdp, await centre(p.locator(".tree-book:not([hidden])")));
@@ -539,7 +638,7 @@ async function runKannot(browser) {
   await p.waitForTimeout(2500);
   let s = await settled(p);
   check(run, "back-control-returns-to-the-tree", s.book === null && s.near === 0, `near=${s.near}`);
-  await swipe(p, cdp, "next");
+  await turn(p, cdp, "right");
   s = await settled(p);
   check(run, "home-swipe-works-after-the-return", s.near === 1, `near=${s.near}`);
   check(run, "no-console-error", errors.length === 0, errors.join(" | "));
@@ -662,16 +761,31 @@ async function runEnds(browser) {
     s.hint,
   );
   await p.screenshot({ path: OUT + "home-landscape-hint.png" });
-  await swipe(p, cdp, "next");
+  const bars = await sideways(p);
+  check(run, "landscape-no-horizontal-scrollbar", noBar(bars), JSON.stringify(bars));
+  await turn(p, cdp, "right");
   s = await settled(p);
-  check(run, "landscape-home-swipe-left", s.near === 0, `t=${s.t} near=${s.near}`);
-  await swipe(p, cdp, "next");
+  check(run, "landscape-home-left-to-right", s.near === 0, `t=${s.t} near=${s.near}`);
+  await turn(p, cdp, "right");
   s = await settled(p);
   check(run, "landscape-home-second-swipe", s.near === 1, `t=${s.t} near=${s.near}`);
-  await swipe(p, cdp, "previous");
+  await turn(p, cdp, "left");
   s = await settled(p);
-  check(run, "landscape-home-swipe-right", s.near === 0, `t=${s.t} near=${s.near}`);
-  await swipe(p, cdp, "next");
+  check(run, "landscape-home-right-to-left", s.near === 0, `t=${s.t} near=${s.near}`);
+  const seen = [];
+  for (const to of ["left", "left", "left", "left", "left", "right", "right", "right", "right"]) {
+    await turn(p, cdp, to);
+    seen.push((await settled(p)).near);
+  }
+  check(
+    run,
+    "landscape-full-turn-each-way",
+    seen.join(" ") === "-1 2 1 0 -1 0 1 2 -1",
+    seen.join(" "),
+  );
+  await p.screenshot({ path: OUT + "home-landscape-after-turns.png" });
+  await turn(p, cdp, "right");
+  await turn(p, cdp, "right");
   await settled(p);
   await shakyTap(cdp, await centre(p.locator(".tree-book:not([hidden])")));
   let m = await milaArrived(p, 40000);
@@ -972,12 +1086,10 @@ async function runVideo(browser) {
     recordVideo: { dir: OUT + "video/", size: { width: 390, height: 844 } },
   });
   await p.waitForTimeout(1000);
-  await swipe(p, cdp, "next", { ms: 320 });
-  await settled(p);
-  await swipe(p, cdp, "next", { ms: 320 });
-  await settled(p);
-  await swipe(p, cdp, "previous", { ms: 320 });
-  await settled(p);
+  for (const to of ["left", "left", "left", "left", "right", "right", "left"]) {
+    await turn(p, cdp, to, { ms: 320 });
+    await settled(p);
+  }
   await shakyTap(cdp, await centre(p.locator(".tree-book:not([hidden])")));
   await p.waitForSelector(".reading:not([hidden])", { timeout: 20000 });
   await p.waitForTimeout(4500);
@@ -990,7 +1102,7 @@ async function runVideo(browser) {
     timeout: 15000,
   });
   await p.waitForTimeout(3000);
-  await swipe(p, cdp, "next", { ms: 320 });
+  await turn(p, cdp, "right", { ms: 320 });
   await settled(p);
   await shakyTap(cdp, await centre(p.locator(".tree-book:not([hidden])")));
   await milaArrived(p, 40000);

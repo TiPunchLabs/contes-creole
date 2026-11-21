@@ -172,7 +172,14 @@ describe("bindSwipe", () => {
     const el = document.createElement("div");
     const button = document.createElement("button");
     el.append(button);
-    const handlers = { ignore, onSwipe: vi.fn(), onTap: vi.fn(), onVertical: vi.fn() };
+    const handlers = {
+      ignore,
+      onSwipe: vi.fn(),
+      onTap: vi.fn(),
+      onVertical: vi.fn(),
+      onDrag: vi.fn(),
+      onDrop: vi.fn(),
+    };
     const unbind = bindSwipe(el, handlers);
     return { el, button, handlers, unbind };
   }
@@ -222,5 +229,55 @@ describe("bindSwipe", () => {
     fire(el, "pointermove", 150, 400);
     fire(el, "pointerup", 150, 400);
     expect(handlers.onSwipe).not.toHaveBeenCalled();
+  });
+
+  it("reports the sideways travel while the finger moves, both ways, then the swipe", () => {
+    const { el, handlers } = setup();
+    fire(el, "pointerdown", 100, 400);
+    fire(el, "pointermove", 160, 402);
+    fire(el, "pointermove", 220, 404);
+    expect(handlers.onDrag.mock.calls).toEqual([[60], [120]]);
+    fire(el, "pointerup", 220, 404);
+    expect(handlers.onSwipe).toHaveBeenCalledExactlyOnceWith(-1);
+    expect(handlers.onDrop).not.toHaveBeenCalled();
+    fire(el, "pointerdown", 300, 400);
+    fire(el, "pointermove", 200, 400);
+    expect(handlers.onDrag).toHaveBeenLastCalledWith(-100);
+  });
+
+  it("drops a sideways touch that comes back, is cancelled or meets a second finger", () => {
+    const { el, handlers } = setup();
+    fire(el, "pointerdown", 300, 400);
+    fire(el, "pointermove", 200, 400);
+    fire(el, "pointermove", 290, 400);
+    fire(el, "pointerup", 290, 400);
+    expect(handlers.onDrop).toHaveBeenCalledTimes(1);
+    fire(el, "pointerdown", 300, 400);
+    fire(el, "pointermove", 200, 400);
+    fire(el, "pointercancel", 200, 400);
+    expect(handlers.onDrop).toHaveBeenCalledTimes(2);
+    fire(el, "pointerdown", 300, 400);
+    fire(el, "pointermove", 200, 400);
+    el.dispatchEvent(
+      new PointerEvent("pointerdown", { bubbles: true, pointerId: 2, pointerType: "touch" }),
+    );
+    expect(handlers.onDrop).toHaveBeenCalledTimes(3);
+    handlers.onDrag.mockClear();
+    fire(el, "pointermove", 100, 400);
+    fire(el, "pointerup", 100, 400);
+    expect(handlers.onDrag).not.toHaveBeenCalled();
+    expect(handlers.onSwipe).not.toHaveBeenCalled();
+  });
+
+  it("reports no sideways travel for a tap or a vertical move", () => {
+    const { el, handlers } = setup();
+    fire(el, "pointerdown", 300, 400);
+    fire(el, "pointermove", 304, 403);
+    fire(el, "pointerup", 304, 403);
+    fire(el, "pointerdown", 300, 400);
+    fire(el, "pointermove", 305, 300);
+    fire(el, "pointerup", 305, 300);
+    expect(handlers.onDrag).not.toHaveBeenCalled();
+    expect(handlers.onDrop).not.toHaveBeenCalled();
   });
 });

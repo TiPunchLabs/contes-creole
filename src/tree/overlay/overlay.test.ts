@@ -126,4 +126,9 @@ describe("navigation hint", () => {
     overlay.dismissHint();
     expect(hint(container).hidden).toBe(true);
   });
+
+  it("marks the HUD of smartphones, whose climb bar and shelf scrollbar are styled away", () => {
+    expect(mount(true).container.querySelector(".tree-overlay.is-phone")).not.toBeNull();
+    expect(mount().container.querySelector(".tree-overlay.is-phone")).toBeNull();
+  });
 });

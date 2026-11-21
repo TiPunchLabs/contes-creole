@@ -13,17 +13,6 @@ export const climbStops = (count: number): number[] => [
   ...Array.from({ length: count }, (_, i) => cardT(i, count)),
 ];
 
-/**
- * The landmark one step after (1) or before (-1) climb progress `t`; `t` itself at either end.
- * Between two landmarks (after a wheel or a shelf move) the step goes to the nearest one that way.
- */
-export function strideStop(stops: readonly number[], t: number, direction: 1 | -1): number {
-  const eps = 1e-3;
-  const ahead =
-    direction > 0 ? stops.filter((s) => s > t + eps) : stops.filter((s) => s < t - eps).reverse();
-  return ahead[0] ?? t;
-}
-
 /** A point that can be written to: a three.js vector, or the solver's own. */
 export interface Spot {
   x: number;
@@ -403,6 +392,66 @@ export function treeCam(t: number, aspect: number, out: Spot, look: Spot, height
   const a = stagedCam(t, aspect, out, look, height);
   look.y = out.y + Math.tan(climbPitch(t, aspect, height)) * Math.hypot(out.x, out.z);
   return a;
+}
+
+/** What the ring shows at a position: the lens shift, and the climb value the cards and HUD read. */
+export interface RingShot {
+  shift: number;
+  /** Climb value of the view; beyond [0, 1] on the way round the back, far from every card. */
+  t: number;
+}
+
+/**
+ * The camera of the tree on a smartphone: the climb closed into a ring, so the visitor turns about
+ * the tree without end, either way. `turn` counts landmarks (`climbStops`): whole numbers rest on
+ * the opening view (0) and on each card, and the ring repeats every `stops.length`. Between two
+ * landmarks the camera is on the climb's own path (`treeCam`); after the last card it keeps turning
+ * the same way round the back of the tree, coming down to the opening view. Same outputs as
+ * `treeCam`, plus the lens shift.
+ */
+export function ringCam(
+  turn: number,
+  stops: readonly number[],
+  aspect: number,
+  out: Spot,
+  look: Spot,
+  height = 900,
+): RingShot {
+  const n = stops.length;
+  const at = ((turn % n) + n) % n;
+  const i = Math.floor(at);
+  const f = at - i;
+  if (i < n - 1) {
+    const t = lerp(stops[i], stops[i + 1], f);
+    treeCam(t, aspect, out, look, height);
+    return { shift: lensShift(t, aspect, height), t };
+  }
+  const last = stops[n - 1];
+  treeCam(0, aspect, out, look, height);
+  const to = { a: Math.atan2(out.z, out.x), r: Math.hypot(out.x, out.z), y: out.y, look: look.y };
+  treeCam(last, aspect, out, look, height);
+  const from = { a: Math.atan2(out.z, out.x), r: Math.hypot(out.x, out.z) };
+  while (to.a <= from.a) to.a += Math.PI * 2;
+  const a = lerp(from.a, to.a, f);
+  const r = lerp(from.r, to.r, f);
+  out.set(Math.cos(a) * r, lerp(out.y, to.y, f), Math.sin(a) * r);
+  look.set(0, lerp(look.y, to.look, f), 0);
+  return {
+    shift: lerp(lensShift(last, aspect, height), lensShift(0, aspect, height), f),
+    // No card is near on the way: past the last one, then short of the opening view.
+    t: f < 0.5 ? last + f * RING_AWAY : (f - 1) * RING_AWAY,
+  };
+}
+
+/** Climb value given to half the way round the back: over a card's reach (0.22) from each end. */
+const RING_AWAY = 0.6;
+
+/**
+ * The ring position of landmark `stop` (0 the opening view, then the cards) nearest to `turn`, so
+ * going there never unwinds the turns already made.
+ */
+export function ringStop(stop: number, turn: number, count: number): number {
+  return stop + count * Math.round((turn - stop) / count);
 }
 
 /**

@@ -90,11 +90,19 @@ Isolation is enforced by ESLint `no-restricted-imports`: universes import only t
 Wheel, keyboard and vertical finger drags drive the tree's climb and the tales' pages on computers
 and tablets. On a smartphone (`isPhone()` in `src/shared/gesture.ts`: a touch screen whose short side
 is under 600 CSS px; never the window's width) the same
-progress answers horizontal swipes instead: right to left is one scene forward, left to right one
-back, and a mostly vertical move only scrolls a long passage. `bindSwipe()` reads the touches for
-the three places that own progress: the tree (`src/tree/index.ts`, one landmark of `climbStops()`
-per swipe), the shell for books with a `world` (`src/app/app.ts`, `goPage`), and Mila's own reading
-interface (`src/books/mila/world/index.ts`, `go`). `qa/swipe.mjs` drives them with real touch input.
+progress answers horizontal touches instead, and a mostly vertical move only scrolls a long passage.
+`bindSwipe()` reads the touches for the three places that own progress:
+
+- the tree (`src/tree/index.ts`): the climb is closed into a ring (`ringCam()` in
+  `src/tree/scene/camera.ts`: the climb's own path between the opening view and the last card, then
+  round the back of the tree down to the opening view). The scene follows the finger while it is
+  down, and a swipe rests on the next landmark that way, one per gesture, without end either way.
+  The climb bar is unseen there and the shelf has no scrollbar;
+- the shell for books with a `world` (`src/app/app.ts`, `goPage`) and Mila's own reading interface
+  (`src/books/mila/world/index.ts`, `go`): right to left is one page forward, left to right one
+  back, within the tale's first and last page.
+
+`qa/swipe.mjs` drives them with real touch input.
 
 ### Books with their own reading interface (Mila)
 

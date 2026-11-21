@@ -41,6 +41,8 @@ export interface SwipeTracker {
   down(id: number, x: number, y: number, now: number, primary: boolean): void;
   /** A finger moves; returns the vertical travel (finger up > 0) of a mostly vertical gesture, else 0. */
   move(id: number, x: number, y: number): number;
+  /** Horizontal travel (finger to the right > 0) of a mostly horizontal gesture under way, else null. */
+  sideways(): number | null;
   /** A finger lifts; names the gesture it ends: one scene at most, whatever its length or speed. */
   up(id: number, now: number): Gesture;
   /** The browser took the touch over (native scroll, system gesture). */
@@ -85,6 +87,9 @@ export function createSwipeTracker(): SwipeTracker {
       }
       return touch.axis === "y" ? lastY - y : 0;
     },
+    sideways() {
+      return touch?.axis === "x" && !voided ? touch.x - touch.x0 : null;
+    },
     up(id, now) {
       if (!touch || touch.id !== id) return null;
       const { x0, y0, x, y, t0, axis } = touch;
@@ -109,26 +114,48 @@ export interface SwipeHandlers {
   onTap?(e: PointerEvent): void;
   /** Vertical travel of a mostly vertical touch (finger up > 0): scrolls a text, never the scenes. */
   onVertical?(dy: number, e: PointerEvent): void;
+  /** Horizontal travel since the press (finger to the right > 0) of a touch that may end as a swipe. */
+  onDrag?(dx: number): void;
+  /** A touch reported by `onDrag` ended without a swipe (came back, cancelled, second finger). */
+  onDrop?(): void;
 }
 
 /** Listens to the touches on `el` and reports them as taps, swipes and vertical moves; returns the unbinder. */
 export function bindSwipe(el: HTMLElement, handlers: SwipeHandlers): () => void {
   const tracker = createSwipeTracker();
+  let dragging = false;
+  const drop = (): void => {
+    if (dragging) handlers.onDrop?.();
+    dragging = false;
+  };
   const onDown = (e: PointerEvent): void => {
     if (e.pointerType === "mouse") return;
+    drop();
     if (e.isPrimary && handlers.ignore?.(e.target)) tracker.cancel(e.pointerId);
     else tracker.down(e.pointerId, e.clientX, e.clientY, e.timeStamp, e.isPrimary);
   };
   const onMove = (e: PointerEvent): void => {
     const dy = tracker.move(e.pointerId, e.clientX, e.clientY);
     if (dy !== 0) handlers.onVertical?.(dy, e);
+    const dx = tracker.sideways();
+    if (dx === null || !handlers.onDrag) return;
+    dragging = true;
+    handlers.onDrag(dx);
   };
   const onUp = (e: PointerEvent): void => {
     const gesture = tracker.up(e.pointerId, e.timeStamp);
+    if (gesture === "next" || gesture === "previous") {
+      dragging = false;
+      handlers.onSwipe(gesture === "next" ? 1 : -1);
+      return;
+    }
+    drop();
     if (gesture === "tap") handlers.onTap?.(e);
-    else if (gesture) handlers.onSwipe(gesture === "next" ? 1 : -1);
   };
-  const onCancel = (e: PointerEvent): void => tracker.cancel(e.pointerId);
+  const onCancel = (e: PointerEvent): void => {
+    tracker.cancel(e.pointerId);
+    drop();
+  };
   el.addEventListener("pointerdown", onDown);
   el.addEventListener("pointermove", onMove);
   el.addEventListener("pointerup", onUp);

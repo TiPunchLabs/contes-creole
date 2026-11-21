@@ -77,8 +77,8 @@ function place(el: HTMLElement, box: Box): void {
  * Tree HUD: intro column with the site title, climb bar, shelf, and two keyboard entry points laid
  * over the scene: the near card (a book's tale, or the classes page for the invitation) and the
  * storyteller (a tale at random). Pointers keep hitting the 3D scene: these entry points let them
- * through and only take the focus. `swipe`: the intro's hint invites a swipe to the left
- * (smartphones) instead of scrolling.
+ * through and only take the focus. `swipe` (smartphones): the intro's hint invites a swipe to the
+ * left instead of scrolling, the climb bar is unseen and the shelf has no scrollbar.
  */
 export function createTreeOverlay(
   container: HTMLElement,
@@ -104,7 +104,7 @@ export function createTreeOverlay(
   dispose(): void;
 } {
   const el = document.createElement("div");
-  el.className = "tree-overlay";
+  el.className = handlers.swipe ? "tree-overlay is-phone" : "tree-overlay";
   el.innerHTML = `
     <div class="tree-intro"><div class="tree-intro-inner">
       <h1 class="tree-intro-title" lang="gcf">Pyébwa a Konesans</h1>

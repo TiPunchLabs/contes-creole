@@ -191,6 +191,22 @@
   touch-action: pan-x;
 }
 
+/*
+ * Smartphones: the tree turns without end, so the climb bar has no start or end to show (kept in
+ * the layout, unseen), and the shelf scrolls under the finger without a scrollbar across the screen.
+ */
+.tree-overlay.is-phone .tree-climb {
+  visibility: hidden;
+}
+
+.tree-overlay.is-phone .tree-shelf {
+  scrollbar-width: none;
+}
+
+.tree-overlay.is-phone .tree-shelf::-webkit-scrollbar {
+  display: none;
+}
+
 .tree-shelf-label {
   font: 800 15px/1 var(--font-brand);
   color: var(--tree-ink-soft);
