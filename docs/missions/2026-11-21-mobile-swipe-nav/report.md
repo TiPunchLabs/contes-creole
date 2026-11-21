@@ -33,7 +33,7 @@ Verification (same method as section 3: Chrome 158 headless on the NVIDIA GPU, r
 - Desktop, narrow desktop window and tablet against the base `c5c6f0c` (`fb1-legacy/legacy.json` against `legacy-base/legacy.json`): the same single difference as before this round (desktop `homeKeyUp` 0.089 against 0.088); everything else identical.
 - Unit tests: 438 pass (432 before): the ring rests exactly on the climb's views at each landmark, repeats every turn both ways, never jumps (the closing included), stays above the ground behind the tree; drag and drop reporting of `bindSwipe`.
 - Local checks on `a5ef0a8`: format, lint, typecheck, tests, build: all pass.
-- CI on `cc48f4f` (previous HEAD): `quality` pass, Netlify preview pass. CI on the new HEAD: see section 5 note below.
+- CI on `cc48f4f` (previous HEAD): `quality` pass, Netlify preview pass. CI and the Deploy Preview on the new HEAD were still pending when this was written; their result is NOT_VERIFIED.
 - NOT_VERIFIED: a real phone; Safari / WebKit; the feel of the rotation judged by a person. The video of the first delivery was not re-recorded.
 
 Limits and things to know:
