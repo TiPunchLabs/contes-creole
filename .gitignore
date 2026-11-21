@@ -43,3 +43,6 @@ qa/out/
 
 # Python bytecode of the QA scripts
 __pycache__/
+
+# Blender backup saves
+*.blend1

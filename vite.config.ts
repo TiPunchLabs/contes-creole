@@ -5,6 +5,8 @@ import { defineConfig } from "vitest/config";
 const dir = (path: string): string => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
+  // Binary glTF models (src/tree/assets): served as files, or inlined with `?inline` in tests.
+  assetsInclude: ["**/*.glb"],
   build: {
     rolldownOptions: {
       // Two pages: the tree app, and "Les contes des classes" (a static page, no Three.js).

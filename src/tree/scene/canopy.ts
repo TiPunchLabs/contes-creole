@@ -273,6 +273,27 @@ vec3 treeWind(vec3 p) {
   return d;
 }`;
 
+/**
+ * The same wind on the CPU: where the point `p` of the tree (in its own frame) stands now, written
+ * into `out`. Keep in step with `FIELD`; it lets a thread follow the twig it hangs from.
+ */
+export function treeWindAt(p: THREE.Vector3, out: THREE.Vector3): THREE.Vector3 {
+  const time = SWAY_TIME.value;
+  const h = Math.max(0, p.y - 3.2);
+  const r2 = p.x * p.x + p.z * p.z;
+  const ph = p.x * 0.23 + p.z * 0.17;
+  const gust = 0.7 + 0.32 * Math.sin(time * 0.23 + ph * 0.5) + 0.2 * Math.sin(time * 0.11 + 2.1);
+  const bend = (0.0008 * h * h + 0.0015 * r2) * gust;
+  const s1 = Math.sin(time * 0.9 + ph);
+  const s2 = Math.sin(time * 1.55 + ph * 1.7 + 1.3);
+  const rustle = RUSTLE.value * bend * 0.5;
+  return out.set(
+    p.x + (0.8 * s1 + 0.3 * s2) * bend + rustle * Math.sin(time * 7 + ph * 3),
+    p.y - 0.3 * s2 * bend,
+    p.z + (0.45 * s2 + 0.2 * s1) * bend + rustle * Math.cos(time * 6 + ph * 2),
+  );
+}
+
 /** Bends the bark with the tree's wind (`FIELD`). */
 export function withTreeWind<T extends THREE.Material>(material: T): T {
   patchShader(material, "tree-wind", (shader) => {

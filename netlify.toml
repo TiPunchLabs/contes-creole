@@ -6,6 +6,11 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# Deploy previews (pull requests) carry the flamboyant silhouette review switch (`?tree=a|b`,
+# src/tree/preview); production builds do not.
+[context.deploy-preview.environment]
+  VITE_TREE_PREVIEW = "1"
+
 # Vite emits content-hashed file names under /assets: safe to cache forever.
 [[headers]]
   for = "/assets/*"

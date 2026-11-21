@@ -8,6 +8,8 @@ import { createStage, fitFov, type Stage } from "@shared/three/stage";
 import { CLASSES_PAGE, RETURN_HASH, isInvitation, treeSlots } from "./invitation";
 import { detectLite, readLiteEnv, scaleCount } from "./lite";
 import { createTreeOverlay, type TellerBox } from "./overlay/overlay";
+import { readTreeChoice } from "./preview/choice";
+import type { TreePreview } from "./preview";
 import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { RANDOM_TALE_ACTION, RANDOM_TALE_NONE, eligibleTales, pickRandomTale } from "./random-tale";
 import { cardT, konteurSpot, lensShift, openingStage, shiftLens, treeCam } from "./scene/camera";
@@ -173,6 +175,25 @@ function buildTree(
   const ray = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
   const pickable = [...cards.planes, konteur.plane, views.lapen.group, views.zanba.group];
+  // Silhouette review (`?tree=`, never in production): the published tree is always built above,
+  // so the scenery's random draws are the same whichever tree is shown.
+  let preview: TreePreview | null = null;
+  let disposed = false;
+  // The build flag is tested here, in full, so a production build drops the import below and with
+  // it the loader and the models.
+  const choice =
+    import.meta.env.DEV || import.meta.env.VITE_TREE_PREVIEW === "1"
+      ? readTreeChoice(location.search, true)
+      : null;
+  if (choice) {
+    void import("./preview").then((m) => {
+      if (disposed) return;
+      preview = m.mountTreePreview(
+        { container, scene, current: tree, hang: (tips) => cards.hang(tips) },
+        choice,
+      );
+    });
+  }
 
   const climb = (dy: number): void => {
     target = clamp(target + dy * 0.00055, 0, 1);
@@ -397,6 +418,7 @@ function buildTree(
     landscape.update(decor);
     sky.update(decor, camera.position);
     tree.update(decor, !calm && (hover !== null || near >= 0));
+    preview?.update();
     konteur.update(decor, camera.position, (tellerHovered || tellerFocused) && !diving);
     stepCritters(critters, dt, camera.position, obstacles, critterRng, onStage, calm);
     for (const c of critters) views[c.name].pose(c, time, around[c.name]);
@@ -470,6 +492,8 @@ function buildTree(
       stage.start(frame);
     },
     dispose() {
+      disposed = true;
+      preview?.dispose();
       setSpeaker(null);
       clearTimeout(holdTimer);
       container.removeEventListener("wheel", onWheel);

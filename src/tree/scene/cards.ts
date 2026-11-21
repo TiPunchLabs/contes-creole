@@ -26,6 +26,11 @@ export interface Cards {
   group: THREE.Group;
   planes: THREE.Mesh[];
   position(index: number): THREE.Vector3;
+  /**
+   * Hangs every thread from the nearest of `tips`. The points are kept, not copied: moving one
+   * (a twig in the wind) moves its thread's top on the next update.
+   */
+  hang(tips: readonly THREE.Vector3[]): void;
   update(
     time: number,
     t: number,
@@ -142,6 +147,20 @@ function haloTexture(): THREE.CanvasTexture {
 
 const CARD_SCALE = 1.18;
 
+/** The point of `tips` closest to `to`. */
+function nearest(tips: readonly THREE.Vector3[], to: THREE.Vector3): THREE.Vector3 {
+  let tip = tips[0];
+  let best = Infinity;
+  for (const candidate of tips) {
+    const d = candidate.distanceTo(to);
+    if (d < best) {
+      best = d;
+      tip = candidate;
+    }
+  }
+  return tip;
+}
+
 /** Book cards hanging from the branches on the camera spiral, with a thread to the nearest tip. */
 export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards {
   const group = new THREE.Group();
@@ -178,15 +197,7 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
     );
     halo.position.z = -0.02;
     g.add(halo, back, plane);
-    let tip = tips[0];
-    let best = Infinity;
-    for (const candidate of tips) {
-      const d = candidate.distanceTo(g.position);
-      if (d < best) {
-        best = d;
-        tip = candidate;
-      }
-    }
+    const tip = nearest(tips, g.position);
     const line = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints([
         tip,
@@ -195,7 +206,7 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
       threadMat,
     );
     group.add(g, line);
-    return { g, plane, halo, line, t, hover: 0 };
+    return { g, plane, halo, line, t, hover: 0, tip };
   });
   const below = new THREE.Vector3();
 
@@ -203,6 +214,9 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
     group,
     planes: cards.map((c) => c.plane),
     position: (index) => cards[index].g.position,
+    hang(points) {
+      for (const c of cards) c.tip = nearest(points, c.g.position);
+    },
     update(time, t, hover, cameraPosition, project) {
       return cards.map((c, i) => {
         c.g.lookAt(cameraPosition);
@@ -215,6 +229,7 @@ export function createCards(books: BookManifest[], tips: THREE.Vector3[]): Cards
         c.halo.material.opacity = 0.2 + near * 0.35 + c.hover * 0.35;
         c.g.rotation.z += Math.sin(time * 5) * 0.03 * c.hover;
         const thread = c.line.geometry.attributes.position;
+        thread.setXYZ(0, c.tip.x, c.tip.y, c.tip.z);
         thread.setXYZ(1, c.g.position.x, c.g.position.y + 1.05 * scale, c.g.position.z);
         thread.needsUpdate = true;
         below.copy(c.g.position);
