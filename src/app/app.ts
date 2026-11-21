@@ -15,6 +15,7 @@ import { showFallback } from "./fallback";
 import { createLanguagePanel } from "./language-panel/language-panel";
 import { readingLangs, storyFor, type ReadingLang } from "./languages";
 import { showNotice } from "./notice";
+import { bindSwipe, isPhone } from "@shared/gesture";
 import { clampPage, createPager } from "@shared/paging";
 import { createReadingUI } from "./reading-ui/reading-ui";
 import { createFlash } from "./transition";
@@ -62,12 +63,19 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   const bookLayer = addLayer("app-book");
   bookLayer.hidden = true;
   createBackdrop(root);
-  const reading = createReadingUI(root, {
-    onPage: (index) => goPage(index),
-    onLang: (lang) => setLang(lang),
-    onBack: () => void leave(),
-    onToggleText: () => toggleText(),
-  });
+  /** On a smartphone the pages turn with horizontal swipes; a vertical move only scrolls a text. */
+  const phone = isPhone();
+  root.toggleAttribute("data-phone", phone);
+  const reading = createReadingUI(
+    root,
+    {
+      onPage: (index) => goPage(index),
+      onLang: (lang) => setLang(lang),
+      onBack: () => void leave(),
+      onToggleText: () => toggleText(),
+    },
+    { swipe: phone },
+  );
   const panel = createLanguagePanel(root);
   const bubble = createBubble(root);
   const flash = createFlash(root);
@@ -337,7 +345,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     step(e.deltaY);
   };
   const onPointerDown = (e: PointerEvent): void => {
-    touchY = e.pointerType === "mouse" ? null : e.clientY;
+    touchY = e.pointerType === "mouse" || phone ? null : e.clientY;
     swipeScrolled = false;
   };
   const onPointerMove = (e: PointerEvent): void => {
@@ -382,6 +390,21 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   root.addEventListener("pointermove", onPointerMove);
   root.addEventListener("pointerup", onPointerUp);
   window.addEventListener("keydown", onKey);
+  const unbindSwipe = phone
+    ? bindSwipe(root, {
+        ignore: (target) =>
+          mode !== "book" ||
+          !book ||
+          panel.isOpen ||
+          (target instanceof Element && target.closest("button, a") !== null),
+        onSwipe: (direction) => goPage(page + direction),
+        // Where the card does not scroll by itself (no native pan), the finger scrolls it.
+        onVertical: (dy, e) => {
+          const card = scrollableCard(e.target, dy);
+          if (card) card.scrollTop += dy;
+        },
+      })
+    : null;
   mountTree(1);
 
   return {
@@ -392,6 +415,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       root.removeEventListener("pointermove", onPointerMove);
       root.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKey);
+      unbindSwipe?.();
       book?.handle.dispose();
       immersive?.handle.dispose();
       tree?.dispose();

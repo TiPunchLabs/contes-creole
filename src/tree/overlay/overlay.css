@@ -108,6 +108,11 @@
   animation: tree-bob 1.8s ease-in-out infinite;
 }
 
+/* Smartphones: the arrow slides left, the way the finger goes. */
+.tree-intro-hint.is-swipe svg {
+  animation-name: tree-nudge;
+}
+
 /*
  * Keyboard entry points over the scene (near card, storyteller): transparent, they let the pointer
  * through to the 3D scene and only show the focus ring, rounded like the card.
@@ -443,6 +448,16 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes tree-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-6px);
   }
 }
 

@@ -2,6 +2,7 @@ import "./fonts";
 import "./overlay/overlay.css";
 import * as THREE from "three";
 import type { BubbleSegment, MountTree, TreeContext, TreeHandle } from "@app/contract";
+import { bindSwipe, isPhone } from "@shared/gesture";
 import { clamp, lerp, smoothstep } from "@shared/math";
 import { createRng } from "@shared/random";
 import { createStage, fitFov, type Stage } from "@shared/three/stage";
@@ -10,7 +11,16 @@ import { detectLite, readLiteEnv, scaleCount } from "./lite";
 import { createTreeOverlay, type TellerBox } from "./overlay/overlay";
 import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { RANDOM_TALE_ACTION, RANDOM_TALE_NONE, eligibleTales, pickRandomTale } from "./random-tale";
-import { cardT, konteurSpot, lensShift, openingStage, shiftLens, treeCam } from "./scene/camera";
+import {
+  cardT,
+  climbStops,
+  konteurSpot,
+  lensShift,
+  openingStage,
+  shiftLens,
+  strideStop,
+  treeCam,
+} from "./scene/camera";
 import { createCards, type CardView } from "./scene/cards";
 import { createLapen } from "./scene/critters/lapen";
 import type { CritterView, Surroundings } from "./scene/critters/parts";
@@ -177,6 +187,15 @@ function buildTree(
   const climb = (dy: number): void => {
     target = clamp(target + dy * 0.00055, 0, 1);
   };
+  /** On a smartphone a horizontal swipe walks the climb one landmark at a time. */
+  const phone = isPhone();
+  const stops = climbStops(slots.length);
+  const stride = (direction: 1 | -1): void => {
+    const next = strideStop(stops, target, direction);
+    if (next === target) return;
+    target = next;
+    overlay.dismissHint();
+  };
   /** Leaves a quiet tree (no hovered card, no bubble) for the classes page. */
   const invite = (): void => {
     hover = null;
@@ -218,6 +237,7 @@ function buildTree(
     else target = cardT(index, slots.length);
   };
   const overlay = createTreeOverlay(container, slots, {
+    swipe: phone,
     onEnter: ctx.onEnter,
     onShelf,
     onCardFocus: (focused) => {
@@ -302,6 +322,7 @@ function buildTree(
   const onPointerMove = (e: PointerEvent): void => {
     Object.assign(pointer, stage.pointer(e));
     if (!active || diving) return;
+    if (phone && e.pointerType !== "mouse") return;
     if (down && e.pointerType !== "mouse") {
       const dy = down.y - e.clientY;
       down.y = e.clientY;
@@ -322,7 +343,12 @@ function buildTree(
     const d = down;
     down = null;
     if (!d || !active || diving) return;
+    if (phone && e.pointerType !== "mouse") return;
     if (d.moved > TAP_DISTANCE || performance.now() - d.t > TAP_MS) return;
+    tap(e);
+  };
+  /** A press on the scene: opens a card, asks the storyteller for a tale, or makes a critter speak. */
+  const tap = (e: PointerEvent): void => {
     Object.assign(pointer, stage.pointer(e));
     const p = pick();
     if (p?.type === "card") enter(p.index);
@@ -439,6 +465,16 @@ function buildTree(
   container.addEventListener("pointerup", onPointerUp);
   window.addEventListener("keydown", onKey);
   motion?.addEventListener("change", onMotion);
+  const unbindSwipe = phone
+    ? bindSwipe(container, {
+        ignore: (target) =>
+          !active ||
+          diving !== null ||
+          (target instanceof Element && target.closest("button, a, .tree-shelf") !== null),
+        onSwipe: stride,
+        onTap: tap,
+      })
+    : null;
   stage.start(frame);
 
   return {
@@ -478,6 +514,7 @@ function buildTree(
       container.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKey);
       motion?.removeEventListener("change", onMotion);
+      unbindSwipe?.();
       overlay.dispose();
       stage.dispose();
     },

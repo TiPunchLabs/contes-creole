@@ -28,6 +28,9 @@ export interface ReadingUI {
 const ARROW = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>`;
 /** The hint's arrow points down: it invites scrolling, not a page direction. */
 const SCROLL_ARROW = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M3 9l5 5 5-5"/></svg>`;
+const SCROLL_HINT = `<div class="reading-hint" aria-hidden="true"><span lang="fr">Défilez pour continuer</span>${SCROLL_ARROW}</div>`;
+/** Smartphones turn the page with a swipe to the left: the hint's arrow points that way. */
+const SWIPE_HINT = `<div class="reading-hint is-swipe" aria-hidden="true">${ARROW}<span lang="fr">Glissez pour continuer</span></div>`;
 const BACK = `<svg width="20" height="12" viewBox="0 0 20 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M7 1 2 6l5 5M2 6h17"/></svg>`;
 const TEXT_ON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2.5h10v15H5zM8 7h4M8 10h4M8 13h2"/></svg>`;
 const TEXT_OFF = TEXT_ON.replace("M8 13h2", "M8 13h2M2.5 2.5l15 15");
@@ -45,9 +48,14 @@ const blocksHtml = (page: StoryPage): string =>
 
 /**
  * Shared reading overlay: text card, language switch, page counter and buttons (the last page
- * offers to read the tale again), text toggle, back button, hint.
+ * offers to read the tale again), text toggle, back button, hint. `swipe`: the hint invites a
+ * swipe to the left (smartphones) instead of scrolling.
  */
-export function createReadingUI(root: HTMLElement, events: ReadingEvents): ReadingUI {
+export function createReadingUI(
+  root: HTMLElement,
+  events: ReadingEvents,
+  options: { swipe?: boolean } = {},
+): ReadingUI {
   const el = document.createElement("div");
   el.className = "reading";
   el.hidden = true;
@@ -67,7 +75,7 @@ export function createReadingUI(root: HTMLElement, events: ReadingEvents): Readi
       <button type="button" class="reading-next" aria-label="Page suivante">${ARROW}</button>
       <button type="button" class="reading-reread" lang="fr" aria-label="${REREAD_LABEL}" title="${REREAD_LABEL}" hidden>${REREAD}<span>${REREAD_LABEL}</span></button>
     </div>
-    <div class="reading-hint" aria-hidden="true"><span lang="fr">Défilez pour continuer</span>${SCROLL_ARROW}</div>`;
+    ${options.swipe ? SWIPE_HINT : SCROLL_HINT}`;
   root.append(el);
 
   const part = <T extends HTMLElement>(selector: string): T => {

@@ -7,12 +7,14 @@ import {
   cardT,
   clearances,
   climbPitch,
+  climbStops,
   hubCam,
   konteurSpot,
   lensShift,
   openingShot,
   openingStage,
   shortness,
+  strideStop,
   treeCam,
 } from "./camera";
 import { groundHeight } from "./ground";
@@ -41,6 +43,32 @@ describe("cardT", () => {
     expect(ts[0]).toBeCloseTo(0.2);
     expect(ts[count - 1]).toBeCloseTo(0.88);
     ts.slice(1).forEach((t, i) => expect(t).toBeGreaterThan(ts[i]));
+  });
+});
+
+describe("climbStops and strideStop", () => {
+  const stops = climbStops(3);
+
+  it("lists the opening view, then each card", () => {
+    expect(stops).toEqual([0, cardT(0, 3), cardT(1, 3), cardT(2, 3)]);
+  });
+
+  it("steps one landmark at a time, both ways", () => {
+    expect(strideStop(stops, 0, 1)).toBe(stops[1]);
+    expect(strideStop(stops, stops[1], 1)).toBe(stops[2]);
+    expect(strideStop(stops, stops[2], -1)).toBe(stops[1]);
+  });
+
+  it("stays put at either end of the climb", () => {
+    expect(strideStop(stops, 0, -1)).toBe(0);
+    expect(strideStop(stops, stops[3], 1)).toBe(stops[3]);
+    expect(strideStop(stops, 1, 1)).toBe(1);
+  });
+
+  it("goes to the nearest landmark that way from in between", () => {
+    expect(strideStop(stops, 0.3, 1)).toBe(stops[2]);
+    expect(strideStop(stops, 0.3, -1)).toBe(stops[1]);
+    expect(strideStop(stops, 1, -1)).toBe(stops[3]);
   });
 });
 

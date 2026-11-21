@@ -12,10 +12,11 @@ const mila: BookManifest = {
 };
 
 /** Mounts the overlay with spied handlers. */
-function mount() {
+function mount(swipe = false) {
   const container = document.createElement("div");
   document.body.append(container);
   const handlers = {
+    swipe,
     onEnter: vi.fn(),
     onShelf: vi.fn(),
     onCardFocus: vi.fn(),
@@ -105,5 +106,24 @@ describe("tree overlay", () => {
     expect(handlers.onTeller).toHaveBeenCalledTimes(1);
     overlay.update(0.6, null, -1, null);
     expect(teller?.hidden).toBe(true);
+  });
+});
+
+describe("navigation hint", () => {
+  const hint = (container: HTMLElement): HTMLElement =>
+    container.querySelector<HTMLElement>(".tree-intro-hint") as HTMLElement;
+
+  it("keeps the scroll hint off smartphones", () => {
+    const { container } = mount();
+    expect(hint(container).textContent).toBe("Fais défiler · Glisse avec le doigt");
+  });
+
+  it("invites a swipe to the left on smartphones, in French, until dismissed", () => {
+    const { container, overlay } = mount(true);
+    expect(hint(container).textContent).toBe("Glisse vers la gauche pour explorer");
+    expect(hint(container).querySelector("span")?.lang).toBe("fr");
+    expect(hint(container).hidden).toBe(false);
+    overlay.dismissHint();
+    expect(hint(container).hidden).toBe(true);
   });
 });
