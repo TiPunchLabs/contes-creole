@@ -29,6 +29,11 @@ export interface Box {
 
 const MOUSE = `<svg width="18" height="26" viewBox="0 0 18 26" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="1" width="16" height="24" rx="8"/><circle cx="9" cy="8" r="2" fill="currentColor"/></svg>`;
 
+/** A finger sliding either way: the smartphone's way round the tree, no side named. */
+const SWIPE = `<svg width="26" height="18" viewBox="0 0 26 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 9H3M9 3 3 9l6 6M17 3l6 6-6 6"/></svg>`;
+const HINT = `${MOUSE}<span lang="fr">Fais défiler · Glisse avec le doigt</span>`;
+const HINT_SWIPE = `${SWIPE}<span lang="fr">Glisse pour explorer</span>`;
+
 /** Kréyòl name of the way into a tale (the old fiche's button), kept for the card's accessible name. */
 const ENTER_TALE = "Antré adan kont-la";
 
@@ -72,12 +77,14 @@ function place(el: HTMLElement, box: Box): void {
  * Tree HUD: intro column with the site title, climb bar, shelf, and two keyboard entry points laid
  * over the scene: the near card (a book's tale, or the classes page for the invitation) and the
  * storyteller (a tale at random). Pointers keep hitting the 3D scene: these entry points let them
- * through and only take the focus.
+ * through and only take the focus. `swipe` (smartphones): the intro's hint invites a swipe
+ * (either way) instead of scrolling, the climb bar is unseen and the shelf has no scrollbar.
  */
 export function createTreeOverlay(
   container: HTMLElement,
   books: BookManifest[],
   handlers: {
+    swipe?: boolean;
     onEnter(bookId: string): void;
     onShelf(index: number, action: ShelfAction): void;
     /** The near card's entry point took or lost the focus. */
@@ -92,10 +99,12 @@ export function createTreeOverlay(
   setTeller(text: string, available: boolean): void;
   /** Reads a short message out to screen readers. */
   announce(text: string): void;
+  /** Removes the navigation hint for good: the reader has found the way. */
+  dismissHint(): void;
   dispose(): void;
 } {
   const el = document.createElement("div");
-  el.className = "tree-overlay";
+  el.className = handlers.swipe ? "tree-overlay is-phone" : "tree-overlay";
   el.innerHTML = `
     <div class="tree-intro"><div class="tree-intro-inner">
       <h1 class="tree-intro-title" lang="gcf">Pyébwa a Konesans</h1>
@@ -103,7 +112,7 @@ export function createTreeOverlay(
       <p class="tree-intro-motto" lang="gcf">Chak fèy sé on kont.</p>
       <p class="tree-intro-gloss" lang="fr">Chaque feuille est un conte.</p>
       <p class="tree-intro-text" lang="fr">Tourne autour de l'arbre pour trouver le tien&nbsp;!</p>
-      <div class="tree-intro-hint">${MOUSE}<span lang="fr">Fais défiler · Glisse avec le doigt</span></div>
+      <div class="tree-intro-hint${handlers.swipe ? " is-swipe" : ""}">${handlers.swipe ? HINT_SWIPE : HINT}</div>
     </div></div>
     <button type="button" class="tree-hit tree-book" hidden><span class="tree-sr"><span class="tree-book-title"></span> — <span lang="gcf">${ENTER_TALE}</span></span></button>
     <a class="tree-hit tree-book tree-book-invite" lang="fr" href="${CLASSES_PAGE}" hidden><span class="tree-sr">${INVITATION_FICHE.title} — ${INVITATION_FICHE.action}</span></a>
@@ -117,6 +126,7 @@ export function createTreeOverlay(
     return found;
   };
   const intro = part(".tree-intro");
+  const hint = part(".tree-intro-hint");
   const enter = part<HTMLButtonElement>("button.tree-book");
   const enterTitle = part(".tree-book-title");
   const invite = part<HTMLAnchorElement>(".tree-book-invite");
@@ -182,6 +192,9 @@ export function createTreeOverlay(
       requestAnimationFrame(() => {
         status.textContent = text;
       });
+    },
+    dismissHint() {
+      hint.hidden = true;
     },
     dispose() {
       shelf.dispose();

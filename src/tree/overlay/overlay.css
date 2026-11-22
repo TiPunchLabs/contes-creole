@@ -108,6 +108,11 @@
   animation: tree-bob 1.8s ease-in-out infinite;
 }
 
+/* Smartphones: the double arrow sways both ways, like the finger may go. */
+.tree-intro-hint.is-swipe svg {
+  animation-name: tree-nudge;
+}
+
 /*
  * Keyboard entry points over the scene (near card, storyteller): transparent, they let the pointer
  * through to the 3D scene and only show the focus ring, rounded like the card.
@@ -184,6 +189,22 @@
   overflow-x: auto;
   pointer-events: auto;
   touch-action: pan-x;
+}
+
+/*
+ * Smartphones: the tree turns without end, so the climb bar has no start or end to show (kept in
+ * the layout, unseen), and the shelf scrolls under the finger without a scrollbar across the screen.
+ */
+.tree-overlay.is-phone .tree-climb {
+  visibility: hidden;
+}
+
+.tree-overlay.is-phone .tree-shelf {
+  scrollbar-width: none;
+}
+
+.tree-overlay.is-phone .tree-shelf::-webkit-scrollbar {
+  display: none;
 }
 
 .tree-shelf-label {
@@ -443,6 +464,19 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes tree-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
   }
 }
 

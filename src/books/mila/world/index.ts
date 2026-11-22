@@ -8,6 +8,7 @@ import "@fontsource/karla/400.css";
 import "@fontsource/karla/600.css";
 import "./mila.css";
 import { defineImmersive, type ImmersiveText, type StoryPage } from "@app/contract";
+import { bindSwipe, isPhone } from "@shared/gesture";
 import { createPager } from "@shared/paging";
 import { createAmbience } from "./audio";
 import { createMilaScene, type MilaScene } from "./scene";
@@ -97,6 +98,9 @@ export default defineImmersive({
     root.className = "mila";
     root.lang = "fr";
     root.innerHTML = TEMPLATE;
+    /** On a smartphone the pages turn with horizontal swipes; a vertical move only scrolls the text. */
+    const phone = isPhone();
+    root.classList.toggle("is-phone", phone);
     container.append(root);
     const part = <T extends HTMLElement>(selector: string): T => {
       const found = root.querySelector<T>(selector);
@@ -313,7 +317,7 @@ export default defineImmersive({
       step(e.deltaY);
     };
     const onPointerDown = (e: PointerEvent): void => {
-      touchY = e.pointerType === "mouse" || onScrollingText(e.target) ? null : e.clientY;
+      touchY = e.pointerType === "mouse" || phone || onScrollingText(e.target) ? null : e.clientY;
     };
     const onPointerMove = (e: PointerEvent): void => {
       if (touchY === null) return;
@@ -323,6 +327,13 @@ export default defineImmersive({
     };
     const onPointerEnd = (): void => {
       touchY = null;
+    };
+    /** A swipe turns one page, within the tale and never during a move, like the page buttons. */
+    const onSwipe = (direction: 1 | -1): void => {
+      const to = page() + direction;
+      if (page() === 0 || moving() || to < 1 || to > PAGE_COUNT) return;
+      lastControl = direction > 0 ? next : prev;
+      go(to);
     };
     const onBack = (): void => ctx.exit();
     const back = part<HTMLButtonElement>(".mila-back");
@@ -340,6 +351,12 @@ export default defineImmersive({
     root.addEventListener("pointermove", onPointerMove);
     root.addEventListener("pointerup", onPointerEnd);
     root.addEventListener("pointercancel", onPointerEnd);
+    if (phone) {
+      bindSwipe(root, {
+        ignore: (target) => target instanceof Element && target.closest("button") !== null,
+        onSwipe,
+      });
+    }
 
     // The tale opens straight on page 1: the tree's dive is its only way in.
     audio.start();

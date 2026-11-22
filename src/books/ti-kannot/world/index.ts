@@ -146,7 +146,7 @@ export default defineWorld({
       /** Time since the last page turn; the paper is wet for `WASH_SECONDS` after it. */
       let sinceTurn = Infinity;
       const probe = { time: 0, frames: 0, done: false };
-      let down: { y: number; t: number; moved: number } | null = null;
+      let down: { x: number; y: number; t: number; moved: number } | null = null;
       const pointer = { x: 0, y: 0 };
       /** Mouse parallax, eased so the camera never follows the cursor in steps. */
       const sway = new THREE.Vector2();
@@ -225,14 +225,14 @@ export default defineWorld({
       };
 
       const onPointerDown = (e: PointerEvent): void => {
-        down = { y: e.clientY, t: performance.now(), moved: 0 };
+        down = { x: e.clientX, y: e.clientY, t: performance.now(), moved: 0 };
       };
       const onPointerMove = (e: PointerEvent): void => {
         Object.assign(pointer, stage.pointer(e));
         if (e.pointerType === "mouse" && !calm) swayTarget.set(pointer.x, pointer.y);
         if (down && e.pointerType !== "mouse") {
-          down.moved += Math.abs(e.clientY - down.y);
-          down.y = e.clientY;
+          // Distance from the press, sideways too: a page-turning swipe over a character is not a tap.
+          down.moved = Math.max(down.moved, Math.hypot(e.clientX - down.x, e.clientY - down.y));
         }
       };
       const onPointerUp = (e: PointerEvent): void => {

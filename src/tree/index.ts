@@ -2,6 +2,7 @@ import "./fonts";
 import "./overlay/overlay.css";
 import * as THREE from "three";
 import type { BubbleSegment, MountTree, TreeContext, TreeHandle } from "@app/contract";
+import { bindSwipe, isPhone } from "@shared/gesture";
 import { clamp, lerp, smoothstep } from "@shared/math";
 import { createRng } from "@shared/random";
 import { createStage, fitFov, type Stage } from "@shared/three/stage";
@@ -10,7 +11,17 @@ import { detectLite, readLiteEnv, scaleCount } from "./lite";
 import { createTreeOverlay, type TellerBox } from "./overlay/overlay";
 import { isShelfEvent, type ShelfAction } from "./overlay/shelf";
 import { RANDOM_TALE_ACTION, RANDOM_TALE_NONE, eligibleTales, pickRandomTale } from "./random-tale";
-import { cardT, konteurSpot, lensShift, openingStage, shiftLens, treeCam } from "./scene/camera";
+import {
+  cardT,
+  climbStops,
+  konteurSpot,
+  lensShift,
+  openingStage,
+  ringCam,
+  ringStop,
+  shiftLens,
+  treeCam,
+} from "./scene/camera";
 import { createCards, type CardView } from "./scene/cards";
 import { createLapen } from "./scene/critters/lapen";
 import type { CritterView, Surroundings } from "./scene/critters/parts";
@@ -57,6 +68,11 @@ const BUBBLE_HOLD_MS = 4500;
 const LAMP_REACH = 4.2;
 /** Pace of the decor's clock under reduced motion: leaves and lights barely drift. */
 const CALM_PACE = 0.08;
+/** Share of the screen's width a finger travels to turn the tree by one landmark. */
+const DRAG_SPAN = 0.75;
+/** How fast the camera closes on its target (per second): at rest, and under a finger. */
+const EASE = 4.5;
+const EASE_DRAG = 18;
 const CLIMB_KEYS_UP = ["ArrowUp", "ArrowLeft"];
 const CLIMB_KEYS_DOWN = ["ArrowDown", "ArrowRight", " "];
 
@@ -143,11 +159,22 @@ function buildTree(
     },
   };
 
+  /**
+   * On a smartphone the climb is a ring walked sideways (see `ringCam`): `t` and `target` then count
+   * landmarks, without bounds; elsewhere they are the climb's progress, from 0 to 1.
+   */
+  const phone = isPhone();
+  const stops = climbStops(slots.length);
+  /** Where the card of slot `index` rests, in the unit of `t`. */
+  const restAt = (index: number): number =>
+    phone ? ringStop(index + 1, target, stops.length) : cardT(index, slots.length);
   let t = 0;
   let target = 0;
+  /** The landmark a sideways touch under way started from. */
+  let dragFrom: number | null = null;
   // Back from the classes page: open on the invitation, then drop the hash so a reload starts low.
   if (location.hash === RETURN_HASH) {
-    t = target = cardT(slots.length - 1, slots.length);
+    t = target = restAt(slots.length - 1);
     history.replaceState(null, "", location.pathname + location.search);
   }
   let hover: number | null = null;
@@ -175,7 +202,23 @@ function buildTree(
   const pickable = [...cards.planes, konteur.plane, views.lapen.group, views.zanba.group];
 
   const climb = (dy: number): void => {
-    target = clamp(target + dy * 0.00055, 0, 1);
+    target = phone ? target + dy * 0.0016 : clamp(target + dy * 0.00055, 0, 1);
+  };
+  /** A sideways finger turns the tree with it: the scene follows the finger. */
+  const turnBy = (dx: number): void => {
+    dragFrom ??= Math.round(target);
+    target = dragFrom + clamp(dx / (container.clientWidth * DRAG_SPAN), -1, 1);
+  };
+  /** A swipe rests on the next landmark the way the finger went: one per gesture, without end. */
+  const stride = (direction: 1 | -1): void => {
+    target = (dragFrom ?? Math.round(target)) - direction;
+    dragFrom = null;
+    overlay.dismissHint();
+  };
+  /** A sideways touch that ends without a swipe gives the tree back to where it was. */
+  const settle = (): void => {
+    if (dragFrom !== null) target = dragFrom;
+    dragFrom = null;
   };
   /** Leaves a quiet tree (no hovered card, no bubble) for the classes page. */
   const invite = (): void => {
@@ -215,9 +258,10 @@ function buildTree(
   const onShelf = (index: number, action: ShelfAction): void => {
     if (!active || diving) return;
     if (action === "enter") enter(index);
-    else target = cardT(index, slots.length);
+    else target = restAt(index);
   };
   const overlay = createTreeOverlay(container, slots, {
+    swipe: phone,
     onEnter: ctx.onEnter,
     onShelf,
     onCardFocus: (focused) => {
@@ -302,6 +346,7 @@ function buildTree(
   const onPointerMove = (e: PointerEvent): void => {
     Object.assign(pointer, stage.pointer(e));
     if (!active || diving) return;
+    if (phone && e.pointerType !== "mouse") return;
     if (down && e.pointerType !== "mouse") {
       const dy = down.y - e.clientY;
       down.y = e.clientY;
@@ -322,7 +367,12 @@ function buildTree(
     const d = down;
     down = null;
     if (!d || !active || diving) return;
+    if (phone && e.pointerType !== "mouse") return;
     if (d.moved > TAP_DISTANCE || performance.now() - d.t > TAP_MS) return;
+    tap(e);
+  };
+  /** A press on the scene: opens a card, asks the storyteller for a tale, or makes a critter speak. */
+  const tap = (e: PointerEvent): void => {
     Object.assign(pointer, stage.pointer(e));
     const p = pick();
     if (p?.type === "card") enter(p.index);
@@ -367,11 +417,18 @@ function buildTree(
   const frame = (time: number, dt: number): void => {
     decor += dt * (calm ? CALM_PACE : 1);
     const parallax = calm ? 0.2 : 1;
-    t += (target - t) * (1 - Math.exp(-dt * 4.5));
-    treeCam(t, camera.aspect, cam, look, stage.canvas.clientHeight);
+    t += (target - t) * (1 - Math.exp(-dt * (dragFrom === null ? EASE : EASE_DRAG)));
+    const high = stage.canvas.clientHeight;
+    /** The climb value the cards and the HUD read. */
+    let at = t;
+    let shift: number;
+    if (phone) ({ shift, t: at } = ringCam(t, stops, camera.aspect, cam, look, high));
+    else {
+      treeCam(t, camera.aspect, cam, look, high);
+      shift = lensShift(t, camera.aspect, high);
+    }
     konteur.place(camera.aspect);
     const fov = fitFov(50, camera.aspect);
-    let shift = lensShift(t, camera.aspect, stage.canvas.clientHeight);
     if (diving) {
       diving.progress = Math.min(1, diving.progress + dt / DIVE_SECONDS);
       const d = smoothstep(diving.progress);
@@ -402,7 +459,7 @@ function buildTree(
     for (const c of critters) views[c.name].pose(c, time, around[c.name]);
     // A focused card answers like a hovered one: it grows and its halo brightens.
     const lit = hover ?? (cardFocused && near >= 0 ? near : null);
-    const cardViews = cards.update(decor, t, lit, camera.position, stage.project);
+    const cardViews = cards.update(decor, at, lit, camera.position, stage.project);
     let best: CardView | null = null;
     for (const v of cardViews)
       if (v.visible && onScreen(v.x) && v.near > 0.35 && (!best || v.near > best.near)) best = v;
@@ -413,7 +470,7 @@ function buildTree(
     // the one that opened the tale on return.
     if (!diving)
       overlay.update(
-        t,
+        clamp(Math.abs(at), 0, 1),
         best && book
           ? {
               index: best.index,
@@ -439,6 +496,18 @@ function buildTree(
   container.addEventListener("pointerup", onPointerUp);
   window.addEventListener("keydown", onKey);
   motion?.addEventListener("change", onMotion);
+  const unbindSwipe = phone
+    ? bindSwipe(container, {
+        ignore: (target) =>
+          !active ||
+          diving !== null ||
+          (target instanceof Element && target.closest("button, a, .tree-shelf") !== null),
+        onSwipe: stride,
+        onTap: tap,
+        onDrag: turnBy,
+        onDrop: settle,
+      })
+    : null;
   stage.start(frame);
 
   return {
@@ -461,7 +530,8 @@ function buildTree(
     },
     resume(fromBookId) {
       const index = fromBookId ? slots.findIndex((b) => b.id === fromBookId) : -1;
-      if (index >= 0) t = target = cardT(index, slots.length);
+      if (index >= 0) t = target = restAt(index);
+      dragFrom = null;
       diving = null;
       hover = null;
       tellerHovered = false;
@@ -478,6 +548,7 @@ function buildTree(
       container.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKey);
       motion?.removeEventListener("change", onMotion);
+      unbindSwipe?.();
       overlay.dispose();
       stage.dispose();
     },
