@@ -9,6 +9,16 @@ Why PARTIAL and not PASS: steps N1 to N4 are done and every technical criterion 
 
 Session model: `claude-fable-5-2` (Claude Fable 5.2), confirmed at the start of the session.
 
+## H1. Owner decision (2026-11-22) — merge and production
+
+This section is later than everything below and supersedes it where they differ (the header paragraph and section 7 still describe the state before the review).
+
+- Codex review, cycle 1, on `23bb7d8` (`review-1.md`): PASS_WITH_RESERVATIONS, no finding raised. The reviewer drove the interface with real touch input on its own cases (home both ways, two full turns each way, both tales, bounds, long text, ambiguous gestures, orientation) and reproduced the 438 passing tests.
+- Its reservations: AC6, AC7 and AC8 are NOT_VERIFIED on its side (full desktop/tablet tale regression, trackpad and native pinch not repeated; exact `pnpm` commands blocked by its sandbox, CI not queried; the round-trip video is from the older `71f910a`). Not checked by it: Safari/WebKit, Firefox, a physical device, performance (it ran on SwiftShader). Three of its bulk runs with `qa/swipe.mjs` ended at 25/33, 25/33 and 0/6 on timeouts; its independent journeys cover those cases. It reported two preview servers left listening on `127.0.0.1:4271` and `:4272`; neither port is listening any more (`ss`, 2026-11-22).
+- Owner test on a real phone after D4, on the Deploy Preview of `23bb7d8` (2026-11-21, relayed by pilotage): « test téléphone ok ».
+- Owner decision, 2026-11-22, verbatim: « livre en prod ». PR #52 is merged into `main` and published.
+- The two readers' test required by the brief was not done before this decision. This is the owner's call; the readers' understanding of the gesture stays NOT_VERIFIED, which is why the verdict stays PARTIAL.
+
 ## 0. Owner feedback 1 (2026-11-21) — product `a5ef0a8`
 
 Source: `owner-feedback-1.md` (owner's words after testing PR #52 on a phone, with pilotage's framing A1 to A4). Commit: `a5ef0a8` feat(nav): turn around the tree without end on smartphones (11 files, +465 −107). Smartphones only; tales untouched.

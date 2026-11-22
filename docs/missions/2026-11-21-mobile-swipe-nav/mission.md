@@ -54,3 +54,6 @@ Not authorized: merge, production publication, changing art direction, tale cont
 
 - 2026-11-21 — Owner brief received (verbatim `owner-brief.md`): Claude Code implementation, Codex review with Playwright from the UI, PR + Netlify preview testable on a phone; merge and production reserved to the owner.
 - 2026-11-21 — Pilot framing: base `origin/main` c5c6f0c (home work since then archived); executor Fable 5.2 (project default); Codex reviewer started with network/loopback for this mission's review because the brief requires it to drive the UI with Playwright.
+- 2026-11-21 — Owner feedback 1 (`owner-feedback-1.md`): endless free rotation around the home tree on phones, both directions; tales keep their bounds.
+- 2026-11-21 — Owner decision D4: keep the direction (scene follows the finger); home hint « Glisse pour explorer », no side named.
+- 2026-11-21 — Owner real-phone test of the Deploy Preview after D4 (product `23bb7d8`): « test téléphone ok ». R1 cycle 1 dispatched to Codex on `23bb7d8` (`review-brief-1.md`).
