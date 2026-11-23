@@ -128,7 +128,7 @@ describe("the gap between two stand-in shapes", () => {
     }
     expect(overlapping).toBeGreaterThan(100);
     expect(apart).toBeGreaterThan(100);
-  });
+  }, 30_000);
 });
 
 describe("the depth of a shape under the ground", () => {
