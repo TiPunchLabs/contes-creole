@@ -104,6 +104,8 @@ export interface Probe {
    * wall, another figure). A subject that covers almost nothing on the screen has no entry.
    */
   visibility(): Record<string, number>;
+  /** Height above y = 0 of the highest solid of the set (ground excepted) at a place, 0 if none. */
+  solidAt(x: number, z: number): number;
   /** Shows the two figures alone, flat black on bare paper: their outlines (design captures). */
   setSilhouette(on: boolean): void;
   /** Uses grey proxies instead of the painted materials (layout captures). */
@@ -132,11 +134,13 @@ export interface Probe {
      * Each foot of each figure shown (left, then right): where its ankle is on the ground plan
      * (world x, z), the lowest and highest point of the foot and its shoe above the ground the
      * figure stands on (metres; negative: through the ground), and how far its toes point down
-     * (radians), with the figure's heading (a foot turns with her when she turns on the spot).
+     * (radians), with the figure's heading (a foot turns with her when she turns on the spot), and
+     * `over`: how high a root, a step or any other solid of the set stands above that ground under
+     * the foot (0 on open ground). A foot lower than `over` is inside that solid.
      */
     feet: Record<
       string,
-      { x: number; z: number; low: number; top: number; pitch: number; yaw: number }[]
+      { x: number; z: number; low: number; top: number; pitch: number; yaw: number; over: number }[]
     >;
     /** The fruit, faces, hands and lantern as the lens frames them this instant. */
     subjects: Subjects;
@@ -266,6 +270,27 @@ export default defineWorld({
       );
       tableTop.y += GOURD_R * 0.96;
 
+      // Solids a foot can run into: everything Blender built except the ground itself and the fruits
+      // (painted cut-outs are flat pictures and are checked on the ground plan by the unit tests).
+      const solids: THREE.Object3D[] = [];
+      built.group.traverse((object) => {
+        if (!(object instanceof THREE.Mesh) || object instanceof THREE.SkinnedMesh) return;
+        if (object.geometry.getAttribute("position").count < 24) return;
+        if (/^(ground|gourds|gourd_hero|lamp|rooster)/.test(object.name)) return;
+        if (object.material instanceof THREE.ShaderMaterial) return;
+        if (object.geometry.type !== "BufferGeometry") return;
+        solids.push(object);
+      });
+      const down = new THREE.Raycaster();
+      const straightDown = new THREE.Vector3(0, -1, 0);
+      const above = new THREE.Vector3();
+      /** Highest solid within 0.6 m above `floor` at a place, as a height above `floor`. */
+      const solidOver = (x: number, z: number, floor: number): number => {
+        down.set(above.set(x, floor + 0.6, z), straightDown);
+        down.far = 0.6;
+        const hit = down.intersectObjects(solids, false)[0];
+        return hit ? Math.max(0, hit.point.y - floor) : 0;
+      };
       const frameState = createFrame();
       const key = createMixedKey();
       let story = ctx.story;
@@ -451,8 +476,8 @@ export default defineWorld({
           f.mila.left = hold(built.shutters.left, -1);
           f.mila.right = hold(built.shutters.right, 1);
         }
-        applyPose(mila as Figure, MILA_DIMS, f.mila, calm ? 0 : time);
-        applyPose(ninon, NINON_DIMS, f.ninon, calm ? 0 : time + 2);
+        applyPose(mila as Figure, MILA_DIMS, f.mila, calm ? 0 : time, solidOver);
+        applyPose(ninon, NINON_DIMS, f.ninon, calm ? 0 : time + 2, solidOver);
         milaShadow.visible = f.mila.visible;
         milaShadow.position.set(f.mila.x, f.mila.y + 0.03, f.mila.z);
         ninonShadow.visible = f.ninon.visible;
@@ -562,7 +587,15 @@ export default defineWorld({
         : never => {
         const out: Record<
           string,
-          { x: number; z: number; low: number; top: number; pitch: number; yaw: number }[]
+          {
+            x: number;
+            z: number;
+            low: number;
+            top: number;
+            pitch: number;
+            yaw: number;
+            over: number;
+          }[]
         > = {};
         const figures = [
           ["mila", mila as Figure, frameState.mila],
@@ -582,6 +615,7 @@ export default defineWorld({
               top: footBox.max.y - pose.y,
               pitch: Math.asin(clamp(-toes.y, -1, 1)),
               yaw: pose.yaw,
+              over: solidOver(scratch.x, scratch.z, pose.y),
             };
           });
         }
@@ -736,6 +770,7 @@ export default defineWorld({
           frozen = false;
         },
         visibility,
+        solidAt: (x, z) => solidOver(x, z, 0),
         setSilhouette(on) {
           if (on === inked.size > 0) return;
           for (const child of scene.children) {

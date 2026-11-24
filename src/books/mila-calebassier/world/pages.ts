@@ -569,10 +569,11 @@ export const PAGES: Record<string, PageScript> = {
         f.mila.headYaw = 0.4 * ramp(t, 7, 8.2);
       } else {
         // The heading of her route below: she walks the way she faces.
-        const west = facing(0, 0, -1.9, -0.25);
+        const west = facing(0, 0, -1.9, 0.05);
         const ninon = route([
           [nx, nz],
-          [nx - 1.9, nz - 0.25],
+          // A little away from the trunk: its root flare is too tall there to step over.
+          [nx - 1.9, nz + 0.05],
         ]);
         const mila = route([
           [mx, mz],

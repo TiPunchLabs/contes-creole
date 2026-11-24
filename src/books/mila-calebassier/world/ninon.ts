@@ -79,10 +79,9 @@ function dressGeometry(): THREE.LatheGeometry {
     const a = Math.atan2(z, x);
     const low = THREE.MathUtils.clamp((1.0 - y) / 0.7, 0, 1);
     // Flatter back and chest than a turned shape; folds that open towards the hem.
-    // A rounder belly in front, and the upper back rounded by the years behind.
+    // A rounder belly in front; the back stays straight (a rounded upper back read as a hump).
     const belly = z > 0 ? 0.1 * Math.exp(-(((y - 0.86) / 0.16) ** 2)) : 0;
-    const back = z < 0 ? 0.16 * Math.exp(-(((y - 1.17) / 0.11) ** 2)) : 0;
-    const depth = (z > 0 ? 0.92 : 0.84) + belly + back;
+    const depth = (z > 0 ? 0.92 : 0.84) + belly;
     const fold = 1 + (Math.sin(a * 9) * 0.028 + Math.sin(a * 17 + 1.3) * 0.012) * low * low;
     p.setXYZ(i, x * fold, y, z * depth * fold);
   }
@@ -169,7 +168,7 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
   }
   body.add(
     taper(
-      [V3(0, 1.27, 0), V3(0, 1.325, 0.018), V3(0, 1.372, 0.036)],
+      [V3(0, 1.27, -0.003), V3(0, 1.33, 0.008), V3(0, 1.38, 0.018)],
       [0.058, 0.048, 0.05],
       skin,
       8,
@@ -206,8 +205,8 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
   });
 
   const head = new THREE.Group();
-  // Carried a little forward of the shoulders: an older woman's neck.
-  head.position.set(0, HEAD_Y - 0.012, 0.045);
+  // Carried upright, barely forward of the shoulders.
+  head.position.set(0, HEAD_Y, 0.026);
   body.add(head);
   const face = new THREE.Group();
   face.scale.setScalar(HEAD_SCALE);
@@ -287,10 +286,11 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
   }
   cap.computeVertexNormals();
   face.add(new THREE.Mesh(cap, hairM));
-  // A full chignon, low on the nape: it draws her profile.
+  // A full chignon at the back of the crown, clear of the neck and shoulders: it draws her profile
+  // without filling the nape.
   const bun = new THREE.Mesh(new THREE.SphereGeometry(0.064, 16, 12), hairM);
   bun.scale.set(1.12, 0.92, 0.95);
-  bun.position.set(0, 0.012, -0.15);
+  bun.position.set(0, 0.058, -0.138);
   face.add(bun);
   return { g, pose, inner, body, head, legs, arms };
 }

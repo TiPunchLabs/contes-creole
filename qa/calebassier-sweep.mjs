@@ -1,7 +1,7 @@
 // « Mila et le calebassier magique »: sweep of every page through its whole action in the QA viewer
 // (qa/calebassier/, needs `vite` dev), for defects a still cannot show: an arm inside the clothes
 // (`info().arms`, metres; clear at 0 or less), more than one hero calabash, a foot through the
-// ground or up in the dress, a planted foot that slides. Prints, per page and viewport, the worst
+// ground, inside a root or another solid of the set, or up in the dress, a planted foot that slides. Prints, per page and viewport, the worst
 // of each and the instant it happens; exit 1 over the limits.
 // Usage: [SITE=http://127.0.0.1:5199/] [OUT=dir] [STEP=0.1] [TOL=0.018] [VPS=desktop,mobile]
 //        [STRIPS=1,3,4,5,9,10,11,12] [QA_CHANNEL=chrome] node qa/calebassier-sweep.mjs
@@ -19,12 +19,14 @@ const STEP = Number(process.env.STEP ?? 0.1);
 // Depth is measured against the clothes plus 40 mm (a forearm is 20 mm thick from its axis): at
 // 18 mm the arm's surface is still 2 mm outside the cloth.
 const TOL = Number(process.env.TOL ?? 0.018);
-// Feet (`info().feet`): no shoe under the ground (GROUND, metres), none up in the dress (HEM: each
-// figure's hem less 3 cm), and for a figure who walks on planted feet (PLANTED) a foot lying flat on
+// Feet (`info().feet`): no shoe under the ground (GROUND, metres), none up in the dress on open
+// ground (HEM: each figure's hem less 3 cm), and for a figure who walks on planted feet (PLANTED) a foot lying flat on
 // the ground does not move more than SLIDE between two instants while she keeps her heading.
 const GROUND = Number(process.env.GROUND ?? -0.003);
 const HEM = { mila: 0.425, ninon: 0.27 };
 const PLANTED = ["mila", "ninon"];
+// A foot inside a root, a step or any other solid of the set by more than SUNK (metres) is a fault.
+const SUNK = Number(process.env.SUNK ?? 0.012);
 const SLIDE = Number(process.env.SLIDE ?? 0.01);
 const STRIPS = (process.env.STRIPS ?? "").split(",").filter(Boolean).map(Number);
 const EGL_VENDOR = process.env.QA_EGL_VENDOR ?? "/usr/share/glvnd/egl_vendor.d/10_nvidia.json";
@@ -85,10 +87,20 @@ try {
             // Feet: lowest and highest point over the page, and how far a foot that lies flat on
             // the ground moves between two instants while she does not turn (a slide).
             for (const [who, feet] of Object.entries(info.feet ?? {})) {
-              const f = (out.feet[who] ??= { low: [1, 0], top: [0, 0], slide: [0, 0] });
+              const f = (out.feet[who] ??= {
+                low: [1, 0],
+                top: [0, 0],
+                slide: [0, 0],
+                sunk: [0, 0, 0],
+              });
               feet.forEach((foot, k) => {
                 if (foot.low < f.low[0]) f.low = [foot.low, t];
-                if (foot.top > f.top[0]) f.top = [foot.top, t];
+                // A root, a step or a wall under the foot (`over`): how deep the foot is in it.
+                const sunk = (foot.over ?? 0) > 0.03 ? foot.over - foot.low : 0;
+                if (sunk > f.sunk[0]) f.sunk = [sunk, t, foot.over];
+                // A foot lifted over a root or onto a step is under the skirt, as it should be: the
+                // dress check is for open ground, where nothing calls for a foot that high.
+                if (!((foot.over ?? 0) > 0.03) && foot.top > f.top[0]) f.top = [foot.top, t];
                 const was = before?.[who]?.[k];
                 const flat = (g) => g.low < 0.005 && Math.abs(g.pitch) < 0.03;
                 if (was && flat(foot) && flat(was) && Math.abs(foot.yaw - was.yaw) < 0.002) {
@@ -107,7 +119,10 @@ try {
       results[vp].push(row);
       const feetBad = Object.entries(worst.feet).some(
         ([who, f]) =>
-          f.low[0] < GROUND || f.top[0] > HEM[who] || (PLANTED.includes(who) && f.slide[0] > SLIDE),
+          f.low[0] < GROUND ||
+          f.top[0] > HEM[who] ||
+          f.sunk[0] > SUNK ||
+          (PLANTED.includes(who) && f.slide[0] > SLIDE),
       );
       const bad = worst.mila[0] > TOL || worst.ninon[0] > TOL || worst.heroes !== 1 || feetBad;
       failed ||= bad;
@@ -119,7 +134,7 @@ try {
         )
           .map(
             ([who, f]) =>
-              `; ${who} feet lowest ${(f.low[0] * 1000).toFixed(1)} mm at ${f.low[1].toFixed(1)} s, highest ${(f.top[0] * 1000).toFixed(0)} mm, flat-foot slide ${(f.slide[0] * 1000).toFixed(1)} mm at ${f.slide[1].toFixed(1)} s`,
+              `; ${who} feet lowest ${(f.low[0] * 1000).toFixed(1)} mm at ${f.low[1].toFixed(1)} s, highest ${(f.top[0] * 1000).toFixed(0)} mm, flat-foot slide ${(f.slide[0] * 1000).toFixed(1)} mm at ${f.slide[1].toFixed(1)} s, deepest in a solid ${(f.sunk[0] * 1000).toFixed(0)} mm${f.sunk[0] > 0 ? ` at ${f.sunk[1].toFixed(1)} s (solid ${(f.sunk[2] * 1000).toFixed(0)} mm high)` : ""}`,
           )
           .join("")}`,
       );

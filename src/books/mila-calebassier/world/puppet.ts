@@ -146,6 +146,14 @@ export const CHILD_STEP: Step = {
   twist: 0.025,
 };
 
+/**
+ * How high a solid of the set (a root, a step) stands under a place, above the ground at height
+ * `floor` there; 0 on open ground.
+ */
+export type Solid = (x: number, z: number, floor: number) => number;
+/** The highest thing a foot steps onto or over; anything taller is not a step. */
+export const MAX_STEP = 0.3;
+
 const frac = (v: number): number => v - Math.floor(v);
 const ease = (v: number): number => v * v * (3 - 2 * v);
 
@@ -156,8 +164,16 @@ const ease = (v: number): number => v * v * (3 - 2 * v);
  * standing leg to reach the ground, and the foot rolls from heel to toe. Returns, per leg, how far
  * forward its foot is (−1 back … 1 front), for the arms to swing against.
  */
-function plantedWalk(figure: Figure, dims: Dims, STEP: Step, p: Pose): number[] {
+function plantedWalk(
+  figure: Figure,
+  dims: Dims,
+  STEP: Step,
+  p: Pose,
+  solid: Solid | undefined,
+): number[] {
   const { pose, inner, body, legs } = figure;
+  const sinYaw = Math.sin(p.yaw);
+  const cosYaw = Math.cos(p.yaw);
   // The move is cut into a whole number of steps, and starts and ends with one leg passing the
   // other (feet side by side): she leaves from standing and comes back to it without a shuffle.
   const steps = Math.max(1, Math.round(p.path / dims.stride));
@@ -195,7 +211,23 @@ function plantedWalk(figure: Figure, dims: Dims, STEP: Step, p: Pose): number[] 
       lift * Math.sqrt(walk) +
       (pitch > 0 ? STEP.ball * Math.sin(pitch) : STEP.heel * Math.sin(-pitch));
     if (pitch > 0) z += STEP.ball * (1 - Math.cos(pitch));
-    return { z, rise, pitch, standing: ph < STEP.stance };
+    // A root or a step under the foot: it stands on it, or is lifted clear of it as it swings.
+    const side = leg.hip.parent?.position.x ?? 0;
+    const over = solid
+      ? solid(p.x + side * cosYaw + z * sinYaw, p.z - side * sinYaw + z * cosYaw, p.y)
+      : 0;
+    const step = over > 0 && over <= MAX_STEP ? over : 0;
+    const onGround = ph < STEP.stance || walk === 0;
+    return {
+      z,
+      // In the air the toes or the heel hang below the ankle: they clear the solid too.
+      rise: onGround
+        ? rise + step
+        : Math.max(rise, step + (0.02 + STEP.ball * Math.abs(Math.sin(pitch))) * walk) +
+          step * (1 - walk),
+      pitch,
+      standing: ph < STEP.stance,
+    };
   });
   const lean = p.lean + 0.05 * walk;
   pose.rotation.x = lean;
@@ -251,9 +283,10 @@ const up = new THREE.Vector3();
 /**
  * Puts a figure in a pose: place, step cycle (Mila's walk from the underwater tale: thigh swing,
  * knee bending on the pass, flat foot, body dropping onto the standing leg), stoop, head and two-bone
- * arm IK towards the hands' tasks. `time` only feeds the idle breath.
+ * arm IK towards the hands' tasks. `time` only feeds the idle breath. `solid` tells a planted walk
+ * what stands on the ground under each foot.
  */
-export function applyPose(figure: Figure, dims: Dims, p: Pose, time: number): void {
+export function applyPose(figure: Figure, dims: Dims, p: Pose, time: number, solid?: Solid): void {
   const { g, pose, inner, body, head, legs, arms } = figure;
   g.visible = p.visible;
   if (!p.visible) return;
@@ -265,7 +298,7 @@ export function applyPose(figure: Figure, dims: Dims, p: Pose, time: number): vo
   /** Per leg, how far forward its foot is: the free arm of that side swings the other way. */
   let stepped: number[] | null = null;
   if (dims.step) {
-    stepped = plantedWalk(figure, dims, dims.step, p);
+    stepped = plantedWalk(figure, dims, dims.step, p, solid);
     // The head stays level over the leaning trunk and looks where she goes.
     head.rotation.set(
       p.headPitch - pose.rotation.x * 0.5 + Math.sin(time * 0.45) * 0.015,
