@@ -1,7 +1,7 @@
 /*
  * « Mila et le calebassier magique »: the text reads in the scene, as in Ti Kannot's and Mila's
  * books (ruling TKR): light text with a dark halo over a soft indigo shade laid on the scene layer;
- * the camera slides the subject away from it (TEXT_SHIFT in staging.ts).
+ * the camera slides the subject away from it (`textShift` in staging.ts).
  */
 [data-book="mila-calebassier"] {
   --reading-accent: #c98a3c;

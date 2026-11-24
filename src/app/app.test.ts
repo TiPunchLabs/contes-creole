@@ -186,17 +186,93 @@ describe("app", () => {
     expect($(".reading-title")?.textContent).toBe("Paj en");
   });
 
-  it("ignores locked books, repeated entries and Escape during the dive", async () => {
+  it("ignores locked books and repeated entries", async () => {
     start();
     treeCtx.onEnter("lock");
     treeCtx.onEnter("liv");
     treeCtx.onEnter("liv");
-    await vi.advanceTimersByTimeAsync(500);
-    key("Escape");
     await vi.advanceTimersByTimeAsync(OPEN_MS);
     expect(tree.dive).toHaveBeenCalledOnce();
     expect(tree.dive).toHaveBeenCalledWith("liv");
     expect(handle.dispose).not.toHaveBeenCalled();
+  });
+
+  it("cancels the opening on the first Escape during the dive: tree back, nothing mounted", async () => {
+    start();
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(500);
+    key("Escape");
+    await vi.advanceTimersByTimeAsync(TIMING.cancel + 50);
+    expect(tree.resume).toHaveBeenCalledExactlyOnceWith("liv");
+    expect(root.dataset.book).toBeUndefined();
+    expect($(".app-tree")?.hidden).toBe(false);
+    expect(document.activeElement).toBe(opener);
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect(world.mount).not.toHaveBeenCalled();
+    expect(tree.pause).not.toHaveBeenCalled();
+    expect($(".reading")?.hidden).toBe(true);
+    expect($(".app-notice")).toBeNull();
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
+  it("cancels on the first Escape while the world loads; the late world is disposed, not shown", async () => {
+    let finish: (h: BookHandle) => void = () => undefined;
+    world.mount.mockImplementationOnce(
+      (container: HTMLElement) =>
+        new Promise<BookHandle>((resolve) => {
+          container.append(document.createElement("canvas"));
+          finish = resolve;
+        }),
+    );
+    start();
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect(world.mount).toHaveBeenCalledOnce();
+    expect($(".reading")?.hidden).toBe(true);
+    key("Escape");
+    await vi.advanceTimersByTimeAsync(TIMING.cancel + 50);
+    expect(tree.resume).toHaveBeenCalledExactlyOnceWith("liv");
+    expect(root.dataset.book).toBeUndefined();
+    expect($(".app-book")?.childElementCount).toBe(0);
+    expect(handle.dispose).not.toHaveBeenCalled();
+    finish(handle as unknown as BookHandle);
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect(handle.dispose).toHaveBeenCalledOnce();
+    expect(root.dataset.book).toBeUndefined();
+    expect($(".reading")?.hidden).toBe(true);
+    expect($(".app-tree")?.hidden).toBe(false);
+    expect($(".app-notice")).toBeNull();
+    key("ArrowRight");
+    expect(handle.setPage).not.toHaveBeenCalled();
+    // The tale opens again normally, once.
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect(world.mount).toHaveBeenCalledTimes(2);
+    expect(root.dataset.book).toBe("liv");
+    expect($(".reading-title")?.textContent).toBe("Paj en");
+    key("Escape");
+    await vi.advanceTimersByTimeAsync(CLOSE_MS);
+    expect(handle.dispose).toHaveBeenCalledTimes(2);
+  });
+
+  it("stays quiet when a world cancelled while loading fails later", async () => {
+    let fail: (err: Error) => void = () => undefined;
+    world.mount.mockImplementationOnce(
+      () => new Promise<BookHandle>((_resolve, reject) => void (fail = reject)),
+    );
+    start();
+    treeCtx.onEnter("liv");
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    key("Escape");
+    await vi.advanceTimersByTimeAsync(TIMING.cancel + 50);
+    fail(new Error("late 404"));
+    await vi.advanceTimersByTimeAsync(OPEN_MS);
+    expect($(".app-notice")).toBeNull();
+    expect(console.error).not.toHaveBeenCalled();
+    expect(tree.resume).toHaveBeenCalledOnce();
   });
 
   it("scrolls a long passage with the wheel or a swipe before turning the page", async () => {
@@ -625,6 +701,26 @@ describe("app language panel", () => {
       await vi.advanceTimersByTimeAsync(CLOSE_MS);
       expect(own.dispose).toHaveBeenCalledTimes(2);
       expect(tree.resume).toHaveBeenCalledTimes(2);
+    });
+
+    it("cancels on the first Escape while its world loads and disposes the late world", async () => {
+      let finish: (h: ImmersiveHandle) => void = () => undefined;
+      ownWorld.mount.mockImplementationOnce(
+        () => new Promise<ImmersiveHandle>((resolve) => void (finish = resolve)),
+      );
+      startBoth();
+      treeCtx.onEnter("mila");
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      key("Escape");
+      await vi.advanceTimersByTimeAsync(TIMING.cancel + 50);
+      expect(tree.resume).toHaveBeenCalledExactlyOnceWith("mila");
+      expect(root.dataset.book).toBeUndefined();
+      expect(root.hasAttribute("data-immersive")).toBe(false);
+      finish(own as unknown as ImmersiveHandle);
+      await vi.advanceTimersByTimeAsync(OPEN_MS);
+      expect(own.dispose).toHaveBeenCalledOnce();
+      expect($(".reading")?.hidden).toBe(true);
+      expect($(".app-notice")).toBeNull();
     });
 
     it("leaves page keys and wheel to the world", async () => {

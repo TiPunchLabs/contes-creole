@@ -34,6 +34,9 @@ sources are in `design/v13/`.
   └──────────── rise (1.1 s) ◄──── Esc / back ──────┘
 ```
 
+Escape also cancels a book that is still opening (dive, loading, mount): the tree comes back at
+that book's card, and a world whose mount ends afterwards is disposed, never shown.
+
 - **Hub — Pyébwa a Konesans**: a tree of light on a tropical _morne_, drawn as a flamboyant whose
   leaf and flower sprays grow from its branches and twigs and sway with them in one wind
   (`src/tree/scene/canopy.ts`), turned about its foot so its fullest face meets the opening view
@@ -163,11 +166,13 @@ the validated navigation (keys, wheel, buttons, one page per horizontal swipe on
   action a page holds its last state. The hero calabash is a single object blended between three
   anchors (branch socket, Mila's hands, bedside table).
 - **Cameras** (`staging.ts`): per page, a landscape and a portrait shot, each with an entry and a
-  reading lens; the text is cleared by a view offset (`TEXT_SHIFT`), not by a crop. A page change is
-  a short dip to paper; under reduced motion only the dip remains and pages show their final state.
+  reading lens; the text is cleared by a view offset (`textShift`: the middle of what the text
+  leaves on that screen), not by a crop, and a screen narrower than its design frame (16:10, 9:16)
+  keeps that frame's horizontal view (`fitLens`). A page change is a short dip to paper; under
+  reduced motion only the dip remains and pages show their final state.
 - **QA**: `qa/calebassier/` is a dev-only viewer (page, instant, graybox); the world's handle
   carries a `probe` (seek, counters) and the canvas publishes `data-page`, `data-hero`,
-  `data-settled`.
+  `data-settled` and `data-framing` (where the lens puts the fruit, faces, hands and lantern).
 
 ### Theme and language layers ("Veillée claire" redesign)
 

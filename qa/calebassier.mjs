@@ -9,7 +9,15 @@
 //   journey    1 → 12 → 1 with the buttons: data-page / data-hero / data-settled, the gift of
 //              pages 3 and 11 must not replay, no console error
 //   rapid      quick presses (2→3→4→3, 6→8→6, 10→11→12→11), keyboard, wheel
-//   lifecycle  Escape while opening / changing page, then ten open → page 5 → back cycles (heap)
+//   escape     ONE Escape during the dive, while the files load (held .glb responses) and during
+//              a page change: back on the tree each time, a late world neither shown nor kept
+//              [QA_NO_ESCAPE=1: negative control, the key is not pressed while the files load]
+//   lifecycle  ten open → page 5 → back cycles (heap, canvases, WebGL contexts)
+//   framing    fruit, faces, hands and lantern (canvas data-framing) whole on the screen and clear
+//              of the text lines and the reader's buttons, the 12 pages, 390×844 and 360×640 (plus
+//              1440×900), Français and Kréyòl, normal and reduced motion, and after turning the
+//              phone to landscape and back [FRAMING=phone-fr-reduced,...: some cases only]
+//              [QA_SHIFT_LOOK=dx: negative control, slides every subject by dx of the screen width]
 //   resize     viewport changes on page 3
 //   touch      emulated phone, real swipes and taps
 //   reduced    prefers-reduced-motion: pages settle within 2 s
@@ -21,12 +29,15 @@ import { chromium } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cropped, required, under } from "./calebassier-subjects.mjs";
 
 const SITE = process.env.SITE ?? "http://localhost:4199/";
 const OUT = (
   process.env.OUT ?? new URL("./out/calebassier-run/", import.meta.url).pathname
 ).replace(/\/?$/, "/");
-const MODES = ["text", "journey", "rapid", "lifecycle", "resize", "touch", "reduced"].concat([
+const MODES = ["text", "journey", "rapid", "escape", "lifecycle", "resize", "touch"].concat([
+  "reduced",
+  "framing",
   "contrast",
   "failure",
   "shots",
@@ -470,87 +481,300 @@ async function runRapid(browser) {
   await s.ctx.close();
 }
 
-async function runLifecycle(browser) {
-  const mode = "lifecycle";
-  const dom = (p) =>
-    p.evaluate(
-      (sel) => ({
-        cards: document.querySelectorAll(".reading-card").length,
-        canvases: document.querySelectorAll(sel).length,
-        books: document.querySelectorAll(".app-book").length,
-        allCanvases: document.querySelectorAll("canvas").length,
-        backs: document.querySelectorAll(".reading-back").length,
-        nexts: document.querySelectorAll(".reading-next").length,
-      }),
-      CANVAS,
+/** Records every WebGL context the page creates, weakly, in `window.__gl`. */
+const trackGl = (p) =>
+  p.addInitScript(() => {
+    window.__gl = [];
+    const get = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (kind, ...rest) {
+      const gl = get.call(this, kind, ...rest);
+      if (gl && /webgl/.test(kind)) window.__gl.push(new WeakRef(gl));
+      return gl;
+    };
+  });
+
+/** What the shell shows: the open book, the reading interface, the tree, the book's canvases. */
+const shell = (p) =>
+  p.evaluate((sel) => {
+    const alive = (window.__gl ?? []).map((r) => r.deref()).filter(Boolean);
+    return {
+      book: document.querySelector("#app").dataset.book ?? null,
+      reading: !document.querySelector(".reading")?.hidden,
+      tree: !document.querySelector(".app-tree")?.hidden,
+      canvases: document.querySelectorAll(sel).length,
+      cards: document.querySelectorAll(".reading-card").length,
+      backs: document.querySelectorAll(".reading-back").length,
+      nexts: document.querySelectorAll(".reading-next").length,
+      notice: document.querySelector(".app-notice")?.textContent ?? null,
+      gl: alive.filter((g) => !g.isContextLost()).length,
+    };
+  }, CANVAS);
+
+/** True when the shell is back on the tree within `ms`, without any further key. */
+const backOnTree = (p, ms) =>
+  p
+    .waitForFunction(
+      () =>
+        !document.querySelector("#app").dataset.book &&
+        !document.querySelector(".app-tree")?.hidden,
+      undefined,
+      { timeout: ms },
+    )
+    .then(() => true)
+    .catch(() => false);
+
+/**
+ * One Escape, never a second: during the opening dive, while the tale's files load (their responses
+ * are held, then released after the key) and during a page change. Each must bring the tree back by
+ * itself; a world that ends loading after the key is neither shown nor kept.
+ */
+async function runEscape(browser) {
+  const mode = "escape";
+  const s = await open(browser, "desktop");
+  const { p } = s;
+  await trackGl(p);
+  await home(p);
+  const rest = (await shell(p)).gl;
+  /** Reopens the tale and checks it starts clean: page 1, one card, one canvas, one context more. */
+  const reopen = async (after) => {
+    await openTale(s);
+    await waitPage(p, "p01", false);
+    await p.waitForTimeout(1000);
+    const st = await state(p);
+    const d = await shell(p);
+    check(
+      mode,
+      `reopen-after-${after}-page1-branch`,
+      st.page === "p01" && st.hero === "branch" && st.count?.trim() === "1 / 12",
+      `page ${st.page} hero ${st.hero} count ${st.count}`,
     );
-  {
-    const s = await open(browser, "desktop");
+    check(
+      mode,
+      `reopen-after-${after}-no-duplicates`,
+      d.cards === 1 && d.canvases === 1 && d.backs === 1 && d.nexts === 1 && d.gl === rest + 1,
+      JSON.stringify(d),
+    );
+    // One press of a page key turns one page: no handler was left behind by the cancelled opening.
+    await p.keyboard.press("ArrowRight");
+    await waitPage(p, "p02", false, 15000).catch(() => {});
+    await p.waitForTimeout(1200);
+    const turned = await state(p);
+    check(
+      mode,
+      `reopen-after-${after}-one-page-per-key`,
+      turned.page === "p02",
+      `page ${turned.page}`,
+    );
+    await leaveTale(s);
+  };
+
+  // 1. During the dive, before anything is mounted.
+  await openTale(s, { wait: false });
+  await p.waitForTimeout(200);
+  await p.keyboard.press("Escape");
+  let back = await backOnTree(p, 4000);
+  await p.waitForTimeout(6000);
+  let now = await shell(p);
+  check(
+    mode,
+    "dive-first-escape-back-on-tree",
+    back && now.book === null && !now.reading && now.tree && now.canvases === 0 && !now.notice,
+    `back within 4 s: ${back}; 6 s later ${JSON.stringify(now)}`,
+  );
+  await p.waitForTimeout(1500);
+  await reopen("dive");
+
+  // 1b. The shell change serves every tale: the same key during the dive into each other one.
+  const titles = await p
+    .locator(".tree-shelf-book:not(.is-invitation)")
+    .evaluateAll((list) => list.map((b) => b.textContent.trim()));
+  for (const title of titles.filter((t) => !new RegExp(BOOK, "i").test(t))) {
+    const other = p.locator(".tree-shelf-book", { hasText: title });
+    await press(s, other);
+    await p.waitForTimeout(2800);
+    await press(s, other);
+    await p.waitForTimeout(200);
+    await p.keyboard.press("Escape");
+    back = await backOnTree(p, 4000);
+    await p.waitForTimeout(6000);
+    now = await shell(p);
+    check(
+      mode,
+      `dive-first-escape-other-tale-${title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 24)}`,
+      back && now.book === null && !now.reading && now.tree && !now.notice && now.gl === rest,
+      `"${title}": back within 4 s: ${back}; 6 s later ${JSON.stringify(now)}`,
+    );
+  }
+
+  // 2. While the world loads its files: the .glb responses are held until after the key.
+  const held = [];
+  const hold = (route) => void held.push(route);
+  await s.ctx.route("**/*.glb", hold);
+  await openTale(s, { wait: false });
+  await p.waitForSelector(".calebassier-status", { state: "visible", timeout: 30000 });
+  const loading = await shell(p);
+  if (!process.env.QA_NO_ESCAPE) await p.keyboard.press("Escape");
+  back = await backOnTree(p, 4000);
+  now = await shell(p);
+  check(
+    mode,
+    "loading-first-escape-back-on-tree",
+    held.length > 0 && loading.book !== null && back && !now.reading && !now.notice,
+    `held responses ${held.length}; while loading ${JSON.stringify(loading)}; back within 4 s: ${back}; then ${JSON.stringify(now)}`,
+  );
+  await s.ctx.unroute("**/*.glb", hold);
+  await Promise.all(held.map((route) => route.continue().catch(() => {})));
+  await p.waitForTimeout(8000);
+  now = await shell(p);
+  check(
+    mode,
+    "loading-late-world-not-shown",
+    now.book === null && !now.reading && now.tree && now.canvases === 0 && !now.notice,
+    `8 s after the responses were released: ${JSON.stringify(now)}`,
+  );
+  check(
+    mode,
+    "loading-late-world-not-kept",
+    now.gl === rest,
+    `WebGL contexts alive and not lost: ${now.gl} (the tree alone: ${rest})`,
+  );
+  if (now.book !== null) await leaveTale(s, "escape");
+  await reopen("loading");
+
+  // 3. During a page change: the tale closes on the one key.
+  await openTale(s);
+  await waitPage(p, "p01", true);
+  await press(s, p.locator(".reading-next"));
+  await p.waitForTimeout(150);
+  await p.keyboard.press("Escape");
+  back = await backOnTree(p, 5000);
+  await p.waitForTimeout(3500);
+  now = await shell(p);
+  check(
+    mode,
+    "page-change-first-escape-back-on-tree",
+    back && now.book === null && !now.reading && now.canvases === 0 && now.gl === rest,
+    `back within 5 s: ${back}; then ${JSON.stringify(now)}`,
+  );
+  await reopen("page-change");
+  errorCheck(mode, "no-console-error", s.errors);
+  await s.ctx.close();
+}
+
+/** The framing the canvas publishes, with the text lines and the reader's buttons on the screen. */
+const framingNow = (p) =>
+  p.evaluate((sel) => {
+    const canvas = document.querySelector(sel);
+    const card = document.querySelector(".reading-card");
+    const clip = card.getBoundingClientRect();
+    // The lines as they are written: the boxes of the text itself, not of its paragraphs.
+    const range = document.createRange();
+    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+    const lines = [];
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      range.selectNodeContents(node);
+      for (const b of range.getClientRects()) {
+        const line = {
+          l: Math.max(b.left, clip.left),
+          t: Math.max(b.top, clip.top),
+          r: Math.min(b.right, clip.right),
+          b: Math.min(b.bottom, clip.bottom),
+        };
+        if (line.r - line.l > 1 && line.b - line.t > 1) lines.push(line);
+      }
+    }
+    const buttons = [...document.querySelectorAll(".reading button, .reading .reading-count")]
+      .filter((e) => e.getClientRects().length > 0)
+      .map((e) => e.getBoundingClientRect())
+      .map((b) => ({ l: b.left, t: b.top, r: b.right, b: b.bottom }));
+    return {
+      width: innerWidth,
+      height: innerHeight,
+      framing: JSON.parse(canvas.dataset.framing ?? "null"),
+      lines,
+      buttons,
+      textBottom: Math.max(0, ...lines.map((b) => b.b)),
+    };
+  }, CANVAS);
+
+/** Checks the published framing of the settled page against the screen, the text and the buttons. */
+async function checkFraming(p, mode, id, page) {
+  const now = await framingNow(p);
+  const shift = Number(process.env.QA_SHIFT_LOOK ?? 0);
+  const faults = [];
+  const names = now.framing ? required(page, { end: true, ...now.framing }) : [];
+  for (const name of names) {
+    const raw = now.framing.subjects[name];
+    const subject = { ...raw, x: raw.x + shift };
+    const why = cropped(subject, now.width, now.height);
+    if (why) faults.push(`${name} ${why}`);
+    const text = Math.max(0, ...now.lines.map((b) => under(subject, b, now.width, now.height)));
+    if (text > 0) faults.push(`${name} ${text} px under the text`);
+    const button = Math.max(0, ...now.buttons.map((b) => under(subject, b, now.width, now.height)));
+    if (button > 0) faults.push(`${name} ${button} px under a button`);
+  }
+  check(
+    mode,
+    id,
+    now.framing !== null && faults.length === 0,
+    `${now.width}x${now.height} text to y ${Math.round(now.textBottom)}; ${names.join(", ") || "no subject required"}${faults.length ? `; ${faults.join("; ")}` : ""}`,
+  );
+  return now;
+}
+
+/**
+ * The reading frame of every page against the real text: phone sizes in both languages, normal and
+ * reduced motion, and after the phone is turned to landscape and back.
+ */
+async function runFraming(browser) {
+  const mode = "framing";
+  const cases = [
+    ["phone", "Français", false],
+    ["small", "Français", false],
+    ["phone", "Français", true],
+    ["small", "Français", true],
+    ["phone", null, true],
+    ["small", null, true],
+    ["desktop", "Français", true],
+  ];
+  const texts = {};
+  for (const [vp, lang, calm] of cases) {
+    const tag = `${vp}-${lang ? "fr" : "gcf"}-${calm ? "reduced" : "motion"}`;
+    if (process.env.FRAMING && !process.env.FRAMING.split(",").includes(tag)) continue;
+    const s = await open(browser, vp, calm ? { reducedMotion: "reduce" } : {});
     const { p } = s;
     await home(p);
-    for (const when of ["opening", "page-change"]) {
-      await openTale(s, { wait: when === "page-change" });
-      if (when === "page-change") {
-        await waitPage(p, "p01", true);
-        await press(s, p.locator(".reading-next"));
-        await p.waitForTimeout(150);
-      } else await p.waitForTimeout(200);
-      await p.keyboard.press("Escape");
-      // Escape is ignored until the tale is open (the shell is not in its book state yet).
-      const opened = await p
-        .waitForSelector(`${CANVAS}[data-page]`, { timeout: when === "opening" ? 20000 : 3000 })
-        .then(() => true)
-        .catch(() => false);
-      if (when === "page-change") await p.waitForTimeout(2500);
-      const book = await p.evaluate(() => document.querySelector("#app").dataset.book ?? null);
-      if (book) {
-        await p.waitForTimeout(1500);
-        await p.keyboard.press("Escape");
-      }
-      await p.waitForFunction(() => !document.querySelector("#app").dataset.book, undefined, {
-        timeout: 20000,
-      });
-      await p.waitForTimeout(3500);
-      check(
-        mode,
-        `escape-${when}-back-on-tree`,
-        true,
-        `first Escape: ${when === "opening" ? (opened ? "tale opened anyway (key ignored during the opening)" : "tale did not open") : "tale left or still open per book attribute"}, book attribute ${book}`,
-      );
-      await openTale(s);
-      await waitPage(p, "p01", false);
-      await p.waitForTimeout(1000);
-      const st = await state(p);
-      const d = await dom(p);
-      check(
-        mode,
-        `reopen-after-${when}-page1-branch`,
-        st.page === "p01" && st.hero === "branch" && st.count?.trim() === "1 / 12",
-        `page ${st.page} hero ${st.hero} count ${st.count}`,
-      );
-      check(
-        mode,
-        `reopen-after-${when}-no-duplicates`,
-        d.cards === 1 && d.canvases === 1 && d.books === 1 && d.backs === 1 && d.nexts === 1,
-        JSON.stringify(d),
-      );
-      await leaveTale(s);
+    await openTale(s, { lang });
+    const size = p.viewportSize();
+    for (let n = 1; n <= 12; n++) {
+      if (n > 1) await step(s, 1);
+      await waitPage(p, pid(n), true);
+      await p.waitForTimeout(900);
+      const now = await checkFraming(p, mode, `${tag}-${pid(n)}`, pid(n));
+      (texts[tag] ??= {})[pid(n)] = Math.round(now.textBottom);
+      if (vp === "desktop" || lang === null) continue;
+      await p.setViewportSize({ width: size.height, height: size.width });
+      await p.waitForTimeout(1200);
+      await checkFraming(p, mode, `${tag}-${pid(n)}-turned-landscape`, pid(n));
+      await p.setViewportSize(size);
+      await p.waitForTimeout(1200);
+      await checkFraming(p, mode, `${tag}-${pid(n)}-turned-back`, pid(n));
     }
-    errorCheck(mode, "escape-no-console-error", s.errors);
+    errorCheck(mode, `${tag}-no-console-error`, s.errors);
     await s.ctx.close();
   }
+  results.extras.textBottom = texts;
+}
+
+async function runLifecycle(browser) {
+  const mode = "lifecycle";
   {
     const s = await open(browser, "desktop");
     const { p, ctx } = s;
-    await p.addInitScript(() => {
-      window.__gl = [];
-      const get = HTMLCanvasElement.prototype.getContext;
-      HTMLCanvasElement.prototype.getContext = function (kind, ...rest) {
-        const gl = get.call(this, kind, ...rest);
-        if (gl && /webgl/.test(kind)) window.__gl.push(new WeakRef(gl));
-        return gl;
-      };
-    });
+    await trackGl(p);
     await home(p);
     const cdp = await ctx.newCDPSession(p);
     const heaps = {};
@@ -966,7 +1190,9 @@ try {
     text: runText,
     journey: runJourney,
     rapid: runRapid,
+    escape: runEscape,
     lifecycle: runLifecycle,
+    framing: runFraming,
     resize: runResize,
     touch: runTouch,
     reduced: runReduced,

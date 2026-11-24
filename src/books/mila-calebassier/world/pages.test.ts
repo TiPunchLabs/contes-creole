@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { foregroundFoot, STAGING } from "../staging";
+import { fitLens, foregroundFoot, STAGING, textShift } from "../staging";
 import report from "./assets.json";
 import LAYOUT from "./layout.json";
 import { MASSES } from "./masses";
@@ -183,7 +183,7 @@ describe("staging", () => {
     for (const id of IDS) {
       const page = STAGING[id];
       for (const shot of [page.wide, page.tall]) {
-        expect(shot.seconds, id).toBeLessThanOrEqual(PAGES[id].seconds);
+        expect((shot.after ?? 0) + shot.seconds, id).toBeLessThanOrEqual(PAGES[id].seconds);
         for (const lens of [shot.from, shot.to]) {
           expect([...lens.pos, ...lens.look].every(Number.isFinite), id).toBe(true);
           expect(lens.fov, id).toBeGreaterThanOrEqual(30);
@@ -347,6 +347,45 @@ describe("figures and the set", () => {
         const onTable = lx < x0 + 0.63 + 0.2 && Math.abs(lz - 1.05) < 0.25 + 0.2;
         expect(onBed || onTable, where).toBe(false);
       }
+    }
+  });
+});
+
+describe("lens and text", () => {
+  it("keeps the horizontal view of the design frame on a narrower screen", () => {
+    const across = (fov: number, aspect: number): number =>
+      Math.tan((fov * Math.PI) / 360) * aspect;
+    // 9:16 is the portrait design frame: 390 × 844 must show as much from side to side.
+    expect(fitLens(50, 9 / 16, true)).toBe(50);
+    expect(fitLens(50, 412 / 732, true)).toBe(50);
+    expect(across(fitLens(50, 390 / 844, true), 390 / 844)).toBeCloseTo(across(50, 9 / 16), 6);
+    expect(fitLens(50, 390 / 844, true)).toBeGreaterThan(50);
+    expect(fitLens(36, 1.6, false)).toBe(36);
+    expect(fitLens(36, 844 / 390, false)).toBe(36);
+    expect(across(fitLens(36, 1.2, false), 1.2)).toBeCloseTo(across(36, 1.6), 6);
+  });
+
+  it("slides the subject to the middle of what the text leaves, on every screen", () => {
+    // Portrait: the band between the text block and the reader's buttons, in pixels.
+    const middle = (w: number, h: number): number => (0.5 + textShift(w, h).y) * h;
+    expect(textShift(390, 844).x).toBe(0);
+    expect(middle(390, 844)).toBeCloseTo((364 + 844 - 92) / 2, 6);
+    expect(middle(360, 640)).toBeCloseTo((364 + 640 - 92) / 2, 6);
+    expect(middle(320, 568)).toBeCloseTo((70 + 0.46 * 568 + 568 - 92) / 2, 6);
+    expect(textShift(360, 640).y).toBeGreaterThan(textShift(390, 844).y);
+    // Landscape: half of the text column, wider on a phone lying down.
+    expect(textShift(1440, 900)).toEqual({ x: (86.4 + 496) / 1440 / 2, y: 0 });
+    expect(textShift(844, 390).x).toBeCloseTo((50.64 + 422) / 844 / 2, 6);
+    expect(textShift(844, 390).x).toBeGreaterThan(textShift(1440, 900).x);
+    for (const [w, h] of [
+      [320, 568],
+      [900, 1200],
+      [3840, 1080],
+      [601, 600],
+    ]) {
+      const { x, y } = textShift(w, h);
+      expect(x + y, `${w}x${h}`).toBeGreaterThanOrEqual(0.1);
+      expect(x + y, `${w}x${h}`).toBeLessThanOrEqual(0.3);
     }
   });
 });

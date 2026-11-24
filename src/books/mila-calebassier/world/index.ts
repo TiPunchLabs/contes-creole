@@ -9,7 +9,7 @@ import { clamp, lerp } from "@shared/math";
 import { createRng } from "@shared/random";
 import { softSprite } from "@shared/three/soft-sprite";
 import { createStage } from "@shared/three/stage";
-import { STAGING, TEXT_SHIFT, type Lens, type PageStaging, type Vec3 } from "../staging";
+import { fitLens, STAGING, textShift, type Lens, type PageStaging, type Vec3 } from "../staging";
 import { loadAssets, type Assets } from "./assets";
 import report from "./assets.json";
 import { createFinish, finishQuality } from "./finish";
@@ -62,6 +62,23 @@ function stagingFor(story: Story): { id: string; staging: PageStaging }[] {
   });
 }
 
+/**
+ * Where something the reader must see lands on the screen: centre as fractions of the view from
+ * its top left corner, radius as a fraction of the view's height; `front` is false behind the lens.
+ */
+export interface Framed {
+  x: number;
+  y: number;
+  r: number;
+  front: boolean;
+}
+
+/** The subjects of a frame, keyed by name; a figure or a prop that is not shown has no entry. */
+export type Subjects = Record<string, Framed>;
+
+/** Radius of a head, a hand and the lantern for the framing checks (metres). */
+const SUBJECT_R = { milaFace: 0.126, ninonFace: 0.115, hand: 0.035, lamp: 0.07 } as const;
+
 /** What a QA script may ask of the mounted world (never used by the app). */
 export interface Probe {
   /** Jumps to a page (index) at an instant of its action, without the paper dip; freezes the clock. */
@@ -92,6 +109,11 @@ export interface Probe {
      * the gap of `ARM_GAP`); null when she is not on the page.
      */
     arms: { mila: number | null; ninon: number | null };
+    /** The fruit, faces, hands and lantern as the lens frames them this instant. */
+    subjects: Subjects;
+    /** Mila's hands on the hero calabash (0 free, 1 holding), the gift in Man Ninon's (0..1). */
+    hold: number;
+    gift: number;
   };
 }
 
@@ -435,7 +457,10 @@ export default defineWorld({
         renderer.getSize(view);
         const tall = view.x < view.y;
         const shot = tall ? staging.tall : staging.wide;
-        const u = calm || shot.seconds === 0 ? 1 : easeInOut(clamp(clock / shot.seconds, 0, 1));
+        const u =
+          calm || shot.seconds === 0
+            ? 1
+            : easeInOut(clamp((clock - (shot.after ?? 0)) / shot.seconds, 0, 1));
         const lens = (pick: (l: Lens) => Vec3, out: THREE.Vector3): THREE.Vector3 => {
           worldPoint(pick(shot.from), staging.space, from);
           worldPoint(pick(shot.to), staging.space, to);
@@ -444,34 +469,74 @@ export default defineWorld({
         lens((l) => l.pos, camera.position);
         lens((l) => l.look, look);
         camera.lookAt(look);
-        // Screens between the two designs keep the horizontal view of a 16:10 landscape frame.
-        const fov = lerp(shot.from.fov, shot.to.fov, u);
-        const aspect = view.x / view.y;
-        camera.fov =
-          !tall && aspect < 1.6
-            ? (Math.atan((Math.tan((fov * Math.PI) / 360) * 1.6) / aspect) * 360) / Math.PI
-            : fov;
-        const dx = tall ? 0 : -view.x * TEXT_SHIFT.wide * cardShift;
-        const dy = tall ? -view.y * TEXT_SHIFT.tall * cardShift : 0;
+        // A screen narrower than its design frame keeps that frame's horizontal view: a tall phone
+        // shows what a 9:16 one shows from side to side, never less.
+        camera.fov = fitLens(lerp(shot.from.fov, shot.to.fov, u), view.x / view.y, tall);
+        const shift = textShift(view.x, view.y);
+        const dx = -view.x * shift.x * cardShift;
+        const dy = -view.y * shift.y * cardShift;
         camera.setViewOffset(view.x, view.y, dx, dy, view.x, view.y);
         camera.updateMatrixWorld();
         built.frame(camera, id, tall);
       };
 
+      const centre = new THREE.Vector3();
+      const edge = new THREE.Vector3();
+      const lensUp = new THREE.Vector3();
+      /** Projects a sphere of the scene through the lens of the frame just composed. */
+      const framed = (at: THREE.Vector3, radius: number): Framed => {
+        const front = edge.copy(at).applyMatrix4(camera.matrixWorldInverse).z < 0;
+        lensUp.setFromMatrixColumn(camera.matrixWorld, 1);
+        edge.copy(at).addScaledVector(lensUp, radius).project(camera);
+        centre.copy(at).project(camera);
+        const round = (v: number): number => Math.round(v * 1e4) / 1e4;
+        return {
+          x: round((centre.x + 1) / 2),
+          y: round((1 - centre.y) / 2),
+          r: round(Math.abs(edge.y - centre.y) / 2),
+          front,
+        };
+      };
+      /** The fruit, the faces, the hands and the lantern on the screen, for the framing checks. */
+      const subjects = (): Subjects => {
+        const out: Subjects = { hero: framed(heroAt, GOURD_R) };
+        if (frameState.gift.k > 0) out.gift = framed(giftAt, GOURD_R);
+        if (built.lamp.visible) out.lamp = framed(lampAt, SUBJECT_R.lamp);
+        const figures = [
+          ["mila", mila as Figure, frameState.mila, SUBJECT_R.milaFace],
+          ["ninon", ninon, frameState.ninon, SUBJECT_R.ninonFace],
+        ] as const;
+        for (const [name, figure, pose, head] of figures) {
+          if (!pose.visible) continue;
+          out[`${name}Face`] = framed(figure.head.getWorldPosition(scratch), head);
+          for (const arm of figure.arms) {
+            const side = arm.sd > 0 ? "Right" : "Left";
+            out[`${name}${side}Hand`] = framed(arm.hand.getWorldPosition(scratch), SUBJECT_R.hand);
+          }
+        }
+        return out;
+      };
+
       /**
-       * Says on the canvas which page is shown, who holds the hero calabash and whether the page's
-       * action is over: a few attributes, written only when they change, for QA scripts to wait on.
+       * Says on the canvas which page is shown, who holds the hero calabash, whether the page's
+       * action is over and where the lens puts the fruit, faces and hands: a few attributes, written
+       * only when the state or the screen changes, for QA scripts to wait on and to measure.
        */
       let published = "";
       const publish = (): void => {
         const id = pages[shown].id;
         const settled = veilLevel === 0 && clock >= PAGES[id].seconds;
-        const state = `${id} ${heroOwner} ${settled ? "settled" : "moving"}`;
+        const state = `${id} ${heroOwner} ${settled ? "settled" : "moving"} ${view.x}x${view.y} ${cardShift}`;
         if (state === published) return;
         published = state;
         stage.canvas.dataset.page = id;
         stage.canvas.dataset.hero = heroOwner;
         stage.canvas.dataset.settled = String(settled);
+        stage.canvas.dataset.framing = JSON.stringify({
+          hold: frameState.hold,
+          gift: frameState.gift.hold,
+          subjects: subjects(),
+        });
       };
 
       /** Advances the page clock, the paper dip and the text shift, then composes the frame. */
@@ -565,6 +630,9 @@ export default defineWorld({
               mila: deepest(mila as Figure, MILA_DIMS, frameState.mila),
               ninon: deepest(ninon, NINON_DIMS, frameState.ninon),
             },
+            subjects: subjects(),
+            hold: frameState.hold,
+            gift: frameState.gift.hold,
           };
         },
       };

@@ -49,6 +49,8 @@ export interface Shot {
   to: Lens;
   /** Duration of the entry move (cosine ease in and out); 0 is a fixed camera. */
   seconds: number;
+  /** Seconds the lens holds `from` before it moves (default 0): a move that follows a late action. */
+  after?: number;
   foreground: Foreground[];
 }
 
@@ -77,10 +79,53 @@ const FAR = 400;
 export const CLIP = { near: NEAR, far: FAR } as const;
 
 /**
- * Share of the screen the framed subject is slid by, away from the reading text: to the right on
- * landscape screens, downwards on portrait ones (camera view offset; the lens itself is unchanged).
+ * Room the reading text takes on the screen, as `theme.css` lays it out (pixels): in portrait the
+ * text starts under the top buttons and runs to about 294 px (46 % of a short phone, where a longer
+ * passage scrolls) and the reader's buttons take the bottom; in landscape the text is a left column.
  */
-export const TEXT_SHIFT = { wide: 0.17, tall: 0.17 } as const;
+const TEXT = {
+  top: 70,
+  block: 294,
+  shortBlock: 0.46,
+  shortHeight: 700,
+  controls: 92,
+  column: { width: 496, share: 0.4, shortWidth: 448, shortShare: 0.5, shortHeight: 500 },
+} as const;
+
+/**
+ * Share of the screen the framed subject is slid by, away from the reading text (camera view
+ * offset; the lens itself is unchanged): downwards on a portrait screen, to the middle of the band
+ * left between the text and the reader's buttons; to the right on a landscape one, to the middle of
+ * what the text column leaves. The text is laid out in pixels, so the share follows the screen.
+ */
+export function textShift(width: number, height: number): { x: number; y: number } {
+  if (width < height) {
+    const block = height <= TEXT.shortHeight ? TEXT.shortBlock * height : TEXT.block;
+    const middle = (TEXT.top + Math.min(TEXT.block, block) + height - TEXT.controls) / 2;
+    return { x: 0, y: Math.min(0.24, Math.max(0.1, middle / height - 0.5)) };
+  }
+  const c = TEXT.column;
+  const short = height <= c.shortHeight;
+  const column = Math.min(short ? c.shortWidth : c.width, (short ? c.shortShare : c.share) * width);
+  const edge = (Math.max(24, 0.06 * width) + column) / width;
+  return { x: Math.min(0.3, Math.max(0.15, edge / 2)), y: 0 };
+}
+
+/**
+ * Screen shapes the lenses were composed for: 16:10 landscape, 9:16 portrait. A narrower screen of
+ * the same kind keeps the horizontal view of its design frame and sees more above and below.
+ */
+export const DESIGN_ASPECT = { wide: 1.6, tall: 9 / 16 } as const;
+
+/**
+ * Vertical field of view (degrees) that shows on a screen of `aspect` (width / height) the width a
+ * lens of `fov` shows on its design frame; wider screens keep `fov` and see more to the sides.
+ */
+export function fitLens(fov: number, aspect: number, tall: boolean): number {
+  const design = tall ? DESIGN_ASPECT.tall : DESIGN_ASPECT.wide;
+  if (aspect >= design) return fov;
+  return (Math.atan((Math.tan((fov * Math.PI) / 360) * design) / aspect) * 360) / Math.PI;
+}
 
 /** Staging of every page; the keys are the story page ids (checked by `books.test.ts`). */
 export const STAGING: Record<string, PageStaging> = {
@@ -91,8 +136,8 @@ export const STAGING: Record<string, PageStaging> = {
     move: "Light dolly in towards the gate, then still.",
     space: "garden",
     wide: {
-      from: { pos: [11.6, 1.15, 6.1], look: [5.2, 1.0, 0.2], fov: 36 },
-      to: { pos: [10.9, 1.1, 5.5], look: [5.2, 1.0, 0.2], fov: 36 },
+      from: { pos: [11.6, 1.15, 6.1], look: [5.4, 1.0, -0.02], fov: 36 },
+      to: { pos: [10.9, 1.1, 5.5], look: [5.4, 1.0, -0.02], fov: 36 },
       seconds: 5,
       foreground: [
         { cell: [0, 1], forward: 2.6, right: 0.72, foot: 0, height: 0.9 },
@@ -160,9 +205,11 @@ export const STAGING: Record<string, PageStaging> = {
       foreground: [{ cell: [0, 1], forward: 2.6, right: -1.35, foot: 0, height: 0.85 }],
     },
     tall: {
-      from: { pos: [9.2, 1.2, 6.9], look: [8.6, 0.8, 1.5], fov: 54 },
+      from: { pos: [8.95, 1.2, 6.9], look: [8.35, 0.8, 1.5], fov: 54 },
       to: { pos: [10.4, 1.2, 6.6], look: [10.7, 0.8, 0.4], fov: 54 },
-      seconds: 8,
+      // The lens waits for the walk: panning earlier, it would overtake the two figures.
+      after: 2.4,
+      seconds: 7,
       foreground: [],
     },
     portrait: "Both bodies and the ground they light.",
@@ -180,8 +227,8 @@ export const STAGING: Record<string, PageStaging> = {
       foreground: [{ cell: [1, 0], forward: 0.9, right: -0.36, foot: 0, height: 0.75 }],
     },
     tall: {
-      from: { pos: [0.95, 1.05, 3.7], look: [0.45, 0.95, 1.4], fov: 50 },
-      to: { pos: [0.9, 1.05, 3.5], look: [0.45, 0.95, 1.4], fov: 50 },
+      from: { pos: [0.95, 1.05, 3.7], look: [0.45, 1.0, 1.4], fov: 50 },
+      to: { pos: [0.9, 1.05, 3.5], look: [0.45, 1.0, 1.4], fov: 50 },
       seconds: 6,
       foreground: [{ cell: [0, 1], forward: 1.0, right: 0.26, foot: 0, height: 0.55, flip: true }],
     },
@@ -214,8 +261,8 @@ export const STAGING: Record<string, PageStaging> = {
     move: "Fixed.",
     space: "garden",
     wide: {
-      from: { pos: [10.9, 1.1, 5.5], look: [5.2, 1.3, 0.2], fov: 38 },
-      to: { pos: [10.9, 1.1, 5.5], look: [5.2, 1.3, 0.2], fov: 38 },
+      from: { pos: [10.9, 1.1, 5.5], look: [5.4, 1.3, -0.02], fov: 38 },
+      to: { pos: [10.9, 1.1, 5.5], look: [5.4, 1.3, -0.02], fov: 38 },
       seconds: 0,
       foreground: [
         { cell: [0, 1], forward: 2.6, right: 0.72, foot: 0, height: 0.9 },
@@ -257,8 +304,8 @@ export const STAGING: Record<string, PageStaging> = {
     move: "Short follow, left to right.",
     space: "garden",
     wide: {
-      from: { pos: [3.1, 0.5, 3.7], look: [0.5, 0.6, 1.2], fov: 36 },
-      to: { pos: [3.6, 0.5, 3.6], look: [1.5, 0.6, 1.4], fov: 36 },
+      from: { pos: [3.1, 0.5, 3.7], look: [0.89, 0.81, 0.83], fov: 36 },
+      to: { pos: [3.6, 0.5, 3.6], look: [1.89, 0.81, 1.03], fov: 36 },
       seconds: 8,
       foreground: [
         { cell: [0, 1], forward: 1.9, right: 0.8, foot: 0, height: 0.6, flip: true },
@@ -266,8 +313,8 @@ export const STAGING: Record<string, PageStaging> = {
       ],
     },
     tall: {
-      from: { pos: [2.4, 0.6, 4.3], look: [0.6, 0.6, 1.2], fov: 54 },
-      to: { pos: [3.3, 0.6, 4.3], look: [2.1, 0.6, 1.5], fov: 54 },
+      from: { pos: [2.4, 0.6, 4.3], look: [0.6, 0.85, 1.2], fov: 54 },
+      to: { pos: [3.3, 0.6, 4.3], look: [2.1, 0.85, 1.5], fov: 54 },
       seconds: 8,
       foreground: [{ cell: [0, 1], forward: 2.2, right: 0.45, foot: 0, height: 0.5, flip: true }],
     },
@@ -280,14 +327,14 @@ export const STAGING: Record<string, PageStaging> = {
     move: "Reveal: the lens waits on Mila, the lamp enters from the gate side.",
     space: "garden",
     wide: {
-      from: { pos: [2.4, 1.05, 5.0], look: [4.4, 0.9, 1.6], fov: 36 },
-      to: { pos: [2.9, 1.05, 5.2], look: [4.1, 0.9, 1.6], fov: 36 },
+      from: { pos: [2.4, 1.05, 5.0], look: [3.36, 0.9, 1.25], fov: 36 },
+      to: { pos: [2.9, 1.05, 5.2], look: [3.06, 0.9, 1.25], fov: 36 },
       seconds: 7,
       foreground: [{ cell: [0, 0], forward: 2.3, right: 1.0, foot: 0, height: 1.7, flip: true }],
     },
     tall: {
-      from: { pos: [3.1, 1.2, 5.7], look: [3.9, 0.85, 1.6], fov: 54 },
-      to: { pos: [2.9, 1.2, 5.9], look: [3.0, 0.85, 1.7], fov: 54 },
+      from: { pos: [3.1, 1.2, 5.7], look: [3.9, 1.02, 1.6], fov: 54 },
+      to: { pos: [2.9, 1.2, 5.9], look: [3.0, 1.02, 1.7], fov: 54 },
       seconds: 7,
       foreground: [],
     },
