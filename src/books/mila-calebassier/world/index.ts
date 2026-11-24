@@ -99,6 +99,8 @@ export default defineWorld({
     const { scene, camera, renderer } = stage;
     // Painted colours are shown as painted: no filmic curve between the washes and the screen.
     renderer.toneMapping = THREE.NoToneMapping;
+    // The tale is read in the text card; the picture is not announced.
+    stage.canvas.setAttribute("aria-hidden", "true");
     camera.near = 0.1;
     camera.far = 400;
     const veil = document.createElement("div");

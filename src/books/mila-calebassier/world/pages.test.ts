@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { STAGING } from "../staging";
+import report from "./assets.json";
+import LAYOUT from "./layout.json";
 import { KEYS, createMixedKey, mixKeys } from "./keys";
 import {
   PAGES,
@@ -227,5 +229,25 @@ describe("light keys", () => {
     mixKeys("night", "dark", 0.5, out);
     expect(out.hemi).toBeCloseTo((KEYS.night.hemi + KEYS.dark.hemi) / 2);
     expect(out.sunFrom.length()).toBeCloseTo(1);
+  });
+});
+
+describe("the built tree", () => {
+  it("hangs its calabashes in the branches and the canopy, never on the trunk", () => {
+    const [tx, , tz] = LAYOUT.tree.at;
+    expect(report.tree.gourds.length).toBeGreaterThanOrEqual(10);
+    for (const [x, y, z] of report.tree.gourds) {
+      // Away from the trunk's axis (the trunk is 0.4 m thick at the fork) and above the fork.
+      expect(Math.hypot(x - tx, z - tz)).toBeGreaterThan(1.3);
+      expect(y).toBeGreaterThan(LAYOUT.tree.trunkHeight);
+    }
+  });
+
+  it("brings each low branch down to the height where hands can take its fruit", () => {
+    for (const branch of [report.tree.A, report.tree.B]) {
+      expect(branch.rest[1]).toBeGreaterThan(2.5);
+      expect(branch.bent[1]).toBeGreaterThan(1.0);
+      expect(branch.bent[1]).toBeLessThan(1.3);
+    }
   });
 });
