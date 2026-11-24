@@ -59,7 +59,7 @@ export interface PageStaging {
   intent: string;
   /** Shot size and angle. */
   size: string;
-  /** Camera move in words (entry → reading); the exit is always the paper dip to the next page. */
+  /** Camera move in words (entry → reading); the exit is always the wash into the next page. */
   move: string;
   /** Where the coordinates live: the garden (world) or Mila's house (local: x along the façade, +z out). */
   space: "garden" | "house";
@@ -221,8 +221,8 @@ export const STAGING: Record<string, PageStaging> = {
     move: "Almost fixed: a few centimetres of drift in.",
     space: "garden",
     wide: {
-      from: { pos: [1.75, 1.02, 3.55], look: [0.75, 0.98, 1.45], fov: 34 },
-      to: { pos: [1.65, 1.02, 3.35], look: [0.75, 0.98, 1.45], fov: 34 },
+      from: { pos: [1.75, 1.02, 3.55], look: [0.66, 0.98, 1.49], fov: 34 },
+      to: { pos: [1.65, 1.02, 3.35], look: [0.66, 0.98, 1.49], fov: 34 },
       seconds: 6,
       foreground: [{ cell: [1, 0], forward: 0.9, right: -0.36, foot: 0, height: 0.75 }],
     },

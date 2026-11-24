@@ -94,9 +94,19 @@ export function createMila(wash: Wash, ramp: THREE.Texture, rnd: Rand): MilaFigu
     hoop: fine("#e9b949"),
     madras: washed(wash, ramp, { map: madras, side: THREE.DoubleSide, gran: 0.2, pool: 0.1 }),
     rand: (a, b) => a + (b - a) * rnd(),
-    // In the garden she wears closed canvas shoes, pale so they read at dusk and at night.
-    shoes: { upper: flat("#efe4cf", 0.25, 0.55), sole: flat("#b06a4c", 0.1) },
+    // In the garden she wears soft flat shoes of unbleached canvas with a band the colour of her
+    // dress straps: pale, so they read at dusk and at night, and from the tale's own colours.
+    shoes: {
+      upper: flat("#eadfc6", 0.3, 0.55),
+      sole: flat("#a8704e", 0.1),
+      band: flat("#d98d1f", 0.2, 0.55),
+    },
+    // Seen small and far in this garden, her limbs are a fifth thicker than in the close underwater
+    // shots: arms and legs keep a readable outline against the dress and the path.
+    limbs: 1.2,
   });
+  // Fuller puffs: the two rounds of her hair are her outline's signature at any size.
+  for (const puff of figure.puffs) puff.scale.multiplyScalar(1.12);
   // In this tale Mila keeps her eyes open: she looks at the tree, the calabash, Man Ninon.
   figure.open.visible = true;
   figure.closed.visible = false;

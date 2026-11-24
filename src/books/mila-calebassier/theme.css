@@ -241,7 +241,8 @@
   }
 }
 
-/* Paper dip between two pages, and the note shown while the garden's files load. */
+/* Bare paper that lifts when the tale opens (page changes are a wash drawn by the world), and the
+   note shown while the garden's files load. */
 .calebassier-veil {
   position: absolute;
   inset: 0;

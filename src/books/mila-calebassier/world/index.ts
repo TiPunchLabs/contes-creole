@@ -22,8 +22,13 @@ import { createWash, softRamp } from "./paint";
 import { createFrame, PAGES, resetFrame, type Anchor, type Carry, type Places } from "./pages";
 import { applyPose, armDepth, type Dims, type Figure, type Grip, type Pose } from "./puppet";
 
-/** Seconds the paper covers the scene around a page change: down, then up. */
-const DIP = { cover: 0.22, clear: 0.5 } as const;
+/** Seconds the paper takes to lift when the tale opens. */
+const LIFT = 0.5;
+/**
+ * Seconds a page change lasts: the page just left stays on the sheet while the new one soaks
+ * through it (see `finish.ts`); with reduced motion, a short even cross-fade.
+ */
+const WASH = { soak: 0.85, fade: 0.25 } as const;
 /** Seconds the camera takes to slide when the reading text is hidden or shown. */
 const CARD_SECONDS = 1.2;
 /** How Man Ninon carries the fruit she is given, and her lantern (body space). */
@@ -81,8 +86,13 @@ const SUBJECT_R = { milaFace: 0.126, ninonFace: 0.115, hand: 0.035, lamp: 0.07 }
 
 /** What a QA script may ask of the mounted world (never used by the app). */
 export interface Probe {
-  /** Jumps to a page (index) at an instant of its action, without the paper dip; freezes the clock. */
-  seek(page: number, seconds: number): void;
+  /**
+   * Jumps to a page (index) at an instant of its action and freezes the clock. `left` (default 0)
+   * leaves that share of the picture kept by `keep()` over it: an instant of a page change.
+   */
+  seek(page: number, seconds: number, left?: number, way?: number): void;
+  /** Keeps the picture now on the screen as the page a change starts from. */
+  keep(): void;
   /** Resumes the page's own clock. */
   resume(): void;
   /** The scene graph, for inspection. */
@@ -94,6 +104,8 @@ export interface Probe {
    * wall, another figure). A subject that covers almost nothing on the screen has no entry.
    */
   visibility(): Record<string, number>;
+  /** Shows the two figures alone, flat black on bare paper: their outlines (design captures). */
+  setSilhouette(on: boolean): void;
   /** Uses grey proxies instead of the painted materials (layout captures). */
   setGraybox(on: boolean): void;
   info(): {
@@ -262,7 +274,9 @@ export default defineWorld({
       let clock = calm ? PAGES[pages[shown].id].seconds : 0;
       let frozen = false;
       let veilLevel = 1;
-      let veilWay = -1;
+      /** What remains of the page just left over the page shown (1 → 0), and the way it was turned. */
+      let washLeft = 0;
+      let washWay = 1;
       let cardShift = 1;
       let cardGoal = 1;
       let graybox = false;
@@ -277,6 +291,9 @@ export default defineWorld({
       const scratch = new THREE.Vector3();
       const grey = new THREE.MeshLambertMaterial({ color: "#b9b6b0" });
       const painted = new Map<THREE.Mesh, THREE.Material | THREE.Material[]>();
+      const ink = new THREE.MeshBasicMaterial({ color: "#15131c" });
+      const inked = new Map<THREE.Mesh, THREE.Material | THREE.Material[]>();
+      const hiddenForInk = new Map<THREE.Object3D, boolean>();
 
       /** A carried point in world space: `carry` in the body space of a figure standing in `p`. */
       const carried = (p: Pose, c: Carry, out: THREE.Vector3): THREE.Vector3 => {
@@ -649,7 +666,7 @@ export default defineWorld({
       let published = "";
       const publish = (): void => {
         const id = pages[shown].id;
-        const settled = veilLevel === 0 && clock >= PAGES[id].seconds;
+        const settled = veilLevel === 0 && washLeft === 0 && clock >= PAGES[id].seconds;
         const state = `${id} ${heroOwner} ${settled ? "settled" : "moving"} ${view.x}x${view.y} ${cardShift}`;
         if (state === published) return;
         published = state;
@@ -663,22 +680,22 @@ export default defineWorld({
         });
       };
 
-      /** Advances the page clock, the paper dip and the text shift, then composes the frame. */
+      /** Advances the page clock, the page-change wash and the text shift, then composes the frame. */
       const frame = (time: number, dt: number): void => {
         if (!frozen) {
-          if (shown !== target && veilWay <= 0) veilWay = 1;
-          veilLevel = clamp(
-            veilLevel + (veilWay * dt) / (veilWay > 0 ? DIP.cover : DIP.clear),
-            0,
-            1,
-          );
-          if (veilLevel >= 1 && veilWay > 0) {
+          veilLevel = clamp(veilLevel - dt / LIFT, 0, 1);
+          if (shown !== target) {
+            // Whatever is on the screen now, a change still under way included, becomes the picture
+            // the new page soaks through: quick turns never stack, there is one wash at a time.
+            sheet.hold();
+            washWay = target > shown ? 1 : -1;
+            washLeft = 1;
             shown = target;
             clock = calm ? PAGES[pages[shown].id].seconds : 0;
-            veilWay = -1;
-          } else if (veilLevel <= 0) veilWay = 0;
-          else if (veilWay === 0) veilWay = -1;
-          if (veilWay <= 0) clock = Math.min(clock + dt, PAGES[pages[shown].id].seconds);
+          } else {
+            washLeft = Math.max(0, washLeft - dt / (calm ? WASH.fade : WASH.soak));
+            clock = Math.min(clock + dt, PAGES[pages[shown].id].seconds);
+          }
           const step = dt / CARD_SECONDS;
           cardShift = calm
             ? cardGoal
@@ -698,23 +715,54 @@ export default defineWorld({
       renderer.info.autoReset = false;
       stage.start(frame, () => {
         renderer.info.reset();
-        sheet.render();
+        sheet.render(washLeft, washWay, calm);
       });
 
       const probe: Probe = {
         scene,
-        seek(page, seconds) {
+        keep() {
+          sheet.hold();
+        },
+        seek(page, seconds, left = 0, way = 1) {
           target = shown = clamp(Math.round(page), 0, pages.length - 1);
           clock = clamp(seconds, 0, PAGES[pages[shown].id].seconds);
           frozen = true;
           cardShift = cardGoal;
           veilLevel = 0;
-          veilWay = 0;
+          washLeft = clamp(left, 0, 1);
+          washWay = way;
         },
         resume() {
           frozen = false;
         },
         visibility,
+        setSilhouette(on) {
+          if (on === inked.size > 0) return;
+          for (const child of scene.children) {
+            if (child !== mila.g && child !== ninon.g) {
+              if (on) hiddenForInk.set(child, child.visible);
+              else child.visible = hiddenForInk.get(child) ?? child.visible;
+              if (on) child.visible = false;
+            }
+          }
+          scene.background = on ? new THREE.Color("#f4ecdc") : null;
+          for (const figure of [mila.g, ninon.g]) {
+            figure.traverse((object) => {
+              if (!(object instanceof THREE.Mesh)) return;
+              if (on) {
+                inked.set(object, object.material);
+                object.material = ink;
+              } else {
+                const mat = inked.get(object);
+                if (mat) object.material = mat;
+              }
+            });
+          }
+          if (!on) {
+            inked.clear();
+            hiddenForInk.clear();
+          }
+        },
         setGraybox(on) {
           if (on === graybox) return;
           graybox = on;
@@ -776,6 +824,7 @@ export default defineWorld({
         },
         dispose() {
           grey.dispose();
+          ink.dispose();
           sparks.dispose();
           release();
         },

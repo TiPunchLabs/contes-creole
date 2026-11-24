@@ -18,15 +18,16 @@ const V3 = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
 /** Her dress in profile: radius and height, hem last (body space). */
 const DRESS_PROFILE: [number, number][] = [
   [0.07, 1.31],
-  [0.15, 1.27],
-  [0.185, 1.2],
-  [0.195, 1.1],
-  [0.185, 0.99],
-  [0.205, 0.9],
-  [0.235, 0.78],
-  [0.25, 0.62],
-  [0.265, 0.46],
-  [0.275, 0.4],
+  [0.152, 1.275],
+  [0.192, 1.21],
+  [0.208, 1.12],
+  [0.196, 1.0],
+  [0.226, 0.88],
+  [0.248, 0.74],
+  [0.254, 0.58],
+  [0.264, 0.44],
+  [0.284, 0.33],
+  [0.292, 0.3],
 ];
 
 /**
@@ -61,7 +62,10 @@ const HEAD_Y = 1.44;
 /** Her head against Mila's child-sized one. */
 const HEAD_SCALE = 0.9;
 
-/** Her everyday dress: a plain knee-length cotton shift, fuller at the hips, soft folds at the hem. */
+/**
+ * Her everyday dress: a plain cotton shift to mid-calf, full at the bust and the hips, a little
+ * taken in between, flaring at the hem in soft folds.
+ */
 function dressGeometry(): THREE.LatheGeometry {
   const geometry = new THREE.LatheGeometry(
     DRESS_PROFILE.map(([r, y]) => new THREE.Vector2(r, y)),
@@ -73,9 +77,12 @@ function dressGeometry(): THREE.LatheGeometry {
     const y = p.getY(i);
     const z = p.getZ(i);
     const a = Math.atan2(z, x);
-    const low = THREE.MathUtils.clamp((1.0 - y) / 0.6, 0, 1);
+    const low = THREE.MathUtils.clamp((1.0 - y) / 0.7, 0, 1);
     // Flatter back and chest than a turned shape; folds that open towards the hem.
-    const depth = z > 0 ? 0.92 : 0.84;
+    // A rounder belly in front, and the upper back rounded by the years behind.
+    const belly = z > 0 ? 0.1 * Math.exp(-(((y - 0.86) / 0.16) ** 2)) : 0;
+    const back = z < 0 ? 0.16 * Math.exp(-(((y - 1.17) / 0.11) ** 2)) : 0;
+    const depth = (z > 0 ? 0.92 : 0.84) + belly + back;
     const fold = 1 + (Math.sin(a * 9) * 0.028 + Math.sin(a * 17 + 1.3) * 0.012) * low * low;
     p.setXYZ(i, x * fold, y, z * depth * fold);
   }
@@ -86,7 +93,7 @@ function dressGeometry(): THREE.LatheGeometry {
 /**
  * Man Ninon: built on the plan of the shared Mila figure (skinned limbs, sculpted head, the same
  * hands and arm IK) so the two stand in one drawing, with her own proportions: grey hair in a bun,
- * a coral cotton dress with short sleeves, closed slippers. No folklore costume (brief, spec 02).
+ * a coral cotton dress to mid-calf with short sleeves, light closed shoes. No folklore costume (brief, spec 02).
  */
 export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Texture): Figure {
   const g = new THREE.Group();
@@ -123,8 +130,10 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
     scale: 6,
   });
   const hairM = flat("#b9b4ae", 0.35);
-  // Closed house slippers, pale against her skin and the path so they read at dusk and at night.
-  const slipper = flat("#b9d2c6", 0.3, 0.55);
+  // Light closed walking shoes of soft sand-coloured leather, pale against her skin and the path so
+  // they read at dusk and at night; a darker collar and sole draw the shoe.
+  const leather = flat("#cfbf9f", 0.3, 0.55);
+  const trim = flat("#8a6f55", 0.15, 0.5);
   const sole = flat("#6d5644", 0.1);
 
   const dress = new THREE.Mesh(dressGeometry(), dressM);
@@ -134,16 +143,25 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
     const limb = skinnedLimb(skin, {
       lens: [NINON_DIMS.thigh, NINON_DIMS.shin],
       axis: -1,
-      radii: [0.062, 0.056, 0.048, 0.04, 0.042, 0.04, 0.033, 0.027, 0.025],
+      radii: [0.068, 0.062, 0.054, 0.046, 0.05, 0.05, 0.042, 0.034, 0.03],
     });
     limb.mesh.position.set(sx * 0.085, 0.75, 0);
     inner.add(limb.mesh);
     const [hip, knee, ankle] = limb.bones;
-    // The slipper covers the whole foot: a rounded upper over a flat sole, open at the ankle.
-    const upper = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 12), slipper);
-    upper.scale.set(0.74, 0.46, 1.6);
+    // A low closed shoe: a rounded upper over the whole foot, a firmer heel, a collar round the
+    // ankle and a flat sole with a low heel.
+    const upper = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 12), leather);
+    upper.scale.set(0.74, 0.44, 1.6);
     upper.position.set(0, -0.022, 0.042);
     ankle.add(upper);
+    const counter = new THREE.Mesh(new THREE.SphereGeometry(0.036, 12, 10), leather);
+    counter.scale.set(1, 0.9, 0.95);
+    counter.position.set(0, -0.012, -0.012);
+    ankle.add(counter);
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.034, 0.006, 6, 18), trim);
+    collar.rotation.x = Math.PI / 2;
+    collar.position.set(0, 0.012, 0.004);
+    ankle.add(collar);
     const tread = new THREE.Mesh(new THREE.BoxGeometry(0.078, 0.012, 0.185), sole);
     tread.position.set(0, -0.042, 0.042);
     ankle.add(tread);
@@ -151,7 +169,7 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
   }
   body.add(
     taper(
-      [V3(0, 1.27, -0.005), V3(0, 1.33, 0.004), V3(0, 1.38, 0.012)],
+      [V3(0, 1.27, 0), V3(0, 1.325, 0.018), V3(0, 1.372, 0.036)],
       [0.058, 0.048, 0.05],
       skin,
       8,
@@ -164,13 +182,13 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
     const limb = skinnedLimb(skin, {
       lens: [L1, L2],
       axis: 1,
-      radii: [0.047, 0.045, 0.04, 0.035, 0.032, 0.03, 0.027, 0.024],
+      radii: [0.05, 0.05, 0.045, 0.039, 0.036, 0.034, 0.03, 0.026],
     });
     limb.mesh.position.set(sd * 0.185, SHOULDER_Y, 0);
     body.add(limb.mesh);
     // Short sleeve: a cap of the dress's cotton over the shoulder, riding the upper arm.
-    const sleeve = new THREE.Mesh(new THREE.SphereGeometry(0.066, 14, 10), dressM);
-    sleeve.scale.set(1, 1.35, 1);
+    const sleeve = new THREE.Mesh(new THREE.SphereGeometry(0.074, 14, 10), dressM);
+    sleeve.scale.set(1.02, 1.4, 1.05);
     sleeve.position.y = 0.05;
     limb.bones[0].add(sleeve);
     const hand = makeHand(skin, skinL);
@@ -188,7 +206,8 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
   });
 
   const head = new THREE.Group();
-  head.position.set(0, HEAD_Y, 0.02);
+  // Carried a little forward of the shoulders: an older woman's neck.
+  head.position.set(0, HEAD_Y - 0.012, 0.045);
   body.add(head);
   const face = new THREE.Group();
   face.scale.setScalar(HEAD_SCALE);
@@ -268,9 +287,10 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
   }
   cap.computeVertexNormals();
   face.add(new THREE.Mesh(cap, hairM));
-  const bun = new THREE.Mesh(new THREE.SphereGeometry(0.052, 14, 10), hairM);
-  bun.scale.set(1.1, 0.95, 0.9);
-  bun.position.set(0, 0.03, -0.135);
+  // A full chignon, low on the nape: it draws her profile.
+  const bun = new THREE.Mesh(new THREE.SphereGeometry(0.064, 16, 12), hairM);
+  bun.scale.set(1.12, 0.92, 0.95);
+  bun.position.set(0, 0.012, -0.15);
   face.add(bun);
   return { g, pose, inner, body, head, legs, arms };
 }

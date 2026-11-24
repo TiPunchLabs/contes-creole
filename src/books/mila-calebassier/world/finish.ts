@@ -58,6 +58,24 @@ const FRAGMENT = `uniform sampler2D tDiffuse; uniform sampler2D uGrain; uniform 
     c=mix(c,c*uPaper,.14);
     gl_FragColor=vec4(c,1.); }`;
 
+// Page change: the picture of the page just left stays on the sheet and the new page soaks through
+// it, as a wet wash eats into a dry one. The edge follows the paper's tooth (large blotches, fine
+// grain), runs across the sheet the way the pages turn, and carries a darker rim of pooled pigment.
+// `uPlain` is the reduced-motion version: an even cross-fade, no travelling edge.
+const WASH_FRAGMENT = `uniform sampler2D uHeld; uniform sampler2D uGrain; uniform float uAspect; uniform float uLeft; uniform float uWay; uniform float uPlain; varying vec2 vUv;
+  void main(){
+    vec3 held=texture2D(uHeld,vUv).rgb;
+    vec2 g=vUv*vec2(uAspect,1.);
+    float blot=texture2D(uGrain,g*.11+.17).r*.7+texture2D(uGrain,g*.47).g*.22+texture2D(uGrain,g*2.3).b*.08;
+    float across=uWay>0.?1.-vUv.x:vUv.x;
+    float n=clamp((blot*.5+across*.5-.14)/.72,0.,1.);
+    float soft=.11;
+    float t=(1.-uLeft)*(1.+2.*soft)-soft;
+    float a=mix(smoothstep(t-soft,t+soft,n),uLeft,uPlain);
+    float rim=a*(1.-a)*4.*(1.-uPlain);
+    held*=1.-.3*rim;
+    gl_FragColor=vec4(held,a); }`;
+
 /**
  * The sheet's finish: renders the scene, then lays the brush, the pooled edges and the paper's
  * tooth over the whole picture. Owns its render targets.
@@ -68,7 +86,16 @@ export function createFinish(
   camera: THREE.Camera,
   grain: THREE.Texture,
   quality: FinishQuality,
-): { render(): void; dispose(): void } {
+): {
+  /** Keeps the picture now on the screen, for the next page to soak through (`render`'s `left`). */
+  hold(): void;
+  /**
+   * Draws the frame. `left` (1 → 0) is how much of the held picture remains over it; `way` is +1
+   * towards the next page, −1 back; `plain` asks for an even cross-fade.
+   */
+  render(left?: number, way?: number, plain?: boolean): void;
+  dispose(): void;
+} {
   const target = new THREE.WebGLRenderTarget(1, 1, {
     type: THREE.HalfFloatType,
     samples: quality === "high" ? 4 : 0,
@@ -92,8 +119,40 @@ export function createFinish(
   const size = new THREE.Vector2();
   let width = 0;
   let height = 0;
+  let held: THREE.FramebufferTexture | null = null;
+  const wash = new THREE.ShaderMaterial({
+    uniforms: {
+      uHeld: { value: null },
+      uGrain: { value: grain },
+      uAspect: { value: 1 },
+      uLeft: { value: 0 },
+      uWay: { value: 1 },
+      uPlain: { value: 0 },
+    },
+    vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }`,
+    fragmentShader: WASH_FRAGMENT,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const sheet = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), wash);
+  sheet.frustumCulled = false;
+  const overlay = new THREE.Scene();
+  overlay.add(sheet);
+  const flat = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const buffer = new THREE.Vector2();
   return {
-    render() {
+    hold() {
+      renderer.getDrawingBufferSize(buffer);
+      if (!held || held.image.width !== buffer.x || held.image.height !== buffer.y) {
+        held?.dispose();
+        held = new THREE.FramebufferTexture(buffer.x, buffer.y);
+        wash.uniforms.uHeld.value = held;
+      }
+      renderer.setRenderTarget(null);
+      renderer.copyFramebufferToTexture(held);
+    },
+    render(left = 0, way = 1, plain = false) {
       renderer.getSize(size);
       if (size.x !== width || size.y !== height) {
         width = size.x;
@@ -105,11 +164,28 @@ export function createFinish(
         brush.uniforms.uAspect.value = width / height;
       }
       composer.render();
+      // A screen resized or turned since the picture was held: nothing sensible to soak through.
+      renderer.getDrawingBufferSize(buffer);
+      if (left <= 0 || !held || held.image.width !== buffer.x || held.image.height !== buffer.y) {
+        return;
+      }
+      wash.uniforms.uLeft.value = left;
+      wash.uniforms.uWay.value = way;
+      wash.uniforms.uPlain.value = plain ? 1 : 0;
+      wash.uniforms.uAspect.value = size.x / size.y;
+      const auto = renderer.autoClear;
+      renderer.autoClear = false;
+      renderer.setRenderTarget(null);
+      renderer.render(overlay, flat);
+      renderer.autoClear = auto;
     },
     dispose() {
       for (const pass of composer.passes) pass.dispose();
       composer.dispose();
       target.dispose();
+      held?.dispose();
+      wash.dispose();
+      sheet.geometry.dispose();
     },
   };
 }

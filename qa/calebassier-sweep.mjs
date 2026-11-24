@@ -23,7 +23,7 @@ const TOL = Number(process.env.TOL ?? 0.018);
 // figure's hem less 3 cm), and for a figure who walks on planted feet (PLANTED) a foot lying flat on
 // the ground does not move more than SLIDE between two instants while she keeps her heading.
 const GROUND = Number(process.env.GROUND ?? -0.003);
-const HEM = { mila: 0.425, ninon: 0.37 };
+const HEM = { mila: 0.425, ninon: 0.27 };
 const PLANTED = ["mila", "ninon"];
 const SLIDE = Number(process.env.SLIDE ?? 0.01);
 const STRIPS = (process.env.STRIPS ?? "").split(",").filter(Boolean).map(Number);

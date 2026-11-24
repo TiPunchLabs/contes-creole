@@ -31,8 +31,8 @@ const ready = world
     label(page, probe.info().clock);
     return {
       ...probe,
-      seek(index, seconds) {
-        probe.seek(index, seconds);
+      seek(index, seconds, left, way) {
+        probe.seek(index, seconds, left, way);
         label(index, Math.min(seconds, 99));
       },
       setPage: (index) => handle.setPage(index),

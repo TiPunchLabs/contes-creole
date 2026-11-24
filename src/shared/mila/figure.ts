@@ -397,10 +397,16 @@ export interface MilaKit {
   /** Uniform draw in [a, b) from the tale's seeded generator (180 draws, the hairline). */
   rand(a: number, b: number): number;
   /**
-   * Closed canvas shoes over her feet (upper and sole). Absent by default: she is barefoot, as in
-   * the underwater tale, and her build is then exactly what it was (no mesh added, no draw taken).
+   * Light closed shoes over her feet: a low upper, a flat sole, a band across the instep. Absent by
+   * default: she is barefoot, as in the underwater tale, and her build is then exactly what it was
+   * (no mesh added, no draw taken).
    */
-  shoes?: { upper: THREE.Material; sole: THREE.Material };
+  shoes?: { upper: THREE.Material; sole: THREE.Material; band: THREE.Material };
+  /**
+   * Thickness of her arms and legs against the underwater tale's (1.2: a fifth thicker), for a tale
+   * that shows her small and far. Absent by default: the limbs are exactly what they were.
+   */
+  limbs?: number;
 }
 
 /**
@@ -452,13 +458,16 @@ export function buildMilaFigure(kit: MilaKit): MilaFigure {
         false,
       ),
     );
+  const { limbs } = kit;
+  /** Limb radii, thickened only when the tale asks for it (the same array otherwise). */
+  const thick = (radii: number[]): number[] => (limbs ? radii.map((r) => r * limbs) : radii);
   // shaped legs (knee, calf, ankle) and feet with toes
   const legs: Leg[] = [];
   for (const sx of [-1, 1]) {
     const L = skinnedLimb(skin, {
       lens: [0.245, 0.222],
       axis: -1,
-      radii: [0.041, 0.037, 0.032, 0.028, 0.03, 0.031, 0.026, 0.02, 0.018],
+      radii: thick([0.041, 0.037, 0.032, 0.028, 0.03, 0.031, 0.026, 0.02, 0.018]),
       offsets: (t) =>
         0.012 * Math.sin(Math.PI * clamp(t * 2, 0, 1)) -
         0.012 * Math.sin(Math.PI * clamp(t * 2 - 1, 0, 1)),
@@ -479,14 +488,21 @@ export function buildMilaFigure(kit: MilaKit): MilaFigure {
       ankle.add(t);
     }
     if (kit.shoes) {
-      // A rounded upper that takes in the heel and the toes, on a flat sole a little wider.
+      // A low rounded upper that takes in the heel and the toes, a flat sole a little wider, and a
+      // band over the instep: a child's soft flat shoe.
       const upper = new THREE.Mesh(new THREE.SphereGeometry(0.05, 16, 12), kit.shoes.upper);
-      upper.scale.set(0.7, 0.5, 1.52);
-      upper.position.set(0, -0.018, 0.034);
+      upper.scale.set(0.72, 0.46, 1.52);
+      upper.position.set(0, -0.02, 0.034);
       ankle.add(upper);
       const sole = new THREE.Mesh(new THREE.BoxGeometry(0.064, 0.01, 0.158), kit.shoes.sole);
       sole.position.set(0, -0.04, 0.034);
       ankle.add(sole);
+      const band = new THREE.Mesh(
+        new THREE.TorusGeometry(0.031, 0.0055, 6, 16, Math.PI),
+        kit.shoes.band,
+      );
+      band.position.set(0, -0.022, 0.03);
+      ankle.add(band);
     }
     legs.push({ hip, knee, ankle, sx, prevC: 0 });
   }
@@ -511,7 +527,7 @@ export function buildMilaFigure(kit: MilaKit): MilaFigure {
     const lim = skinnedLimb(skin, {
       lens: [L1, L2],
       axis: 1,
-      radii: [0.029, 0.027, 0.024, 0.021, 0.0195, 0.019, 0.017, 0.015],
+      radii: thick([0.029, 0.027, 0.024, 0.021, 0.0195, 0.019, 0.017, 0.015]),
     });
     lim.mesh.position.set(sd * 0.098, 0.896, 0);
     body.add(lim.mesh);
