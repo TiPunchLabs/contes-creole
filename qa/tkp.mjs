@@ -55,6 +55,14 @@ async function newPage(browser, vp, extra = {}) {
 const touchOf = (vp) => Boolean(VIEWPORTS[vp].hasTouch);
 const press = async (loc, touch) => (touch ? loc.tap() : loc.click());
 
+/** Index of the invitation in the shelf: the last slot, found by its class rather than by a count. */
+const invitationIndex = (p) =>
+  p.evaluate(() =>
+    [...document.querySelectorAll(".tree-shelf-book")].findIndex((b) =>
+      b.classList.contains("is-invitation"),
+    ),
+  );
+
 /** Brings the camera to the shelf book at `index` (0 Ti Kannot, 1 Mila). */
 async function approach(p, index, touch) {
   const shelf = p.locator(".tree-shelf-book").nth(index);
@@ -126,9 +134,11 @@ async function cards(browser, vp) {
   const { ctx, p, errors } = await newPage(browser, vp);
   const run = `cards.${vp}`;
   const short = VIEWPORTS[vp].viewport.height < 640;
+  const invitation = await invitationIndex(p);
+  check(run, "invitation is the last slot", invitation >= 2, `index ${invitation}`);
   for (const [index, name] of [
     [1, "mila"],
-    [2, "invitation"],
+    [invitation, "invitation"],
   ]) {
     await approach(p, index, touch);
     await p.waitForTimeout(2500);
@@ -151,7 +161,7 @@ async function cards(browser, vp) {
   await p.screenshot({ path: `${OUT}${vp}-mila-returned.png` });
   await clears(p, run, "mila card whole after the way back");
   // Back from the classes page: the tree comes back on the invitation.
-  await approach(p, 2, touch);
+  await approach(p, invitation, touch);
   await p.waitForTimeout(1500);
   await press(p.locator(".tree-shelf-book.is-invitation"), touch);
   await p.waitForURL("**/contes-des-classes/");

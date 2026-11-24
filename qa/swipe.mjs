@@ -306,6 +306,35 @@ const noBar = (b) =>
   b.shelfBarStyle === "none" &&
   b.climb === "hidden";
 
+/**
+ * The ring has one landmark per shelf slot (tales, then the invitation) plus the opening view, so a
+ * full turn is `slots + 1` swipes. Landmark 0 is the opening view (`near` -1), landmark k the slot k-1.
+ * Returns the `near` values seen after `count` swipes (to the "right" or "left") from landmark `start`.
+ */
+function ringNears(slots, start, to, count) {
+  const ring = slots + 1;
+  return Array.from({ length: count }, (_, i) => {
+    const at = (((start + (to === "right" ? 1 : -1) * (i + 1)) % ring) + ring) % ring;
+    return at - 1;
+  });
+}
+/** Number of slots on the shelf (the tales and the invitation). */
+const slotCount = (p) => p.evaluate(() => document.querySelectorAll(".tree-shelf-book").length);
+/**
+ * The climb value `t` of each slot at rest, read from a fresh page by selecting the slot from the
+ * shelf: what the swipes must land on, whatever the number of tales.
+ */
+async function slotClimbs(browser) {
+  const { ctx, p, cdp } = await open(browser, "phone");
+  const climbs = [];
+  for (let i = 0; i < (await slotCount(p)); i++) {
+    await tap(cdp, p.locator(".tree-shelf-book").nth(i));
+    climbs.push((await settled(p)).t);
+  }
+  await ctx.close();
+  return climbs;
+}
+
 /** Turns the home to the landmark of card `index` and presses its cover with a trembling finger. */
 async function enterByCover(p, cdp, index) {
   for (let i = 0; i < 6 && (await settled(p)).near !== index; i++) await turn(p, cdp, "right");
@@ -315,7 +344,16 @@ async function enterByCover(p, cdp, index) {
 /* ---------- journeys ---------- */
 async function runHome(browser) {
   const run = "home";
+  const climbs = await slotClimbs(browser);
   const { ctx, p, cdp, errors } = await open(browser, "phone");
+  const slots = await slotCount(p);
+  const atSlot = (s, i) => s.near === i && Math.abs(s.t - climbs[i]) < 0.01;
+  check(
+    run,
+    "slot-climbs-rise-one-per-slot",
+    climbs.length === slots && slots >= 3 && climbs.every((t, i) => i === 0 || t > climbs[i - 1]),
+    climbs.join(" "),
+  );
   const { width, height } = size(p);
   const mid = [width / 2, height / 2];
   let s = await settled(p);
@@ -335,8 +373,8 @@ async function runHome(browser) {
   check(
     run,
     "left-to-right-from-the-opening-moves-to-the-first-cover",
-    s.near === 0 && Math.abs(s.t - 0.2) < 0.01,
-    `t=${s.t} near=${s.near}`,
+    atSlot(s, 0),
+    `t=${s.t} near=${s.near} (slot 0 at t=${climbs[0]})`,
   );
   check(run, "hint-removed-after-first-navigation", s.hint === null);
   await p.screenshot({ path: OUT + "home-1-first-cover.png" });
@@ -345,17 +383,12 @@ async function runHome(browser) {
   check(
     run,
     "second-swipe-reaches-second-cover",
-    s.near === 1 && Math.abs(s.t - 0.54) < 0.01,
-    `t=${s.t} near=${s.near}`,
+    atSlot(s, 1),
+    `t=${s.t} near=${s.near} (slot 1 at t=${climbs[1]})`,
   );
   await turn(p, cdp, "left");
   s = await settled(p);
-  check(
-    run,
-    "right-to-left-comes-back",
-    s.near === 0 && Math.abs(s.t - 0.2) < 0.01,
-    `t=${s.t} near=${s.near}`,
-  );
+  check(run, "right-to-left-comes-back", atSlot(s, 0), `t=${s.t} near=${s.near}`);
 
   // the scene follows the finger while it is down, both ways, and goes back if the finger does
   const rest = s.t;
@@ -436,14 +469,14 @@ async function runHome(browser) {
   check(
     run,
     "right-to-left-from-the-opening-moves-too",
-    s.near === 2 && Math.abs(s.t - 0.88) < 0.01 && s.path === "/",
-    `t=${s.t} near=${s.near} path=${s.path}`,
+    atSlot(s, slots - 1) && s.path === "/",
+    `t=${s.t} near=${s.near} path=${s.path} (last slot at t=${climbs[slots - 1]})`,
   );
   await turn(p, cdp, "right");
   s = await settled(p);
   check(run, "and-back-to-the-opening-view", s.t < 0.01 && s.near === -1, `t=${s.t}`);
 
-  // several full turns each way: opening view, then the three slots, again and again
+  // several full turns each way: opening view, then every slot, again and again
   const lap = async (to, count) => {
     const seen = [];
     for (let i = 0; i < count; i++) {
@@ -452,10 +485,23 @@ async function runHome(browser) {
     }
     return seen.join(" ");
   };
-  let seen = await lap("right", 9);
-  check(run, "two-full-turns-to-the-right-and-on", seen === "0 1 2 -1 0 1 2 -1 0", seen);
-  seen = await lap("left", 13);
-  check(run, "three-full-turns-to-the-left-and-on", seen === "-1 2 1 0 -1 2 1 0 -1 2 1 0 -1", seen);
+  const ring = slots + 1;
+  let seen = await lap("right", 2 * ring + 1);
+  let expected = ringNears(slots, 0, "right", 2 * ring + 1).join(" ");
+  check(
+    run,
+    "two-full-turns-to-the-right-and-on",
+    seen === expected,
+    `${seen} (expected ${expected})`,
+  );
+  seen = await lap("left", 3 * ring + 1);
+  expected = ringNears(slots, 1, "left", 3 * ring + 1).join(" ");
+  check(
+    run,
+    "three-full-turns-to-the-left-and-on",
+    seen === expected,
+    `${seen} (expected ${expected})`,
+  );
   s = await settled(p);
   check(run, "the-turns-end-on-the-opening-view", s.t < 0.01 && s.book === null, `t=${s.t}`);
   bars = await sideways(p);
@@ -767,16 +813,22 @@ async function runEnds(browser) {
   await turn(p, cdp, "left");
   s = await settled(p);
   check(run, "landscape-home-right-to-left", s.near === 0, `t=${s.t} near=${s.near}`);
+  const slots = await slotCount(p);
   const seen = [];
-  for (const to of ["left", "left", "left", "left", "left", "right", "right", "right", "right"]) {
+  const turns = [...Array(slots + 2).fill("left"), ...Array(slots + 1).fill("right")];
+  for (const to of turns) {
     await turn(p, cdp, to);
     seen.push((await settled(p)).near);
   }
+  const expected = [
+    ...ringNears(slots, 1, "left", slots + 2),
+    ...ringNears(slots, 1 - (slots + 2), "right", slots + 1),
+  ].join(" ");
   check(
     run,
     "landscape-full-turn-each-way",
-    seen.join(" ") === "-1 2 1 0 -1 0 1 2 -1",
-    seen.join(" "),
+    seen.join(" ") === expected,
+    `${seen.join(" ")} (expected ${expected})`,
   );
   await p.screenshot({ path: OUT + "home-landscape-after-turns.png" });
   await turn(p, cdp, "right");

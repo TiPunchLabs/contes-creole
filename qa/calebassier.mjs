@@ -3,6 +3,7 @@
 // results.json in OUT; exit code 1 when any check fails. Touch input goes through CDP
 // Input.dispatchTouchEvent; no check calls a "next page" function.
 // Usage: [SITE=url] [OUT=dir] [ONLY=text,journey,...] [VPS=desktop,phone,small] [QA_CHANNEL=chrome]
+//        [QA_INJECT_CSS=css: negative control, a style added to the page under test, never to the app]
 //        node qa/calebassier.mjs
 //   text       French text of the 12 pages against the brief's story.fr.json, and the counter
 //   journey    1 → 12 → 1 with the buttons: data-page / data-hero / data-settled, the gift of
@@ -110,6 +111,8 @@ async function home(p) {
   await p.goto(SITE);
   await p.waitForSelector(".loader.is-done", { state: "attached", timeout: 30000 });
   await p.waitForTimeout(1500);
+  // Negative-control hook: QA_INJECT_CSS breaks the page under test on purpose to prove a check can fail.
+  if (process.env.QA_INJECT_CSS) await p.addStyleTag({ content: process.env.QA_INJECT_CSS });
 }
 
 /** Presses `locator` with a mouse click, or a touch tap on a touch context. */
