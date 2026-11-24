@@ -68,3 +68,5 @@ Not authorized: merge into `main`, production deploy, publication, marking the P
 
 - 2026-11-23 — Owner: « lance la mission .../mila-calebassier-production/PROMPT_PILOTE.md dossier cible (.../mila-calebassier-production) ». Brief received (verbatim `owner-brief.md`, `brief/`).
 - 2026-11-23 — Pilot framing: worktree from `origin/main` `3ce9759`; push + draft PR + preview authorized by brief step 6; merge/production/publication reserved to the owner; Codex review cap 3; gcf as unvalidated draft (D-GCF at delivery); text p12 from the new brief supersedes D-P12 of the cancelled mission.
+- 2026-11-24 — Owner feedback 1 on the preview (`owner-feedback-1.md`): arms/dress pages 1, 3, 10, plant crossing page 5. Fixed in `23236c7`.
+- 2026-11-24 — Codex review 1 on `23236c7`: CHANGES_REQUESTED (F1 portrait framing, F2 Escape ignored during loading). Pilot decision: F2 is fixed in the shell (`src/app/app.ts`) as a narrow, behaviour-preserving cancellation fix, because spec 06 requires closing during loading; it applies to every book, so Ti Kannot and the underwater Mila are regression-checked on it. Not a global change of the home or other tales.
