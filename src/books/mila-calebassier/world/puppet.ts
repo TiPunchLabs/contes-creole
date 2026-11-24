@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { solveArm, type Arm, type Leg } from "@shared/mila/figure";
+import { highestUnderSole, SOLE_MARGIN, type Sole, type Terrain } from "./terrain";
 
 /** What the puppet code needs of a figure: Mila's shared build, and Man Ninon's on the same plan. */
 export interface Figure {
@@ -29,6 +30,8 @@ export interface Dims {
    * body passes over it. Without it the legs swing as in the underwater tale.
    */
   step?: Step;
+  /** Her shoe's sole from the ankle: what the ground is asked about when a foot is placed. */
+  sole?: Sole;
   /**
    * Widest radius of the clothes at a height (body space, 0 where there is none): arms are kept
    * outside it along their whole length, not only at the hand.
@@ -146,11 +149,6 @@ export const CHILD_STEP: Step = {
   twist: 0.025,
 };
 
-/**
- * How high a solid of the set (a root, a step) stands under a place, above the ground at height
- * `floor` there; 0 on open ground.
- */
-export type Solid = (x: number, z: number, floor: number) => number;
 /** The highest thing a foot steps onto or over; anything taller is not a step. */
 export const MAX_STEP = 0.3;
 
@@ -169,7 +167,7 @@ function plantedWalk(
   dims: Dims,
   STEP: Step,
   p: Pose,
-  solid: Solid | undefined,
+  terrain: Terrain | undefined,
 ): number[] {
   const { pose, inner, body, legs } = figure;
   const sinYaw = Math.sin(p.yaw);
@@ -211,11 +209,22 @@ function plantedWalk(
       lift * Math.sqrt(walk) +
       (pitch > 0 ? STEP.ball * Math.sin(pitch) : STEP.heel * Math.sin(-pitch));
     if (pitch > 0) z += STEP.ball * (1 - Math.cos(pitch));
-    // A root or a step under the foot: it stands on it, or is lifted clear of it as it swings.
+    // A root or a step under any part of the shoe (heel, toe, sides): the foot stands on it, or is
+    // lifted clear of it as it swings.
     const side = leg.hip.parent?.position.x ?? 0;
-    const over = solid
-      ? solid(p.x + side * cosYaw + z * sinYaw, p.z - side * sinYaw + z * cosYaw, p.y)
-      : 0;
+    const over =
+      terrain && dims.sole
+        ? highestUnderSole(
+            terrain,
+            dims.sole,
+            p.x + side * cosYaw + z * sinYaw,
+            p.z - side * sinYaw + z * cosYaw,
+            sinYaw,
+            cosYaw,
+            p.y,
+            ph < STEP.stance || walk === 0 ? SOLE_MARGIN.planted : SOLE_MARGIN.swing,
+          )
+        : 0;
     const step = over > 0 && over <= MAX_STEP ? over : 0;
     const onGround = ph < STEP.stance || walk === 0;
     return {
@@ -286,7 +295,13 @@ const up = new THREE.Vector3();
  * arm IK towards the hands' tasks. `time` only feeds the idle breath. `solid` tells a planted walk
  * what stands on the ground under each foot.
  */
-export function applyPose(figure: Figure, dims: Dims, p: Pose, time: number, solid?: Solid): void {
+export function applyPose(
+  figure: Figure,
+  dims: Dims,
+  p: Pose,
+  time: number,
+  terrain?: Terrain,
+): void {
   const { g, pose, inner, body, head, legs, arms } = figure;
   g.visible = p.visible;
   if (!p.visible) return;
@@ -298,7 +313,7 @@ export function applyPose(figure: Figure, dims: Dims, p: Pose, time: number, sol
   /** Per leg, how far forward its foot is: the free arm of that side swings the other way. */
   let stepped: number[] | null = null;
   if (dims.step) {
-    stepped = plantedWalk(figure, dims, dims.step, p, solid);
+    stepped = plantedWalk(figure, dims, dims.step, p, terrain);
     // The head stays level over the leaning trunk and looks where she goes.
     head.rotation.set(
       p.headPitch - pose.rotation.x * 0.5 + Math.sin(time * 0.45) * 0.015,

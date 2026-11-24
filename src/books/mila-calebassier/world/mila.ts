@@ -14,6 +14,7 @@ export const MILA_DIMS: Dims = {
   restHand: [0.21, 0.66, 0.03],
   swing: 0.11,
   step: CHILD_STEP,
+  sole: { front: 0.113, back: 0.045, half: 0.036 },
   radius: dressRadius,
 };
 

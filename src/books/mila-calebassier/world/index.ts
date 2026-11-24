@@ -19,6 +19,7 @@ import LAYOUT from "./layout.json";
 import { createMila, MILA_DIMS } from "./mila";
 import { createNinon, NINON_DIMS } from "./ninon";
 import { createWash, softRamp } from "./paint";
+import { createTerrain } from "./terrain";
 import { createFrame, PAGES, resetFrame, type Anchor, type Carry, type Places } from "./pages";
 import { applyPose, armDepth, type Dims, type Figure, type Grip, type Pose } from "./puppet";
 
@@ -81,6 +82,8 @@ export interface Framed {
 /** The subjects of a frame, keyed by name; a figure or a prop that is not shown has no entry. */
 export type Subjects = Record<string, Framed>;
 
+/** How high above her floor a solid still counts as under a shoe, for the QA measure (metres). */
+const STEP_REACH = 0.4;
 /** Radius of a head, a hand and the lantern for the framing checks (metres). */
 const SUBJECT_R = { milaFace: 0.126, ninonFace: 0.115, hand: 0.035, lamp: 0.07 } as const;
 
@@ -135,12 +138,24 @@ export interface Probe {
      * (world x, z), the lowest and highest point of the foot and its shoe above the ground the
      * figure stands on (metres; negative: through the ground), and how far its toes point down
      * (radians), with the figure's heading (a foot turns with her when she turns on the spot), and
-     * `over`: how high a root, a step or any other solid of the set stands above that ground under
-     * the foot (0 on open ground). A foot lower than `over` is inside that solid.
+     * against the set's solids, measured on every vertex of the shoe's own meshes (heel, toe, sides,
+     * sole and upper): `over` is the highest root, step or other solid under any of them, `sunk`
+     * how far the deepest of them is below the solid's surface over it (0 or less: the whole shoe is
+     * clear of every solid). `ankle` is what a single reading under the ankle alone gives.
      */
     feet: Record<
       string,
-      { x: number; z: number; low: number; top: number; pitch: number; yaw: number; over: number }[]
+      {
+        x: number;
+        z: number;
+        low: number;
+        top: number;
+        pitch: number;
+        yaw: number;
+        over: number;
+        sunk: number;
+        ankle: number;
+      }[]
     >;
     /** The fruit, faces, hands and lantern as the lens frames them this instant. */
     subjects: Subjects;
@@ -281,16 +296,33 @@ export default defineWorld({
         if (object.geometry.type !== "BufferGeometry") return;
         solids.push(object);
       });
-      const down = new THREE.Raycaster();
-      const straightDown = new THREE.Vector3(0, -1, 0);
-      const above = new THREE.Vector3();
+      // Their triangles near the ground, in world space, as one height field (the set does not
+      // move; the shutters and the gate leaf are not something a foot meets).
+      const low: number[] = [];
+      const corner = new THREE.Vector3();
+      built.group.updateMatrixWorld(true);
+      for (const solid of solids) {
+        const mesh = solid as THREE.Mesh;
+        const position = mesh.geometry.getAttribute("position");
+        const index = mesh.geometry.getIndex();
+        const count = index ? index.count : position.count;
+        for (let t = 0; t + 2 < count; t += 3) {
+          const tri: number[] = [];
+          let lowest = Infinity;
+          for (let k = 0; k < 3; k++) {
+            corner
+              .fromBufferAttribute(position, index ? index.getX(t + k) : t + k)
+              .applyMatrix4(mesh.matrixWorld);
+            tri.push(corner.x, corner.y, corner.z);
+            lowest = Math.min(lowest, corner.y);
+          }
+          if (lowest < 1.2) low.push(...tri);
+        }
+      }
+      const terrain = createTerrain(new Float32Array(low));
       /** Highest solid within 0.6 m above `floor` at a place, as a height above `floor`. */
-      const solidOver = (x: number, z: number, floor: number): number => {
-        down.set(above.set(x, floor + 0.6, z), straightDown);
-        down.far = 0.6;
-        const hit = down.intersectObjects(solids, false)[0];
-        return hit ? Math.max(0, hit.point.y - floor) : 0;
-      };
+      const solidOver = (x: number, z: number, floor: number): number =>
+        terrain.heightAt(x, z, floor);
       const frameState = createFrame();
       const key = createMixedKey();
       let story = ctx.story;
@@ -476,8 +508,8 @@ export default defineWorld({
           f.mila.left = hold(built.shutters.left, -1);
           f.mila.right = hold(built.shutters.right, 1);
         }
-        applyPose(mila as Figure, MILA_DIMS, f.mila, calm ? 0 : time, solidOver);
-        applyPose(ninon, NINON_DIMS, f.ninon, calm ? 0 : time + 2, solidOver);
+        applyPose(mila as Figure, MILA_DIMS, f.mila, calm ? 0 : time, terrain);
+        applyPose(ninon, NINON_DIMS, f.ninon, calm ? 0 : time + 2, terrain);
         milaShadow.visible = f.mila.visible;
         milaShadow.position.set(f.mila.x, f.mila.y + 0.03, f.mila.z);
         ninonShadow.visible = f.ninon.visible;
@@ -595,6 +627,8 @@ export default defineWorld({
             pitch: number;
             yaw: number;
             over: number;
+            sunk: number;
+            ankle: number;
           }[]
         > = {};
         const figures = [
@@ -605,7 +639,21 @@ export default defineWorld({
           if (!pose.visible) continue;
           out[name] = figure.legs.map((leg) => {
             footBox.makeEmpty();
-            for (const part of leg.ankle.children) footBox.union(partBox.setFromObject(part));
+            let over = 0;
+            let sunk = -Infinity;
+            for (const part of leg.ankle.children) {
+              footBox.union(partBox.setFromObject(part));
+              if (!(part instanceof THREE.Mesh)) continue;
+              const position = part.geometry.getAttribute("position");
+              for (let v = 0; v < position.count; v++) {
+                corner.fromBufferAttribute(position, v).applyMatrix4(part.matrixWorld);
+                // Solids a foot can step on or over; a table top above is not under the shoe.
+                const h = terrain.heightAt(corner.x, corner.z, pose.y, STEP_REACH);
+                if (h <= 0) continue;
+                over = Math.max(over, h);
+                sunk = Math.max(sunk, h - (corner.y - pose.y));
+              }
+            }
             leg.ankle.getWorldPosition(scratch);
             toes.set(0, 0, 1).transformDirection(leg.ankle.matrixWorld);
             return {
@@ -615,7 +663,9 @@ export default defineWorld({
               top: footBox.max.y - pose.y,
               pitch: Math.asin(clamp(-toes.y, -1, 1)),
               yaw: pose.yaw,
-              over: solidOver(scratch.x, scratch.z, pose.y),
+              over,
+              sunk: over > 0 ? sunk : 0,
+              ankle: terrain.heightAt(scratch.x, scratch.z, pose.y, STEP_REACH),
             };
           });
         }

@@ -25,8 +25,9 @@ const TOL = Number(process.env.TOL ?? 0.018);
 const GROUND = Number(process.env.GROUND ?? -0.003);
 const HEM = { mila: 0.425, ninon: 0.27 };
 const PLANTED = ["mila", "ninon"];
-// A foot inside a root, a step or any other solid of the set by more than SUNK (metres) is a fault.
-const SUNK = Number(process.env.SUNK ?? 0.012);
+// Any vertex of a shoe more than SUNK (metres) under the surface of a root, a step or any other
+// solid of the set is a fault: the whole shoe is tested, not the place under the ankle.
+const SUNK = Number(process.env.SUNK ?? 0.004);
 const SLIDE = Number(process.env.SLIDE ?? 0.01);
 const STRIPS = (process.env.STRIPS ?? "").split(",").filter(Boolean).map(Number);
 const EGL_VENDOR = process.env.QA_EGL_VENDOR ?? "/usr/share/glvnd/egl_vendor.d/10_nvidia.json";
@@ -91,13 +92,15 @@ try {
                 low: [1, 0],
                 top: [0, 0],
                 slide: [0, 0],
-                sunk: [0, 0, 0],
+                sunk: [-1, 0, 0, 0, 0],
               });
               feet.forEach((foot, k) => {
                 if (foot.low < f.low[0]) f.low = [foot.low, t];
-                // A root, a step or a wall under the foot (`over`): how deep the foot is in it.
-                const sunk = (foot.over ?? 0) > 0.03 ? foot.over - foot.low : 0;
-                if (sunk > f.sunk[0]) f.sunk = [sunk, t, foot.over];
+                // A root, a step or a wall under any vertex of the shoe (`over`), and how far the
+                // deepest vertex of the shoe is below that solid's surface (`sunk`): measured in the
+                // world on the shoe's own meshes, heel, toe and sides included.
+                const sunk = (foot.over ?? 0) > 0.03 ? foot.sunk : -1;
+                if (sunk > f.sunk[0]) f.sunk = [sunk, t, foot.over, foot.ankle ?? 0, foot.low];
                 // A foot lifted over a root or onto a step is under the skirt, as it should be: the
                 // dress check is for open ground, where nothing calls for a foot that high.
                 if (!((foot.over ?? 0) > 0.03) && foot.top > f.top[0]) f.top = [foot.top, t];
@@ -134,7 +137,13 @@ try {
         )
           .map(
             ([who, f]) =>
-              `; ${who} feet lowest ${(f.low[0] * 1000).toFixed(1)} mm at ${f.low[1].toFixed(1)} s, highest ${(f.top[0] * 1000).toFixed(0)} mm, flat-foot slide ${(f.slide[0] * 1000).toFixed(1)} mm at ${f.slide[1].toFixed(1)} s, deepest in a solid ${(f.sunk[0] * 1000).toFixed(0)} mm${f.sunk[0] > 0 ? ` at ${f.sunk[1].toFixed(1)} s (solid ${(f.sunk[2] * 1000).toFixed(0)} mm high)` : ""}`,
+              `; ${who} feet lowest ${(f.low[0] * 1000).toFixed(1)} mm at ${f.low[1].toFixed(1)} s, highest ${(f.top[0] * 1000).toFixed(0)} mm, flat-foot slide ${(f.slide[0] * 1000).toFixed(1)} mm at ${f.slide[1].toFixed(1)} s, ${
+                f.sunk[0] === -1
+                  ? "never over a solid"
+                  : f.sunk[0] > 0
+                    ? `deepest in a solid ${(f.sunk[0] * 1000).toFixed(1)} mm at ${f.sunk[1].toFixed(1)} s (solid ${(f.sunk[2] * 1000).toFixed(0)} mm high; under the ankle alone ${(f.sunk[3] * 1000).toFixed(0)} mm, shoe's lowest point ${(f.sunk[4] * 1000).toFixed(0)} mm)`
+                    : `closest to a solid ${(-f.sunk[0] * 1000).toFixed(1)} mm clear at ${f.sunk[1].toFixed(1)} s (solid ${(f.sunk[2] * 1000).toFixed(0)} mm high)`
+              }`,
           )
           .join("")}`,
       );

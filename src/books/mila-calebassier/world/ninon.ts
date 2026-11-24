@@ -54,6 +54,7 @@ export const NINON_DIMS: Dims = {
   restHand: [0.33, 0.8, 0.04],
   swing: 0.1,
   step: ELDER_STEP,
+  sole: { front: 0.135, back: 0.05, half: 0.042 },
   radius: ninonDressRadius,
 };
 
