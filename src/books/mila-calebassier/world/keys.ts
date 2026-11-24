@@ -54,8 +54,8 @@ export const KEYS: Record<KeyName, LightKey> = {
   night: {
     top: "#1b2750",
     low: "#3d5a78",
-    cloud: "#51608e",
-    cloudK: 0.55,
+    cloud: "#6474a8",
+    cloudK: 0.7,
     ambient: "#56689a",
     hemiSky: "#6f86c4",
     hemiGround: "#33485a",
@@ -72,8 +72,8 @@ export const KEYS: Record<KeyName, LightKey> = {
   dark: {
     top: "#101a36",
     low: "#22304e",
-    cloud: "#2c3a5c",
-    cloudK: 0.4,
+    cloud: "#34446c",
+    cloudK: 0.55,
     ambient: "#2c3856",
     hemiSky: "#44557f",
     hemiGround: "#1c2836",

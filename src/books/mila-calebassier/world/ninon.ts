@@ -80,7 +80,15 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
   const body = new THREE.Group();
   inner.add(body);
   const flat = (color: string, gran = 0.25, brush = 0.7): THREE.MeshToonMaterial =>
-    washed(wash, ramp, { color, gran, pool: 0.25, scale: 8, brush, vary: 0.15 });
+    washed(wash, ramp, {
+      color,
+      gran,
+      pool: 0.25,
+      scale: 8,
+      brush,
+      vary: 0.15,
+      ragged: brush < 0.5 ? 0.12 : 0.5,
+    });
   /** Her face: drawn fine, almost untouched by the sheet's brush. */
   const fine = (color: string): THREE.MeshToonMaterial => flat(color, 0, 0.12);
   const faceSkin = flat("#74432e", 0.18, 0.2);

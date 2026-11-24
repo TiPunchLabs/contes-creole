@@ -38,14 +38,23 @@ const FRAGMENT = `uniform sampler2D tDiffuse; uniform sampler2D uGrain; uniform 
     vec3 tooth=texture2D(uGrain,g).rgb;
     vec2 wander=(texture2D(uGrain,g*.31).gb-.5)*uTexel*7.;
     vec4 raw=texture2D(tDiffuse,vUv);
+    // Additive lights (halos, sparks) can push the mask past 1 in a float target.
+    raw.a=clamp(raw.a,0.,1.);
     vec3 c=mix(raw.rgb,kuwahara(vUv+wander),raw.a);
-    float lx=luma(texture2D(tDiffuse,vUv+vec2(uTexel.x*2.,0.)).rgb)-luma(texture2D(tDiffuse,vUv-vec2(uTexel.x*2.,0.)).rgb);
-    float ly=luma(texture2D(tDiffuse,vUv+vec2(0.,uTexel.y*2.)).rgb)-luma(texture2D(tDiffuse,vUv-vec2(0.,uTexel.y*2.)).rgb);
-    float edge=clamp(length(vec2(lx,ly))*5.,0.,1.);
-    c*=1.-edge*(.22+.3*tooth.b)*raw.a;
+    float l0=luma(texture2D(tDiffuse,vUv+vec2(uTexel.x*2.,0.)).rgb);
+    float l1=luma(texture2D(tDiffuse,vUv-vec2(uTexel.x*2.,0.)).rgb);
+    float l2=luma(texture2D(tDiffuse,vUv+vec2(0.,uTexel.y*2.)).rgb);
+    float l3=luma(texture2D(tDiffuse,vUv-vec2(0.,uTexel.y*2.)).rgb);
+    float edge=clamp(length(vec2(l0-l1,l2-l3))*5.,0.,1.);
+    // Pigment pools on the dark side of an edge; small lights (stars, sparks) are left alone.
+    edge*=1.-smoothstep(0.,.06,luma(raw.rgb)-(l0+l1+l2+l3)*.25);
+    c*=1.-edge*(.3+.4*tooth.b)*raw.a;
     float l=luma(c);
     c*=1.-(tooth.r-.5)*.2*(1.-.55*l);
     c*=1.+(tooth.g-.5)*.07;
+    // Dry brush: where a light wash crosses the tooth, specks of bare paper show through.
+    float bare=smoothstep(.74,.93,tooth.r)*smoothstep(.25,.8,l)*raw.a;
+    c=mix(c,max(c,uPaper*(.55+.45*l)),bare*.32);
     c=mix(c,c*uPaper,.14);
     gl_FragColor=vec4(c,1.); }`;
 

@@ -66,6 +66,8 @@ export interface WashedOptions {
   scale?: number;
   /** Uneven drying of the wash: value and warm/cool drift over metres (0..1). */
   vary?: number;
+  /** How far the paper's tooth breaks the edge of each shade (0 smooth, 1 ragged). */
+  ragged?: number;
   /** Extra shader code; each kind is its own program. */
   kind?: "plain" | "wall" | "leaves" | "ground" | "gourd" | "gourds" | "dress";
   /** Ground only: the earth texture blended in by the vertex colour. */
@@ -103,6 +105,16 @@ const WASH_FRAGMENT = `
 `;
 
 /**
+ * The shade of a form is laid as washes: its steps follow the paper's tooth instead of a clean
+ * line. The normal used for lighting is nudged by the grain, fixed to the object.
+ */
+const RAGGED_FRAGMENT = `
+{ vec3 rp=vWcP*uWcScale*1.7; vec3 rn=abs(vWcN)+1e-3; rn/=rn.x+rn.y+rn.z;
+  vec2 rg=texture2D(uGrain,rp.yz).gb*rn.x+texture2D(uGrain,rp.xz).gb*rn.y+texture2D(uGrain,rp.xy).gb*rn.z;
+  normal=normalize(normal+vec3(rg-.5,0.)*uRagged*.9); }
+`;
+
+/**
  * A lit, painted surface: soft toon shading, the painted texture, pigment granulation fixed to the
  * object (it never crawls on screen) and a darker pooled edge where the form turns away.
  */
@@ -112,6 +124,7 @@ export function washed(
   options: WashedOptions = {},
 ): THREE.MeshToonMaterial {
   const { gran = 0.35, pool = 0.22, scale = 1.6, kind = "plain", brush = 1, vary = 0.5 } = options;
+  const ragged = options.ragged ?? 0.5;
   const mat = new THREE.MeshToonMaterial({
     color: new THREE.Color(options.color ?? "#ffffff"),
     map: options.map ?? null,
@@ -133,6 +146,7 @@ export function washed(
     sh.uniforms.uGlow = glow;
     sh.uniforms.uBrush = { value: brush };
     sh.uniforms.uVary = { value: vary };
+    sh.uniforms.uRagged = { value: ragged };
     sh.uniforms.uAir = wash.uAir;
     sh.uniforms.uAirK = wash.uAirK;
     sh.uniforms.uShimmer = wash.uShimmer;
@@ -140,7 +154,7 @@ export function washed(
     if (options.earth) sh.uniforms.uEarth = { value: options.earth };
     let vertexHead = "varying vec3 vWcP; varying vec3 vWcN;\n";
     let vertexBody = "vWcP=position; vWcN=normal;\n";
-    let fragmentHead = WASH_PARS + "uniform float uBrush;\n";
+    let fragmentHead = WASH_PARS + "uniform float uBrush; uniform float uRagged;\n";
     let diffuse = "";
     let emissive = "";
     if (kind === "leaves") {
@@ -196,6 +210,10 @@ export function washed(
       sh.fragmentShader
         .replace("#include <map_fragment>", "#include <map_fragment>\n" + diffuse)
         .replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\n" + emissive)
+        .replace(
+          "#include <normal_fragment_maps>",
+          "#include <normal_fragment_maps>\n" + RAGGED_FRAGMENT,
+        )
         .replace("#include <opaque_fragment>", WASH_FRAGMENT + "#include <opaque_fragment>")
         .replace(
           "#include <dithering_fragment>",
@@ -283,10 +301,10 @@ void main(){ vec3 d=normalize(vDir); float h=clamp(d.y*1.6+.08,0.,1.);
   vec3 c=mix(uLow,uTop,g);
   // Wet-in-wet blooms: the cloud pigment runs into the wash, with a hard dried rim here and there.
   float bloom=w.r*smoothstep(.0,.25,d.y+.1)*(1.-.45*h);
-  c=mix(c,uCloud,clamp(bloom*uCloudK*1.25+smoothstep(.5,.62,bloom)*.12,0.,1.));
+  c=mix(c,uCloud,clamp(bloom*uCloudK*1.45+smoothstep(.5,.62,bloom)*.16,0.,1.));
   // Backruns near the horizon, and pigment settled in the paper's tooth.
   c*=1.+(w2.r-.5)*.1*(1.-h);
-  c*=1.-(w.b-.5)*.16-(w2.b-.5)*.08;
+  c*=1.-(w.b-.5)*.24-(w2.b-.5)*.12;
   gl_FragColor=vec4(c,1.);
   #include <colorspace_fragment>
 }
@@ -315,7 +333,7 @@ attribute float aGroup; attribute float aSize; uniform float uLit; uniform float
 varying float vOn;
 void main(){ vOn=smoothstep(aGroup,aGroup+.12,uLit)*step(.001,uLit);
   vec4 mv=modelViewMatrix*vec4(position,1.); gl_Position=projectionMatrix*mv; gl_Position.z=gl_Position.w;
-  gl_PointSize=aSize*uPixel; }
+  gl_PointSize=aSize*uPixel*1.35; }
 `;
 
 const STAR_FRAGMENT = `
