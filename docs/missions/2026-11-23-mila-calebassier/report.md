@@ -1,7 +1,7 @@
 # Report — mila-calebassier
 
 Verdict: PARTIAL
-Version: 7ed9c95
+Version: 23236c7
 
 Executor: Claude Code session, model id `claude-fable-5-2`. Layout and camera owner: the executor
 (no camera subagent). Date: 2026-11-23/24.
@@ -14,7 +14,7 @@ PR with a Deploy Preview.
 
 Outcome: the twelve pages are built, integrated as book 3 of the tree, playable on the Deploy
 Preview of draft PR #54, with sources, rebuild procedure, tests and evidence. Functional QA on the
-product commit `7ed9c95`: 156 checks, 0 failed. The existing checks of the repository are green.
+product commit `23236c7`: 156 checks, 0 failed. The existing checks of the repository are green.
 
 Why PARTIAL and not PASS:
 
@@ -118,10 +118,10 @@ OpenGL ES 3.2)`, system Chrome 158. Every "phone" below is an emulated viewport 
 | A03 | several calabashes in the branches, none on the trunk                  | build rule (no hanging point nearer than 1.3 m from the trunk axis), test "the built tree" on `assets.json`, captures                                                                                                                                                   | 13 fruits, nearest at more than 1.3 m, all above the fork                                                                                                                                                                                                                                                       | VERIFIED                                                                  |
 | A04 | contemporary architecture, no wooden hut                               | Blender stills of both houses (`s5/architecture/houses-blender.jpg`), pages 1, 3, 4, 12                                                                                                                                                                                 | rendered masonry, slab, covered terrace on posts, ribbed metal roof with eaves, jalousies; no reference photographs were gathered (limit)                                                                                                                                                                       | VERIFIED                                                                  |
 | A05 | coherent watercolour in 2D and 3D                                      | browser captures dusk, night, dark, dawn; before/after of pages 3 and 9                                                                                                                                                                                                 | coherent in one hand; drawing below the boards (section E)                                                                                                                                                                                                                                                      | PARTIAL, visual judgement                                                 |
-| A06 | real depth in motion                                                   | `s5/parallax/parallax-p01-02-04-12-desktop.mp4` (camera moves over foreground cut-outs, mid masses, tree, far relief)                                                                                                                                                   | parallax and occlusion visible on entry moves; watched as frame strips by the executor, not as video                                                                                                                                                                                                            | VERIFIED by frames                                                        |
+| A06 | real depth in motion                                                   | `s7/parallax/parallax-p01-02-04-05-10-12-{desktop,portrait}.mp4` (camera moves over foreground cut-outs, mid masses, tree, far relief)                                                                                                                                  | parallax and occlusion visible on entry moves; watched as frame strips by the executor, not as video                                                                                                                                                                                                            | VERIFIED by frames                                                        |
 | A07 | cameras documented for the twelve pages                                | `staging.ts` (landscape and portrait, entry and reading lens, duration, intent, size, move, portrait priority, continuity), `preprod.md` shotlist, `plan-jardin.png`, graybox animatics `s2/animatic/*.mp4`, tests on the presets                                       | present and executable; axis rule tested                                                                                                                                                                                                                                                                        | VERIFIED                                                                  |
-| A08 | taking, carrying, giving back are credible                             | `s5/gestures/gestures-p03-06-08-09-11-{desktop,portrait}.mp4`, time strips                                                                                                                                                                                              | hands follow the fruit, one fruit, attach point visible on pages 3 and 11; limits in section E                                                                                                                                                                                                                  | VERIFIED with reservations                                                |
-| A09 | no regression of existing tales                                        | the five repository checks; underwater stills on a fake clock against the baseline; Mila pages 1–6; existing QA journeys on branch and baseline, three of them updated to read the shelf                                                                                | checks exit 0 (57 files, 459 tests; baseline 56 and 438); no regression; details below                                                                                                                                                                                                                          | VERIFIED; `tree.mjs` and the end of `mila-nav.mjs` not run (pre-existing) |
+| A08 | taking, carrying, giving back are credible                             | `s7/gestures/gestures-p03-06-08-09-11-{desktop,portrait}.mp4`, time strips                                                                                                                                                                                              | hands follow the fruit, one fruit, attach point visible on pages 3 and 11; limits in section E                                                                                                                                                                                                                  | VERIFIED with reservations                                                |
+| A09 | no regression of existing tales                                        | the five repository checks; underwater stills on a fake clock against the baseline; Mila pages 1–6; existing QA journeys on branch and baseline, three of them updated to read the shelf                                                                                | checks exit 0 (57 files, 462 tests; baseline 56 and 438); no regression; details below                                                                                                                                                                                                                          | VERIFIED; `tree.mjs` and the end of `mila-nav.mjs` not run (pre-existing) |
 | A10 | robust, accessible navigation                                          | `qa/calebassier.mjs` on `7ed9c95`: modes `journey` (32), `rapid` (19), `touch` (13, CDP touch events), `reduced` (13), `resize` (21), `contrast` (8)                                                                                                                    | all pass; HTML text in the shared card; canvas `aria-hidden`                                                                                                                                                                                                                                                    | VERIFIED                                                                  |
 | A11 | clean loading and closing                                              | mode `lifecycle` (11): ten open/close cycles, mode `failure` (8)                                                                                                                                                                                                        | heap after GC 19.5, 20.2, 20.5 MB at cycles 1, 5, 10 (+1.5 % from 5 to 10); one canvas; one live WebGL context; blocked GLB or texture shows the shell's notice and returns to the tree                                                                                                                         | VERIFIED                                                                  |
 | A12 | performance measured                                                   | headed Chrome on the GPU, 20 s after 3 s warm-up                                                                                                                                                                                                                        | tables below                                                                                                                                                                                                                                                                                                    | VERIFIED on this desktop only                                             |
@@ -129,7 +129,7 @@ OpenGL ES 3.2)`, system Chrome 158. Every "phone" below is an emulated viewport 
 | A14 | provenance and licences                                                | `asset-register.md`, `art/mila-calebassier/README.md`                                                                                                                                                                                                                   | every file generated by the mission's scripts, nothing downloaded                                                                                                                                                                                                                                               | VERIFIED                                                                  |
 | A15 | complete reviewable version                                            | PR #54 draft, Deploy Preview, CI                                                                                                                                                                                                                                        | PR and preview exist; Codex review not done yet                                                                                                                                                                                                                                                                 | PARTIAL                                                                   |
 
-### Functional scenarios of spec 06 (commit `7ed9c95`, `s6/functional.log`, 156 pass, 0 fail)
+### Functional scenarios of spec 06 (commit `23236c7`, `s7/functional.log`, 156 pass, 0 fail)
 
 | Scenario                                     | Result                                                                                                                                                                                                                     |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -235,6 +235,53 @@ masters, `.blend`, scripts, layout, build report, `MANIFEST_SHA256.txt` of 26 li
 `sha256sum -c`). The older `sources/2026-11-23-3cef379/` is left as it was (its hedge master
 predates the repaint).
 
+### Owner feedback 1 (2026-11-24, `owner-feedback-1.md`, fixed in `23236c7`)
+
+| Defect reported                                  | Root cause found                                                                                                                                     | Fix                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pages 1 and 3: arms merge into the dress         | only the hand was kept out of the clothes, and only for Mila; Man Ninon's resting hand lay on the surface of her dress; elbows hung against the body | each figure's dress volume is measured (`Dims.radius`); after every arm solve the arm's depth in the clothes is measured along the upper arm and the forearm (`armDepth`), the elbow swings out and a free hand moves out until the arm is clear (`world/puppet.ts`) |
+| page 10: Man Ninon's lantern arm has disappeared | the lantern was given to her right arm but placed on her left side: the arm crossed her body inside the dress                                        | the lantern is carried out on the side of the arm that holds it                                                                                                                                                                                                      |
+| page 10: Mila's arm partly in her dress          | same cause as pages 1 and 3                                                                                                                          | same fix                                                                                                                                                                                                                                                             |
+| page 5: Mila passes through a plant              | a foreground cut-out stood on her walking line (0.1 m from it)                                                                                       | cut-out moved to the lens side of the path                                                                                                                                                                                                                           |
+
+Sweep for the same classes of defect, on every page:
+
+- Figure crossing a set element: three new tests sample both figures every 0.2 s of every page
+  against every painted cut-out (foreground of both formats and the mid-garden masses), the trunk,
+  the gate posts, the garden wall (crossed only through the gate), both houses, and in the bedroom
+  the walls, bed and bedside table. They found three more foreground cut-outs on a walking line
+  (page 2 landscape, page 5 portrait, page 10 landscape): moved. These tests see positions on the
+  ground, not what overlaps on screen: a foreground leaf may still pass in front of a figure, as a
+  foreground does. On page 5 it was moved to the text side so that it no longer does.
+- Arm inside the clothes, hidden arm: `qa/calebassier-sweep.mjs` runs every page through its whole
+  action in the engine (0.1 s steps, 1 337 instants per format, landscape and portrait) and reads
+  each figure's worst arm depth. It found one more defect: on pages 6 and 8 Mila's hands went to the
+  shutter leaves of the opposite sides, her arms crossing through her chest (about 80 mm deep);
+  uncrossed. Final sweep (`s7/sweep.log`), deepest point per page, measured against the cloth plus
+  40 mm (a forearm is 20 mm thick from its axis, limit 18 mm):
+
+| Page           | 1     | 2    | 3    | 4     | 5     | 6   | 8    | 9    | 10    | 11    | 12   |
+| -------------- | ----- | ---- | ---- | ----- | ----- | --- | ---- | ---- | ----- | ----- | ---- |
+| Mila (mm)      | 5.1   | -0.1 | -5.8 | 0.0   | -13.0 | 8.1 | 14.5 | 16.6 | 15.2  | 14.5  | -0.2 |
+| Man Ninon (mm) | -23.1 |      |      | -14.3 |       |     |      |      | -14.3 | -23.1 | -1.8 |
+
+Same values in both formats (the poses do not depend on the screen). Pages 8 to 11 are the belly
+carry: her arms are at full stretch over the front of the dress, 2 to 5 mm clear of it by this
+measure. The measure treats the dress as round and does not see its animated hem; the hero
+calabash count stayed at one on every instant.
+
+- Limits of the fix: an arm seen in front of the dress still overlaps it on screen (it is in front
+  of it, not in it); Mila's hands cannot reach the shutter leaves (the window is above her reach):
+  they are raised towards them. The frames were checked by the executor on stills and strips, not
+  as video.
+
+Evidence: `evidence/s7-owner-feedback-1-before-after.jpg` (owner's captures left, same frames
+now right), `evidence/s7-page03-arm-after.jpg`, `evidence/s7-strips-desktop.jpg` and
+`evidence/s7-strips-portrait.jpg` (eight instants of pages 1, 3, 4, 5, 9, 10, 11, 12), re-captured
+clips `s7/gestures/gestures-p03-06-08-09-11-{desktop,portrait}.mp4` and
+`s7/parallax/parallax-p01-02-04-05-10-12-{desktop,portrait}.mp4`, page sheets `evidence/s5-pages-*`
+refreshed from this build.
+
 ### Answers to the pilot's notes on S3
 
 | #   | Note                                                 | Answer                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -243,7 +290,7 @@ predates the repaint).
 | 2   | page 9: fruit beside the shoulder, hand on the chest | Two passes. First the carry was lowered to 0.78 m, which still read at shoulder height in the reading frame (her shoulder is at 0.90 m and the fruit is 0.21 m across), and her hands, kept clear of the dress, left the shell. Now (`7ed9c95`) the fruit is held in front of her belly at 0.68 m, just outside the flounces, with both hands on it, on pages 8 to 11: `evidence/s6-page09-reading-frame.jpg`. "Against her" is therefore a fruit held close in front of the dress, not pressed into it |
 | 3   | page 3: attach point and transfer readable           | the branch brings the fruit by its stalk into frame, her hands rise to it, then take it; the branch stays bowed over her at the end. Same clip, landscape and portrait                                                                                                                                                                                                                                                                                                                                  |
 | 4   | page 11: attach visible, then the whole tree         | the page starts on a medium shot of the raised fruit and branch A, pulls back and tilts to the whole tree; the wide frame is the end state. Same clip                                                                                                                                                                                                                                                                                                                                                   |
-| 5   | foreground cut-outs not placed                       | placed per shot and per format in `staging.ts`, relative to each reading lens; parallax clip `s5/parallax/…`                                                                                                                                                                                                                                                                                                                                                                                            |
+| 5   | foreground cut-outs not placed                       | placed per shot and per format in `staging.ts`, relative to each reading lens; parallax clips `s7/parallax/…`                                                                                                                                                                                                                                                                                                                                                                                           |
 | 6   | captures with the real text card                     | `evidence/s5-pages-desktop-1440x900.jpg`, `s5-pages-phone-390x844.jpg`, `s5-pages-phone-360x640.jpg` (real app, Français), contrast measured on pages 1, 7, 9, 12                                                                                                                                                                                                                                                                                                                                       |
 | 7   | push, draft PR, preview from S3                      | PR #54, preview `https://deploy-preview-54--contes-creoles.netlify.app`                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
@@ -279,7 +326,8 @@ Risks:
 Not verified:
 
 - The tree card through `tree.mjs` (does not launch here); the end of `mila-nav.mjs` (timeout).
-- The gesture and parallax clips in `s5/` predate the page-9 carry fix; they were not re-captured.
+- Frame times, draw calls and weights after `7ed9c95`: the owner-feedback fix changes arm solving
+  (a few more IK passes per arm on the CPU) and four cut-out positions, no asset and no shader.
 
 ## F. Repository state
 
@@ -287,10 +335,10 @@ Not verified:
   no production deploy. CI `quality` was green on `f476aa8`; later pushes re-run it.
 - Commits: `0683636` docs, `99a9f80` shared Mila figure, `f476aa8` S3 checkpoint, `3cef379` S4,
   `bd5754d` wash refinements, `65b9988` assets equal to a rebuild, `f1143ff` QA script and text shade,
-  `7ed9c95` belly carry (the product commit this report describes), `8854187` QA scripts reading the
-  shelf (no product file), then this report.
+  `7ed9c95` belly carry, `8854187` QA scripts reading the shelf, `23236c7` owner feedback 1 (the
+  product commit this report describes), then this report.
 - Local checks on the final tree: `format:check`, `lint --max-warnings=0`, `typecheck`, `test`
-  (57 files, 459 tests), `build`: all exit 0.
+  (57 files, 462 tests), `build`: all exit 0.
 - Mutating operations outside the worktree: evidence under `~/.local/share/contes-creole-qa/`, one
   new folder under the production folder's `sources/`. Nothing else.
 
@@ -305,4 +353,5 @@ Not verified:
 
 ## H. Recommended next action
 
-Pilot: route the Codex review on `7ed9c95` (later commits touch QA scripts and documents only). Safe to execute; no approval required for the review.
+Pilot: route the Codex review on `23236c7`; the owner can check the three frames of feedback 1 on
+the Deploy Preview once it has rebuilt. Safe to execute; no approval required for the review.
