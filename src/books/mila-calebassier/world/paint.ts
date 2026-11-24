@@ -12,6 +12,11 @@ export interface Wash {
   uGlowPos: { value: THREE.Vector3[] };
   uGlowCol: { value: THREE.Color[] };
   uGlowRange: { value: number[] };
+  /** Aerial perspective: the colour distance fades into, and how fast (per metre). */
+  uAir: { value: THREE.Color };
+  uAirK: { value: number };
+  /** Golden reflections the calabash throws on the bedroom walls (0..1). */
+  uShimmer: { value: number };
   /** Foliage sway (0 under reduced motion). */
   uWind: { value: number };
   /** Share of the calabashes in the branches that are lit (0..1), and their look (0 green, 1 gold). */
@@ -28,6 +33,9 @@ export function createWash(grain: THREE.Texture): Wash {
     uGlowPos: { value: Array.from({ length: GLOW_LIGHTS }, () => new THREE.Vector3()) },
     uGlowCol: { value: Array.from({ length: GLOW_LIGHTS }, () => new THREE.Color(0, 0, 0)) },
     uGlowRange: { value: Array.from({ length: GLOW_LIGHTS }, () => 1) },
+    uAir: { value: new THREE.Color(1, 1, 1) },
+    uAirK: { value: 0 },
+    uShimmer: { value: 0 },
     uWind: { value: 1 },
     uLit: { value: 0 },
     uGold: { value: 0 },
@@ -56,8 +64,10 @@ export interface WashedOptions {
   pool?: number;
   /** Grain scale in object space (repeats per metre). */
   scale?: number;
+  /** Uneven drying of the wash: value and warm/cool drift over metres (0..1). */
+  vary?: number;
   /** Extra shader code; each kind is its own program. */
-  kind?: "plain" | "leaves" | "ground" | "gourd" | "gourds" | "dress";
+  kind?: "plain" | "wall" | "leaves" | "ground" | "gourd" | "gourds" | "dress";
   /** Ground only: the earth texture blended in by the vertex colour. */
   earth?: THREE.Texture;
   /**
@@ -70,7 +80,8 @@ export interface WashedOptions {
 }
 
 const WASH_PARS = `
-uniform sampler2D uGrain; uniform float uGran; uniform float uPool; uniform float uWcScale;
+uniform sampler2D uGrain; uniform float uGran; uniform float uPool; uniform float uWcScale; uniform float uVary;
+uniform vec3 uAir; uniform float uAirK;
 varying vec3 vWcP; varying vec3 vWcN;
 float wcGrain(vec3 p, vec3 n){ vec3 w=abs(n)+1e-3; w/=w.x+w.y+w.z;
   return texture2D(uGrain,p.yz).r*w.x+texture2D(uGrain,p.xz).r*w.y+texture2D(uGrain,p.xy).r*w.z; }
@@ -80,8 +91,15 @@ float wcGrain(vec3 p, vec3 n){ vec3 w=abs(n)+1e-3; w/=w.x+w.y+w.z;
 const WASH_FRAGMENT = `
 { vec3 wp=vWcP*uWcScale; float wg=wcGrain(wp,vWcN); float wb=texture2D(uGrain,wp.xz*.19+wp.y*.13).g;
   float wf=1.-clamp(dot(normalize(normal),normalize(vViewPosition)),0.,1.);
+  // The wash dried unevenly: slow blooms of value, drifting a little warm or cool.
+  float wv=texture2D(uGrain,vWcP.xz*.05+vWcP.y*.07).g; float wu=texture2D(uGrain,vWcP.zx*.021+vWcP.y*.03+.37).g;
+  float drift=(wv-.5)*.6+(wu-.5)*.7;
+  outgoingLight*=1.+uVary*drift*.55;
+  outgoingLight*=mix(vec3(1.),vec3(1.07,1.,.9),clamp(.5+drift*uVary*1.6,0.,1.))*mix(1.,.97,uVary);
   outgoingLight*=1.+uGran*((wg-.5)*1.1+(wb-.5)*.5);
-  outgoingLight*=1.-uPool*smoothstep(.5,1.,wf+(wg-.5)*.4); }
+  outgoingLight*=1.-uPool*smoothstep(.5,1.,wf+(wg-.5)*.4);
+  // Distance takes the colour of the air: far planes go lighter and bluer, near ones stay rich.
+  outgoingLight=mix(outgoingLight,uAir,1.-exp(-length(vViewPosition)*uAirK)); }
 `;
 
 /**
@@ -93,7 +111,7 @@ export function washed(
   ramp: THREE.Texture,
   options: WashedOptions = {},
 ): THREE.MeshToonMaterial {
-  const { gran = 0.35, pool = 0.22, scale = 1.6, kind = "plain", brush = 1 } = options;
+  const { gran = 0.35, pool = 0.22, scale = 1.6, kind = "plain", brush = 1, vary = 0.5 } = options;
   const mat = new THREE.MeshToonMaterial({
     color: new THREE.Color(options.color ?? "#ffffff"),
     map: options.map ?? null,
@@ -114,6 +132,11 @@ export function washed(
     sh.uniforms.uGold = wash.uGold;
     sh.uniforms.uGlow = glow;
     sh.uniforms.uBrush = { value: brush };
+    sh.uniforms.uVary = { value: vary };
+    sh.uniforms.uAir = wash.uAir;
+    sh.uniforms.uAirK = wash.uAirK;
+    sh.uniforms.uShimmer = wash.uShimmer;
+    sh.uniforms.uGlowPos = wash.uGlowPos;
     if (options.earth) sh.uniforms.uEarth = { value: options.earth };
     let vertexHead = "varying vec3 vWcP; varying vec3 vWcN;\n";
     let vertexBody = "vWcP=position; vWcN=normal;\n";
@@ -126,6 +149,17 @@ export function washed(
       vertexBody += `{ float ph=color.g*6.283; float k=color.r*uWind;
         transformed.x+=sin(uTime*.9+ph)*.035*k; transformed.z+=cos(uTime*.7+ph*1.3)*.03*k;
         transformed.y+=sin(uTime*1.3+ph*2.1)*.012*k; }\n`;
+    } else if (kind === "wall") {
+      // A rendered wall takes its wash from the top: paler under the eaves, pigment settled low.
+      diffuse = `{ float low=smoothstep(1.5,0.,vWcP.y-.3); float high=smoothstep(1.6,3.,vWcP.y);
+        diffuseColor.rgb*=1.-.2*low*(.6+.8*texture2D(uGrain,vWcP.xz*.4+vWcP.y*.13).g)+.06*high; }\n`;
+      // The calabash's light plays on the walls around it: soft golden patches, slowly drifting.
+      fragmentHead += "uniform float uShimmer; uniform float uTime; uniform vec3 uGlowPos[3];\n";
+      emissive = `{ vec2 q=vec2(vWcP.x+vWcP.z,vWcP.y)*.55; float t=uTime*.035;
+        float a=texture2D(uGrain,q+vec2(t,-t*.6)).g; float b=texture2D(uGrain,q*1.7-vec2(t*.8,t)).g;
+        float gleam=smoothstep(.46,.8,a*.6+b*.5)+.3*smoothstep(.4,.66,b);
+        float reach=max(0.,1.-distance(vWcP,uGlowPos[0])/4.2);
+        totalEmissiveRadiance+=vec3(1.,.76,.34)*uShimmer*gleam*reach*reach*.3; }\n`;
     } else if (kind === "dress") {
       // Mila's flounces: each hem (aHem 0 at the seam, 1 at the edge) stirs a little in the air.
       vertexHead += "attribute float aHem; uniform float uTime; uniform float uWind;\n";
@@ -182,12 +216,15 @@ void main(){ vUv=vec2(uv.x,1.-uv.y)*uCell.zw+uCell.xy; vec3 p=position;
 
 const CARD_FRAGMENT = `
 uniform sampler2D map; uniform vec3 uAmbient; uniform vec3 uTint; uniform float uOpacity;
+uniform vec3 uAir; uniform float uAirK; uniform float uAirGain;
 uniform vec3 uGlowPos[${GLOW_LIGHTS}]; uniform vec3 uGlowCol[${GLOW_LIGHTS}]; uniform float uGlowRange[${GLOW_LIGHTS}];
 varying vec2 vUv; varying vec3 vWorld;
 void main(){ vec4 t=texture2D(map,vUv); if(t.a<.02) discard;
   vec3 light=uAmbient;
   for(int i=0;i<${GLOW_LIGHTS};i++){ float k=max(0.,1.-distance(vWorld,uGlowPos[i])/uGlowRange[i]); light+=uGlowCol[i]*k*k; }
-  gl_FragColor=vec4(t.rgb*uTint*light,t.a*uOpacity);
+  vec3 c=t.rgb*uTint*light;
+  c=mix(c,uAir,(1.-exp(-distance(vWorld,cameraPosition)*uAirK))*uAirGain);
+  gl_FragColor=vec4(c,t.a*uOpacity);
   #include <colorspace_fragment>
 }
 `;
@@ -217,6 +254,9 @@ export function cardMaterial(
       uTime: wash.uTime,
       uWind: wash.uWind,
       uAmbient: wash.uAmbient,
+      uAir: wash.uAir,
+      uAirK: wash.uAirK,
+      uAirGain: { value: 1 },
       uGlowPos: wash.uGlowPos,
       uGlowCol: wash.uGlowCol,
       uGlowRange: wash.uGlowRange,
@@ -238,10 +278,15 @@ void main(){ vec3 d=normalize(vDir); float h=clamp(d.y*1.6+.08,0.,1.);
   vec2 uv=vec2(atan(d.x,-d.z)/6.2832+.5,clamp(.92-d.y*1.25,0.,1.));
   vec3 w=texture2D(uWashMap,uv*vec2(2.,1.)).rgb;
   // A graded wash: the horizon colour rises into the zenith colour, unevenly, as a wet sheet dries.
-  float g=smoothstep(0.,1.,h+(w.g-.5)*.22);
+  vec3 w2=texture2D(uWashMap,uv*vec2(5.,2.3)+.31).rgb;
+  float g=smoothstep(0.,1.,h+(w.g-.5)*.42+(w2.g-.5)*.12);
   vec3 c=mix(uLow,uTop,g);
-  c=mix(c,uCloud,w.r*uCloudK*smoothstep(.0,.25,d.y+.1)*(1.-.5*h));
-  c*=1.+(w.b-.5)*.05;
+  // Wet-in-wet blooms: the cloud pigment runs into the wash, with a hard dried rim here and there.
+  float bloom=w.r*smoothstep(.0,.25,d.y+.1)*(1.-.45*h);
+  c=mix(c,uCloud,clamp(bloom*uCloudK*1.25+smoothstep(.5,.62,bloom)*.12,0.,1.));
+  // Backruns near the horizon, and pigment settled in the paper's tooth.
+  c*=1.+(w2.r-.5)*.1*(1.-h);
+  c*=1.-(w.b-.5)*.16-(w2.b-.5)*.08;
   gl_FragColor=vec4(c,1.);
   #include <colorspace_fragment>
 }

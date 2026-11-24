@@ -141,6 +141,34 @@ The prototype's cover screen is not ported (ruling MILA-OPEN): the tree's card i
 dive lands on page 1 (`MilaScene.show(1)`, no camera flight). The sound starts on opening; where the
 browser holds it until a gesture, the reader's first tap or key in the tale resumes it.
 
+### A 2.5D painted garden (Mila et le calebassier magique)
+
+`src/books/mila-calebassier/` is a `world` book: the shell gives it the shared reading interface and
+the validated navigation (keys, wheel, buttons, one page per horizontal swipe on smartphones).
+
+- **One master layout** (`world/layout.json`): Mila's house, the calabash tree, the gate, Man
+  Ninon's house, the path. Blender builds the models from it (`art/mila-calebassier/scripts/`,
+  seeded bpy scripts, GLB export) and the web engine stages the twelve pages in it.
+- **Layers**: sky wash and ordered stars, far relief (painted ring), mid-garden masses and
+  foreground cut-outs (painted billboards turning about the vertical only), 3D things (tree with two
+  skinned branches, houses with a real bedroom, gate, props, the two figures). Painted layers are
+  unlit and take the page's light key and the nearby warm lights; 3D surfaces are lit by the same
+  key. `world/finish.ts` lays one brush over the frame; faces opt out through the frame's alpha.
+- **Characters**: Mila is the underwater tale's figure, built by `src/shared/mila/` for both
+  books; Man Ninon is built on the same plan (`world/ninon.ts`). `world/puppet.ts` poses either
+  (walk cycle, stoop, head, two-bone arm IK towards hand tasks).
+- **Page states** (`world/pages.ts`): each page is a function of its own clock filling one frame
+  description (poses, owner of the hero calabash, branch bends, shutters, lights, stars). Nothing is
+  kept between frames: a page can be entered directly, left mid-action and entered again; after its
+  action a page holds its last state. The hero calabash is a single object blended between three
+  anchors (branch socket, Mila's hands, bedside table).
+- **Cameras** (`staging.ts`): per page, a landscape and a portrait shot, each with an entry and a
+  reading lens; the text is cleared by a view offset (`TEXT_SHIFT`), not by a crop. A page change is
+  a short dip to paper; under reduced motion only the dip remains and pages show their final state.
+- **QA**: `qa/calebassier/` is a dev-only viewer (page, instant, graybox); the world's handle
+  carries a `probe` (seek, counters) and the canvas publishes `data-page`, `data-hero`,
+  `data-settled`.
+
 ### Theme and language layers ("Veillée claire" redesign)
 
 - **Tokens**: `src/shared/theme/tokens.css` holds the site-wide colours, fonts and the dusk-sky

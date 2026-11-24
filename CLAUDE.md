@@ -35,6 +35,7 @@ src/
     reading-ui/                # text card, language switch, page counter and buttons, back button, bubble
     transition.ts, backdrop.ts, bubble.ts, fallback.ts, languages.ts, notice.ts
   shared/                      # optional toolbox: random.ts (createRng), math.ts, paging.ts (createPager), gesture.ts (isPhone, bindSwipe: smartphone swipes), cover.ts (imageCover), three/ helpers
+                               # mila/ (Mila's procedural figure, arm IK and texture painters, shared by her two tales)
   pages/contes-des-classes/    # script + styles of the static "Les contes des classes" page (no Three.js)
   tree/                        # tree universe: index.ts (mountTree), invitation.ts (class invitation slot), random-tale.ts (Konteur),
                                # scene/, overlay/, assets/konteur.png
@@ -42,8 +43,12 @@ src/
     ti-kannot/                 # book.ts, cover.ts (owner's poster cropped, assets/cover.webp), staging.ts, theme.css, story/{gcf,fr}.md, world/
     mila/                      # immersive book (own reading UI, shell's language switch): book.ts, cover.ts,
                                # assets/cover.webp, story/{gcf,fr}.md, world/ (port of the owner's prototype)
+    mila-calebassier/          # 2.5D watercolour garden: book.ts, cover.ts, staging.ts (camera presets), theme.css,
+                               # story/{gcf,fr}.md (gcf = unvalidated draft), assets/{glb,tex}, world/ (layout.json,
+                               # pages.ts timelines, garden.ts, paint.ts, finish.ts)
     zanba/, konpe-lapen/       # manifest only (book.ts), ready: false — kept, not shown in the tree
 contes-des-classes/index.html  # that page's HTML (second Vite entry, served at /contes-des-classes/)
+art/mila-calebassier/          # sources of that tale: bpy and painter scripts, README (rebuild); masters and .blend git-ignored
 doc/                           # architecture.md, development.md
 ```
 
@@ -69,6 +74,10 @@ doc/                           # architecture.md, development.md
   order (`createLandscape` → `createLightTree` → `createSky`, one `createRng(11)`) — reordering
   changes the layout.
 - Each world's mount disposes whatever it built if it throws.
+- `src/books/mila-calebassier/assets/` is generated: change `art/mila-calebassier/scripts/` or
+  `world/layout.json` and rebuild (`art/mila-calebassier/README.md`), never edit a GLB or a texture by hand.
+- Mila is one character in two tales: her build lives in `src/shared/mila/`; a change there must
+  leave the underwater tale's frames unchanged (`qa/mila-underwater.mjs`).
 - Package manager: pnpm only.
 
 ## Gotchas

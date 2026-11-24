@@ -121,18 +121,24 @@ export function createGarden(
       pool: 0,
     }),
     gourd: paint("#ffffff", tex.gourd, { kind: "gourds", gran: 0.12, pool: 0.3, scale: 9 }),
-    wall_mila: paint("#f7e4b6", tex.wall),
-    wall_ninon: paint("#f3cdbf", tex.wall),
-    wall_in: paint("#f1e3cd", tex.wall),
-    trim: paint("#faf4ea", tex.wall, { gran: 0.2 }),
+    wall_mila: paint("#f7e4b6", tex.wall, { kind: "wall", vary: 0.8 }),
+    wall_ninon: paint("#f3cdbf", tex.wall, { kind: "wall", vary: 0.8 }),
+    wall_in: paint("#f1e3cd", tex.wall, { kind: "wall", vary: 0.7 }),
+    trim: paint("#faf4ea", tex.wall, { kind: "wall", gran: 0.2, vary: 0.6 }),
     roof: paint("#ffffff", tex.roof, { side: THREE.DoubleSide }),
-    slab: paint("#ddd1bf", tex.wall),
+    slab: paint("#ddd1bf", tex.wall, { vary: 0.8 }),
     floor: paint("#d2ba9c", tex.earth),
     louver: paint("#e3ece5", null, { side: THREE.DoubleSide, gran: 0.2 }),
     door: paint("#5f8f86"),
     wood: paint("#a67c58", null, { gran: 0.5 }),
     metal: paint("#3f6b5c", null, { gran: 0.15 }),
-    ground: paint("#ffffff", tex.ground, { kind: "ground", earth: tex.earth, pool: 0, gran: 0.25 }),
+    ground: paint("#ffffff", tex.ground, {
+      kind: "ground",
+      earth: tex.earth,
+      pool: 0,
+      gran: 0.25,
+      vary: 1,
+    }),
     stone: paint("#f6eee2", tex.wall, { pool: 0, gran: 0.2 }),
     hedge: paint("#ffffff", tex.hedge, { alphaTest: 0.5, side: THREE.DoubleSide, pool: 0 }),
     cloth: paint("#f3e9dc", tex.cloth),
@@ -236,6 +242,8 @@ export function createGarden(
   group.add(starPoints);
   const hills = cardMaterial(wash, tex.hills, [0, 0, 1 / 7, 1]);
   hills.uniforms.uAmbient = { value: new THREE.Color() };
+  // The relief is painted far already: it takes its key's tint, not the garden's air.
+  hills.uniforms.uAirGain.value = 0;
   const ring = new THREE.CylinderGeometry(150, 150, 34, 48, 1, true);
   const hillMesh = new THREE.Mesh(ring, hills);
   hillMesh.position.y = 9;

@@ -56,26 +56,43 @@ def foliage(
     spread: float = 0.9,
     under: str | None = None,
 ) -> None:
-    """A mass of leaves growing away from `base`, filling an ellipse: three glazes, light to dark."""
+    """A mass of leaves growing away from `base`, painted as a mass first: a light wash, a shadow
+    glaze on its lower right (the light comes from the upper left), a dark heart; then the leaves
+    that tell: lit ones lifted to the paper at the upper rim, dark ones glazed in the shade."""
     rng = sheet.rng
-    if under:
-        m = wc.empty(sheet)
-        wc.ellipse(m, sheet, centre[0], centre[1], radii[0] * 0.86, radii[1] * 0.86, soft=radii[0] * 0.35)
-        sheet.wash(wc.rough(sheet, m, 0.4, radii[0] * 0.2), under, 0.5, edge=0.2, bloom=0.7, soft=3)
+    cx, cy = centre
+    rx, ry = radii
+    body = wc.empty(sheet)
+    wc.ellipse(body, sheet, cx, cy, rx * 0.9, ry * 0.9, soft=rx * 0.3)
+    mass = wc.rough(sheet, body, 0.45, rx * 0.22)
+    sheet.wash(mass, under or pigments[0], 0.5, edge=0.55, bloom=0.9, gran=0.6, soft=3)
+    shade = wc.empty(sheet)
+    wc.ellipse(shade, sheet, cx + rx * 0.2, cy + ry * 0.24, rx * 0.74, ry * 0.72, soft=rx * 0.4)
+    sheet.wash(shade * mass, pigments[1], 0.55, edge=0.35, bloom=0.8, gran=0.6, soft=4, cover=0)
+    heart = wc.empty(sheet)
+    wc.ellipse(heart, sheet, cx + rx * 0.3, cy + ry * 0.4, rx * 0.46, ry * 0.42, soft=rx * 0.3)
+    sheet.wash(wc.rough(sheet, heart * mass, 0.35, rx * 0.15), pigments[2], 0.5, edge=0.5, bloom=0.7, soft=3, cover=0)
     layers = [wc.empty(sheet) for _ in range(3)]
-    for i in range(count):
+    lit = wc.empty(sheet)
+    for _ in range(count):
         a = rng.uniform(0, math.tau)
         r = math.sqrt(rng.uniform(0, 1))
-        x = centre[0] + math.cos(a) * r * radii[0]
-        y = centre[1] + math.sin(a) * r * radii[1]
+        x = cx + math.cos(a) * r * rx
+        y = cy + math.sin(a) * r * ry
         out = math.atan2(y - base[1], x - base[0]) + rng.normal(0, spread)
-        length = rng.uniform(*leaf_len)
-        # Leaves near the rim catch the light; the heart of the mass is glazed darker.
-        k = int(np.clip(rng.normal(1.15 - r * 1.1, 0.75), 0, 2.99))
-        wc.leaf(layers[k], sheet, x, y, length, length * slim * rng.uniform(0.8, 1.2), out, tip)
-    strengths = (0.55, 0.75, 0.95)
-    for mask, pigment, strength in zip(layers, pigments, strengths):
-        sheet.wash(mask, pigment, strength, edge=0.7, gran=0.55, bloom=0.5, soft=0.9)
+        length = rng.uniform(*leaf_len) * (1.25 - 0.35 * r)
+        # How deep in the shade the leaf sits: lower right is dark, the upper left rim is lit.
+        shadow = ((x - cx) / rx * 0.6 + (y - cy) / ry * 0.75) * 0.5 + 0.5
+        width = length * slim * rng.uniform(0.8, 1.2)
+        if shadow < 0.34 and rng.random() < 0.55:
+            wc.leaf(lit, sheet, x, y, length, width, out, tip)
+        else:
+            k = int(np.clip(rng.normal(shadow * 2.4 - 0.2, 0.6), 0, 2.99))
+            wc.leaf(layers[k], sheet, x, y, length, width, out, tip)
+    sheet.lift(lit, 0.6, 1.0)
+    sheet.wash(lit, pigments[0], 0.3, edge=0.9, gran=0.4, bloom=0.4, soft=0.8)
+    for mask, pigment, strength in zip(layers, pigments, (0.42, 0.62, 0.8)):
+        sheet.wash(mask, pigment, strength, edge=0.8, gran=0.55, bloom=0.5, soft=0.9)
 
 
 def stem(sheet: wc.Sheet, pts: list[tuple[float, float]], r0: float, r1: float, pigment: str = UMBER, strength: float = 0.9) -> None:
@@ -127,6 +144,15 @@ def paint_leaves(size):
                 fork.append((fx, fy))
             forks.append(fork)
         layers = [wc.empty(s) for _ in range(3)]
+        clump = wc.empty(s)
+        shade = wc.empty(s)
+        for line in [twig, *forks]:
+            for px, py in line[1:]:
+                wc.ellipse(clump, s, px, py, h * 0.15, h * 0.12, soft=h * 0.06)
+                wc.ellipse(shade, s, px + h * 0.03, py + h * 0.04, h * 0.1, h * 0.08, soft=h * 0.05)
+        clump = wc.rough(s, clump, 0.4, 26)
+        s.wash(clump, SAP, 0.55, edge=0.6, gran=0.5, bloom=0.9, soft=2.5)
+        s.wash(shade * clump, JADE, 0.5, edge=0.3, gran=0.5, bloom=0.8, soft=3, cover=0)
         for line in [twig, *forks]:
             for px, py in line[1:]:
                 for _ in range(rng.integers(5, 9)):
@@ -139,7 +165,7 @@ def paint_leaves(size):
         stem(s, twig, 7, 2.5, UMBER, 0.8)
         for fork in forks:
             stem(s, fork, 4, 2, UMBER, 0.7)
-        out.append(s.image(alpha=True, alpha_gain=1.25))
+        out.append(s.image(alpha=True, alpha_gain=1.7))
     return tiles(out, 2)
 
 

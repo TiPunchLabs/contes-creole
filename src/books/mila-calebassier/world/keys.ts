@@ -20,6 +20,9 @@ export interface LightKey {
   sun: string;
   sunK: number;
   sunFrom: readonly [number, number, number];
+  /** Aerial perspective: colour of the air and its density per metre. */
+  air: string;
+  airK: number;
   /** Tint and night windows of the distant hills. */
   hills: string;
   hillLights: number;
@@ -42,6 +45,8 @@ export const KEYS: Record<KeyName, LightKey> = {
     sun: "#ffc998",
     sunK: 0.42,
     sunFrom: [-0.8, 0.35, 0.45],
+    air: "#e9c9c0",
+    airK: 0.013,
     hills: "#cdbfd6",
     hillLights: 0.25,
   },
@@ -58,6 +63,8 @@ export const KEYS: Record<KeyName, LightKey> = {
     sun: "#a9bdf0",
     sunK: 0.2,
     sunFrom: [0.5, 0.8, 0.4],
+    air: "#3b4f86",
+    airK: 0.014,
     hills: "#46588a",
     hillLights: 1,
   },
@@ -74,6 +81,8 @@ export const KEYS: Record<KeyName, LightKey> = {
     sun: "#7f93c8",
     sunK: 0.1,
     sunFrom: [0.5, 0.8, 0.4],
+    air: "#1b2744",
+    airK: 0.022,
     hills: "#232f4e",
     hillLights: 0.12,
   },
@@ -90,6 +99,8 @@ export const KEYS: Record<KeyName, LightKey> = {
     sun: "#a9bdf0",
     sunK: 0.06,
     sunFrom: [0.5, 0.8, 0.4],
+    air: "#33457a",
+    airK: 0.014,
     hills: "#3a4a78",
     hillLights: 0.8,
   },
@@ -106,6 +117,8 @@ export const KEYS: Record<KeyName, LightKey> = {
     sun: "#ffd9b0",
     sunK: 0.4,
     sunFrom: [0.85, 0.4, 0.3],
+    air: "#f3d9cf",
+    airK: 0.013,
     hills: "#e3d3dc",
     hillLights: 0,
   },
@@ -124,6 +137,8 @@ export interface MixedKey {
   sun: THREE.Color;
   sunK: number;
   sunFrom: THREE.Vector3;
+  air: THREE.Color;
+  airK: number;
   hills: THREE.Color;
   hillLights: number;
 }
@@ -136,9 +151,10 @@ const COLOURS = [
   "hemiSky",
   "hemiGround",
   "sun",
+  "air",
   "hills",
 ] as const;
-const NUMBERS = ["cloudK", "hemi", "sunK", "hillLights"] as const;
+const NUMBERS = ["cloudK", "hemi", "sunK", "airK", "hillLights"] as const;
 
 /** An empty mix to be filled by `mixKeys`. */
 export function createMixedKey(): MixedKey {
@@ -154,6 +170,8 @@ export function createMixedKey(): MixedKey {
     sun: new THREE.Color(),
     sunK: 0,
     sunFrom: new THREE.Vector3(),
+    air: new THREE.Color(),
+    airK: 0,
     hills: new THREE.Color(),
     hillLights: 0,
   };

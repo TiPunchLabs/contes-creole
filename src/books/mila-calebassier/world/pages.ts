@@ -34,8 +34,11 @@ export interface Frame {
   branchB: number;
   /** The fruit the tree gives at dawn: 0 on branch B, 1 in Man Ninon's hands; her hands on it. */
   gift: { k: number; hold: number };
-  /** Bedroom shutters: 0 closed, 1 open. */
+  /** Bedroom shutters: 0 closed, 1 open; Mila's hands on them (0..1). */
   shutters: number;
+  shut: number;
+  /** Golden reflections on the bedroom walls (0..1). */
+  shimmer: number;
   /** Calabashes in the branches: share that is lit, and their look (0 green, 1 lit gold). */
   lit: number;
   gold: number;
@@ -87,6 +90,8 @@ export function resetFrame(f: Frame): Frame {
   f.branchB = 0;
   f.gift = { k: 0, hold: 0 };
   f.shutters = 1;
+  f.shut = 0;
+  f.shimmer = 0;
   f.lit = 1;
   f.gold = 1;
   f.stars = 1;
@@ -385,6 +390,10 @@ export const PAGES: Record<string, PageScript> = {
       f.hold = 1 - ramp(t, 3.5, 4.3);
       f.carry = { side: 0, height: 0.88, forward: lerp(0.24, 0.36, ramp(t, 2, 3)) };
       f.shutters = 1 - ramp(t, 6.9, 8.8);
+      // She leans out, takes the two leaves as they come round and draws them together.
+      f.shut = pulse(t, 7.5, 8.2, 8.9, 9.4);
+      f.mila.lean = 0.2 * pulse(t, 6.6, 7.4, 8.8, 9.4);
+      f.shimmer = ramp(t, 3.3, 5.2);
       f.mila.headPitch = 0.3 * pulse(t, 2, 3, 4, 4.6) + 0.2 * ramp(t, 9.4, 10.4);
       f.stars = 1 - 0.08 * ramp(t, 9.6, 10.6);
     },
@@ -427,13 +436,20 @@ export const PAGES: Record<string, PageScript> = {
         ramp(t, 8.2, 9),
       );
       f.shutters = ramp(t, 0.8, 2.8);
-      f.mila.lean = 0.16 * pulse(t, 2.8, 3.6, 6.4, 7);
+      // Both hands push the leaves apart, then she leans on the sill to look out.
+      f.shut = pulse(t, 0.2, 0.7, 1.3, 1.9);
+      f.shimmer = 0.45;
+      f.mila.lean = 0.2 * pulse(t, 0.2, 0.8, 1.5, 2.2) + 0.16 * pulse(t, 2.8, 3.6, 6.4, 7);
       f.mila.headYaw = -0.6 * pulse(t, 3.2, 4, 4.4, 5) + 0.6 * pulse(t, 4.6, 5.4, 5.8, 6.4);
       f.mila.headPitch = -0.38 * pulse(t, 5.8, 6.4, 6.8, 7.2) + 0.3 * ramp(t, 9, 10);
       const tremble = 0.5 + 0.5 * Math.sin(t * 9) * Math.sin(t * 2.3);
       f.hold = ramp(t, 9, 9.8);
       f.gourd = { from: "table", to: "carry", k: ramp(t, 9.8, 10.9), glow: 0.5 + 0.2 * tremble };
-      f.carry = { side: 0, height: 0.86, forward: lerp(0.34, 0.165, ramp(t, 10.2, 11.2)) };
+      f.carry = {
+        side: 0,
+        height: lerp(0.86, 0.78, ramp(t, 10.2, 11.2)),
+        forward: lerp(0.34, 0.165, ramp(t, 10.2, 11.2)),
+      };
     },
   },
   // One step after another: she trips on the root, holds the fruit against her, goes on slowly.
@@ -456,7 +472,7 @@ export const PAGES: Record<string, PageScript> = {
       f.mila.gait = Math.max(f.mila.gait, t > 3.3 && t < 4.4 ? 1 : 0);
       f.carry = {
         side: 0,
-        height: lerp(0.84, 0.78, trip),
+        height: lerp(0.78, 0.74, trip),
         forward: lerp(0.2, 0.15, ramp(t, 3.3, 4)),
       };
       f.mila.headPitch = 0.3 + 0.2 * trip;
@@ -473,7 +489,7 @@ export const PAGES: Record<string, PageScript> = {
       f.lamp = 1;
       f.gourd = { from: "carry", to: "carry", k: 1, glow: 0.42 };
       f.hold = 1;
-      f.carry = { side: 0, height: 0.84, forward: 0.17 };
+      f.carry = { side: 0, height: 0.78, forward: 0.17 };
       if (t < 8.6) {
         stand(f.mila, 3.5, 1.65, EAST);
         stroll(f.ninon, P10_NINON, t, 0.6, 5);
@@ -509,7 +525,7 @@ export const PAGES: Record<string, PageScript> = {
       f.hold = 1 - ramp(t, 6.2, 7);
       f.carry = {
         side: 0,
-        height: lerp(0.86, OFFER.height, ramp(t, 1.4, 3)),
+        height: lerp(0.78, OFFER.height, ramp(t, 1.4, 3)),
         forward: lerp(0.17, OFFER.forward, ramp(t, 1.4, 3)),
       };
       f.treeGlow = pulse(t, 6.8, 7.8, 9, 10.5);

@@ -47,7 +47,7 @@ export function createMila(wash: Wash, ramp: THREE.Texture, rnd: Rand): MilaFigu
   const madras = canvasTexture(64, 3, paintMadras);
   const hair = canvasTexture(512, 6, (g, w, h) => paintHair(g, w, h, rnd));
   const flat = (color: string, gran = 0.25, brush = 0.7): THREE.Material =>
-    washed(wash, ramp, { color, gran, pool: 0.25, scale: 9, brush });
+    washed(wash, ramp, { color, gran, pool: 0.25, scale: 9, brush, vary: 0.15 });
   /** Features of her face: drawn fine, almost untouched by the sheet's brush. */
   const fine = (color: string): THREE.Material => flat(color, 0, 0.12);
   const figure = buildMilaFigure({

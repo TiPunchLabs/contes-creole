@@ -141,7 +141,11 @@ def taper(n: int, r0: float, r1: float) -> list[float]:
 def leaf_card(mesh: Mesh, rng, at: Vector, along: Vector, size: float, bones: dict[str, float] | None = None) -> None:
     """A painted foliage card growing from `at`, roughly along `along`; colour R = sway, G = phase."""
     up = (along + Vector((rng.gauss(0, 0.5), rng.uniform(0.1, 0.9), rng.gauss(0, 0.5)))).normalized()
-    side = up.cross(Vector((rng.gauss(0, 1), rng.gauss(0, 0.3), rng.gauss(0, 1)))).normalized()
+    # Cards face the south-east half of the garden, where every exterior lens stands: their width
+    # runs across that view (with a wide scatter), so few are ever seen on edge.
+    turn = rng.gauss(0, 0.6)
+    across = Vector((0.86 * math.cos(turn) - 0.5 * math.sin(turn), rng.gauss(0, 0.15), -0.5 * math.cos(turn) - 0.86 * math.sin(turn)))
+    side = (across - up * across.dot(up)).normalized()
     half = side * size * 0.5
     top = up * size
     tile = rng.randrange(4)
@@ -345,10 +349,10 @@ def build_tree(mats) -> dict:
     for i in range(13):
         t = i / 12
         p = start.lerp(cross + (cross - start).normalized() * 1.1, t)
-        p.y = 0.16 * (1 - t) ** 2 + 0.05 + (0.05 * math.sin(t * 9) if 0.55 < t < 0.95 else 0)
+        p.y = 0.16 * (1 - t) ** 2 + 0.03 + (0.035 * math.sin(t * 9) if 0.55 < t < 0.95 else 0)
         p += Vector((1, 0, -0.3)).normalized() * math.sin(t * 6.5) * 0.2
         pts.append(p)
-    mesh.tube(pts, taper(13, 0.16, 0.05), "bark", 7, tile=0.9, squash=0.8)
+    mesh.tube(pts, taper(13, 0.15, 0.035), "bark", 7, tile=0.9, squash=0.7)
     info["root_cross"] = [list(p) for p in pts[7:12]]
     mesh.build(col, mats)
 

@@ -31,6 +31,8 @@ const NINON_CARRY: Carry = { side: 0, height: 1.02, forward: 0.3 };
 const LAMP_HAND: Carry = { side: -0.26, height: 0.98, forward: 0.3 };
 /** Reach of the warm lights on the painted layers (metres). */
 const GLOW_RANGE = [4.6, 5, 9] as const;
+/** Distance from a shutter's hinge to the edge where the two leaves meet. */
+const SHUTTER_EDGE = 0.6;
 
 const easeInOut = (t: number): number => -(Math.cos(Math.PI * t) - 1) / 2;
 
@@ -293,7 +295,10 @@ export default defineWorld({
         built.hillLights.opacity = key.hillLights;
         built.stars.uniforms.uLit.value = f.stars;
         wash.uAmbient.value.copy(key.ambient);
+        wash.uAir.value.copy(key.air);
+        wash.uAirK.value = key.airK;
         wash.uTime.value = calm ? 0 : time;
+        wash.uShimmer.value = f.shimmer * f.gourd.glow;
         wash.uLit.value = f.lit;
         wash.uGold.value = f.gold;
         hemi.color.copy(key.hemiSky);
@@ -342,6 +347,33 @@ export default defineWorld({
           built.lamp.position.copy(lampAt);
         }
         built.lamp.visible = f.lamp > 0 && f.ninon.visible;
+        // Shutters, and her hands on their meeting edges while she closes or opens them.
+        const open = f.shutters * 1.95;
+        built.shutters.left.rotation.y = built.shutters.yaw - open;
+        built.shutters.right.rotation.y = built.shutters.yaw + open;
+        if (f.shut > 0.001) {
+          const s = Math.sin(f.mila.yaw);
+          const co = Math.cos(f.mila.yaw);
+          const [rx, ry, rz] = MILA_DIMS.restHand;
+          const hold = (leaf: THREE.Object3D, sd: number): Grip => {
+            leaf.updateMatrixWorld(true);
+            const edge = leaf.localToWorld(new THREE.Vector3(-sd * SHUTTER_EDGE, -0.12, 0));
+            const rest = new THREE.Vector3(
+              f.mila.x + sd * rx * co + rz * s,
+              f.mila.y + ry,
+              f.mila.z - sd * rx * s + rz * co,
+            );
+            return {
+              at: rest.lerp(edge, f.shut),
+              face: edge.clone().add(scratch.set(s, 0, co)),
+              up: [0, 1, 0.2],
+              pole: [0.2, -0.22, -0.08],
+            };
+          };
+          // Seen from inside, the leaf hinged on her right is the house's left one.
+          f.mila.left = hold(built.shutters.right, -1);
+          f.mila.right = hold(built.shutters.left, 1);
+        }
         applyPose(mila as Figure, MILA_DIMS, f.mila, calm ? 0 : time);
         applyPose(ninon, NINON_DIMS, f.ninon, calm ? 0 : time + 2);
         milaShadow.visible = f.mila.visible;
@@ -349,9 +381,6 @@ export default defineWorld({
         ninonShadow.visible = f.ninon.visible;
         ninonShadow.position.set(f.ninon.x, f.ninon.y + 0.03, f.ninon.z);
 
-        const open = f.shutters * 1.95;
-        built.shutters.left.rotation.y = built.shutters.yaw - open;
-        built.shutters.right.rotation.y = built.shutters.yaw + open;
         built.breakfast.visible = f.breakfast;
 
         // Warm sources: the hero calabash, the lantern, the tree's own glow.
@@ -408,6 +437,22 @@ export default defineWorld({
         built.frame(camera, id, tall);
       };
 
+      /**
+       * Says on the canvas which page is shown, who holds the hero calabash and whether the page's
+       * action is over: a few attributes, written only when they change, for QA scripts to wait on.
+       */
+      let published = "";
+      const publish = (): void => {
+        const id = pages[shown].id;
+        const settled = veilLevel === 0 && clock >= PAGES[id].seconds;
+        const state = `${id} ${heroOwner} ${settled ? "settled" : "moving"}`;
+        if (state === published) return;
+        published = state;
+        stage.canvas.dataset.page = id;
+        stage.canvas.dataset.hero = heroOwner;
+        stage.canvas.dataset.settled = String(settled);
+      };
+
       /** Advances the page clock, the paper dip and the text shift, then composes the frame. */
       const frame = (time: number, dt: number): void => {
         if (!frozen) {
@@ -432,6 +477,7 @@ export default defineWorld({
         }
         veil.style.opacity = String(veilLevel);
         compose(time);
+        publish();
       };
 
       // Every shader is compiled before the paper lifts, so the first page change does not stall.
