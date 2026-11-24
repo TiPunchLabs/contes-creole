@@ -324,18 +324,21 @@ export const STAGING: Record<string, PageStaging> = {
   p10: {
     intent: "The light given back: Man Ninon comes from the gate with her lamp and leads Mila.",
     size: "Medium two-shot.",
-    move: "Reveal: the lens waits on Mila, the lamp enters from the gate side.",
+    move: "Reveal: the lens waits on Mila, the lamp enters from the gate side; then a short pan follows them to the left.",
     space: "garden",
     wide: {
-      from: { pos: [2.4, 1.05, 5.0], look: [3.36, 0.9, 1.25], fov: 36 },
-      to: { pos: [2.9, 1.05, 5.2], look: [3.06, 0.9, 1.25], fov: 36 },
-      seconds: 7,
+      // The lens holds the meeting, then follows the two of them as they leave to the left.
+      from: { pos: [2.9, 1.05, 5.2], look: [4.2, 0.9, 1.6], fov: 36 },
+      to: { pos: [2.9, 1.05, 5.2], look: [2.92, 0.9, 1.2], fov: 36 },
+      after: 8.6,
+      seconds: 2.9,
       foreground: [{ cell: [0, 0], forward: 2.3, right: 1.0, foot: 0, height: 1.7, flip: true }],
     },
     tall: {
-      from: { pos: [3.1, 1.2, 5.7], look: [3.9, 1.02, 1.6], fov: 54 },
+      from: { pos: [2.9, 1.2, 5.9], look: [3.95, 1.02, 1.7], fov: 54 },
       to: { pos: [2.9, 1.2, 5.9], look: [3.0, 1.02, 1.7], fov: 54 },
-      seconds: 7,
+      after: 8.6,
+      seconds: 2.9,
       foreground: [],
     },
     portrait: "Hands, faces and the lamp.",
