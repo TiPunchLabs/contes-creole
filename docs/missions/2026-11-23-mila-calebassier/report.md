@@ -1,7 +1,7 @@
 # Report — mila-calebassier
 
 Verdict: PARTIAL
-Version: a6e1062
+Version: 1de7283
 
 Executor: Claude Code session, model id `claude-fable-5-2`. Layout and camera owner: the executor
 (no camera subagent). Date: 2026-11-23/24.
@@ -25,10 +25,16 @@ Review cycle 2 (Codex, `review-2.md`, CHANGES_REQUESTED on `486c002`; F1 and F2 
 F3 and F4 are fixed in `a6e1062` and in this report (section "Answers to review 2"). It was the third
 and last correction cycle allowed by the mission.
 
+Owner feedback 2 with its five additions (`owner-feedback-2.md`, cycle 4 approved by the owner):
+Man Ninon's walk is redone, both figures wear light closed shoes, both silhouettes are improved
+(Man Ninon's back straightened after the owner saw a hump), page changes are a watercolour wash and
+no foot crosses a root any more, in `ff11440`, `a3716b3` and `1de7283` (section "Owner feedback 2"). Codex review 3 on `a6e1062`
+ran in parallel; its file is not touched by this cycle and its findings are not answered here.
+
 Why PARTIAL and not PASS:
 
-- A15 asks for a Codex review on the final SHA: review 2 was on `486c002`; `a6e1062` moves one
-  foreground cut-out, one stopping point of Mila and adds a check, and has not been reviewed.
+- A15 asks for a Codex review on the final SHA: `1de7283` changes both figures' walk, feet and
+  shapes and the page change, and has not been reviewed (review 3 is on `a6e1062`).
 - Two props are hidden by the figure who carries them at a reading frame (the gift on page 12, the
   lantern in part on page 11 portrait): section "Answers to review 2", decision D-GIFT.
 - A09 regression of the existing tales: none found. `qa/tree.mjs` cannot launch on this machine
@@ -103,17 +109,18 @@ Decisions taken by the executor (all reversible):
 
 Delegations (model economy):
 
-| Task                                                                                                                                                                                             | Subagent model            | Result                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Baseline checks, baseline build, underwater stills, Mila pages 1–6 at `3ce9759`                                                                                                                  | Sonnet, isolated worktree | done                                                                                                     |
-| Functional QA script, captures with the text card, weight, frame times, draw calls                                                                                                               | Sonnet                    | done; one check relaxed by the executor (ambient sway is not a replay)                                   |
-| Rebuild from the scripts twice, hash comparison, archive of the sources with a manifest                                                                                                          | Sonnet, isolated worktree | done                                                                                                     |
-| Regression of the existing tales (pixel comparison, existing QA journeys)                                                                                                                        | Sonnet, isolated worktree | done                                                                                                     |
-| Update of `qa/swipe.mjs`, `qa/mila.mjs`, `qa/tkp.mjs` for any shelf size, negative control                                                                                                       | Sonnet                    | done                                                                                                     |
-| Frame times, draw calls and weights on `7ed9c95`; third rebuild; refreshed archive                                                                                                               | Sonnet, isolated worktree | done                                                                                                     |
-| Review cycle 1: every mode of `qa/calebassier.mjs`, framing sweep, negative controls, arms sweep, contact sheets, on `875fb5d`                                                                   | Sonnet                    | done; found one remaining framing failure (page 10, 640x360 landscape), fixed by the executor            |
-| Review cycle 2: final runs on `a6e1062` (app framing 7 cases, sweep on 7 screens, escape, journey, rapid, touch, reduced, stills, arms sweep, stills of the page 10 meeting and the page 1 gate) | Sonnet                    | done; the portrait sweep at 0.1 s steps hit the time limit twice and was rerun by the executor at 0.25 s |
-| Review cycle 1: regression of Ti Kannot and the underwater Mila on the shell change                                                                                                              | Sonnet                    | done; `mila-lang.mjs` stopped by the time limit                                                          |
+| Task                                                                                                                                                                                                                                                                                                                                                                                                                    | Subagent model            | Result                                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Baseline checks, baseline build, underwater stills, Mila pages 1–6 at `3ce9759`                                                                                                                                                                                                                                                                                                                                         | Sonnet, isolated worktree | done                                                                                                            |
+| Functional QA script, captures with the text card, weight, frame times, draw calls                                                                                                                                                                                                                                                                                                                                      | Sonnet                    | done; one check relaxed by the executor (ambient sway is not a replay)                                          |
+| Rebuild from the scripts twice, hash comparison, archive of the sources with a manifest                                                                                                                                                                                                                                                                                                                                 | Sonnet, isolated worktree | done                                                                                                            |
+| Regression of the existing tales (pixel comparison, existing QA journeys)                                                                                                                                                                                                                                                                                                                                               | Sonnet, isolated worktree | done                                                                                                            |
+| Update of `qa/swipe.mjs`, `qa/mila.mjs`, `qa/tkp.mjs` for any shelf size, negative control                                                                                                                                                                                                                                                                                                                              | Sonnet                    | done                                                                                                            |
+| Frame times, draw calls and weights on `7ed9c95`; third rebuild; refreshed archive                                                                                                                                                                                                                                                                                                                                      | Sonnet, isolated worktree | done                                                                                                            |
+| Review cycle 1: every mode of `qa/calebassier.mjs`, framing sweep, negative controls, arms sweep, contact sheets, on `875fb5d`                                                                                                                                                                                                                                                                                          | Sonnet                    | done; found one remaining framing failure (page 10, 640x360 landscape), fixed by the executor                   |
+| Owner feedback 2: final runs on `1de7283` (a run on `ff11440` was stopped when the owner's additions arrived; a full run on `a3716b3` passed on the calebassier tale and gave the unstable underwater comparison) (app framing 7 cases, framing and visibility sweep on 7 screens, escape, journey, rapid, touch, reduced, resize, text, stills, arms and feet sweep, underwater stills against the `3ce9759` baseline) | Sonnet                    | done on `1de7283`, all passing; it ran four long calls in the background and waited for each, against the brief |
+| Review cycle 2: final runs on `a6e1062` (app framing 7 cases, sweep on 7 screens, escape, journey, rapid, touch, reduced, stills, arms sweep, stills of the page 10 meeting and the page 1 gate)                                                                                                                                                                                                                        | Sonnet                    | done; the portrait sweep at 0.1 s steps hit the time limit twice and was rerun by the executor at 0.25 s        |
+| Review cycle 1: regression of Ti Kannot and the underwater Mila on the shell change                                                                                                                                                                                                                                                                                                                                     | Sonnet                    | done; `mila-lang.mjs` stopped by the time limit                                                                 |
 
 Art, staging, cameras, product code, shaders, Blender and painter scripts, tests and documents were
 done on the executor's model. In review cycle 1 the executor also wrote the two fixes, the new QA
@@ -453,6 +460,164 @@ Acceptance after this cycle, where it changed:
 One touch device limit, pre-existing and unchanged: while a book is opening there is no control on
 screen, so the cancellation is a keyboard gesture only.
 
+### Owner feedback 2 and its additions (2026-11-24, `owner-feedback-2.md`, done in `ff11440`, `a3716b3` and `1de7283`)
+
+Evidence of this cycle: `~/.local/share/contes-creole-qa/mila-calebassier/s10/` and the sheets
+`evidence/s10-*.jpg`. Same browser and renderer as before (headless system Chrome 158 on the NVIDIA
+GPU; software renderers refused). Phone sizes are emulated viewports.
+
+1. Man Ninon's walk, on every page where she walks (4, 10, 12).
+
+- Cause of the stiff look: her legs swung on a fixed arc, the same as Mila's, wider than her step
+  (0.54 m of foot travel for 0.40 m of body travel): the feet slid, the knees never took her weight,
+  and the arm swung with the leg of its own side. Measured on `a6e1062`'s gait under the new check:
+  feet down to 19 mm under the ground, a flat foot sliding up to 294 mm in 0.1 s.
+- Now (`world/puppet.ts`, `plantedWalk`): the step phase comes from the distance walked, so a foot
+  stays exactly where it lands while the body passes over it; each leg is solved (hip and knee) to
+  reach its foot; the heel lands first, the foot lies flat, the toes leave last; the hips sink at
+  each landing and rise over the standing leg; the trunk leans over the standing leg and the
+  shoulders turn against the hips; the free arm swings against the leg of its side. A move is cut
+  into a whole number of steps and starts and ends with the feet side by side: she leaves from
+  standing and stops without a shuffle. Her step (`ELDER_STEP`): 0.42 m, both feet on the ground a
+  fifth of the cycle, the swinging foot lifted 4 cm; about 1.7 steps a second at the page 10 pace.
+- Mila walks the same way with a child's step (`CHILD_STEP`, 0.30 m). Not asked as such: with
+  shoes on, her previous walk showed its toes 15 mm under the ground and the same slide, so the
+  ground check of this feedback could not pass on it. Her poses, carries and timelines are unchanged.
+- Planted feet showed two walks made sideways to the heading (page 5 last steps, page 12 walk to
+  the table): the routes are aligned with the headings; page 5's last steps are shorter (0.33 m).
+- Contacts kept: the lantern arm (page 10) and both carries are world-space hand targets solved
+  after the body; arms sweep below.
+- Limits: a figure who turns on the spot pivots on her feet (no stepping round); on page 8 Mila
+  steps back while turning, a flat foot moves up to 7.9 mm in 0.1 s there; legs bend in one plane
+  (no hip sway sideways, the trunk leans instead); the dress does not react to the knees.
+
+2. Footwear, as made precise by the owner: light closed shoes for both, no sandal, no slipper.
+
+- Man Ninon: low closed walking shoes of sand-coloured soft leather (`#cfbf9f`), a firmer heel, a
+  darker collar round the ankle and a flat brown sole (`world/ninon.ts`). A first version of this
+  cycle (`ff11440`, pale green slippers) was replaced after the precision.
+- Mila: soft flat shoes of unbleached canvas (`#eadfc6`) with a band the colour of her dress straps
+  and a brown sole. They are an option of the shared figure (`MilaKit.shoes` in
+  `src/shared/mila/figure.ts`), absent by default.
+- Both are painted with the tale's wash materials (same grain, pooling and brush as the skin and
+  the clothes); pale so they read at dusk and at night against dark skin and the ochre path.
+- Against the ground and the hems, at every instant of every page (`qa/calebassier-sweep.mjs`, new
+  `info().feet`): lowest point of a shoe 0.8 mm above the ground (never under); on open ground the
+  highest is 184 mm for Man Ninon (hem at 300 mm) and 152 mm for Mila (hem at 455 mm).
+
+3. Silhouettes, incrementally (design by the executor on Fable 5.2; a flat-black pass was added to
+   the probe to judge and to show them).
+
+- Man Ninon read as a straight tube on thin legs. Now: a dress full at the bust and the hips and a
+  little taken in between, to mid-calf with a flaring hem; a rounder belly; a fuller chignon at the
+  back of the crown, which draws her profile; larger sleeves, sturdier arms and calves. Same
+  figure, same face, same colours.
+- Addendum 2, « la mamie semble bossue »: the first version of this work (`a3716b3`) also rounded
+  her upper back, carried her head forward and set the chignon low on the nape; in profile the
+  three made one hump. In `1de7283` the back is straight again (the dress keeps only its belly),
+  the head is upright, the chignon sits at the back of the crown, clear of the neck. Nothing in
+  the rest pose or the walk bends her spine: the walk's forward lean is 0.05 rad and was not
+  changed. Before (`a3716b3`) above, after below, the four pages where she appears in profile or
+  three-quarter: `evidence/s10-ninon-back-{desktop,phone}-before-after.jpg`.
+- Mila: her outline (two puffs, jagged flounces) was already her own; her arms and legs were thin
+  sticks at phone size. Now a fifth thicker (`MilaKit.limbs`, an option of the shared figure, absent
+  by default) and fuller puffs (set by this tale on the built figure).
+- Sheets, before above and after below, painted and flat black, desktop and phone:
+  `evidence/s10-silhouette-{mila,ninon}-{desktop,phone}-before-after.jpg` ("before" is `ff11440`,
+  the first shoes already on; "after" is `1de7283`; the bare feet of `a6e1062` are in the feet
+  sheets).
+
+4. Page changes: a wash instead of the dip to bare paper (`world/finish.ts`, `world/index.ts`).
+
+- The picture of the page just left stays on the sheet and the new page soaks through it, along
+  the paper's tooth, across the sheet in the direction the pages turn, with a darker rim of pooled
+  pigment; 0.85 s. The picture is never blank; the text changes as before (the shell's own fade).
+- A turn made during a change takes what is on the screen at that instant as its starting picture:
+  there is one wash at a time, nothing queues or stacks.
+- Reduced motion: a 0.25 s even cross-fade, and the page shows its final state.
+- Inside this book's world only: the shell, the home tree and the other tales are not touched.
+- Strips of two changes (pages 2 to 3 and 9 to 10), desktop and phone, and the reduced-motion
+  version: `evidence/s10-transitions-{desktop,phone}.jpg` (stepped with the probe, not real time).
+
+5. Addendum 3, « page 12 les personnages traversent la racine ».
+
+- Cause: the long surface root of the tree (built to cross the path for page 9) is a ridge 15 to
+  22 cm high between the place of the gift and the house; both figures walked through it. The
+  check written for it showed the same root crossed by Mila's feet on pages 2, 5 and 9.
+- Fix, for every page at once (`world/puppet.ts`, `world/index.ts`): a planted foot now follows
+  what stands on the ground. A ray is cast down from each foot against the solids Blender built
+  (roots, trunk, walls, steps, furniture; not the ground itself); a foot that lands there stands on
+  it, a foot that swings over it is lifted clear of it, toes included; anything taller than 30 cm
+  is not a step and is left to the check. The root, the composition and the timelines are
+  unchanged; Man Ninon's page 12 path ends 0.3 m further from the trunk, whose root flare is the
+  tallest there.
+- Check with a negative control (`qa/calebassier-sweep.mjs`, `info().feet[].over`): at every
+  instant of every page, a foot more than 12 mm inside a solid is a fault. With the ground-following
+  switched off in a scratch worktree (`s10/neg-roots-no-terrain.log`, exit 1): pages 2, 5, 9 and 12
+  fail, feet 46 to 215 mm inside the root. On `1de7283`: no foot in a solid on any page.
+- Before (`a3716b3`) above, after below: `evidence/s10-page12-roots-before-after.jpg`,
+  `evidence/s10-page02-roots-before-after.jpg`.
+- Limits: the check is on the feet and their shoes; legs, dress and carried props are not tested
+  against the roots (the roots stand below the hems), and the figures' bodies against walls, trunk,
+  furniture and painted cut-outs stay covered on the ground plan by the unit tests of owner
+  feedback 1. Reduced motion shows the reading frame, where both stand on open ground. The dress
+  does not react to a knee lifted over a root.
+
+Results on `1de7283` (`s10/final-1de7283/`, run by a Sonnet subagent): every call exit 0, no
+failure, no rerun.
+
+- Real app against the real text (`framing`): 37 of 37 on each of 390x844 and 360x640 in
+  Français, normal and reduced motion, each page also after turning the phone; 13 of 13 on each
+  phone size in Kréyòl and on 1440x900. F1 holds.
+- Edges and rendered visibility through time (`qa/calebassier-framing.mjs`, 0.25 s steps): 84 of
+  84 on the seven screens. F3 and the page 1 gate hold.
+- `escape` 17 of 17 (F2; the shell is unchanged since `875fb5d`), `journey` 32 of 32, `rapid` 19 of
+  19, `touch` 13 of 13 (the three that exercise page changes under the new wash, quick turns
+  included), `reduced` 13 of 13 (each page settled within 2 s), `resize` 21, `text` 25, `lifecycle`
+  4 (heap 19.5, 20.2, 20.7 MB at cycles 1, 5, 10: +2.3 % from 5 to 10), `failure` 8, `contrast` 8,
+  `shots` 6: all pass.
+- Arms, hero and feet at every instant (`qa/calebassier-sweep.mjs`): 24 of 24 lines, desktop and
+  phone identical. Arms: worst 16.2 mm (Mila, page 9; limit 18), Man Ninon between -11.9 and 0.0 mm:
+  owner feedback 1 holds with the new dress and limbs. One hero calabash at every instant. Feet:
+  never under the ground (lowest 0.8 mm above it), never in a solid (0 mm on every page), highest
+  on open ground 184 mm for Man Ninon and 152 mm for Mila, flat-foot slide 0.0 to 0.1 mm except
+  page 6 (3.9 mm) and page 8 (7.9 mm, the turn noted above).
+- Page sheets of the real app refreshed from this build: `evidence/s8-pages-*.jpg`.
+
+Underwater tale after the two options added to the shared figure (`shoes`, `limbs`, both absent
+there). The pixel comparison could not give a clean answer in this cycle, and is reported as such:
+
+- The stills of `qa/mila-underwater.mjs` were not reproducible on this machine during the cycle. A
+  first subagent run of `a3716b3` against the original baseline files (`3ce9759`) gave 7 of 20
+  identical, 3 desktop files within 24 pixels at 1/255, and the 10 mobile files different (87 000
+  to 549 000 pixels); its rerun gave 0 of 20 identical.
+- To separate the build from the machine, the executor served the untouched baseline build
+  (`baseline/dist`, `3ce9759`) and rendered both builds back to back, twice, with no other QA
+  browser running (`s10/underwater-today/`). The baseline build rendered today differs from its own
+  baseline files on 20 of 20, and from itself between its two runs on 20 of 20. The instability is
+  therefore not caused by this branch.
+- In the one pair of runs where both builds came out in the same state (run 2 of each), the new
+  build equals the baseline build on 18 of 20 files exactly; `desktop-p10.png` and
+  `desktop-p10-scene.png` differ on 28 pixels by 1/255 (the same pair as in review 2, then 23
+  pixels).
+- What this supports: no difference attributable to the branch was found. What it does not: a
+  repeatable pixel identity on 20 of 20. The code argument stands beside it: with neither option
+  given, `buildMilaFigure` adds no mesh, takes no seeded draw and passes the same radius arrays;
+  `src/books/mila/` is unchanged since `99a9f80`. The owner's dev server and browser were running
+  on the same GPU during these runs; whether that is the cause was not investigated.
+
+Negative control of the feet check (`s10/neg-feet-old-gait.log`): the same sweep on a scratch
+worktree of `ff11440` with the previous swung gait fails 9 pages of 12 (shoes 15 to 19 mm under the
+ground, flat-foot slides of 190 to 294 mm in 0.1 s). Evidence sheets ("after" gait and feet sheets
+are `a3716b3`; the walk itself did not change in `1de7283` away from the roots): `evidence/s10-gait-ninon-p04`,
+`-p10`, `-p12-before-after.jpg` (before `a6e1062` above, after below), `s10-feet-before-after.jpg`,
+`s10-feet-closeups-before-after.jpg`.
+
+Not done or not verified in this cycle: no unit test drives `plantedWalk` (it is checked in the
+engine by the sweep); performance was not measured again (the wash adds one full-screen copy and
+one quad during a change; the shoes add 14 small meshes); nothing was looked at on a real phone;
+the gift on page 12 (D-GIFT) is as before; the underwater pixel proof is inconclusive (above).
+
 ### Answers to review 2 (Codex, `review-2.md`, on `486c002`; fixed in `a6e1062`)
 
 Evidence of this cycle: `~/.local/share/contes-creole-qa/mila-calebassier/s9/`. Same browser and
@@ -589,9 +754,11 @@ Not verified:
   `bd5754d` wash refinements, `65b9988` assets equal to a rebuild, `f1143ff` QA script and text shade,
   `7ed9c95` belly carry, `8854187` QA scripts reading the shelf, `23236c7` owner feedback 1,
   `875fb5d` review 1 (framing, first Escape, new QA modes), `486c002` page 10 lens, `a6e1062`
-  review 2 (page 10 foreground, page 1 gate, rendered visibility check: the product commit this
-  report describes), then this report with `review-2.md` and `review-brief-2.md`.
-- Local checks on `a6e1062`: `format:check`, `lint`, `typecheck`, `test` (57 files, 468 tests),
+  review 2 (page 10 foreground, page 1 gate, rendered visibility check), `ff11440` owner feedback 2
+  (planted walk, first shoes, feet check), `a3716b3` its additions (light closed shoes, silhouettes,
+  wash between pages), `1de7283` addenda 2 and 3 (straight back, feet over the roots: the product
+  commit this report describes), then this report with `owner-feedback-2.md`.
+- Local checks on `1de7283`: `format:check`, `lint`, `typecheck`, `test` (57 files, 468 tests),
   `build` (the usual large-chunk warning): all exit 0.
 - Local servers and browsers of this cycle are stopped.
 - Mutating operations outside the worktree: evidence under `~/.local/share/contes-creole-qa/`, one
@@ -609,9 +776,11 @@ Not verified:
 
 ## H. Recommended next action
 
-Pilot: the three correction cycles are used. `a6e1062` differs from the reviewed `486c002` by one
-foreground cut-out (`staging.ts`, page 10 landscape), Mila's stopping point on page 1
-(`world/pages.ts`), a QA-only probe function (`world/index.ts`) and the QA rules; hand the owner
-the PR with review 2 and this report, or route a check of those zones if one more is allowed. The
-owner can look at page 10 on a desktop and at page 1 on the Deploy Preview once it has rebuilt.
-No approval is needed for that; merge stays the owner's.
+Pilot: `1de7283` differs from `a6e1062` by the walk of both figures and their feet on the ground
+(`world/puppet.ts`), their shoes and shapes (`world/ninon.ts`, `world/mila.ts`, the optional `shoes`
+and `limbs` of `src/shared/mila/figure.ts`), the page change (`world/finish.ts`, `world/index.ts`),
+three routes and one lens (`world/pages.ts`, `staging.ts`), the probe and
+`qa/calebassier-sweep.mjs`. Fold in review 3's findings on `a6e1062`, then route review 4 on the new
+SHA; a rerun of the underwater stills on a quiet machine would settle the one open proof. The owner
+can look at the walks on pages 4, 10 and 12, the shoes, the outlines, Man Ninon's back, the roots
+of page 12 and a few page changes on the dev server or the Deploy Preview. Merge stays the owner's.

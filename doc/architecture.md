@@ -165,11 +165,18 @@ the validated navigation (keys, wheel, buttons, one page per horizontal swipe on
   kept between frames: a page can be entered directly, left mid-action and entered again; after its
   action a page holds its last state. The hero calabash is a single object blended between three
   anchors (branch socket, Mila's hands, bedside table).
+- **Walk** (`world/puppet.ts`, `plantedWalk`): both figures walk on planted feet. The step phase
+  comes from the distance walked, a foot stays where it lands while the body passes over it, each
+  leg is solved to reach it, a move is cut into whole steps, and a foot follows what stands on
+  the ground under it (a ray down against the set's solids: it lands on a root or steps over it). Each figure has her own `Step`
+  (an older woman's, a child's). Mila's shoes are an option of the shared figure, off by default.
 - **Cameras** (`staging.ts`): per page, a landscape and a portrait shot, each with an entry and a
   reading lens; the text is cleared by a view offset (`textShift`: the middle of what the text
   leaves on that screen), not by a crop, and a screen narrower than its design frame (16:10, 9:16)
-  keeps that frame's horizontal view (`fitLens`). A page change is a short dip to paper; under
-  reduced motion only the dip remains and pages show their final state.
+  keeps that frame's horizontal view (`fitLens`). A page change is a wash (`world/finish.ts`):
+  the picture of the page just left is kept and the new page soaks through it in 0.85 s, along the
+  paper's tooth; a turn made during a change restarts from what is on the screen, so changes never
+  stack. Under reduced motion it is a 0.25 s even cross-fade and pages show their final state.
 - **QA**: `qa/calebassier/` is a dev-only viewer (page, instant, graybox); the world's handle
   carries a `probe` (seek, counters, `visibility()`: the share of each subject really drawn) and
   the canvas publishes `data-page`, `data-hero`,
