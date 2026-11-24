@@ -24,8 +24,11 @@ export interface Dims {
   restHand: readonly [number, number, number];
   /** How far the arms swing when walking. */
   swing: number;
-  /** Keeps a hand target out of the clothes. */
-  clear?: (hand: THREE.Vector3, lean: number) => THREE.Vector3;
+  /**
+   * Widest radius of the clothes at a height (body space, 0 where there is none): arms are kept
+   * outside it along their whole length, not only at the hand.
+   */
+  radius(y: number): number;
 }
 
 /** A hand's task: where it goes (world), what its palm faces (world) and where its fingers point. */
@@ -34,6 +37,8 @@ export interface Grip {
   face: THREE.Vector3;
   /** Direction of the fingers, body space. */
   up?: readonly [number, number, number];
+  /** The hand is still on its way to its task: it may be moved out of the clothes like a free hand. */
+  free?: boolean;
   /** Where the elbow leans, body space offset from the shoulder. */
   pole?: readonly [number, number, number];
 }
@@ -127,19 +132,57 @@ export function applyPose(figure: Figure, dims: Dims, p: Pose, time: number): vo
     if (grip) {
       body.worldToLocal(hand.copy(grip.at));
       body.worldToLocal(look.copy(grip.face));
-      const pl = grip.pole ?? [0.22, -0.2, -0.12];
+      const pl = grip.pole ?? [0.3, -0.2, -0.12];
       pole.set(arm.S.x + sd * pl[0], arm.S.y + pl[1], arm.S.z + pl[2]);
       const u = grip.up ?? [0, 0.4, 1];
       up.set(u[0] * sd, u[1], u[2]);
-      dims.clear?.(hand, 0);
     } else {
       const [rx, ry, rz] = dims.restHand;
       hand.set(sd * rx, ry, rz - Math.sin(phase + (sd > 0 ? 0 : Math.PI)) * dims.swing * walk);
-      pole.set(arm.S.x + sd * 0.12, arm.S.y, arm.S.z - 0.3);
+      pole.set(arm.S.x + sd * 0.3, arm.S.y - 0.1, arm.S.z - 0.3);
       look.set(hand.x - sd * 0.2, hand.y, hand.z);
       up.set(0, -1, 0);
-      dims.clear?.(hand, 0);
     }
-    solveArm(arm, hand, pole, look, up);
+    // Solve, measure how deep the arm sits in the clothes, open it and solve again: a free hand
+    // moves out with its elbow, a hand with a task stays on it and only the elbow swings out.
+    for (let pass = 0; pass < 8; pass++) {
+      solveArm(arm, hand, pole, look, up);
+      const fixed = grip !== null && grip.free !== true;
+      const depth = armDepth(arm, dims, fixed);
+      if (depth <= 0) break;
+      pole.x += sd * (0.14 + depth * 2);
+      pole.z += 0.04;
+      if (!fixed) {
+        const r = Math.hypot(hand.x, hand.z) || 1e-6;
+        const out = depth * 1.25;
+        hand.x += (hand.x / r) * out;
+        hand.z += (hand.z / r) * out;
+        look.set(hand.x - sd * 0.2, hand.y, hand.z);
+      }
+    }
   }
+}
+
+/** Half thickness of a forearm plus the gap that must show between an arm and the clothes. */
+export const ARM_GAP = 0.04;
+const elbow = new THREE.Vector3();
+const sample = new THREE.Vector3();
+
+/**
+ * How deep a solved arm sits inside the clothes (metres, 0 or less when clear): the worst point
+ * along the upper arm past the shoulder and along the forearm. A hand with a task is not counted:
+ * its place is given.
+ */
+export function armDepth(arm: Arm, dims: Dims, held: boolean): number {
+  elbow.set(0, arm.L1, 0).applyQuaternion(arm.sh.quaternion).add(arm.S);
+  let worst = -Infinity;
+  const probe = (a: THREE.Vector3, b: THREE.Vector3, t: number): void => {
+    sample.lerpVectors(a, b, t);
+    const cloth = dims.radius(sample.y);
+    if (cloth > 0) worst = Math.max(worst, cloth + ARM_GAP - Math.hypot(sample.x, sample.z));
+  };
+  for (const t of [0.5, 0.75, 1]) probe(arm.S, elbow, t);
+  for (const t of held ? [0.25, 0.5, 0.7] : [0.25, 0.5, 0.75, 1])
+    probe(elbow, arm.hand.position, t);
+  return worst;
 }

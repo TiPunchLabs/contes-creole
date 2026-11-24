@@ -32,6 +32,17 @@ export interface Foreground {
   flip?: boolean;
 }
 
+/** Where a foreground cut-out of a shot stands in the garden: x and z of its foot. */
+export function foregroundFoot(shot: Shot, f: Foreground): [number, number] {
+  const [px, , pz] = shot.to.pos;
+  const dx = shot.to.look[0] - px;
+  const dz = shot.to.look[2] - pz;
+  const d = Math.hypot(dx, dz);
+  const ax = dx / d;
+  const az = dz / d;
+  return [px + ax * f.forward - az * f.right, pz + az * f.forward + ax * f.right];
+}
+
 /** One framing of a page: the camera eases from `from` to `to`, then holds for the reading. */
 export interface Shot {
   from: Lens;
@@ -106,7 +117,7 @@ export const STAGING: Record<string, PageStaging> = {
       from: { pos: [2.4, 1.35, 4.4], look: [-0.9, 1.9, -2.4], fov: 40 },
       to: { pos: [1.7, 1.0, 3.3], look: [-1.0, 2.3, -2.6], fov: 42 },
       seconds: 6,
-      foreground: [{ cell: [1, 0], forward: 2.3, right: 0.95, foot: 0, height: 1.55, flip: true }],
+      foreground: [{ cell: [1, 0], forward: 1.0, right: 0.64, foot: 0, height: 0.9, flip: true }],
     },
     tall: {
       from: { pos: [0.6, 1.3, 4.6], look: [-1.2, 2.2, -2.2], fov: 60 },
@@ -166,13 +177,13 @@ export const STAGING: Record<string, PageStaging> = {
       from: { pos: [1.75, 1.02, 3.55], look: [0.75, 0.98, 1.45], fov: 34 },
       to: { pos: [1.65, 1.02, 3.35], look: [0.75, 0.98, 1.45], fov: 34 },
       seconds: 6,
-      foreground: [{ cell: [1, 0], forward: 1.7, right: 0.68, foot: 0, height: 1.3, flip: true }],
+      foreground: [{ cell: [1, 0], forward: 0.9, right: -0.36, foot: 0, height: 0.75 }],
     },
     tall: {
       from: { pos: [0.95, 1.05, 3.7], look: [0.45, 0.95, 1.4], fov: 50 },
       to: { pos: [0.9, 1.05, 3.5], look: [0.45, 0.95, 1.4], fov: 50 },
       seconds: 6,
-      foreground: [{ cell: [0, 1], forward: 1.9, right: 0.42, foot: 0, height: 0.8, flip: true }],
+      foreground: [{ cell: [0, 1], forward: 1.0, right: 0.26, foot: 0, height: 0.55, flip: true }],
     },
     portrait: "Face and calabash.",
     continuity: "She now faces left: the way back to the tree, and to her house beyond it.",
@@ -272,7 +283,7 @@ export const STAGING: Record<string, PageStaging> = {
       from: { pos: [2.4, 1.05, 5.0], look: [4.4, 0.9, 1.6], fov: 36 },
       to: { pos: [2.9, 1.05, 5.2], look: [4.1, 0.9, 1.6], fov: 36 },
       seconds: 7,
-      foreground: [{ cell: [0, 0], forward: 3.1, right: 1.2, foot: 0, height: 1.9, flip: true }],
+      foreground: [{ cell: [0, 0], forward: 2.3, right: 1.0, foot: 0, height: 1.7, flip: true }],
     },
     tall: {
       from: { pos: [3.1, 1.2, 5.7], look: [3.9, 0.85, 1.6], fov: 54 },

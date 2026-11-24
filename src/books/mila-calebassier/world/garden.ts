@@ -1,42 +1,15 @@
 import * as THREE from "three";
 import { createRng } from "@shared/random";
-import { STAGING, type Foreground } from "../staging";
+import { foregroundFoot, STAGING, type Foreground } from "../staging";
 import type { Assets } from "./assets";
 import report from "./assets.json";
 import LAYOUT from "./layout.json";
+import { MASSES } from "./masses";
 import { cardMaterial, skyMaterial, starMaterial, washed, type Cell, type Wash } from "./paint";
 
 /** Radius of the hero calabash and the drop from its stalk's top to its centre (build report). */
 export const GOURD_R = report.props.gourdRadius;
 export const GOURD_DROP = report.props.gourdStem + GOURD_R * 0.94;
-
-/** A painted mass of the mid garden: atlas cell (column, row), foot (x, z), height. */
-type Mass = readonly [number, number, number, number, number];
-
-/** Mid-garden masses, hand placed: clear of every camera position and of the path. */
-const MASSES: Mass[] = [
-  [1, 1, -5.2, -8.2, 3.6],
-  [1, 0, -1.4, -8.5, 2.8],
-  [0, 0, 2.6, -8.3, 2.4],
-  [0, 1, 5.4, -8.0, 2.6],
-  [2, 0, 6.5, -3.6, 2.0],
-  [1, 0, 6.6, -6.3, 2.7],
-  [0, 0, 6.5, 4.7, 1.9],
-  [0, 1, -3.6, -8.0, 2.4],
-  [1, 0, -11.2, -2.6, 3.0],
-  [2, 0, -9.0, -0.6, 2.1],
-  [2, 1, -6.2, -1.2, 1.3],
-  [2, 1, -1.5, -4.9, 1.2],
-  [2, 1, 2.2, -4.6, 1.2],
-  [0, 0, -4.6, 0.3, 1.5],
-  [2, 1, 4.0, -0.9, 1.1],
-  [1, 0, 13.6, 5.6, 2.6],
-  [1, 1, 10.6, -9.5, 3.8],
-  [0, 0, 19.5, 3.4, 2.4],
-  [2, 0, 12.9, 2.6, 1.7],
-  [0, 1, 13.2, -7.6, 2.6],
-  [2, 1, 9.3, -1.9, 1.1],
-];
 
 export interface Garden {
   group: THREE.Group;
@@ -352,18 +325,15 @@ export function createGarden(
   for (const [id, page] of Object.entries(STAGING)) {
     for (const mode of ["wide", "tall"] as const) {
       const shot = page[mode];
-      const origin = new THREE.Vector3(...shot.to.pos);
-      const ahead = new THREE.Vector3(...shot.to.look).sub(origin).setY(0).normalize();
-      const side = new THREE.Vector3(-ahead.z, 0, ahead.x);
       const meshes = shot.foreground.map((f: Foreground) => {
-        const at = origin.clone().addScaledVector(ahead, f.forward).addScaledVector(side, f.right);
+        const [x, z] = foregroundFoot(shot, f);
         const mesh = stand(
           "foreground",
           f.cell[0],
           f.cell[1],
-          at.x,
+          x,
           f.foot,
-          at.z,
+          z,
           f.height,
           f.flip === true,
         );

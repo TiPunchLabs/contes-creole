@@ -15,14 +15,43 @@ import type { Dims, Figure } from "./puppet";
 
 const V3 = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
 
+/** Her dress in profile: radius and height, hem last (body space). */
+const DRESS_PROFILE: [number, number][] = [
+  [0.07, 1.31],
+  [0.15, 1.27],
+  [0.185, 1.2],
+  [0.195, 1.1],
+  [0.185, 0.99],
+  [0.205, 0.9],
+  [0.235, 0.78],
+  [0.25, 0.62],
+  [0.265, 0.46],
+  [0.275, 0.4],
+];
+
+/**
+ * Widest radius of her dress at a height, folds included; 0 below the hem and above the bust,
+ * where the sleeves and shoulders are the dress.
+ */
+export function ninonDressRadius(y: number): number {
+  if (y > 1.12 || y < DRESS_PROFILE[DRESS_PROFILE.length - 1][1]) return 0;
+  for (let i = 1; i < DRESS_PROFILE.length; i++) {
+    const [r0, y0] = DRESS_PROFILE[i - 1];
+    const [r1, y1] = DRESS_PROFILE[i];
+    if (y <= y0 && y >= y1) return (r0 + ((r1 - r0) * (y0 - y)) / (y0 - y1)) * 1.045;
+  }
+  return 0;
+}
+
 /** Man Ninon's measures (body space): an elderly woman, a head and a half taller than Mila. */
 export const NINON_DIMS: Dims = {
   thigh: 0.36,
   shin: 0.335,
   pivot: 0.88,
   stride: 0.4,
-  restHand: [0.24, 0.78, 0.05],
+  restHand: [0.33, 0.8, 0.04],
   swing: 0.09,
+  radius: ninonDressRadius,
 };
 
 const SHOULDER_Y = 1.235;
@@ -32,20 +61,8 @@ const HEAD_SCALE = 0.9;
 
 /** Her everyday dress: a plain knee-length cotton shift, fuller at the hips, soft folds at the hem. */
 function dressGeometry(): THREE.LatheGeometry {
-  const profile: [number, number][] = [
-    [0.07, 1.31],
-    [0.15, 1.27],
-    [0.185, 1.2],
-    [0.195, 1.1],
-    [0.185, 0.99],
-    [0.205, 0.9],
-    [0.235, 0.78],
-    [0.25, 0.62],
-    [0.265, 0.46],
-    [0.275, 0.4],
-  ];
   const geometry = new THREE.LatheGeometry(
-    profile.map(([r, y]) => new THREE.Vector2(r, y)),
+    DRESS_PROFILE.map(([r, y]) => new THREE.Vector2(r, y)),
     64,
   );
   const p = geometry.attributes.position;

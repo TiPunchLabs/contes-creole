@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { buildMilaFigure, clearOfDress, MILA_SKIN, type MilaFigure } from "@shared/mila/figure";
+import { buildMilaFigure, dressRadius, MILA_SKIN, type MilaFigure } from "@shared/mila/figure";
 import { paintDress, paintHair, paintMadras, type Rand } from "@shared/mila/textures";
 import { washed, type Wash } from "./paint";
 import type { Dims } from "./puppet";
@@ -10,9 +10,9 @@ export const MILA_DIMS: Dims = {
   shin: 0.222,
   pivot: 0.62,
   stride: 0.36,
-  restHand: [0.15, 0.65, 0.03],
+  restHand: [0.21, 0.66, 0.03],
   swing: 0.13,
-  clear: clearOfDress,
+  radius: dressRadius,
 };
 
 /** Height of Mila's eyes above her feet. */

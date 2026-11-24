@@ -20,7 +20,7 @@ import { createMila, MILA_DIMS } from "./mila";
 import { createNinon, NINON_DIMS } from "./ninon";
 import { createWash, softRamp } from "./paint";
 import { createFrame, PAGES, resetFrame, type Anchor, type Carry, type Places } from "./pages";
-import { applyPose, type Dims, type Figure, type Grip, type Pose } from "./puppet";
+import { applyPose, armDepth, type Dims, type Figure, type Grip, type Pose } from "./puppet";
 
 /** Seconds the paper covers the scene around a page change: down, then up. */
 const DIP = { cover: 0.22, clear: 0.5 } as const;
@@ -28,7 +28,8 @@ const DIP = { cover: 0.22, clear: 0.5 } as const;
 const CARD_SECONDS = 1.2;
 /** How Man Ninon carries the fruit she is given, and her lantern (body space). */
 const NINON_CARRY: Carry = { side: 0, height: 1.02, forward: 0.3 };
-const LAMP_HAND: Carry = { side: -0.26, height: 0.98, forward: 0.3 };
+// The lantern is carried by her right arm (body +x): out to that side, never across her body.
+const LAMP_HAND: Carry = { side: 0.3, height: 0.98, forward: 0.3 };
 /** Reach of the warm lights on the painted layers (metres). */
 const GLOW_RANGE = [4.6, 5, 9] as const;
 /** Distance from a shutter's hinge to the edge where the two leaves meet. */
@@ -86,6 +87,11 @@ export interface Probe {
     lit: number;
     stars: number;
     shutters: number;
+    /**
+     * Deepest point of each figure's arms inside her clothes, in metres (0 or less: clear, with
+     * the gap of `ARM_GAP`); null when she is not on the page.
+     */
+    arms: { mila: number | null; ninon: number | null };
   };
 }
 
@@ -272,9 +278,10 @@ export default defineWorld({
           );
           return {
             at: rest.lerp(on, amount),
+            free: amount < 0.999,
             face: centre.clone(),
             up: [0, 0.55, 1],
-            pole: [0.2, -0.24, -0.1],
+            pole: [0.34, -0.2, -0.12],
           };
         };
         p.left = grip(-1);
@@ -344,7 +351,7 @@ export default defineWorld({
             at: lampAt.clone(),
             face: lampAt.clone().add(scratch.set(0, -1, 0)),
             up: [0, 0, 1],
-            pole: [0.25, -0.2, -0.2],
+            pole: [0.36, -0.2, -0.2],
           };
           built.lamp.position.copy(lampAt);
         }
@@ -359,22 +366,34 @@ export default defineWorld({
           const [rx, ry, rz] = MILA_DIMS.restHand;
           const hold = (leaf: THREE.Object3D, sd: number): Grip => {
             leaf.updateMatrixWorld(true);
-            const edge = leaf.localToWorld(new THREE.Vector3(-sd * SHUTTER_EDGE, -0.12, 0));
+            // A hand's width back from the meeting edge, so her two hands stay apart.
+            const edge = leaf.localToWorld(
+              new THREE.Vector3(-sd * (SHUTTER_EDGE - 0.13), -0.12, 0),
+            );
             const rest = new THREE.Vector3(
               f.mila.x + sd * rx * co + rz * s,
               f.mila.y + ry,
               f.mila.z - sd * rx * s + rz * co,
             );
             return {
-              at: rest.lerp(edge, f.shut),
+              // On its way up the hand swings out and forward, round her dress, not through it.
+              at: rest
+                .lerp(edge, f.shut)
+                .add(
+                  scratch
+                    .set(sd * co * 0.2 + s * 0.14, 0, -sd * s * 0.2 + co * 0.14)
+                    .multiplyScalar(Math.sin(Math.PI * f.shut)),
+                ),
+              free: f.shut < 0.999,
               face: edge.clone().add(scratch.set(s, 0, co)),
               up: [0, 1, 0.2],
-              pole: [0.2, -0.22, -0.08],
+              pole: [0.34, -0.2, -0.08],
             };
           };
-          // Seen from inside, the leaf hinged on her right is the house's left one.
-          f.mila.left = hold(built.shutters.right, -1);
-          f.mila.right = hold(built.shutters.left, 1);
+          // She faces out of the façade: her left hand is on the house's left leaf, her right on
+          // the right one. Crossed, her arms would cut through her own chest.
+          f.mila.left = hold(built.shutters.left, -1);
+          f.mila.right = hold(built.shutters.right, 1);
         }
         applyPose(mila as Figure, MILA_DIMS, f.mila, calm ? 0 : time);
         applyPose(ninon, NINON_DIMS, f.ninon, calm ? 0 : time + 2);
@@ -542,6 +561,10 @@ export default defineWorld({
             lit: frameState.lit,
             stars: frameState.stars,
             shutters: frameState.shutters,
+            arms: {
+              mila: deepest(mila as Figure, MILA_DIMS, frameState.mila),
+              ninon: deepest(ninon, NINON_DIMS, frameState.ninon),
+            },
           };
         },
       };
@@ -570,6 +593,16 @@ export default defineWorld({
     }
   },
 });
+
+/** The worst arm of a posed figure against her clothes (see `armDepth`); null when hidden. */
+function deepest(figure: Figure, dims: Dims, pose: Pose): number | null {
+  if (!pose.visible) return null;
+  return Math.max(
+    ...figure.arms.map((arm) =>
+      armDepth(arm, dims, (arm.sd > 0 ? pose.right : pose.left) !== null),
+    ),
+  );
+}
 
 /** Tiny warm sparks turning slowly on the calabash's shell (page 5). */
 function createSparks(): {

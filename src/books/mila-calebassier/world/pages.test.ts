@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { STAGING } from "../staging";
+import { foregroundFoot, STAGING } from "../staging";
 import report from "./assets.json";
 import LAYOUT from "./layout.json";
+import { MASSES } from "./masses";
 import { KEYS, createMixedKey, mixKeys } from "./keys";
 import {
   PAGES,
@@ -248,6 +249,104 @@ describe("the built tree", () => {
       expect(branch.rest[1]).toBeGreaterThan(2.5);
       expect(branch.bent[1]).toBeGreaterThan(1.0);
       expect(branch.bent[1]).toBeLessThan(1.3);
+    }
+  });
+});
+
+describe("figures and the set", () => {
+  /** Every place a figure stands on a page, sampled through its action: x, z and who. */
+  function steps(id: string): { x: number; z: number; who: string; t: number }[] {
+    const out = [];
+    for (let t = 0; t <= PAGES[id].seconds; t += 0.2) {
+      const f = at(id, t);
+      if (f.mila.visible) out.push({ x: f.mila.x, z: f.mila.z, who: "Mila", t });
+      if (f.ninon.visible) out.push({ x: f.ninon.x, z: f.ninon.z, who: "Man Ninon", t });
+    }
+    return out;
+  }
+  const GARDEN = IDS.filter((id) => STAGING[id].space === "garden");
+  /** Half width of a figure with her dress and arms. */
+  const BODY = 0.3;
+
+  it("keep clear of every painted cut-out: foreground of both formats and mid-garden masses", () => {
+    for (const id of GARDEN) {
+      const cards: [number, number, number][] = MASSES.map(([, , x, z, h]) => [x, z, h]);
+      for (const shot of [STAGING[id].wide, STAGING[id].tall]) {
+        for (const f of shot.foreground) cards.push([...foregroundFoot(shot, f), f.height]);
+      }
+      for (const step of steps(id)) {
+        for (const [x, z, height] of cards) {
+          // A cut-out is as wide as it is tall; its painted mass fills about two thirds of that.
+          const gap = Math.hypot(step.x - x, step.z - z) - height * 0.34 - BODY;
+          expect
+            .soft(
+              gap,
+              `${id} t=${step.t.toFixed(1)} ${step.who} and the cut-out at ${x.toFixed(1)}, ${z.toFixed(1)}`,
+            )
+            .toBeGreaterThan(0);
+        }
+      }
+    }
+  });
+
+  it("never walk through the trunk, the gate posts, the garden wall or a house", () => {
+    const [tx, , tz] = LAYOUT.tree.at;
+    const [gx, , gz] = LAYOUT.gate.at;
+    const half = LAYOUT.gate.width / 2;
+    const inHouse = (spec: typeof LAYOUT.milaHouse, x: number, z: number): boolean => {
+      const a = (spec.yaw * Math.PI) / 180;
+      const dx = x - spec.at[0];
+      const dz = z - spec.at[2];
+      const lx = dx * Math.cos(a) - dz * Math.sin(a);
+      const lz = dx * Math.sin(a) + dz * Math.cos(a);
+      const [w, , d] = spec.size;
+      return (
+        Math.abs(lx) < w / 2 + 0.3 + BODY &&
+        lz > -d / 2 - BODY &&
+        lz < d / 2 + spec.terraceDepth + 0.3 + BODY
+      );
+    };
+    for (const id of GARDEN) {
+      let last: Record<string, number> = {};
+      for (const step of steps(id)) {
+        const where = `${id} t=${step.t.toFixed(1)} ${step.who}`;
+        expect(Math.hypot(step.x - tx, step.z - tz), `${where} and the trunk`).toBeGreaterThan(
+          0.75 + BODY,
+        );
+        for (const side of [-1, 1]) {
+          const post = Math.hypot(step.x - gx, step.z - (gz + side * (half + 0.16)));
+          expect(post, `${where} and a gate post`).toBeGreaterThan(0.2 + BODY);
+        }
+        // Crossing the line of the east wall is only possible through the gate's opening.
+        const before = last[step.who];
+        if (before !== undefined && (before - gx) * (step.x - gx) < 0) {
+          expect(Math.abs(step.z - gz), `${where} crossing the wall`).toBeLessThan(half - 0.15);
+        }
+        last = { ...last, [step.who]: step.x };
+        expect(inHouse(LAYOUT.milaHouse, step.x, step.z), `${where} in Mila's house`).toBe(false);
+        expect(inHouse(LAYOUT.ninonHouse, step.x, step.z), `${where} in Man Ninon's house`).toBe(
+          false,
+        );
+      }
+    }
+  });
+
+  it("stay inside the bedroom on its two pages, off the bed and the bedside table", () => {
+    const a = places.houseYaw;
+    for (const id of ["p06", "p08"]) {
+      for (const step of steps(id)) {
+        const dx = step.x - LAYOUT.milaHouse.at[0];
+        const dz = step.z - LAYOUT.milaHouse.at[2];
+        const lx = dx * Math.cos(a) - dz * Math.sin(a);
+        const lz = dx * Math.sin(a) + dz * Math.cos(a);
+        const where = `${id} t=${step.t.toFixed(1)} at ${lx.toFixed(2)}, ${lz.toFixed(2)}`;
+        const [x0, x1, z0, z1] = report.set.milaHouse.room;
+        expect(lx > x0 + 0.2 && lx < x1 - 0.2 && lz > z0 + 0.2 && lz < z1 - 0.15, where).toBe(true);
+        // Bed: 1.9 x 0.95 m against the left wall; table: 0.5 m square between bed and façade.
+        const onBed = lx < x0 + 1.95 + 0.2 && lz > 0.05 - 0.475 - 0.2 && lz < 0.05 + 0.475 + 0.2;
+        const onTable = lx < x0 + 0.63 + 0.2 && Math.abs(lz - 1.05) < 0.25 + 0.2;
+        expect(onBed || onTable, where).toBe(false);
+      }
     }
   });
 });
