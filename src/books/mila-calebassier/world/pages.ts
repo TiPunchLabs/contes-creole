@@ -263,6 +263,11 @@ function underBranchA(f: Frame, at: Places): void {
   stand(f.mila, at.giveA.x - 0.34, at.giveA.z, EAST);
 }
 
+/**
+ * Held against her (pages 8 to 11): the fruit sits in front of her belly, just outside the dress,
+ * at 0.68 m and 0.3 m forward. Nearer or higher and it would sink into the flounces or rise to her
+ * shoulder, and her hands, kept clear of the dress, would leave the shell.
+ */
 /** The carry that puts the fruit exactly where the bent branch holds it. */
 const OFFER: Carry = { side: 0, height: 1.0, forward: 0.34 };
 
@@ -447,8 +452,8 @@ export const PAGES: Record<string, PageScript> = {
       f.gourd = { from: "table", to: "carry", k: ramp(t, 9.8, 10.9), glow: 0.5 + 0.2 * tremble };
       f.carry = {
         side: 0,
-        height: lerp(0.86, 0.78, ramp(t, 10.2, 11.2)),
-        forward: lerp(0.34, 0.165, ramp(t, 10.2, 11.2)),
+        height: lerp(0.86, 0.68, ramp(t, 10.2, 11.2)),
+        forward: lerp(0.34, 0.3, ramp(t, 10.2, 11.2)),
       };
     },
   },
@@ -472,8 +477,8 @@ export const PAGES: Record<string, PageScript> = {
       f.mila.gait = Math.max(f.mila.gait, t > 3.3 && t < 4.4 ? 1 : 0);
       f.carry = {
         side: 0,
-        height: lerp(0.78, 0.74, trip),
-        forward: lerp(0.2, 0.15, ramp(t, 3.3, 4)),
+        height: lerp(0.68, 0.66, trip),
+        forward: lerp(0.3, 0.28, ramp(t, 3.3, 4)),
       };
       f.mila.headPitch = 0.3 + 0.2 * trip;
     },
@@ -489,7 +494,7 @@ export const PAGES: Record<string, PageScript> = {
       f.lamp = 1;
       f.gourd = { from: "carry", to: "carry", k: 1, glow: 0.42 };
       f.hold = 1;
-      f.carry = { side: 0, height: 0.78, forward: 0.17 };
+      f.carry = { side: 0, height: 0.68, forward: 0.3 };
       if (t < 8.6) {
         stand(f.mila, 3.5, 1.65, EAST);
         stroll(f.ninon, P10_NINON, t, 0.6, 5);
@@ -525,8 +530,8 @@ export const PAGES: Record<string, PageScript> = {
       f.hold = 1 - ramp(t, 6.2, 7);
       f.carry = {
         side: 0,
-        height: lerp(0.78, OFFER.height, ramp(t, 1.4, 3)),
-        forward: lerp(0.17, OFFER.forward, ramp(t, 1.4, 3)),
+        height: lerp(0.68, OFFER.height, ramp(t, 1.4, 3)),
+        forward: lerp(0.3, OFFER.forward, ramp(t, 1.4, 3)),
       };
       f.treeGlow = pulse(t, 6.8, 7.8, 9, 10.5);
       f.lit = lerp(0.05, 1, ramp(t, 7.6, 10));
