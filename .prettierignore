@@ -6,3 +6,5 @@ pnpm-lock.yaml
 docs/missions/*/review-*.md
 # the owner brief is kept verbatim
 docs/missions/*/owner-brief.md
+# a mission brief folder is kept verbatim (sha256 manifest)
+docs/missions/*/brief/
