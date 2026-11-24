@@ -87,6 +87,13 @@ export interface Probe {
   resume(): void;
   /** The scene graph, for inspection. */
   readonly scene: THREE.Scene;
+  /**
+   * Share (0..1) of each subject that is really drawn in the frame just shown: the picture is
+   * rendered with and without it, and the pixels it changes are counted against the pixels it
+   * covers when drawn alone. Whatever hides it counts (a painted cut-out with its transparency, a
+   * wall, another figure). A subject that covers almost nothing on the screen has no entry.
+   */
+  visibility(): Record<string, number>;
   /** Uses grey proxies instead of the painted materials (layout captures). */
   setGraybox(on: boolean): void;
   info(): {
@@ -517,6 +524,76 @@ export default defineWorld({
         return out;
       };
 
+      /** The objects behind the subjects' names (see `subjects`). */
+      const subjectObjects = (): Record<string, THREE.Object3D> => {
+        const out: Record<string, THREE.Object3D> = { hero: built.hero };
+        if (frameState.gift.k > 0) out.gift = built.gift;
+        if (built.lamp.visible) out.lamp = built.lamp;
+        const figures = [
+          ["mila", mila as Figure, frameState.mila],
+          ["ninon", ninon, frameState.ninon],
+        ] as const;
+        for (const [name, figure, pose] of figures) {
+          if (!pose.visible) continue;
+          out[`${name}Face`] = figure.head;
+          for (const arm of figure.arms)
+            out[`${name}${arm.sd > 0 ? "Right" : "Left"}Hand`] = arm.hand;
+        }
+        return out;
+      };
+      /** Renders the scene as the lens sees it into a small float picture and returns its pixels. */
+      const snapshot = (target: THREE.WebGLRenderTarget): Float32Array => {
+        const pixels = new Float32Array(target.width * target.height * 4);
+        renderer.setRenderTarget(target);
+        renderer.clear();
+        renderer.render(scene, camera);
+        renderer.readRenderTargetPixels(target, 0, 0, target.width, target.height, pixels);
+        return pixels;
+      };
+      const visibility = (): Record<string, number> => {
+        renderer.getSize(view);
+        const width = 480;
+        const height = Math.max(1, Math.round((width * view.y) / view.x));
+        const target = new THREE.WebGLRenderTarget(width, height, { type: THREE.FloatType });
+        const colour = renderer.getClearColor(new THREE.Color());
+        const alpha = renderer.getClearAlpha();
+        const out: Record<string, number> = {};
+        try {
+          renderer.setClearColor(0x000000, 0);
+          const whole = snapshot(target);
+          for (const [name, object] of Object.entries(subjectObjects())) {
+            // Without the subject: the pixels that change are the ones it shows on.
+            object.visible = false;
+            const without = snapshot(target);
+            object.visible = true;
+            // The subject alone (its own layer): the pixels it would cover with nothing before it.
+            object.traverse((part) => part.layers.set(1));
+            camera.layers.set(1);
+            const alone = snapshot(target);
+            camera.layers.set(0);
+            object.traverse((part) => part.layers.set(0));
+            let covered = 0;
+            let shown = 0;
+            for (let i = 0; i < alone.length; i += 4) {
+              if (alone[i + 3] < 0.02) continue;
+              covered++;
+              const change = Math.max(
+                Math.abs(whole[i] - without[i]),
+                Math.abs(whole[i + 1] - without[i + 1]),
+                Math.abs(whole[i + 2] - without[i + 2]),
+              );
+              if (change > 0.002) shown++;
+            }
+            if (covered >= 12) out[name] = Math.round((shown / covered) * 1000) / 1000;
+          }
+        } finally {
+          renderer.setRenderTarget(null);
+          renderer.setClearColor(colour, alpha);
+          target.dispose();
+        }
+        return out;
+      };
+
       /**
        * Says on the canvas which page is shown, who holds the hero calabash, whether the page's
        * action is over and where the lens puts the fruit, faces and hands: a few attributes, written
@@ -590,6 +667,7 @@ export default defineWorld({
         resume() {
           frozen = false;
         },
+        visibility,
         setGraybox(on) {
           if (on === graybox) return;
           graybox = on;

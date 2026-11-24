@@ -72,3 +72,97 @@ export function under(subject, rect, width, height) {
   const h = Math.min(b.b, rect.b) - Math.max(b.t, rect.t);
   return w > 0 && h > 0 ? Math.round(Math.min(w, h)) : 0;
 }
+
+/**
+ * Share of a subject that must really be drawn (the world's `probe.visibility()`: rendered with and
+ * without it) for it to count as readable. A projected disc says where a subject is, not that
+ * anything of it is seen: a painted cut-out, a wall or another figure may stand before it.
+ */
+export const READABLE = [
+  [/Face$/, 0.8],
+  [/^lamp$/, 0.7],
+  [/Hand$/, 0.5],
+  [/^(hero|gift)$/, 0.5],
+];
+/** Seconds a face or the held fruit may stay hidden at a stretch (behind a gate post, in a turn). */
+export const HIDDEN_MAX = 1.5;
+/**
+ * Moments of the action where what is told must be readable at every instant, whatever the lens
+ * does: Mila calling from the gate (page 1), Man Ninon arriving with her lantern, the meeting and
+ * the walk (page 10, review 2 F3), the tree's gift in Man Ninon's hands until she turns to Mila
+ * (page 12). A prop is asked for where the page tells it, not everywhere: the figure who carries it
+ * hides it when she turns away (the lantern on page 11, the gift after 7.4 s on page 12).
+ */
+export const WINDOWS = {
+  p01: [{ from: 3.8, to: 6.4, names: ["milaFace", "ninonFace"] }],
+  p10: [{ from: 5.2, to: 11.5, names: ["ninonFace", "lamp", "ninonRightHand", "milaFace"] }],
+  p12: [{ from: 5.6, to: 7.4, names: ["gift", "ninonFace", "milaFace"] }],
+};
+
+/** The share a named subject needs to be readable. */
+export function readableShare(name) {
+  return READABLE.find(([pattern]) => pattern.test(name))?.[1] ?? 0.5;
+}
+
+/**
+ * What is hidden over a page's samples `{ t, end, hold, gift, subjects, visibility }` (in time
+ * order), as short texts: a face, or the fruit in Mila's hands, that once readable stays hidden for more than
+ * `HIDDEN_MAX` or is hidden at the reading frame; a subject of a `WINDOWS` moment below its share
+ * at any instant of it; the hero calabash hidden at the reading frame when it is required there.
+ */
+export function hidden(page, samples) {
+  const faults = [];
+  const pct = (v) => `${Math.round(v * 100)} %`;
+  const names = new Set(samples.flatMap((s) => Object.keys(s.visibility)));
+  for (const name of [...names].filter((n) => /Face$|^hero$/.test(n))) {
+    const min = readableShare(name);
+    let seen = false;
+    let since = null;
+    let lowest = 1;
+    for (const s of samples) {
+      // The fruit counts while Mila holds it; on its branch or the table it is part of the set.
+      const v = name === "hero" && s.hold < 0.99 ? undefined : s.visibility[name];
+      // Not on the screen at all (walking in or out): the edges are the other check's business.
+      if (v === undefined) {
+        since = null;
+        continue;
+      }
+      if (v >= min) {
+        seen = true;
+        since = null;
+        lowest = 1;
+        continue;
+      }
+      if (!seen) continue;
+      since ??= s.t;
+      lowest = Math.min(lowest, v);
+      if (s.t - since > HIDDEN_MAX || s.end) {
+        faults.push(
+          `${name} hidden from ${since.toFixed(2)} s${s.end ? " to the reading frame" : ` for more than ${HIDDEN_MAX} s`} (down to ${pct(lowest)} drawn)`,
+        );
+        break;
+      }
+    }
+  }
+  for (const w of WINDOWS[page] ?? []) {
+    for (const name of w.names) {
+      const min = readableShare(name);
+      const bad = samples
+        .filter((s) => s.t >= w.from && s.t <= w.to)
+        .map((s) => [s.t, s.visibility[name] ?? 0])
+        .filter(([, v]) => v < min);
+      if (bad.length) {
+        const [t, v] = bad.reduce((a, b) => (b[1] < a[1] ? b : a));
+        faults.push(
+          `${name} not readable between ${w.from} and ${w.to} s: ${pct(v)} drawn at ${t.toFixed(2)} s (${bad.length} instants under ${pct(min)})`,
+        );
+      }
+    }
+  }
+  const last = samples.at(-1);
+  if (last?.end && required(page, last).includes("hero")) {
+    const v = last.visibility.hero ?? 0;
+    if (v < readableShare("hero")) faults.push(`hero ${pct(v)} drawn at the reading frame`);
+  }
+  return faults;
+}

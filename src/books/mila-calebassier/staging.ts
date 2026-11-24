@@ -332,7 +332,9 @@ export const STAGING: Record<string, PageStaging> = {
       to: { pos: [2.9, 1.05, 5.2], look: [2.92, 0.9, 1.2], fov: 36 },
       after: 8.6,
       seconds: 2.9,
-      foreground: [{ cell: [0, 0], forward: 2.3, right: 1.0, foot: 0, height: 1.7, flip: true }],
+      // On the text side and low: nothing stands between the lens and the two figures, during
+      // the held meeting or the pan.
+      foreground: [{ cell: [0, 1], forward: 2.4, right: -1.5, foot: 0, height: 0.8 }],
     },
     tall: {
       from: { pos: [2.9, 1.2, 5.9], look: [3.95, 1.02, 1.7], fov: 54 },

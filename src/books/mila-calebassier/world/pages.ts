@@ -199,12 +199,13 @@ const WEST = -Math.PI / 2;
 const facing = (x: number, z: number, tx: number, tz: number): number => Math.atan2(tx - x, tz - z);
 
 // Routes of the garden (x, z), all on the stepping-stone path of the master layout.
+// She stops in the gate's opening as both lenses see it, not behind its post.
 const P1_COME = route([
   [4.7, 1.7],
-  [6.75, 1.6],
+  [6.9, 1.2],
 ]);
 const P1_GO = route([
-  [6.75, 1.6],
+  [6.9, 1.2],
   [5.4, 1.68],
   [4.5, 1.7],
 ]);

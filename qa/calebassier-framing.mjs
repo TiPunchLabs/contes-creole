@@ -1,16 +1,19 @@
 // « Mila et le calebassier magique »: framing sweep in the QA viewer (qa/calebassier/, needs `vite`
-// dev). Every page is run through its whole action on each screen, and the fruit, faces, hands and
-// lantern the lens must keep (`info().subjects`) are checked against the edges of the screen: once
-// whole on it they stay whole through the move (a figure may walk in), and all are at the reading frame. The text
-// card is not in the viewer: `qa/calebassier.mjs` mode `framing` checks the reading frame against
-// the real card. Prints one line per page and screen; exit 1 when a subject is cropped.
+// dev). Every page is run through its whole action on each screen. Two things are checked at every
+// instant. Edges: the fruit, faces, hands and lantern the lens must keep (`info().subjects`,
+// projected discs) stay whole once they are on the screen (a figure may walk in), and all are at
+// the reading frame. Rendered visibility (`probe.visibility()`: the picture drawn with and without
+// each subject): a face is not hidden for more than 1.5 s once it has been seen, and what a page
+// tells is readable while it is told (`WINDOWS` in calebassier-subjects.mjs). The text card is not
+// in the viewer: `qa/calebassier.mjs` mode `framing` checks the reading frame against the real card.
+// Prints one line per page and screen; exit 1 when a subject is cropped or hidden.
 // Usage: [SITE=http://127.0.0.1:5199/] [OUT=dir] [STEP=0.25] [VPS=phone,small,...] [QA_CHANNEL=chrome]
 //        [QA_ALLOW_CPU=1: accept a software renderer (positions only, no picture is judged)]
 //        [QA_SHIFT_LOOK=dx: negative control, slides every subject by dx of the screen width]
 //        node qa/calebassier-framing.mjs
 import { chromium } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { cropped, required, SCREENS } from "./calebassier-subjects.mjs";
+import { cropped, hidden, required, SCREENS } from "./calebassier-subjects.mjs";
 
 const SITE = (process.env.SITE ?? "http://127.0.0.1:5199/").replace(/\/?$/, "/");
 const OUT = (process.env.OUT ?? new URL("./out/framing/", import.meta.url).pathname).replace(
@@ -70,6 +73,7 @@ try {
               hold: info.hold,
               gift: info.gift,
               subjects: info.subjects,
+              visibility: api.visibility(),
             });
           }
           return out;
@@ -93,6 +97,8 @@ try {
           }
         }
       }
+      // Rendered visibility: what is told must really be drawn, not only lie inside the screen.
+      for (const fault of hidden(pages[i], samples)) faults.set(`hidden ${faults.size}`, fault);
       checks++;
       if (faults.size) failed++;
       results[vp].pages.push({ page: pages[i], faults: [...faults.values()], end: samples.at(-1) });
