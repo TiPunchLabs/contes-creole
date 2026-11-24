@@ -171,7 +171,8 @@ the validated navigation (keys, wheel, buttons, one page per horizontal swipe on
   keeps that frame's horizontal view (`fitLens`). A page change is a short dip to paper; under
   reduced motion only the dip remains and pages show their final state.
 - **QA**: `qa/calebassier/` is a dev-only viewer (page, instant, graybox); the world's handle
-  carries a `probe` (seek, counters) and the canvas publishes `data-page`, `data-hero`,
+  carries a `probe` (seek, counters, `visibility()`: the share of each subject really drawn) and
+  the canvas publishes `data-page`, `data-hero`,
   `data-settled` and `data-framing` (where the lens puts the fruit, faces, hands and lantern).
 
 ### Theme and language layers ("Veillée claire" redesign)

@@ -1,7 +1,7 @@
 # Report — mila-calebassier
 
 Verdict: PARTIAL
-Version: 486c002
+Version: a6e1062
 
 Executor: Claude Code session, model id `claude-fable-5-2`. Layout and camera owner: the executor
 (no camera subagent). Date: 2026-11-23/24.
@@ -21,10 +21,16 @@ Review cycle 1 (Codex, `review-1.md`, CHANGES_REQUESTED on `23236c7`): both find
 review 1"). The figures of this report that predate the cycle (performance, weights, rebuild) were
 measured on the commits their sections name and were not measured again.
 
+Review cycle 2 (Codex, `review-2.md`, CHANGES_REQUESTED on `486c002`; F1 and F2 confirmed fixed):
+F3 and F4 are fixed in `a6e1062` and in this report (section "Answers to review 2"). It was the third
+and last correction cycle allowed by the mission.
+
 Why PARTIAL and not PASS:
 
-- A15 asks for a Codex review on the final SHA: review 1 was on `23236c7`; `486c002` changes the
-  portrait and landscape framing and the shell's opening, and has not been reviewed yet.
+- A15 asks for a Codex review on the final SHA: review 2 was on `486c002`; `a6e1062` moves one
+  foreground cut-out, one stopping point of Mila and adds a check, and has not been reviewed.
+- Two props are hidden by the figure who carries them at a reading frame (the gift on page 12, the
+  lantern in part on page 11 portrait): section "Answers to review 2", decision D-GIFT.
 - A09 regression of the existing tales: none found. `qa/tree.mjs` cannot launch on this machine
   and `qa/mila-nav.mjs` times out, on the baseline too (section D, A09).
 - A05 watercolour: improved in the materials and painted layers after the pilot's note, but the
@@ -97,16 +103,17 @@ Decisions taken by the executor (all reversible):
 
 Delegations (model economy):
 
-| Task                                                                                                                           | Subagent model            | Result                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------- | --------------------------------------------------------------------------------------------- |
-| Baseline checks, baseline build, underwater stills, Mila pages 1–6 at `3ce9759`                                                | Sonnet, isolated worktree | done                                                                                          |
-| Functional QA script, captures with the text card, weight, frame times, draw calls                                             | Sonnet                    | done; one check relaxed by the executor (ambient sway is not a replay)                        |
-| Rebuild from the scripts twice, hash comparison, archive of the sources with a manifest                                        | Sonnet, isolated worktree | done                                                                                          |
-| Regression of the existing tales (pixel comparison, existing QA journeys)                                                      | Sonnet, isolated worktree | done                                                                                          |
-| Update of `qa/swipe.mjs`, `qa/mila.mjs`, `qa/tkp.mjs` for any shelf size, negative control                                     | Sonnet                    | done                                                                                          |
-| Frame times, draw calls and weights on `7ed9c95`; third rebuild; refreshed archive                                             | Sonnet, isolated worktree | done                                                                                          |
-| Review cycle 1: every mode of `qa/calebassier.mjs`, framing sweep, negative controls, arms sweep, contact sheets, on `875fb5d` | Sonnet                    | done; found one remaining framing failure (page 10, 640x360 landscape), fixed by the executor |
-| Review cycle 1: regression of Ti Kannot and the underwater Mila on the shell change                                            | Sonnet                    | done; `mila-lang.mjs` stopped by the time limit                                               |
+| Task                                                                                                                                                                                             | Subagent model            | Result                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Baseline checks, baseline build, underwater stills, Mila pages 1–6 at `3ce9759`                                                                                                                  | Sonnet, isolated worktree | done                                                                                                     |
+| Functional QA script, captures with the text card, weight, frame times, draw calls                                                                                                               | Sonnet                    | done; one check relaxed by the executor (ambient sway is not a replay)                                   |
+| Rebuild from the scripts twice, hash comparison, archive of the sources with a manifest                                                                                                          | Sonnet, isolated worktree | done                                                                                                     |
+| Regression of the existing tales (pixel comparison, existing QA journeys)                                                                                                                        | Sonnet, isolated worktree | done                                                                                                     |
+| Update of `qa/swipe.mjs`, `qa/mila.mjs`, `qa/tkp.mjs` for any shelf size, negative control                                                                                                       | Sonnet                    | done                                                                                                     |
+| Frame times, draw calls and weights on `7ed9c95`; third rebuild; refreshed archive                                                                                                               | Sonnet, isolated worktree | done                                                                                                     |
+| Review cycle 1: every mode of `qa/calebassier.mjs`, framing sweep, negative controls, arms sweep, contact sheets, on `875fb5d`                                                                   | Sonnet                    | done; found one remaining framing failure (page 10, 640x360 landscape), fixed by the executor            |
+| Review cycle 2: final runs on `a6e1062` (app framing 7 cases, sweep on 7 screens, escape, journey, rapid, touch, reduced, stills, arms sweep, stills of the page 10 meeting and the page 1 gate) | Sonnet                    | done; the portrait sweep at 0.1 s steps hit the time limit twice and was rerun by the executor at 0.25 s |
+| Review cycle 1: regression of Ti Kannot and the underwater Mila on the shell change                                                                                                              | Sonnet                    | done; `mila-lang.mjs` stopped by the time limit                                                          |
 
 Art, staging, cameras, product code, shaders, Blender and painter scripts, tests and documents were
 done on the executor's model. In review cycle 1 the executor also wrote the two fixes, the new QA
@@ -394,13 +401,27 @@ shell, as decided by the pilot (mission §7).
 | underwater stills, 20 files       | see below        |                  |                                                                                                           |
 | `escape` mode, dive of both tales | 2 pass           | n/a              | first Escape during the dive of Ti Kannot and of the underwater Mila returns to the tree                  |
 
-Underwater stills (`qa/mila-underwater.mjs`, `ONLY=shots`), against the baseline's 20 files:
-the 10 mobile stills are pixel-identical. The 10 desktop stills differed in a first run (up to
-322 771 pixels) made while another QA browser was running on the same GPU, and are pixel-identical
-(0 differing pixels on each) in a second run made alone. Two runs of the same build therefore
-disagreed with each other on desktop; the baseline's own determinism log already shows one run of
-three differing on desktop page 7. Read as: 20 of 20 identical in the clean run, with a
-pre-existing run-to-run instability of the desktop stills that this cycle did not investigate.
+Underwater stills (`qa/mila-underwater.mjs`, `ONLY=shots`), corrected after review 2 (F4). Two
+references exist and they are not the same thing:
+
+- Original baseline, `3ce9759`, files in `baseline/underwater-shots/`: this is the reference of the
+  acceptance criterion. Against it, the 10 mobile stills of `s8/regression/underwater/` and the 10
+  desktop stills of the rerun `s8/regression/underwater-rerun/` give **18 of 20 exactly identical**.
+  The 2 others, `desktop-p10.png` and `desktop-p10-scene.png`, differ on 23 pixels each, by at most
+  1/255 on a channel: identical within a tolerance of one channel value, not exactly identical.
+  (Counts recomputed by the reviewer, `review-1/cycle2/underwater-combined-comparison.json`.)
+- Previous product (the branch build of `3cef379`), files in `s5/regression/underwater-shots/`: this
+  is what the subagent of cycle 1 compared with, under the name "baseline". Against it the same 20
+  files are exactly identical, including the two desktop page-10 images. The sentence "20 of 20
+  identical" of the previous version of this report was that comparison, wrongly presented as a
+  comparison with the baseline.
+
+So the two page-10 differences already existed in the previous product and did not change in this
+cycle; nothing is claimed about their cause. Separately, the 10 desktop stills of the subagent's
+first run (made while another QA browser was running) differed from both references on up to
+322 771 pixels; the baseline's own three determinism images of desktop page 7 already disagree with
+each other. That run-to-run instability is pre-existing; its cause (concurrent GPU use or anything
+else) is not established and was not investigated.
 `tree.mjs` and `mila-nav.mjs` were not run (they cannot complete here, on the baseline either).
 
 Reservations of review 1:
@@ -427,10 +448,91 @@ Acceptance after this cycle, where it changed:
 | A10 | VERIFIED: modes `text` 25, `journey` 32, `rapid` 19, `resize` 21, `touch` 13, `reduced` 13, `contrast` 8, all pass, run on `875fb5d` (`s8/functional-*.log`)                  |
 | A11 | VERIFIED: `escape` 17 of 17; `lifecycle` 4 of 4 (heap 19.6, 20.1, 20.7 MB at cycles 1, 5, 10: +2.9 % from 5 to 10; one live WebGL context after each cycle); `failure` 8 of 8 |
 | A12 | unchanged: nothing was measured after `7ed9c95`; this cycle adds one JSON attribute written when a page's state or the screen changes, and no asset                           |
-| A15 | PARTIAL: review 2 on `486c002` to come                                                                                                                                        |
+| A15 | PARTIAL: see "Answers to review 2"                                                                                                                                            |
 
 One touch device limit, pre-existing and unchanged: while a book is opening there is no control on
 screen, so the cancellation is a keyboard gesture only.
+
+### Answers to review 2 (Codex, `review-2.md`, on `486c002`; fixed in `a6e1062`)
+
+Evidence of this cycle: `~/.local/share/contes-creole-qa/mila-calebassier/s9/`. Same browser and
+renderer as cycle 1 (headless system Chrome 158 on the NVIDIA GPU; software renderers refused).
+
+F3, the desktop foreground hides Man Ninon and her lantern during page 10's meeting. Fixed.
+
+- Cause, the executor's own in cycle 1: a foreground cut-out is placed relative to the lens of the
+  reading frame. When `486c002` made the page 10 lens hold the meeting before panning to that
+  frame, the landscape cut-out (a 1.7 m leaf fan, 1 m right of the reading lens) was left where it
+  was: seen from the held lens it stood before Man Ninon. Nothing checked what is drawn, only where
+  subjects are.
+- Fix (`staging.ts`, page 10 landscape): the cut-out is now the low plant, on the text side
+  (`cell [0, 1]`, 1.5 m left of the reading lens, 0.8 m high). It is out of the held frame and
+  slides in at the bottom left during the pan: the foreground and its parallax are kept, nothing
+  stands between the lens and the two figures. The portrait shot has no cut-out, as before.
+  Stills at 5.2, 6.5, 8.5, 10 s and the reading frame: `evidence/s9-page10-meeting-desktop.jpg`.
+- Rendered check, as asked: `probe.visibility()` in the world draws the frame as the lens sees it
+  into a small float picture, once whole, once without the subject, once with the subject alone,
+  and returns the share of the subject's pixels that the subject really changes in the whole
+  picture. A painted cut-out (with its transparency), a wall, a post or another figure standing
+  before it all count; it is a measure of what is drawn, not a projection.
+  `qa/calebassier-framing.mjs` reads it at every instant of every page on the seven screens and
+  fails (rules in `qa/calebassier-subjects.mjs`) when: a face, or the fruit in Mila's hands, once
+  readable (80 % of a face, 50 % of the fruit) stays hidden for more than 1.5 s or is hidden at the
+  reading frame; or what a page tells is not readable at every instant while it is told
+  (`WINDOWS`): page 10 from 5.2 s to the end, Man Ninon's face (80 %), her lantern (70 %), the hand
+  that carries it (50 %) and Mila's face; page 1 from 3.8 to 6.4 s, both faces; page 12 from 5.6
+  to 7.4 s, the gift and both faces.
+- Every other page, the same way, desktop and landscape, over the whole action: no other
+  foreground cut-out hides a face or the held fruit. The check found one older defect that is not a
+  foreground: on page 1, on every screen, Mila stopped exactly behind the gate post as the lens
+  sees it and was hidden (0 % drawn) for about 4 s, while she calls « Attendez-moi » and raises her
+  hand. She now stops in the gate's opening (`world/pages.ts`, `P1_COME`/`P1_GO`: 6.9, 1.2 instead
+  of 6.75, 1.6); she still passes behind the post for about 1 s each way, which the rule allows.
+  Stills: `evidence/s9-page01-gate-desktop.jpg`.
+- Results on `a6e1062` (`s9/final-a6e1062/`): sweep with the rendered check, landscape (1440x900,
+  844x390, 640x360) 36 of 36 at 0.1 s steps; portrait (390x844, 360x640, 320x568, 412x915) 48 of 48
+  at 0.25 s steps. The portrait sweep at 0.1 s steps did not finish within the 570 s limit of a run
+  (twice: 43 and 42 pages passed, none failed, then the limit); it was run again at 0.25 s. App
+  check against the real text: 37 of 37 on each of 390x844 and 360x640 in Français, normal and
+  reduced motion; 13 of 13 on each of the two phone sizes in Kréyòl and on 1440x900. The page
+  sheets `evidence/s8-pages-*.jpg` are refreshed from this build (the desktop one read by the
+  executor).
+- Negative control on `486c002`: the same check run on a scratch worktree of `a6e1062` carrying
+  `staging.ts` and `world/pages.ts` of `486c002` (`s9/neg-visibility-486c002-staging.log`, exit 1,
+  41 of 48): page 10 fails on the three landscape screens ("lamp not readable between 5.2 and
+  11.5 s: 0 % drawn at 5.25 s (21 instants under 70 %)", the same for the carrying hand, Man
+  Ninon's face down to 0 to 2 %), and page 1 fails on the four screens swept. Page 10 portrait
+  passes there, as the review observed. The worktree is removed.
+- Kept intact: F1 (results above), F2 (`escape` 17 of 17 on `a6e1062`; the shell is unchanged since
+  `875fb5d`), owner feedback 1 (arms sweep 24 of 24 lines; page 1 Mila 12.8 mm, was 5.1, limit 18,
+  from her new stopping point; every other page unchanged; one hero calabash at every instant; the
+  figure-against-set tests pass in the 468). Also rerun on `a6e1062`: `journey` 32, `rapid` 19,
+  `touch` 13, `reduced` 13, `shots` 6, all pass. Not rerun (unchanged code paths): `text`,
+  `lifecycle`, `resize`, `contrast`, `failure`, and the regression of the other tales.
+- What the check showed and was not changed (decision D-GIFT, and a limit):
+  - page 12: the gift is readable in Man Ninon's hands from 5.6 to 7.4 s (57 to 89 % drawn on
+    desktop). After she turns to Mila, then walks to the table with her back to the lens, her own
+    body hides it: under 50 % in portrait from about 7.5 s, under 10 % at the reading frame on
+    every screen. A reader with reduced motion sees only that reading frame.
+  - page 11 portrait: the lantern is 61 % drawn at the reading frame, partly behind Man Ninon; the
+    page tells the calabash going back to its branch, which is readable.
+  - The rule asks for a prop where its page tells it, not everywhere; that choice is the
+    executor's and is written in `WINDOWS`.
+- Limits of the measure: it runs in the viewer, on the same world, lenses and cut-outs as the app,
+  without the text card and without the finishing brush; a subject smaller than 12 pixels of the
+  480-pixel picture is not measured; a subject whose colour equals what is behind it would be
+  undercounted (not observed); bodies are not measured, only heads, hands, fruit, gift and lantern.
+
+F4, "20 of 20 identical" does not match a raw comparison against the original baseline. Corrected
+in the regression section above: the reference of the criterion is the original baseline
+`3ce9759`, against which 18 of 20 are exactly identical and the two desktop page-10 images differ
+on 23 pixels by at most 1/255; those two are exactly equal to the previous product's images, which
+is the comparison the earlier sentence reported under the wrong name. Exact identity and tolerance
+are now stated separately, and no cause is claimed for the run-to-run instability.
+
+Acceptance after this cycle, where it changed: A07 fixed for F3 and checked by the executor on
+`a6e1062`, not yet by a reviewer; A15 PARTIAL for the same reason. The other statuses are those of
+review 2.
 
 ### Answers to the pilot's notes on S3
 
@@ -486,9 +588,10 @@ Not verified:
 - Commits: `0683636` docs, `99a9f80` shared Mila figure, `f476aa8` S3 checkpoint, `3cef379` S4,
   `bd5754d` wash refinements, `65b9988` assets equal to a rebuild, `f1143ff` QA script and text shade,
   `7ed9c95` belly carry, `8854187` QA scripts reading the shelf, `23236c7` owner feedback 1,
-  `875fb5d` review 1 (framing, first Escape, new QA modes), `486c002` page 10 lens (the product
-  commit this report describes), then this report with `review-1.md` and `review-brief-1.md`.
-- Local checks on `486c002`: `format:check`, `lint`, `typecheck`, `test` (57 files, 468 tests),
+  `875fb5d` review 1 (framing, first Escape, new QA modes), `486c002` page 10 lens, `a6e1062`
+  review 2 (page 10 foreground, page 1 gate, rendered visibility check: the product commit this
+  report describes), then this report with `review-2.md` and `review-brief-2.md`.
+- Local checks on `a6e1062`: `format:check`, `lint`, `typecheck`, `test` (57 files, 468 tests),
   `build` (the usual large-chunk warning): all exit 0.
 - Local servers and browsers of this cycle are stopped.
 - Mutating operations outside the worktree: evidence under `~/.local/share/contes-creole-qa/`, one
@@ -496,16 +599,19 @@ Not verified:
 
 ## G. Decisions required
 
-| Id      | Context                                             | Options                                                                                                                                                 | Recommendation                                     | Blocking           |
-| ------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------ |
-| MERGE   | draft PR #54                                        | merge after review / ask for corrections                                                                                                                | wait for the Codex review                          | yes, owner only    |
-| D-GCF   | Kréyòl draft shown by default                       | (a) have a speaker validate before merge; (b) merge with the draft label; (c) ship French only until validated (needs a small shell or registry change) | (a)                                                | before publication |
-| D-NINON | Man Ninon procedural instead of a Blender rig       | keep / rebuild as a rigged GLB                                                                                                                          | keep                                               | no                 |
-| D-ART   | scripted washes against painted or generated layers | keep / replace layers with painted masters at the same sizes (the engine reads `rt_*.webp` by name)                                                     | owner's call; the pipeline accepts drop-in masters | no                 |
+| Id      | Context                                                                                                                                            | Options                                                                                                                                                 | Recommendation                                                           | Blocking           |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------ |
+| MERGE   | draft PR #54                                                                                                                                       | merge after review / ask for corrections                                                                                                                | wait for the Codex review                                                | yes, owner only    |
+| D-GCF   | Kréyòl draft shown by default                                                                                                                      | (a) have a speaker validate before merge; (b) merge with the draft label; (c) ship French only until validated (needs a small shell or registry change) | (a)                                                                      | before publication |
+| D-NINON | Man Ninon procedural instead of a Blender rig                                                                                                      | keep / rebuild as a rigged GLB                                                                                                                          | keep                                                                     | no                 |
+| D-GIFT  | page 12: at the reading frame the gift is behind Man Ninon, who walks away to the table (under 10 % of it drawn; it is readable from 5.6 to 7.4 s) | keep / carry it on the lens side or end the page before she turns (new arm poses to re-check against owner feedback 1)                                  | owner's call; not changed in the last cycle to keep the arm fixes intact | no                 |
+| D-ART   | scripted washes against painted or generated layers                                                                                                | keep / replace layers with painted masters at the same sizes (the engine reads `rt_*.webp` by name)                                                     | owner's call; the pipeline accepts drop-in masters                       | no                 |
 
 ## H. Recommended next action
 
-Pilot: route Codex review 2 on `486c002` (changed zones: `src/app/app.ts` and its test,
-`src/books/mila-calebassier/staging.ts` and `world/index.ts`, the three `qa/calebassier*` scripts).
-The owner can look at pages 4, 5, 9 and 10 on a phone on the Deploy Preview once it has rebuilt.
-Safe to execute; no approval required for the review.
+Pilot: the three correction cycles are used. `a6e1062` differs from the reviewed `486c002` by one
+foreground cut-out (`staging.ts`, page 10 landscape), Mila's stopping point on page 1
+(`world/pages.ts`), a QA-only probe function (`world/index.ts`) and the QA rules; hand the owner
+the PR with review 2 and this report, or route a check of those zones if one more is allowed. The
+owner can look at page 10 on a desktop and at page 1 on the Deploy Preview once it has rebuilt.
+No approval is needed for that; merge stays the owner's.
