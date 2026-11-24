@@ -3,6 +3,8 @@ import type { LanguageNotes, Stories } from "@app/contract";
 import { registry } from "@app/registry";
 import { describe, expect, it } from "vitest";
 import tiKannotNotes from "../../docs/explanations/ti-kannot/langue/fr.md?raw";
+import calebassierBrief from "../../docs/missions/2026-11-23-mila-calebassier/brief/data/story.fr.json";
+import calebassierGcf from "./mila-calebassier/story/gcf.md?raw";
 
 const storyFolders = new Set(
   Object.keys(import.meta.glob("./*/story/gcf.md")).map((p) => p.split("/")[1]),
@@ -128,5 +130,26 @@ describe("mila", () => {
       "Ce que Mila rapporta",
     ]);
     expect(stories.en).toBeUndefined();
+  });
+});
+
+describe("mila-calebassier", () => {
+  it("tells the owner's French text word for word, twelve pages in order", async () => {
+    const stories = await registry.loadStories("mila-calebassier");
+    const french = stories.fr;
+    expect(french?.title).toBe(calebassierBrief.title);
+    expect(french?.pages.map((p) => p.id)).toEqual(calebassierBrief.pages.map((p) => p.id));
+    expect(french?.pages.map((p) => p.title)).toEqual(calebassierBrief.pages.map((p) => p.title));
+    expect(french?.pages.map((p) => p.blocks.map((b) => b.text))).toEqual(
+      calebassierBrief.pages.map((p) => p.paragraphs),
+    );
+    expect(stories.en).toBeUndefined();
+  });
+
+  it("marks its Kréyòl as an unvalidated draft, in the file and on every page", async () => {
+    const stories = await registry.loadStories("mila-calebassier");
+    expect(calebassierGcf).toMatch(/^draft: true$/m);
+    expect(stories.gcf.pages).toHaveLength(12);
+    for (const page of stories.gcf.pages) expect(page.label).toBe("Bwouyon — à valider");
   });
 });

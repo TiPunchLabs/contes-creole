@@ -288,7 +288,7 @@ export function sculpt(v: V3): V3 {
   return out;
 }
 export const HEAD_R = 0.126;
-function headPoint(dir: V3): { p: V3; n: V3 } {
+export function headPoint(dir: V3): { p: V3; n: V3 } {
   const d = dir.clone().normalize();
   const p = sculpt(d).multiplyScalar(HEAD_R);
   const e1 = V3(0, 1, 0).cross(d).normalize();
@@ -312,7 +312,8 @@ export function onHead(dir: V3, lift = 0): THREE.Group {
   g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, yAxis, n));
   return g;
 }
-const arc = (a: V3, b: V3, c: V3, r: number, mat: THREE.Material): THREE.Mesh =>
+/** A thin curved stroke (lids, lashes, brows, mouth) through three points. */
+export const arc = (a: V3, b: V3, c: V3, r: number, mat: THREE.Material): THREE.Mesh =>
   new THREE.Mesh(
     new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(a, b, c), 16, r, 6, false),
     mat,
