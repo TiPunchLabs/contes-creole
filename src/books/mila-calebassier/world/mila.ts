@@ -2,16 +2,18 @@ import * as THREE from "three";
 import { buildMilaFigure, dressRadius, MILA_SKIN, type MilaFigure } from "@shared/mila/figure";
 import { paintDress, paintHair, paintMadras, type Rand } from "@shared/mila/textures";
 import { washed, type Wash } from "./paint";
-import type { Dims } from "./puppet";
+import { CHILD_STEP, type Dims } from "./puppet";
 
 /** Mila's measures, as built by the shared figure (body space). */
 export const MILA_DIMS: Dims = {
   thigh: 0.245,
   shin: 0.222,
   pivot: 0.62,
-  stride: 0.36,
+  // A child's short quick step on planted feet: with shoes on, a sliding or sinking foot shows.
+  stride: 0.3,
   restHand: [0.21, 0.66, 0.03],
-  swing: 0.13,
+  swing: 0.11,
+  step: CHILD_STEP,
   radius: dressRadius,
 };
 
@@ -92,6 +94,8 @@ export function createMila(wash: Wash, ramp: THREE.Texture, rnd: Rand): MilaFigu
     hoop: fine("#e9b949"),
     madras: washed(wash, ramp, { map: madras, side: THREE.DoubleSide, gran: 0.2, pool: 0.1 }),
     rand: (a, b) => a + (b - a) * rnd(),
+    // In the garden she wears closed canvas shoes, pale so they read at dusk and at night.
+    shoes: { upper: flat("#efe4cf", 0.25, 0.55), sole: flat("#b06a4c", 0.1) },
   });
   // In this tale Mila keeps her eyes open: she looks at the tree, the calabash, Man Ninon.
   figure.open.visible = true;

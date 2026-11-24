@@ -116,6 +116,16 @@ export interface Probe {
      * the gap of `ARM_GAP`); null when she is not on the page.
      */
     arms: { mila: number | null; ninon: number | null };
+    /**
+     * Each foot of each figure shown (left, then right): where its ankle is on the ground plan
+     * (world x, z), the lowest and highest point of the foot and its shoe above the ground the
+     * figure stands on (metres; negative: through the ground), and how far its toes point down
+     * (radians), with the figure's heading (a foot turns with her when she turns on the spot).
+     */
+    feet: Record<
+      string,
+      { x: number; z: number; low: number; top: number; pitch: number; yaw: number }[]
+    >;
     /** The fruit, faces, hands and lantern as the lens frames them this instant. */
     subjects: Subjects;
     /** Mila's hands on the hero calabash (0 free, 1 holding), the gift in Man Ninon's (0..1). */
@@ -524,6 +534,43 @@ export default defineWorld({
         return out;
       };
 
+      const footBox = new THREE.Box3();
+      const partBox = new THREE.Box3();
+      const toes = new THREE.Vector3();
+      /** The feet of the figures shown, measured on the meshes carried by each ankle. */
+      const feet = (): Probe["info"] extends () => infer I
+        ? I extends { feet: infer F }
+          ? F
+          : never
+        : never => {
+        const out: Record<
+          string,
+          { x: number; z: number; low: number; top: number; pitch: number; yaw: number }[]
+        > = {};
+        const figures = [
+          ["mila", mila as Figure, frameState.mila],
+          ["ninon", ninon, frameState.ninon],
+        ] as const;
+        for (const [name, figure, pose] of figures) {
+          if (!pose.visible) continue;
+          out[name] = figure.legs.map((leg) => {
+            footBox.makeEmpty();
+            for (const part of leg.ankle.children) footBox.union(partBox.setFromObject(part));
+            leg.ankle.getWorldPosition(scratch);
+            toes.set(0, 0, 1).transformDirection(leg.ankle.matrixWorld);
+            return {
+              x: scratch.x,
+              z: scratch.z,
+              low: footBox.min.y - pose.y,
+              top: footBox.max.y - pose.y,
+              pitch: Math.asin(clamp(-toes.y, -1, 1)),
+              yaw: pose.yaw,
+            };
+          });
+        }
+        return out;
+      };
+
       /** The objects behind the subjects' names (see `subjects`). */
       const subjectObjects = (): Record<string, THREE.Object3D> => {
         const out: Record<string, THREE.Object3D> = { hero: built.hero };
@@ -708,6 +755,7 @@ export default defineWorld({
               mila: deepest(mila as Figure, MILA_DIMS, frameState.mila),
               ninon: deepest(ninon, NINON_DIMS, frameState.ninon),
             },
+            feet: feet(),
             subjects: subjects(),
             hold: frameState.hold,
             gift: frameState.gift.hold,

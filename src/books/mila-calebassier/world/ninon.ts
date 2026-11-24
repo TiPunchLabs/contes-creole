@@ -11,7 +11,7 @@ import {
   type Leg,
 } from "@shared/mila/figure";
 import { washed, type Wash } from "./paint";
-import type { Dims, Figure } from "./puppet";
+import { ELDER_STEP, type Dims, type Figure } from "./puppet";
 
 const V3 = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
 
@@ -48,9 +48,11 @@ export const NINON_DIMS: Dims = {
   thigh: 0.36,
   shin: 0.335,
   pivot: 0.88,
-  stride: 0.4,
+  // An older woman's step: short, both feet long on the ground (see `plantedWalk`).
+  stride: 0.42,
   restHand: [0.33, 0.8, 0.04],
-  swing: 0.09,
+  swing: 0.1,
+  step: ELDER_STEP,
   radius: ninonDressRadius,
 };
 
@@ -84,7 +86,7 @@ function dressGeometry(): THREE.LatheGeometry {
 /**
  * Man Ninon: built on the plan of the shared Mila figure (skinned limbs, sculpted head, the same
  * hands and arm IK) so the two stand in one drawing, with her own proportions: grey hair in a bun,
- * a coral cotton dress with short sleeves, sandals. No folklore costume (brief, spec 02).
+ * a coral cotton dress with short sleeves, closed slippers. No folklore costume (brief, spec 02).
  */
 export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Texture): Figure {
   const g = new THREE.Group();
@@ -121,7 +123,9 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
     scale: 6,
   });
   const hairM = flat("#b9b4ae", 0.35);
-  const sole = flat("#5a4334", 0.1);
+  // Closed house slippers, pale against her skin and the path so they read at dusk and at night.
+  const slipper = flat("#b9d2c6", 0.3, 0.55);
+  const sole = flat("#6d5644", 0.1);
 
   const dress = new THREE.Mesh(dressGeometry(), dressM);
   body.add(dress);
@@ -135,17 +139,14 @@ export function createNinon(wash: Wash, ramp: THREE.Texture, cloth: THREE.Textur
     limb.mesh.position.set(sx * 0.085, 0.75, 0);
     inner.add(limb.mesh);
     const [hip, knee, ankle] = limb.bones;
-    const foot = new THREE.Mesh(new THREE.SphereGeometry(0.055, 14, 10), skin);
-    foot.scale.set(0.62, 0.36, 1.5);
-    foot.position.set(0, -0.03, 0.04);
-    ankle.add(foot);
-    const sandal = new THREE.Mesh(new THREE.BoxGeometry(0.085, 0.014, 0.2), sole);
-    sandal.position.set(0, -0.052, 0.04);
-    ankle.add(sandal);
-    const strap = new THREE.Mesh(new THREE.TorusGeometry(0.036, 0.006, 5, 14, Math.PI), sole);
-    strap.position.set(0, -0.045, 0.08);
-    strap.rotation.y = Math.PI / 2;
-    ankle.add(strap);
+    // The slipper covers the whole foot: a rounded upper over a flat sole, open at the ankle.
+    const upper = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 12), slipper);
+    upper.scale.set(0.74, 0.46, 1.6);
+    upper.position.set(0, -0.022, 0.042);
+    ankle.add(upper);
+    const tread = new THREE.Mesh(new THREE.BoxGeometry(0.078, 0.012, 0.185), sole);
+    tread.position.set(0, -0.042, 0.042);
+    ankle.add(tread);
     legs.push({ hip, knee, ankle, sx, prevC: 0 });
   }
   body.add(

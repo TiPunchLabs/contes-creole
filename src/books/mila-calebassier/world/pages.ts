@@ -182,6 +182,8 @@ function stroll(
   p.z = here.z;
   p.yaw = here.yaw;
   p.walked = d;
+  p.start = from;
+  p.path = Math.abs(to - from);
   p.gait = smooth(0, 0.12, u) * (1 - smooth(0.88, 1, u));
 }
 
@@ -229,10 +231,11 @@ const P5_COME = route([
   [2.5, 1.6],
   [0.75, 1.45],
 ]);
+// A few steps the way she faces at the end of page 5 (heading WEST + 0.4): feet that stay where
+// they land cannot walk one way while the body faces another.
 const P5_GO = route([
   [0.75, 1.45],
-  [-0.6, 1.0],
-  [-1.5, 0.3],
+  [0.474, 1.567],
 ]);
 export const P9 = route([
   [-0.7, 1.0],
@@ -368,7 +371,7 @@ export const PAGES: Record<string, PageScript> = {
         f.mila.headPitch = 0.34 * ramp(t, 2.6, 3.6) - 0.5 * pulse(t, 4.8, 5.6, 6.2, 7);
         f.mila.headYaw = -0.9 * pulse(t, 4.8, 5.6, 6.2, 7);
       } else {
-        stroll(f.mila, P5_GO, t, 8.2, 10, 0, 0.55);
+        stroll(f.mila, P5_GO, t, 8.2, 10);
         f.mila.yaw = turn(WEST + 0.6, WEST + 0.4, ramp(t, 7.8, 8.8));
         f.carry = { side: 0, height: 0.97, forward: 0.25 };
         f.mila.headPitch = 0.3;
@@ -565,7 +568,8 @@ export const PAGES: Record<string, PageScript> = {
         f.mila.headPitch = -0.3 + 0.12 * ramp(t, 7, 8);
         f.mila.headYaw = 0.4 * ramp(t, 7, 8.2);
       } else {
-        const west = facing(nx, nz, -3, -2.6);
+        // The heading of her route below: she walks the way she faces.
+        const west = facing(0, 0, -1.9, -0.25);
         const ninon = route([
           [nx, nz],
           [nx - 1.9, nz - 0.25],

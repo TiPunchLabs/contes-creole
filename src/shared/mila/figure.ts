@@ -396,6 +396,11 @@ export interface MilaKit {
   madras: THREE.Material;
   /** Uniform draw in [a, b) from the tale's seeded generator (180 draws, the hairline). */
   rand(a: number, b: number): number;
+  /**
+   * Closed canvas shoes over her feet (upper and sole). Absent by default: she is barefoot, as in
+   * the underwater tale, and her build is then exactly what it was (no mesh added, no draw taken).
+   */
+  shoes?: { upper: THREE.Material; sole: THREE.Material };
 }
 
 /**
@@ -472,6 +477,16 @@ export function buildMilaFigure(kit: MilaKit): MilaFigure {
       const t = new THREE.Mesh(new THREE.SphereGeometry(0.0078 - k * 0.0008, 8, 6), skinL);
       t.position.set((k - 2) * 0.0078 * -sx + 0.002 * sx, -0.03, 0.093 - Math.abs(k - 1) * 0.004);
       ankle.add(t);
+    }
+    if (kit.shoes) {
+      // A rounded upper that takes in the heel and the toes, on a flat sole a little wider.
+      const upper = new THREE.Mesh(new THREE.SphereGeometry(0.05, 16, 12), kit.shoes.upper);
+      upper.scale.set(0.7, 0.5, 1.52);
+      upper.position.set(0, -0.018, 0.034);
+      ankle.add(upper);
+      const sole = new THREE.Mesh(new THREE.BoxGeometry(0.064, 0.01, 0.158), kit.shoes.sole);
+      sole.position.set(0, -0.04, 0.034);
+      ankle.add(sole);
     }
     legs.push({ hip, knee, ankle, sx, prevC: 0 });
   }

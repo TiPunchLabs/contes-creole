@@ -1,7 +1,8 @@
 // « Mila et le calebassier magique »: sweep of every page through its whole action in the QA viewer
 // (qa/calebassier/, needs `vite` dev), for defects a still cannot show: an arm inside the clothes
-// (`info().arms`, metres; clear at 0 or less) and more than one hero calabash. Prints, per page and
-// viewport, the worst arm depth of each figure and the instant it happens; exit 1 over TOL.
+// (`info().arms`, metres; clear at 0 or less), more than one hero calabash, a foot through the
+// ground or up in the dress, a planted foot that slides. Prints, per page and viewport, the worst
+// of each and the instant it happens; exit 1 over the limits.
 // Usage: [SITE=http://127.0.0.1:5199/] [OUT=dir] [STEP=0.1] [TOL=0.018] [VPS=desktop,mobile]
 //        [STRIPS=1,3,4,5,9,10,11,12] [QA_CHANNEL=chrome] node qa/calebassier-sweep.mjs
 // STRIPS also writes a frame strip (8 instants) of those pages per viewport (ImageMagick `montage`).
@@ -18,6 +19,13 @@ const STEP = Number(process.env.STEP ?? 0.1);
 // Depth is measured against the clothes plus 40 mm (a forearm is 20 mm thick from its axis): at
 // 18 mm the arm's surface is still 2 mm outside the cloth.
 const TOL = Number(process.env.TOL ?? 0.018);
+// Feet (`info().feet`): no shoe under the ground (GROUND, metres), none up in the dress (HEM: each
+// figure's hem less 3 cm), and for a figure who walks on planted feet (PLANTED) a foot lying flat on
+// the ground does not move more than SLIDE between two instants while she keeps her heading.
+const GROUND = Number(process.env.GROUND ?? -0.003);
+const HEM = { mila: 0.425, ninon: 0.37 };
+const PLANTED = ["mila", "ninon"];
+const SLIDE = Number(process.env.SLIDE ?? 0.01);
 const STRIPS = (process.env.STRIPS ?? "").split(",").filter(Boolean).map(Number);
 const EGL_VENDOR = process.env.QA_EGL_VENDOR ?? "/usr/share/glvnd/egl_vendor.d/10_nvidia.json";
 const GPU = ["--enable-gpu", "--ignore-gpu-blocklist", "--use-gl=angle", "--use-angle=gl-egl"];
@@ -62,7 +70,8 @@ try {
           const api = window.__api;
           api.seek(index, 0);
           const { seconds } = api.info();
-          const out = { mila: [-1, 0], ninon: [-1, 0], heroes: 0, samples: 0 };
+          const out = { mila: [-1, 0], ninon: [-1, 0], heroes: 0, samples: 0, feet: {} };
+          let before = null;
           for (let t = 0; t <= seconds + 1e-6; t += step) {
             api.seek(index, t);
             await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -73,6 +82,22 @@ try {
               const depth = info.arms[who];
               if (depth !== null && depth > out[who][0]) out[who] = [depth, t];
             }
+            // Feet: lowest and highest point over the page, and how far a foot that lies flat on
+            // the ground moves between two instants while she does not turn (a slide).
+            for (const [who, feet] of Object.entries(info.feet ?? {})) {
+              const f = (out.feet[who] ??= { low: [1, 0], top: [0, 0], slide: [0, 0] });
+              feet.forEach((foot, k) => {
+                if (foot.low < f.low[0]) f.low = [foot.low, t];
+                if (foot.top > f.top[0]) f.top = [foot.top, t];
+                const was = before?.[who]?.[k];
+                const flat = (g) => g.low < 0.005 && Math.abs(g.pitch) < 0.03;
+                if (was && flat(foot) && flat(was) && Math.abs(foot.yaw - was.yaw) < 0.002) {
+                  const moved = Math.hypot(foot.x - was.x, foot.z - was.z);
+                  if (moved > f.slide[0]) f.slide = [moved, t];
+                }
+              });
+            }
+            before = info.feet ?? null;
           }
           return out;
         },
@@ -80,12 +105,23 @@ try {
       );
       const row = { page: pages[i], ...worst };
       results[vp].push(row);
-      const bad = worst.mila[0] > TOL || worst.ninon[0] > TOL || worst.heroes !== 1;
+      const feetBad = Object.entries(worst.feet).some(
+        ([who, f]) =>
+          f.low[0] < GROUND || f.top[0] > HEM[who] || (PLANTED.includes(who) && f.slide[0] > SLIDE),
+      );
+      const bad = worst.mila[0] > TOL || worst.ninon[0] > TOL || worst.heroes !== 1 || feetBad;
       failed ||= bad;
       const fmt = ([d, t]) =>
         d === -1 ? "absent" : `${(d * 1000).toFixed(1)} mm at ${t.toFixed(1)} s`;
       console.log(
-        `${bad ? "FAIL" : "PASS"} ${vp} ${pages[i]} arms: Mila ${fmt(worst.mila)}, Man Ninon ${fmt(worst.ninon)}; hero calabashes ${worst.heroes}; ${worst.samples} instants`,
+        `${bad ? "FAIL" : "PASS"} ${vp} ${pages[i]} arms: Mila ${fmt(worst.mila)}, Man Ninon ${fmt(worst.ninon)}; hero calabashes ${worst.heroes}; ${worst.samples} instants${Object.entries(
+          worst.feet,
+        )
+          .map(
+            ([who, f]) =>
+              `; ${who} feet lowest ${(f.low[0] * 1000).toFixed(1)} mm at ${f.low[1].toFixed(1)} s, highest ${(f.top[0] * 1000).toFixed(0)} mm, flat-foot slide ${(f.slide[0] * 1000).toFixed(1)} mm at ${f.slide[1].toFixed(1)} s`,
+          )
+          .join("")}`,
       );
       if (STRIPS.includes(i + 1)) {
         const seconds = await page.evaluate(() => window.__api.info().seconds);
