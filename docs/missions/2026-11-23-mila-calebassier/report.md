@@ -1,7 +1,7 @@
 # Report — mila-calebassier
 
 Verdict: PARTIAL
-Version: f1143ff
+Version: 7ed9c95
 
 Executor: Claude Code session, model id `claude-fable-5-2`. Layout and camera owner: the executor
 (no camera subagent). Date: 2026-11-23/24.
@@ -14,19 +14,18 @@ PR with a Deploy Preview.
 
 Outcome: the twelve pages are built, integrated as book 3 of the tree, playable on the Deploy
 Preview of draft PR #54, with sources, rebuild procedure, tests and evidence. Functional QA on the
-final build: 152 checks, 0 failed. The existing checks of the repository are green.
+product commit `7ed9c95`: 156 checks, 0 failed. The existing checks of the repository are green.
 
 Why PARTIAL and not PASS:
 
 - A15 asks for a Codex review on the final SHA: it is routed by the pilot after this report and has
   not happened yet.
-- A09 regression of the existing tales: no regression was found (underwater stills pixel-identical,
-  existing journeys unchanged), but three existing QA scripts hard-code a three-entry shelf and now
-  fail or stop early as a consequence of the added book; they were not updated (section D, A09).
+- A09 regression of the existing tales: none found. `qa/tree.mjs` cannot launch on this machine
+  and `qa/mila-nav.mjs` times out, on the baseline too (section D, A09).
 - A05 watercolour: improved in the materials and painted layers after the pilot's note, but the
   painted layers are scripted washes, clearly below the reference boards in drawing (section E).
-- A12 performance: measured on a desktop GPU only; draw calls exceed the brief's initial alert
-  threshold on six pages; no phone was tested.
+- A12 performance: measured on a desktop GPU only (about 1 ms per frame uncapped); draw calls exceed
+  the brief's initial alert threshold on eleven pages; no phone was tested.
 - Kréyòl text is an unvalidated draft (decision D-GCF).
 
 ## B. Initial state and scope
@@ -91,12 +90,14 @@ Decisions taken by the executor (all reversible):
 
 Delegations (model economy):
 
-| Task                                                                                    | Subagent model            | Result                                                                 |
-| --------------------------------------------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------- |
-| Baseline checks, baseline build, underwater stills, Mila pages 1–6 at `3ce9759`         | Sonnet, isolated worktree | done                                                                   |
-| Functional QA script, captures with the text card, weight, frame times, draw calls      | Sonnet                    | done; one check relaxed by the executor (ambient sway is not a replay) |
-| Rebuild from the scripts twice, hash comparison, archive of the sources with a manifest | Sonnet, isolated worktree | done                                                                   |
-| Regression of the existing tales (pixel comparison, existing QA journeys)               | Sonnet, isolated worktree | done (handed back after the first version of this report)              |
+| Task                                                                                       | Subagent model            | Result                                                                 |
+| ------------------------------------------------------------------------------------------ | ------------------------- | ---------------------------------------------------------------------- |
+| Baseline checks, baseline build, underwater stills, Mila pages 1–6 at `3ce9759`            | Sonnet, isolated worktree | done                                                                   |
+| Functional QA script, captures with the text card, weight, frame times, draw calls         | Sonnet                    | done; one check relaxed by the executor (ambient sway is not a replay) |
+| Rebuild from the scripts twice, hash comparison, archive of the sources with a manifest    | Sonnet, isolated worktree | done                                                                   |
+| Regression of the existing tales (pixel comparison, existing QA journeys)                  | Sonnet, isolated worktree | done                                                                   |
+| Update of `qa/swipe.mjs`, `qa/mila.mjs`, `qa/tkp.mjs` for any shelf size, negative control | Sonnet                    | done                                                                   |
+| Frame times, draw calls and weights on `7ed9c95`; third rebuild; refreshed archive         | Sonnet, isolated worktree | done                                                                   |
 
 Art, staging, cameras, product code, shaders, Blender and painter scripts, tests and documents were
 done on the executor's model.
@@ -110,25 +111,25 @@ OpenGL ES 3.2)`, system Chrome 158. Every "phone" below is an emulated viewport 
 
 ### Acceptance matrix
 
-| AC  | What was verified                                                      | Method                                                                                                                                                                                                                                                                  | Observed                                                                                                                                                                                                                                                                                                        | Status                        |
-| --- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| A01 | twelve pages, French text identical to `story.fr.json`, order, opening | vitest (`books.test.ts`), and DOM against JSON in the real app (`qa/calebassier.mjs` mode `text`, 25 checks)                                                                                                                                                            | identical, no normalisation needed; counter `n / 12`                                                                                                                                                                                                                                                            | VERIFIED                      |
-| A02 | canonical Mila reused                                                  | source moved, not rewritten: `src/shared/mila/` from `scene.ts` at `3ce9759` (lines 62–144, 1600–1611, 1854–2130, 2132–2582); underwater stills before/after; Mila pages 1–6 before/after sheet (`s5/regression/mila-pages/before-after.jpg`); captures of the new tale | underwater tale pixel-identical; in the new tale same build, colours and textures, this tale's materials (no rim light, paper grain). No dedicated face/profile/three-quarter turntable was made: the views come from the pages (page 9 front three-quarter, page 5 profile, page 3 three-quarter, page 2 back) | VERIFIED, turntable not made  |
-| A03 | several calabashes in the branches, none on the trunk                  | build rule (no hanging point nearer than 1.3 m from the trunk axis), test "the built tree" on `assets.json`, captures                                                                                                                                                   | 13 fruits, nearest at more than 1.3 m, all above the fork                                                                                                                                                                                                                                                       | VERIFIED                      |
-| A04 | contemporary architecture, no wooden hut                               | Blender stills of both houses (`s5/architecture/houses-blender.jpg`), pages 1, 3, 4, 12                                                                                                                                                                                 | rendered masonry, slab, covered terrace on posts, ribbed metal roof with eaves, jalousies; no reference photographs were gathered (limit)                                                                                                                                                                       | VERIFIED                      |
-| A05 | coherent watercolour in 2D and 3D                                      | browser captures dusk, night, dark, dawn; before/after of pages 3 and 9                                                                                                                                                                                                 | coherent in one hand; drawing below the boards (section E)                                                                                                                                                                                                                                                      | PARTIAL, visual judgement     |
-| A06 | real depth in motion                                                   | `s5/parallax/parallax-p01-02-04-12-desktop.mp4` (camera moves over foreground cut-outs, mid masses, tree, far relief)                                                                                                                                                   | parallax and occlusion visible on entry moves; watched as frame strips by the executor, not as video                                                                                                                                                                                                            | VERIFIED by frames            |
-| A07 | cameras documented for the twelve pages                                | `staging.ts` (landscape and portrait, entry and reading lens, duration, intent, size, move, portrait priority, continuity), `preprod.md` shotlist, `plan-jardin.png`, graybox animatics `s2/animatic/*.mp4`, tests on the presets                                       | present and executable; axis rule tested                                                                                                                                                                                                                                                                        | VERIFIED                      |
-| A08 | taking, carrying, giving back are credible                             | `s5/gestures/gestures-p03-06-08-09-11-{desktop,portrait}.mp4`, time strips                                                                                                                                                                                              | hands follow the fruit, one fruit, attach point visible on pages 3 and 11; limits in section E                                                                                                                                                                                                                  | VERIFIED with reservations    |
-| A09 | no regression of existing tales                                        | the five repository checks; underwater stills on a fake clock against the baseline; Mila pages 1–6; existing QA journeys on branch and baseline                                                                                                                         | checks exit 0 (57 files, 459 tests; baseline 56 and 438); details in "Regression of the existing tales" below                                                                                                                                                                                                   | VERIFIED with reservations    |
-| A10 | robust, accessible navigation                                          | `qa/calebassier.mjs` modes `journey` (32), `rapid` (19), `touch` (13, CDP touch events), `reduced` (13), `resize` (21), `contrast` (8)                                                                                                                                  | all pass; HTML text in the shared card; canvas `aria-hidden`                                                                                                                                                                                                                                                    | VERIFIED                      |
-| A11 | clean loading and closing                                              | mode `lifecycle` (11): ten open/close cycles, mode `failure` (8)                                                                                                                                                                                                        | heap after GC 19.4, 20.1, 20.7 MB at cycles 1, 5, 10 (+2.9 % from 5 to 10); one canvas; one live WebGL context; blocked GLB or texture shows the shell's notice and returns to the tree                                                                                                                         | VERIFIED                      |
-| A12 | performance measured                                                   | headed Chrome on the GPU, 20 s after 3 s warm-up                                                                                                                                                                                                                        | tables below                                                                                                                                                                                                                                                                                                    | VERIFIED on this desktop only |
-| A13 | sources and rebuild usable                                             | rebuild twice from the scripts in a clean worktree, sha256 comparison                                                                                                                                                                                                   | tables below                                                                                                                                                                                                                                                                                                    | VERIFIED                      |
-| A14 | provenance and licences                                                | `asset-register.md`, `art/mila-calebassier/README.md`                                                                                                                                                                                                                   | every file generated by the mission's scripts, nothing downloaded                                                                                                                                                                                                                                               | VERIFIED                      |
-| A15 | complete reviewable version                                            | PR #54 draft, Deploy Preview, CI                                                                                                                                                                                                                                        | PR and preview exist; Codex review not done yet                                                                                                                                                                                                                                                                 | PARTIAL                       |
+| AC  | What was verified                                                      | Method                                                                                                                                                                                                                                                                  | Observed                                                                                                                                                                                                                                                                                                        | Status                                                                    |
+| --- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| A01 | twelve pages, French text identical to `story.fr.json`, order, opening | vitest (`books.test.ts`), and DOM against JSON in the real app (`qa/calebassier.mjs` mode `text`, 25 checks)                                                                                                                                                            | identical, no normalisation needed; counter `n / 12`                                                                                                                                                                                                                                                            | VERIFIED                                                                  |
+| A02 | canonical Mila reused                                                  | source moved, not rewritten: `src/shared/mila/` from `scene.ts` at `3ce9759` (lines 62–144, 1600–1611, 1854–2130, 2132–2582); underwater stills before/after; Mila pages 1–6 before/after sheet (`s5/regression/mila-pages/before-after.jpg`); captures of the new tale | underwater tale pixel-identical; in the new tale same build, colours and textures, this tale's materials (no rim light, paper grain). No dedicated face/profile/three-quarter turntable was made: the views come from the pages (page 9 front three-quarter, page 5 profile, page 3 three-quarter, page 2 back) | VERIFIED, turntable not made                                              |
+| A03 | several calabashes in the branches, none on the trunk                  | build rule (no hanging point nearer than 1.3 m from the trunk axis), test "the built tree" on `assets.json`, captures                                                                                                                                                   | 13 fruits, nearest at more than 1.3 m, all above the fork                                                                                                                                                                                                                                                       | VERIFIED                                                                  |
+| A04 | contemporary architecture, no wooden hut                               | Blender stills of both houses (`s5/architecture/houses-blender.jpg`), pages 1, 3, 4, 12                                                                                                                                                                                 | rendered masonry, slab, covered terrace on posts, ribbed metal roof with eaves, jalousies; no reference photographs were gathered (limit)                                                                                                                                                                       | VERIFIED                                                                  |
+| A05 | coherent watercolour in 2D and 3D                                      | browser captures dusk, night, dark, dawn; before/after of pages 3 and 9                                                                                                                                                                                                 | coherent in one hand; drawing below the boards (section E)                                                                                                                                                                                                                                                      | PARTIAL, visual judgement                                                 |
+| A06 | real depth in motion                                                   | `s5/parallax/parallax-p01-02-04-12-desktop.mp4` (camera moves over foreground cut-outs, mid masses, tree, far relief)                                                                                                                                                   | parallax and occlusion visible on entry moves; watched as frame strips by the executor, not as video                                                                                                                                                                                                            | VERIFIED by frames                                                        |
+| A07 | cameras documented for the twelve pages                                | `staging.ts` (landscape and portrait, entry and reading lens, duration, intent, size, move, portrait priority, continuity), `preprod.md` shotlist, `plan-jardin.png`, graybox animatics `s2/animatic/*.mp4`, tests on the presets                                       | present and executable; axis rule tested                                                                                                                                                                                                                                                                        | VERIFIED                                                                  |
+| A08 | taking, carrying, giving back are credible                             | `s5/gestures/gestures-p03-06-08-09-11-{desktop,portrait}.mp4`, time strips                                                                                                                                                                                              | hands follow the fruit, one fruit, attach point visible on pages 3 and 11; limits in section E                                                                                                                                                                                                                  | VERIFIED with reservations                                                |
+| A09 | no regression of existing tales                                        | the five repository checks; underwater stills on a fake clock against the baseline; Mila pages 1–6; existing QA journeys on branch and baseline, three of them updated to read the shelf                                                                                | checks exit 0 (57 files, 459 tests; baseline 56 and 438); no regression; details below                                                                                                                                                                                                                          | VERIFIED; `tree.mjs` and the end of `mila-nav.mjs` not run (pre-existing) |
+| A10 | robust, accessible navigation                                          | `qa/calebassier.mjs` on `7ed9c95`: modes `journey` (32), `rapid` (19), `touch` (13, CDP touch events), `reduced` (13), `resize` (21), `contrast` (8)                                                                                                                    | all pass; HTML text in the shared card; canvas `aria-hidden`                                                                                                                                                                                                                                                    | VERIFIED                                                                  |
+| A11 | clean loading and closing                                              | mode `lifecycle` (11): ten open/close cycles, mode `failure` (8)                                                                                                                                                                                                        | heap after GC 19.5, 20.2, 20.5 MB at cycles 1, 5, 10 (+1.5 % from 5 to 10); one canvas; one live WebGL context; blocked GLB or texture shows the shell's notice and returns to the tree                                                                                                                         | VERIFIED                                                                  |
+| A12 | performance measured                                                   | headed Chrome on the GPU, 20 s after 3 s warm-up                                                                                                                                                                                                                        | tables below                                                                                                                                                                                                                                                                                                    | VERIFIED on this desktop only                                             |
+| A13 | sources and rebuild usable                                             | rebuild twice from the scripts in a clean worktree, sha256 comparison                                                                                                                                                                                                   | tables below                                                                                                                                                                                                                                                                                                    | VERIFIED                                                                  |
+| A14 | provenance and licences                                                | `asset-register.md`, `art/mila-calebassier/README.md`                                                                                                                                                                                                                   | every file generated by the mission's scripts, nothing downloaded                                                                                                                                                                                                                                               | VERIFIED                                                                  |
+| A15 | complete reviewable version                                            | PR #54 draft, Deploy Preview, CI                                                                                                                                                                                                                                        | PR and preview exist; Codex review not done yet                                                                                                                                                                                                                                                                 | PARTIAL                                                                   |
 
-### Functional scenarios of spec 06 (final build, `s5/functional-final.log`)
+### Functional scenarios of spec 06 (commit `7ed9c95`, `s6/functional.log`, 156 pass, 0 fail)
 
 | Scenario                                     | Result                                                                                                                                                                                                                     |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -141,7 +142,9 @@ OpenGL ES 3.2)`, system Chrome 158. Every "phone" below is an emulated viewport 
 | text in the darkest picture                  | contrast of the text colour against the picture under the text, without its halo: pages 7 and 9 above 14.9; lightest pages 1 and 12 between 8.2 and 10.2 against the mean and between 5.2 and 6.4 against the lightest 5 % |
 | missing asset                                | notice « Kont-la pa ka chajé », back on the tree, shelf usable                                                                                                                                                             |
 
-No negative control was run on the new script (the QA README asks for one per new check): limit.
+Negative control (QA README): with `QA_INJECT_CSS` removing the shade under the text and greying the
+text, mode `contrast` fails on 5 of 8 checks (pages 1 and 12 on both sizes, page 9 on desktop) and
+passes 8 of 8 without it (`s6/negative-control.log`). One control, on one mode.
 
 ### Regression of the existing tales (A09, commit `3cef379`, evidence `s5/regression/`)
 
@@ -154,42 +157,44 @@ No negative control was run on the new script (the QA README asks for one per ne
   Not looked at by the executor or a human: page 2 (largest value) deserves one look.
 - Existing journeys, run on the branch and on the baseline:
 
-| Script           | Branch                      | Baseline         | Reading                                                                                                                                      |
-| ---------------- | --------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mila-lang.mjs`  | 48 pass, 12 fail            | same             | the 12 are one pre-existing console 404                                                                                                      |
-| `tk-reading.mjs` | 238 pass, 3 fail            | same             | pre-existing 404                                                                                                                             |
-| `mila.mjs`       | 140 pass, 10 fail           | 143 pass, 7 fail | 7 pre-existing 404; 3 new: `tree-three-slots` expects three shelf entries, there are four                                                    |
-| `swipe.mjs`      | 83 pass, 7 fail             | 90 pass, 0 fail  | 7 new, all in the home ring: the script hard-codes a three-slot ring and its positions; the observed sequences are those of a four-slot ring |
-| `tkp.mjs`        | 20 pass, 5 fail, then stops | 34 pass, 10 fail | fails are the 404; it stops on mobile because it takes the card at index 2 for the invitation, now this tale                                 |
-| `mila-nav.mjs`   | 72 pass, 22 fail, timeout   | same             | times out at 900 s on both builds                                                                                                            |
-| `tree.mjs`       | does not launch             | same             | needs the pinned headless Chromium, not installed                                                                                            |
-| `world.mjs`      | exit 0                      | not compared     | shots and counters only                                                                                                                      |
+| Script                | Branch                    | Baseline         | Reading                                                                                                                                 |
+| --------------------- | ------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `mila-lang.mjs`       | 48 pass, 12 fail          | same             | the 12 are one pre-existing console 404                                                                                                 |
+| `tk-reading.mjs`      | 238 pass, 3 fail          | same             | pre-existing 404                                                                                                                        |
+| `mila.mjs` (updated)  | 143 pass, 7 fail          | 143 pass, 7 fail | the 7 are the pre-existing 404; the shelf check now asserts the ready tales in manifest order, then the invitation                      |
+| `swipe.mjs` (updated) | 91 pass, 0 fail           | 91 pass, 0 fail  | ring sequences and climb values are built from the shelf it finds; four slots rest at 0.2, 0.426, 0.653, 0.88 and a lap is `0 1 2 3 -1` |
+| `tkp.mjs` (updated)   | 35 pass, 10 fail          | 35 pass, 10 fail | the 10 are the pre-existing 404; the invitation is found by its role, not at index 2                                                    |
+| `mila-nav.mjs`        | 72 pass, 22 fail, timeout | same             | times out at 900 s on both builds                                                                                                       |
+| `tree.mjs`            | does not launch           | same             | needs the pinned headless Chromium, not installed                                                                                       |
+| `world.mjs`           | exit 0                    | not compared     | shots and counters only                                                                                                                 |
 
-No failure was classified as a regression. Reservations: `swipe.mjs`, `mila.mjs` and `tkp.mjs`
-encode the old shelf and must be updated for a fourth entry (not done in this mission); the home
-ring with four slots was therefore checked only through the failing sequences, not by a passing
-test; `tree.mjs` gave no coverage of the new card.
+No failure was classified as a regression. The three scripts that encoded a three-entry shelf were
+updated to read it from the app (commit `8854187`, run on `7ed9c95` and on the baseline build, same
+results on both). Remaining gaps, pre-existing: `tree.mjs` gave no coverage of the new card;
+`mila-nav.mjs` did not reach its end. The other rows of the table are the run on `3cef379`.
 
-### Performance (A12)
+### Performance (A12, commit `7ed9c95`, evidence `s6/perf/`)
 
 Hardware: AMD Ryzen 7 7435HS, NVIDIA GeForce RTX 4060 Laptop GPU (driver 580.178.04), display 60 Hz.
-Headed Chrome 158, cache disabled for the weights. The frame times were measured on commit
-`3cef379`; later commits changed shaders only (three more texture reads in the lit materials, a few
-operations in the finish pass) and were not measured again.
+Headed system Chrome 158 on the GPU, 20 s after the page settles and a 3 s warm-up.
 
 | Viewport                | Page | p50 ms | p95 ms | max ms | frames over 33.4 ms |
 | ----------------------- | ---- | ------ | ------ | ------ | ------------------- |
-| 1440x900, DPR 1         | 3    | 16.7   | 16.8   | 33.3   | 0 %                 |
-| 1440x900, DPR 1         | 9    | 16.7   | 16.8   | 50     | 0.17 %              |
-| 1440x900, DPR 1         | 11   | 16.7   | 16.8   | 19.8   | 0 %                 |
-| 1440x900, DPR 1         | 12   | 16.7   | 16.8   | 33.3   | 0 %                 |
-| emulated 390x844, DPR 2 | 3    | 16.7   | 16.8   | 34     | 0.08 %              |
-| emulated 390x844, DPR 2 | 9    | 16.7   | 16.8   | 34.7   | 0.08 %              |
-| emulated 390x844, DPR 2 | 11   | 16.7   | 16.8   | 34.8   | 0.17 %              |
-| emulated 390x844, DPR 2 | 12   | 16.7   | 16.8   | 34.6   | 0.17 %              |
+| 1440x900, DPR 1         | 3    | 16.7   | 16.8   | 34.0   | 0.08 %              |
+| 1440x900, DPR 1         | 9    | 16.7   | 16.8   | 17.3   | 0 %                 |
+| 1440x900, DPR 1         | 11   | 16.7   | 16.8   | 36.4   | 0.08 %              |
+| 1440x900, DPR 1         | 12   | 16.7   | 16.8   | 33.4   | 0 %                 |
+| emulated 390x844, DPR 2 | 3    | 16.7   | 16.8   | 33.3   | 0 %                 |
+| emulated 390x844, DPR 2 | 9    | 16.7   | 16.8   | 34.3   | 0.17 %              |
+| emulated 390x844, DPR 2 | 11   | 16.7   | 16.8   | 33.3   | 0 %                 |
+| emulated 390x844, DPR 2 | 12   | 16.7   | 16.8   | 50.0   | 0.17 %              |
 
-Longest frame during the page change 3→4: 18.5 ms (desktop), 33.9 ms (emulated phone). The display
-caps at 60 Hz, so these numbers show no headroom figure. They say nothing about a real phone.
+Longest frame during the page change 3→4: 18.4 ms (desktop), 33.8 ms (emulated phone).
+
+Uncapped (vsync and frame limit disabled, desktop 1440x900, DPR 1), to see the headroom the 60 Hz
+display hides: page 3 p50 0.9 ms, p95 1.5 ms; page 12 p50 1.2 ms, p95 1.9 ms. Single frames of 435
+and 582 ms occurred once in each uncapped run and were not investigated. All of this is a desktop
+GPU; the 390x844 rows are an emulated viewport, not a phone.
 
 Draw calls and triangles per page at its end state (whole frame, finish pass included):
 
@@ -206,43 +211,41 @@ Transfer (Chrome network events, `vite preview`, cache disabled):
 
 | Phase                                               | Requests | Encoded | Decoded |
 | --------------------------------------------------- | -------- | ------- | ------- |
-| Home before opening a tale                          | 16       | 0.78 MB | 1.35 MB |
+| Home before opening a tale                          | 16       | 0.79 MB | 1.35 MB |
 | Added by opening this tale, until page 1 is settled | 27       | 3.24 MB | 3.33 MB |
 
-The tale's own files: 3 GLB 0.93 MB (0.32 MB with gzip), 15 textures 2.2 MB (largest
-`rt_garden` 383 kB), code 131 kB (46 kB gzip). Under the 10 MB target. Every file of the tale loads
-at opening (no progressive loading by page: not needed at this weight). The home's main chunk grew
-from 724.41 kB to 752.6 kB (198.6 to about 203 kB gzip): more of `three` is now used.
+The tale's own files: 3 GLB 0.93 MB (0.32 MB with gzip), 14 textures 2.19 MB (largest `rt_garden`
+383 kB), fonts 60 kB, code and styles 55 kB encoded. Under the 10 MB target. Every file of the tale
+loads at opening (no progressive loading by page: not needed at this weight). The home's main chunk
+grew from 724.41 kB to 752.6 kB (198.6 to about 206 kB gzip): more of `three` is now used.
 
 ### Sources and rebuild (A13)
 
-Rebuild in a clean worktree at `3cef379`, twice, with Blender 5.3.0, Python 3.14.4, numpy 2.3.5,
-Pillow 12.1.1: painter 2 min 35 s, Blender build 1.2 s.
+Rebuild from the scripts in clean worktrees, with Blender 5.3.0, Python 3.14.4, numpy 2.3.5, Pillow
+12.1.1: painter about 2 min 30 s, Blender build about 1 s.
 
-| Files                              | Rebuild 1 equals rebuild 2 | Rebuild equals committed                                                                                                 |
-| ---------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `tree.glb`, `set.glb`, `props.glb` | yes, byte for byte         | yes                                                                                                                      |
-| 14 of 15 `rt_*.webp`               | yes                        | yes                                                                                                                      |
-| `rt_hedge.webp`                    | yes                        | no at `3cef379` (painted before a painter fix); repainted and committed in `65b9988`, not re-verified by a third rebuild |
-| `world/assets.json`                | yes                        | same data, reformatted by Prettier at `3cef379`; now excluded from Prettier, sha256 equal to the archive's               |
-| `plan-jardin.png`                  | yes                        | redrawn after the last lens changes                                                                                      |
+| Rebuild | Commit    | Result                                                                                                                                                                                                             |
+| ------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1 and 2 | `3cef379` | identical to each other on the 20 files; identical to the committed files on 17; the hedge texture (painted before a painter fix), the build report (reformatted by Prettier) and the plan (older lenses) differed |
+| 3       | `7ed9c95` | all 20 generated files identical to the committed ones (3 GLB, 15 `rt_*.webp`, `world/assets.json`, `plan-jardin.png`); `git status` empty after the rebuild                                                       |
 
-Archive outside the repository:
-`contes-creole-assets/mila-calebassier-production/sources/2026-11-23-3cef379/` (56 MB: 15 PNG
-masters 37 MB, `.blend` 20 MB, scripts, layout, build report, `MANIFEST_SHA256.txt` verified with
-`sha256sum -c`). The archive was made at `3cef379`: its hedge master predates the repainted one.
+Archive outside the repository, refreshed:
+`contes-creole-assets/mila-calebassier-production/sources/2026-11-24-7ed9c95/` (56 MB: 15 PNG
+masters, `.blend`, scripts, layout, build report, `MANIFEST_SHA256.txt` of 26 lines verified with
+`sha256sum -c`). The older `sources/2026-11-23-3cef379/` is left as it was (its hedge master
+predates the repaint).
 
 ### Answers to the pilot's notes on S3
 
-| #   | Note                                                 | Answer                                                                                                                                                                                                                                                                                                                                                                                              |
-| --- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | watercolour is the main gap                          | Done in materials and layers: uneven drying (value and warm/cool drift) and wall washes pooling low, shade steps broken by the paper's tooth, aerial perspective per light key, foliage painted as lit and shaded masses, wet-in-wet sky blooms with granulation, dry-brush specks. Before/after: `evidence/s4-before-after-p03-p09.jpg` (left S3, right now). Still short of the boards: section E |
-| 2   | page 9: fruit beside the shoulder, hand on the chest | carry lowered to her belly (0.78 m) with both hands on the shell; the crossing root thinned (it read as a log). Clip: `s5/gestures/…` page 9                                                                                                                                                                                                                                                        |
-| 3   | page 3: attach point and transfer readable           | the branch brings the fruit by its stalk into frame, her hands rise to it, then take it; the branch stays bowed over her at the end. Same clip, landscape and portrait                                                                                                                                                                                                                              |
-| 4   | page 11: attach visible, then the whole tree         | the page starts on a medium shot of the raised fruit and branch A, pulls back and tilts to the whole tree; the wide frame is the end state. Same clip                                                                                                                                                                                                                                               |
-| 5   | foreground cut-outs not placed                       | placed per shot and per format in `staging.ts`, relative to each reading lens; parallax clip `s5/parallax/…`                                                                                                                                                                                                                                                                                        |
-| 6   | captures with the real text card                     | `evidence/s5-pages-desktop-1440x900.jpg`, `s5-pages-phone-390x844.jpg`, `s5-pages-phone-360x640.jpg` (real app, Français), contrast measured on pages 1, 7, 9, 12                                                                                                                                                                                                                                   |
-| 7   | push, draft PR, preview from S3                      | PR #54, preview `https://deploy-preview-54--contes-creoles.netlify.app`                                                                                                                                                                                                                                                                                                                             |
+| #   | Note                                                 | Answer                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | watercolour is the main gap                          | Done in materials and layers: uneven drying (value and warm/cool drift) and wall washes pooling low, shade steps broken by the paper's tooth, aerial perspective per light key, foliage painted as lit and shaded masses, wet-in-wet sky blooms with granulation, dry-brush specks. Before/after: `evidence/s4-before-after-p03-p09.jpg` (left S3, right now). Still short of the boards: section E                                                                                                     |
+| 2   | page 9: fruit beside the shoulder, hand on the chest | Two passes. First the carry was lowered to 0.78 m, which still read at shoulder height in the reading frame (her shoulder is at 0.90 m and the fruit is 0.21 m across), and her hands, kept clear of the dress, left the shell. Now (`7ed9c95`) the fruit is held in front of her belly at 0.68 m, just outside the flounces, with both hands on it, on pages 8 to 11: `evidence/s6-page09-reading-frame.jpg`. "Against her" is therefore a fruit held close in front of the dress, not pressed into it |
+| 3   | page 3: attach point and transfer readable           | the branch brings the fruit by its stalk into frame, her hands rise to it, then take it; the branch stays bowed over her at the end. Same clip, landscape and portrait                                                                                                                                                                                                                                                                                                                                  |
+| 4   | page 11: attach visible, then the whole tree         | the page starts on a medium shot of the raised fruit and branch A, pulls back and tilts to the whole tree; the wide frame is the end state. Same clip                                                                                                                                                                                                                                                                                                                                                   |
+| 5   | foreground cut-outs not placed                       | placed per shot and per format in `staging.ts`, relative to each reading lens; parallax clip `s5/parallax/…`                                                                                                                                                                                                                                                                                                                                                                                            |
+| 6   | captures with the real text card                     | `evidence/s5-pages-desktop-1440x900.jpg`, `s5-pages-phone-390x844.jpg`, `s5-pages-phone-360x640.jpg` (real app, Français), contrast measured on pages 1, 7, 9, 12                                                                                                                                                                                                                                                                                                                                       |
+| 7   | push, draft PR, preview from S3                      | PR #54, preview `https://deploy-preview-54--contes-creoles.netlify.app`                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## E. Deviations, risks and limitations
 
@@ -275,17 +278,17 @@ Risks:
 
 Not verified:
 
-- The home ring and shelf with a fourth entry by a passing automated check (the existing scripts
-  encode three entries); the tree card through `tree.mjs`.
-- Frame times after `3cef379`; the rebuild of the repainted hedge.
+- The tree card through `tree.mjs` (does not launch here); the end of `mila-nav.mjs` (timeout).
+- The gesture and parallax clips in `s5/` predate the page-9 carry fix; they were not re-captured.
 
 ## F. Repository state
 
 - Branch `feat/mila-calebassier`, pushed to `origin` (alias `github-xgueret`). Draft PR #54. No merge,
   no production deploy. CI `quality` was green on `f476aa8`; later pushes re-run it.
 - Commits: `0683636` docs, `99a9f80` shared Mila figure, `f476aa8` S3 checkpoint, `3cef379` S4,
-  `bd5754d` wash refinements, `65b9988` assets equal to a rebuild, `f1143ff` QA script and text shade
-  (the product commit this report describes), then this report.
+  `bd5754d` wash refinements, `65b9988` assets equal to a rebuild, `f1143ff` QA script and text shade,
+  `7ed9c95` belly carry (the product commit this report describes), `8854187` QA scripts reading the
+  shelf (no product file), then this report.
 - Local checks on the final tree: `format:check`, `lint --max-warnings=0`, `typecheck`, `test`
   (57 files, 459 tests), `build`: all exit 0.
 - Mutating operations outside the worktree: evidence under `~/.local/share/contes-creole-qa/`, one
@@ -302,5 +305,4 @@ Not verified:
 
 ## H. Recommended next action
 
-Pilot: route the Codex review on the final SHA. Follow-up worth a decision: update `qa/swipe.mjs`,
-`qa/mila.mjs` and `qa/tkp.mjs` for a four-entry shelf (QA scripts only, not in CI). Safe to execute; no approval required for the review.
+Pilot: route the Codex review on `7ed9c95` (later commits touch QA scripts and documents only). Safe to execute; no approval required for the review.
