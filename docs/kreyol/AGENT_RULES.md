@@ -33,7 +33,7 @@ Read before generating or modifying any Kréyòl in this project (tale text, lan
 - A change to the tale (`src/books/<id>/story/gcf.md`) must be added to `CORRECTIONS` in `src/books/v13-conversion.test.ts`.
 - Language-note examples (`src/books/<id>/langue/fr.md`, and Ti Kannot's kept notes in
   `docs/explanations/ti-kannot/langue/fr.md`) are quoted verbatim from `gcf.md`: change both together (`books.test.ts` enforces it).
-- Keep `draft: true` in `langue/fr.md` until a Creole speaker has reviewed the notes.
+- No `draft: true` and no "bwouyon / à valider" label on any Kréyòl text: owner decision 2026-11-25 — the Kréyòl is published without a draft marker and the owner corrects it over time. Uncertain cases still go to [variants.md](variants.md) § 3, never into the reader-visible text.
 - Run `pnpm typecheck && pnpm lint && pnpm test && pnpm build` after any change.
 
 ## 4. Glossary

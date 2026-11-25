@@ -1,7 +1,6 @@
 ---
 lang: fr
 title: Lang kréyòl
-draft: true
 ---
 
 ## « Yé krik ! » : ouvrir le conte {#ye-krik}
