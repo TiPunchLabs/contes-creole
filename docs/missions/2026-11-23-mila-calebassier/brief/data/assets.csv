@@ -1,0 +1,20 @@
+id,medium,task,deliverable,requirements,constraint
+CHAR_MILA,3D ou procédural existant,réutiliser,source du dépôt,"personnage canonique, animations existantes",ne pas recréer depuis les images
+CHAR_NINON,3D,fabriquer,blend + GLB si pertinent,"idle, marche, guidage, don",tenue contemporaine simple
+TREE_HERO,3D + cartes peintes,fabriquer,blend + GLB + textures,"tronc, branches, petite feuille simple",pas de fruits sur tronc
+BRANCH_ACTIVE,3D animée,fabriquer,sous-groupe arbre + clip,"flexion, socket stable",même branche pages 3 et 11
+GOURD_HERO,3D,fabriquer,GLB ou géométrie partagée,"coque lisse, poignée naturelle courte, masque émissif",taille stable et manipulable
+GOURDS_SECONDARY,3D instanciée si possible,fabriquer,instances + données,plusieurs dans les branches,variation contenue sans duplication héros
+HOUSE_MILA,3D simple + textures,fabriquer,blend + GLB,"terrasse, façade, chambre raccordée",maçonnerie moderne
+HOUSE_NINON,3D simple + textures,fabriquer,blend + GLB,façade et terrasse,cohérence géographique
+ROOM,3D simple + textures,fabriquer,blend + GLB,"lit, table, fenêtre et volets articulés",ne pas montrer une autre façade
+GROUND_ROOTS,3D,réutiliser ou fabriquer,mesh + textures,"sol de contact, racines franchissables",collisions ou trajectoires vérifiées
+GATE,3D simple,fabriquer,mesh,portail sobre,repère de continuité
+LAMP,3D,fabriquer,mesh + effet runtime,lampe portable,un point lumineux limité suffit
+FG_LEAVES,2D RGBA,fabriquer,PNG masters et exports optimisés,groupes détourés proches,pas de bord papier rectangulaire visible
+MG_GARDEN,2D RGBA / volume léger,fabriquer,couches indépendantes,masses jardin derrière personnages,raccord valeurs et lumière
+BG_LANDSCAPE,2D,fabriquer,paysage peint sans personnage,relief et habitat contemporain lointain,overscan pour cadrages mobiles
+SKY_STARS,2D + points ou masques,fabriquer,sky + masques états,"crépuscule, nuit, aube, étoiles groupées",extinction/reprise orchestrées
+PAPER_GRAIN,texture,fabriquer ou sourcer,texture répétable discrète,granulation temporellement stable,pas de filtre agressif
+ROOSTER,2D silhouette ou petite 3D,fabriquer,atlas ou mesh,mouvement visuel page 11,aucun son
+BREAKFAST,3D simple / peinture selon cadrage,fabriquer,table et accessoires,table partagée page 12,pas de bol fabriqué instantanément

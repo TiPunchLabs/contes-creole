@@ -24,6 +24,7 @@ export const TIMING = {
   dive: 1700,
   rise: 1100,
   fade: 1200,
+  cancel: 300,
   retryDelay: 1200,
   mountAttempts: 5,
 } as const;
@@ -42,6 +43,33 @@ export interface AppDeps {
 }
 
 type Mode = "tree" | "dive" | "book" | "rise";
+
+/**
+ * Settles as `promise`, unless the opening is cancelled first: it then rejects at once and whatever
+ * `promise` gives later is ignored. The listener is removed as soon as either happens.
+ */
+function unlessCancelled<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = (): void => reject(new Error("opening cancelled"));
+    if (signal.aborted) return onAbort();
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener("abort", onAbort));
+  });
+}
+
+/** Disposes a world whose mount ends after its opening was cancelled; its failure is its own. */
+function discardLate(mounting: Promise<{ dispose(): void }> | null): void {
+  mounting?.then(
+    (late) => {
+      try {
+        late.dispose();
+      } catch (err) {
+        console.error("Book dispose failed", err);
+      }
+    },
+    () => undefined,
+  );
+}
 
 interface OpenBook {
   id: string;
@@ -87,6 +115,8 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
   let immersive: OpenImmersive | null = null;
   /** Element focused when a book was entered (shelf or fiche button), focused again on return. */
   let returnFocus: HTMLElement | null = null;
+  /** The opening in progress (dive, loading, mount): the first Escape aborts it. */
+  let opening: AbortController | null = null;
   let page = 0;
   let lang: ReadingLang = "gcf";
   let textHidden = false;
@@ -176,6 +206,37 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     treeLayer.hidden = false;
   }
 
+  /** Gives the focus back to the control that opened the book. */
+  function restoreFocus(): void {
+    if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
+    returnFocus = null;
+  }
+
+  /**
+   * Ends an opening that was cancelled or failed: back on the tree at the book's card. A cancelled
+   * one covers the screen first and shows no notice; a world still mounting is disposed when it ends.
+   */
+  async function abandon(
+    bookId: string,
+    activeTree: TreeHandle,
+    cancel: AbortController,
+    mounting: Promise<{ dispose(): void }> | null,
+    err: unknown,
+  ): Promise<void> {
+    opening = null;
+    const cancelled = cancel.signal.aborted;
+    if (cancelled) {
+      discardLate(mounting);
+      mode = "rise";
+      await flash.to(1, TIMING.cancel);
+    } else console.error(`Book "${bookId}" failed to open`, err);
+    closeBook();
+    activeTree.resume(bookId);
+    mode = "tree";
+    if (cancelled) restoreFocus();
+    else showNotice(root, LOAD_ERROR).lang = "gcf";
+  }
+
   /** Dives into a book that brings its own reading interface; the tree comes back on failure. */
   async function enterImmersive(manifest: BookManifest, activeTree: TreeHandle): Promise<void> {
     const load = manifest.immersive;
@@ -186,33 +247,39 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       Promise.all([load(), deps.loadStories(manifest.id)]),
     );
     loading.catch(() => undefined);
+    const cancel = new AbortController();
+    opening = cancel;
+    let mounting: Promise<ImmersiveHandle> | null = null;
     try {
-      await Promise.all([
-        activeTree.dive(manifest.id),
-        flash.to(1, TIMING.dive * 0.45, TIMING.dive * 0.55),
-      ]);
+      await unlessCancelled(
+        Promise.all([
+          activeTree.dive(manifest.id),
+          flash.to(1, TIMING.dive * 0.45, TIMING.dive * 0.55),
+        ]),
+        cancel.signal,
+      );
       activeTree.pause();
       treeLayer.hidden = true;
-      const [world, stories] = await loading;
+      const [world, stories] = await unlessCancelled(loading, cancel.signal);
       if (!readingLangs(stories).includes(lang)) lang = "gcf";
       page = 0;
       root.dataset.book = manifest.id;
       root.dataset.immersive = "";
       bookLayer.hidden = false;
-      const handle = await world.default.mount(bookLayer, {
-        exit: () => void leave(),
-        text: textFor(stories),
-      });
+      mounting = Promise.resolve(
+        world.default.mount(bookLayer, {
+          exit: () => void leave(),
+          text: textFor(stories),
+        }),
+      );
+      const handle = await unlessCancelled(mounting, cancel.signal);
+      opening = null;
       immersive = { id: manifest.id, stories, handle };
       reading.open(stories, { langsOnly: true });
       render();
       mode = "book";
     } catch (err) {
-      console.error(`Book "${manifest.id}" failed to open`, err);
-      closeBook();
-      activeTree.resume(manifest.id);
-      mode = "tree";
-      showNotice(root, LOAD_ERROR).lang = "gcf";
+      await abandon(manifest.id, activeTree, cancel, mounting, err);
     }
     await flash.to(0, TIMING.fade);
   }
@@ -230,14 +297,17 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       Promise.all([manifest.world?.(), deps.loadStories(bookId), loadNotes(bookId)]),
     );
     loading.catch(() => undefined);
+    const cancel = new AbortController();
+    opening = cancel;
+    let mounting: Promise<BookHandle> | null = null;
     try {
-      await Promise.all([
-        activeTree.dive(bookId),
-        flash.to(1, TIMING.dive * 0.45, TIMING.dive * 0.55),
-      ]);
+      await unlessCancelled(
+        Promise.all([activeTree.dive(bookId), flash.to(1, TIMING.dive * 0.45, TIMING.dive * 0.55)]),
+        cancel.signal,
+      );
       activeTree.pause();
       treeLayer.hidden = true;
-      const [world, stories, notes] = await loading;
+      const [world, stories, notes] = await unlessCancelled(loading, cancel.signal);
       if (!world) throw new Error(`Book "${bookId}" has no world`);
       if (!readingLangs(stories).includes(lang)) lang = "gcf";
       page = 0;
@@ -247,22 +317,18 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
       bookLayer.hidden = false;
       const story = storyFor(stories, lang);
       bubble.setLang(story.lang);
-      const handle = await world.default.mount(bookLayer, {
-        story,
-        page,
-        bubble: bookBubble,
-      });
+      mounting = Promise.resolve(
+        world.default.mount(bookLayer, { story, page, bubble: bookBubble }),
+      );
+      const handle = await unlessCancelled(mounting, cancel.signal);
+      opening = null;
       book = { id: bookId, stories, handle };
       reading.open(stories);
       render();
       if (notes) panel.attach(notes, stories.gcf);
       mode = "book";
     } catch (err) {
-      console.error(`Book "${bookId}" failed to open`, err);
-      closeBook();
-      activeTree.resume(bookId);
-      mode = "tree";
-      showNotice(root, LOAD_ERROR).lang = "gcf";
+      await abandon(bookId, activeTree, cancel, mounting, err);
     }
     await flash.to(0, TIMING.fade);
   }
@@ -276,8 +342,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     closeBook();
     tree?.resume(bookId);
     mode = "tree";
-    if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
-    returnFocus = null;
+    restoreFocus();
     await flash.to(0, TIMING.fade);
   }
 
@@ -363,6 +428,8 @@ export function startApp(root: HTMLElement, deps: AppDeps): { dispose(): void } 
     touchY = null;
   };
   const onKey = (e: KeyboardEvent): void => {
+    // A book still opening (dive, loading, mount) is cancelled by the first Escape.
+    if (mode === "dive" && e.key === "Escape") opening?.abort();
     if (mode !== "book") return;
     if (immersive) {
       if (e.key === "Escape") void leave();

@@ -34,6 +34,9 @@ sources are in `design/v13/`.
   └──────────── rise (1.1 s) ◄──── Esc / back ──────┘
 ```
 
+Escape also cancels a book that is still opening (dive, loading, mount): the tree comes back at
+that book's card, and a world whose mount ends afterwards is disposed, never shown.
+
 - **Hub — Pyébwa a Konesans**: a tree of light on a tropical _morne_, drawn as a flamboyant whose
   leaf and flower sprays grow from its branches and twigs and sway with them in one wind
   (`src/tree/scene/canopy.ts`), turned about its foot so its fullest face meets the opening view
@@ -140,6 +143,45 @@ picture (`assets/cover.webp`) loads with the tree.
 The prototype's cover screen is not ported (ruling MILA-OPEN): the tree's card is the cover and the
 dive lands on page 1 (`MilaScene.show(1)`, no camera flight). The sound starts on opening; where the
 browser holds it until a gesture, the reader's first tap or key in the tale resumes it.
+
+### A 2.5D painted garden (Mila et le calebassier magique)
+
+`src/books/mila-calebassier/` is a `world` book: the shell gives it the shared reading interface and
+the validated navigation (keys, wheel, buttons, one page per horizontal swipe on smartphones).
+
+- **One master layout** (`world/layout.json`): Mila's house, the calabash tree, the gate, Man
+  Ninon's house, the path. Blender builds the models from it (`art/mila-calebassier/scripts/`,
+  seeded bpy scripts, GLB export) and the web engine stages the twelve pages in it.
+- **Layers**: sky wash and ordered stars, far relief (painted ring), mid-garden masses and
+  foreground cut-outs (painted billboards turning about the vertical only), 3D things (tree with two
+  skinned branches, houses with a real bedroom, gate, props, the two figures). Painted layers are
+  unlit and take the page's light key and the nearby warm lights; 3D surfaces are lit by the same
+  key. `world/finish.ts` lays one brush over the frame; faces opt out through the frame's alpha.
+- **Characters**: Mila is the underwater tale's figure, built by `src/shared/mila/` for both
+  books; Man Ninon is built on the same plan (`world/ninon.ts`). `world/puppet.ts` poses either
+  (walk cycle, stoop, head, two-bone arm IK towards hand tasks).
+- **Page states** (`world/pages.ts`): each page is a function of its own clock filling one frame
+  description (poses, owner of the hero calabash, branch bends, shutters, lights, stars). Nothing is
+  kept between frames: a page can be entered directly, left mid-action and entered again; after its
+  action a page holds its last state. The hero calabash is a single object blended between three
+  anchors (branch socket, Mila's hands, bedside table).
+- **Walk** (`world/puppet.ts`, `plantedWalk`): both figures walk on planted feet. The step phase
+  comes from the distance walked, a foot stays where it lands while the body passes over it, each
+  leg is solved to reach it, a move is cut into whole steps, and a foot follows what stands on
+  the ground under its whole sole (`world/terrain.ts`: a height field of the set's solids; it
+  lands on a root or steps over it). Each figure has her own `Step`
+  (an older woman's, a child's). Mila's shoes are an option of the shared figure, off by default.
+- **Cameras** (`staging.ts`): per page, a landscape and a portrait shot, each with an entry and a
+  reading lens; the text is cleared by a view offset (`textShift`: the middle of what the text
+  leaves on that screen), not by a crop, and a screen narrower than its design frame (16:10, 9:16)
+  keeps that frame's horizontal view (`fitLens`). A page change is a wash (`world/finish.ts`):
+  the picture of the page just left is kept and the new page soaks through it in 0.85 s, along the
+  paper's tooth; a turn made during a change restarts from what is on the screen, so changes never
+  stack. Under reduced motion it is a 0.25 s even cross-fade and pages show their final state.
+- **QA**: `qa/calebassier/` is a dev-only viewer (page, instant, graybox); the world's handle
+  carries a `probe` (seek, counters, `visibility()`: the share of each subject really drawn) and
+  the canvas publishes `data-page`, `data-hero`,
+  `data-settled` and `data-framing` (where the lens puts the fruit, faces, hands and lantern).
 
 ### Theme and language layers ("Veillée claire" redesign)
 

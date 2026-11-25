@@ -2,10 +2,11 @@
 // (WebGL contexts, render loops and AudioContexts counted), keyboard and focus, reduced motion,
 // the text-only fallback, and the existing tale still opening. Real time (the scene runs on
 // performance.now), GPU only.
-// Usage: [SITE=url] [OUT=dir] [ONLY=desktop,mobile,landscape,keys,reduced,nogl,kannot] node qa/mila.mjs
+// Usage: [SITE=url] [OUT=dir] [ONLY=desktop,mobile,landscape,keys,reduced,nogl,kannot]
+//        [QA_BOOKS_DIR=src/books of the source the site was built from] node qa/mila.mjs
 import { chromium } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const SITE = process.env.SITE ?? "http://localhost:4199/";
 const OUT = (process.env.OUT ?? new URL("./out/mila/", import.meta.url).pathname).replace(
@@ -21,6 +22,26 @@ const GPU_ENV = {
   __EGL_VENDOR_LIBRARY_FILENAMES:
     process.env.QA_EGL_VENDOR ?? "/usr/share/glvnd/egl_vendor.d/10_nvidia.json",
 };
+/**
+ * Card titles of the ready books, in manifest order (the tree's own order: `order`, ascending),
+ * read from the `book.ts` files of the source the site was built from (QA_BOOKS_DIR to point at
+ * another checkout, e.g. when testing a build of another branch).
+ */
+function readyTitles() {
+  const dir = process.env.QA_BOOKS_DIR || new URL("../src/books/", import.meta.url).pathname;
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => readFileSync(`${dir.replace(/\/?$/, "/")}${d.name}/book.ts`, "utf8"))
+    .map((src) => ({
+      order: Number(/order:\s*(\d+)/.exec(src)?.[1]),
+      ready: /ready:\s*true/.test(src),
+      title: /card:\s*\{\s*title:\s*"([^"]+)"/.exec(src)?.[1],
+    }))
+    .filter((b) => b.ready)
+    .sort((a, b) => a.order - b.order)
+    .map((b) => b.title);
+}
+
 const VIEWPORTS = {
   desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 },
   mobile: {
@@ -267,7 +288,25 @@ async function journey(browser, vp) {
       title: b.querySelector(".tree-shelf-title")?.textContent,
     })),
   );
-  check(run, "tree-three-slots", shelf.length === 3, shelf.map((s) => s.title).join(" | "));
+  // Every ready tale in manifest order (the tree's own order), then the invitation, last.
+  const manifest = readyTitles();
+  const titles = shelf.map((s) => s.title);
+  const invitationLast = await p.evaluate(() => {
+    const books = [...document.querySelectorAll(".tree-shelf-book")];
+    return (
+      books.filter((b) => b.classList.contains("is-invitation")).length === 1 &&
+      books.at(-1)?.classList.contains("is-invitation")
+    );
+  });
+  check(
+    run,
+    "tree-slots-tales-then-invitation",
+    manifest.length >= 2 &&
+      shelf.length === manifest.length + 1 &&
+      manifest.every((title, i) => titles[i] === title) &&
+      invitationLast,
+    titles.join(" | "),
+  );
   check(
     run,
     "shelf-mila-name",

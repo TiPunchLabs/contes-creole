@@ -1,0 +1,266 @@
+/*
+ * « Mila et le calebassier magique »: the text reads in the scene, as in Ti Kannot's and Mila's
+ * books (ruling TKR): light text with a dark halo over a soft indigo shade laid on the scene layer;
+ * the camera slides the subject away from it (`textShift` in staging.ts).
+ */
+[data-book="mila-calebassier"] {
+  --reading-accent: #c98a3c;
+  --reading-text: #2b2440;
+  --reading-title: #2b2440;
+  --reading-font-display: "Cormorant Garamond", Georgia, serif;
+  --reading-font-body: "Spectral", Georgia, serif;
+}
+
+/*
+ * The tale reads in the scene, as in Mila's book (ruling TKR): no page, just light text with a dark
+ * halo over a soft shade of the scene. The shade lives on the scene layer and fades out, so it never
+ * reads as a card; the camera slides the subject away from the text (frameOffset).
+ */
+[data-book="mila-calebassier"] {
+  --cal-text: #fff8ea;
+  --cal-gold: #f6cf7d;
+  --cal-halo:
+    0 1px 14px rgba(12, 14, 34, 0.9), 0 0 3px rgba(12, 14, 34, 0.75), 0 0 1px rgba(12, 14, 34, 0.9);
+  /* Room the text leaves for the reader's controls under it. */
+  --cal-bottom: 104px;
+}
+
+[data-book="mila-calebassier"] .app-book::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 52% 72% at 18% 40%,
+    rgba(16, 20, 44, 0.7) 0%,
+    rgba(16, 20, 44, 0.5) 48%,
+    rgba(16, 20, 44, 0) 100%
+  );
+}
+
+[data-book="mila-calebassier"] .reading-card {
+  /* Above the scene's shade (z-index 1), like the reader's controls. */
+  z-index: 2;
+  top: clamp(72px, 13vh, 132px);
+  bottom: auto;
+  left: max(24px, calc(env(safe-area-inset-left, 0px) + 6vw));
+  width: min(31rem, 40vw);
+  max-height: calc(100svh - clamp(72px, 13vh, 132px) - var(--cal-bottom));
+  gap: 0;
+  padding: 0 6px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(246, 207, 125, 0.45) transparent;
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+/* Page change: the text fades and rises a little, then settles (Mila's rhythm). */
+[data-book="mila-calebassier"] .reading-card.is-changing {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+[data-book="mila-calebassier"] .reading-body,
+[data-book="mila-calebassier"] .reading-gloss {
+  transition: opacity 0.5s ease 0.18s;
+}
+
+[data-book="mila-calebassier"] .reading-card.is-changing .reading-body,
+[data-book="mila-calebassier"] .reading-card.is-changing .reading-gloss {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+[data-book="mila-calebassier"] .reading-head {
+  margin-bottom: 0.6rem;
+}
+
+[data-book="mila-calebassier"] .reading-label,
+[data-book="mila-calebassier"] .reading-num {
+  font:
+    600 12px/1.2 "Karla",
+    sans-serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cal-gold);
+  text-shadow: var(--cal-halo);
+}
+
+[data-book="mila-calebassier"] .reading-num {
+  letter-spacing: 0.08em;
+}
+
+[data-book="mila-calebassier"] .reading-title {
+  margin-bottom: 0.9rem;
+  font: italic 600 clamp(30px, 2.8vw, 40px)/1.08 var(--reading-font-display);
+  color: var(--cal-text);
+  text-shadow: var(--cal-halo);
+}
+
+[data-book="mila-calebassier"] .reading-body {
+  font: 400 clamp(17px, 1.25vw, 19px)/1.6 var(--reading-font-body);
+  color: var(--cal-text);
+  text-shadow: var(--cal-halo);
+}
+
+[data-book="mila-calebassier"] .reading-body p + p {
+  margin-top: 0.2rem;
+}
+
+[data-book="mila-calebassier"] .reading-dialogue {
+  padding-left: 1.1em;
+  text-indent: -1.1em;
+}
+
+/* Bileng: the French under the Kréyòl, as in Mila's gloss, with a denser halo. */
+[data-book="mila-calebassier"] .reading-gloss {
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed rgba(255, 248, 234, 0.4);
+  font: italic 500 clamp(16px, 1.15vw, 18px)/1.45 var(--reading-font-body);
+  color: var(--cal-text);
+  text-shadow:
+    0 0 3px rgba(12, 14, 34, 0.95),
+    0 0 8px rgba(12, 14, 34, 0.9),
+    0 1px 16px rgba(12, 14, 34, 0.9);
+}
+
+[data-book="mila-calebassier"] .reading-card:focus-visible {
+  outline: 3px solid transparent;
+  box-shadow: var(--focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-book="mila-calebassier"] .reading-card.is-changing {
+    transform: none;
+  }
+}
+
+/*
+ * Phones and portrait screens: the text takes the top, under the back and language buttons, as in
+ * Mila; the shade comes down from the top and the subject slides below the text.
+ */
+@media (max-width: 600px), (min-width: 601px) and (orientation: portrait) {
+  [data-book="mila-calebassier"] {
+    --cal-bottom: 92px;
+  }
+
+  [data-book="mila-calebassier"] .app-book::after {
+    background: linear-gradient(
+      180deg,
+      rgba(16, 20, 44, 0.72) 0%,
+      rgba(16, 20, 44, 0.56) 36%,
+      rgba(16, 20, 44, 0.3) 56%,
+      rgba(16, 20, 44, 0) 72%
+    );
+  }
+
+  [data-book="mila-calebassier"] .reading-card {
+    top: 70px;
+    left: max(18px, env(safe-area-inset-left, 0px));
+    right: max(18px, env(safe-area-inset-right, 0px));
+    width: auto;
+    max-height: calc(100svh - 70px - var(--cal-bottom));
+  }
+
+  /* Mila's heading size on phones (1.5rem). */
+  [data-book="mila-calebassier"] .reading-title {
+    margin-bottom: 0.55rem;
+    font-size: 24px;
+  }
+
+  [data-book="mila-calebassier"] .reading-body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  [data-book="mila-calebassier"] .reading-gloss {
+    font-size: 15px;
+  }
+}
+
+/*
+ * Short portrait phones: the text keeps to the top 46 % so the characters below stay clear; a longer
+ * passage scrolls (wheel or swipe over the text, before the page turns).
+ */
+@media (max-width: 600px) and (max-height: 700px) {
+  [data-book="mila-calebassier"] .reading-card {
+    max-height: min(calc(100svh - 70px - var(--cal-bottom)), 46svh);
+  }
+}
+
+/*
+ * Where passages may scroll (short phones, phones in landscape), the text fades out over its last
+ * 22 px instead of being cut, hinting at more; the padding there keeps a short page's last line
+ * clear of the fade.
+ */
+@media (max-width: 600px) and (max-height: 700px), (max-height: 500px) and (min-width: 601px) {
+  [data-book="mila-calebassier"] .reading-card {
+    padding-bottom: 22px;
+    mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent);
+  }
+}
+
+/* Portrait tablets: a reading column, not the full width. */
+@media (min-width: 601px) and (orientation: portrait) {
+  [data-book="mila-calebassier"] .reading-card {
+    top: 84px;
+    left: max(32px, 6vw);
+    right: auto;
+    width: min(36rem, 88vw);
+  }
+}
+
+/* Phones in landscape: the left column at full height, under the back button. */
+@media (max-height: 500px) and (min-width: 601px) {
+  [data-book="mila-calebassier"] {
+    --cal-bottom: 68px;
+  }
+
+  [data-book="mila-calebassier"] .reading-card {
+    top: 58px;
+    width: min(28rem, 50vw);
+    max-height: calc(100svh - 58px - var(--cal-bottom));
+  }
+
+  [data-book="mila-calebassier"] .reading-title {
+    margin-bottom: 0.4rem;
+    font-size: 26px;
+  }
+
+  [data-book="mila-calebassier"] .reading-body {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+}
+
+/* Bare paper that lifts when the tale opens (page changes are a wash drawn by the world), and the
+   note shown while the garden's files load. */
+.calebassier-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: #f1e9da;
+  opacity: 1;
+}
+
+.calebassier-status {
+  position: absolute;
+  inset: auto 0 46%;
+  z-index: 2;
+  margin: 0;
+  text-align: center;
+  font:
+    italic 600 22px/1.2 "Cormorant Garamond",
+    Georgia,
+    serif;
+  color: #2b2440;
+}

@@ -43,3 +43,8 @@ qa/out/
 
 # Python bytecode of the QA scripts
 __pycache__/
+
+# Heavy sources of "Mila et le calebassier magique": rebuilt by art/mila-calebassier/scripts
+# (kept with a sha256 manifest in the production folder, see art/mila-calebassier/README.md)
+art/mila-calebassier/blend/
+art/mila-calebassier/textures/master/
