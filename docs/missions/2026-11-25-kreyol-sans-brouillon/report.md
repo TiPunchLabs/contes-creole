@@ -4,7 +4,7 @@ Mission: contes-creole/2026-11-25-kreyol-sans-brouillon
 Verdict: PASS
 Version: 41683fe
 Branch: chore/kreyol-sans-brouillon (from origin/main 2c31af2)
-PR: PR_URL_PLACEHOLDER (open, not draft, not merged)
+PR: https://github.com/TiPunchLabs/contes-creole/pull/55 (open, not draft, not merged)
 
 ## Summary
 
