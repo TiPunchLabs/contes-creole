@@ -1,7 +1,7 @@
 # Report — mila-calebassier
 
 Verdict: PARTIAL
-Version: 1de7283
+Version: fa914ca
 
 Executor: Claude Code session, model id `claude-fable-5-2`. Layout and camera owner: the executor
 (no camera subagent). Date: 2026-11-23/24.
@@ -31,9 +31,14 @@ Man Ninon's walk is redone, both figures wear light closed shoes, both silhouett
 no foot crosses a root any more, in `ff11440`, `a3716b3` and `1de7283` (section "Owner feedback 2"). Codex review 3 on `a6e1062`
 ran in parallel; its file is not touched by this cycle and its findings are not answered here.
 
+Review cycle 4 (Codex, `review-4.md`, on `1de7283`), finding F5, in the short cycle 5 approved by
+the owner and limited to it: the whole shoe now clears roots and solids, the walk and the check
+both work on the whole shoe, in `a4903b0` and `fa914ca` (section "Answers to review 4").
+
 Why PARTIAL and not PASS:
 
-- A15 asks for a Codex review on the final SHA: `1de7283` changes both figures' walk, feet and
+- A15 asks for a Codex review on the final SHA: `fa914ca` is not reviewed yet (review 4 is on
+  `1de7283`); since `a6e1062` the branch changes both figures' walk, feet and
   shapes and the page change, and has not been reviewed (review 3 is on `a6e1062`).
 - Two props are hidden by the figure who carries them at a reading frame (the gift on page 12, the
   lantern in part on page 11 portrait): section "Answers to review 2", decision D-GIFT.
@@ -460,6 +465,78 @@ Acceptance after this cycle, where it changed:
 One touch device limit, pre-existing and unchanged: while a book is opening there is no control on
 screen, so the cancellation is a keyboard gesture only.
 
+### Answers to review 4 (Codex, `review-4.md`, on `1de7283`; F5 fixed in `a4903b0`, QA rule in `fa914ca`)
+
+Scope of this cycle: F5 only. Evidence: `~/.local/share/contes-creole-qa/mila-calebassier/s11/`.
+Same browser and renderer (headless system Chrome 158 on the NVIDIA GPU).
+
+F5, part of Man Ninon's shoe inside a root on page 12; ankle-only ground query and check. Fixed.
+
+- The finding is right on both counts. The walk asked the ground what stands under one point,
+  the ankle, and the check compared the shoe's lowest point with that same single reading: where a
+  root rises under the toe or a side of the shoe, both said "clear".
+- One source for both (`world/terrain.ts`, new): the triangles of the set's solids near the ground
+  (roots, trunk, steps, walls, furniture; not the ground mesh) are put once in a height field
+  sorted by squares of the ground plan; a query gives the highest surface over a place, between the
+  floor and a reach above it. Pure geometry, unit-tested (`terrain.test.ts`, 3 tests: heights,
+  floor and reach, and a sole whose ankle is on open ground with a ridge under its toe or its side).
+- The walk (`world/puppet.ts`, was line 216): each foot asks about its whole sole, fifteen places
+  from heel to toe and side to side with a margin (2 cm for a foot in the air, 0.8 cm for a foot set
+  down), and stands on, or is lifted clear of, the highest thing under any of them; the clearance
+  of a swinging foot still adds what its toes or heel hang below the ankle. Each figure's sole is
+  measured on her shoe (`Dims.sole`).
+- The check (`world/index.ts`, was line 618; `qa/calebassier-sweep.mjs`): `info().feet[].sunk` is
+  measured on every vertex of the shoe's own meshes in world space (sole, upper, heel, collar,
+  band): for each, the height of the solid surface over that vertex less the vertex's own height;
+  the worst is kept. The sweep fails above 4 mm (was 12 mm on the ankle reading). `ankle` keeps
+  the old single reading, to show what it missed.
+- Codex's case, page 12 at 10.6 s, read with the same probe on both solvers
+  (`s11/p12-ankle-only/`, `s11/p12-after-a4903b0/`):
+
+| Solver                    | Ankle (x, z)  | Shoe's lowest point | Solid under the ankle | Highest solid under the shoe | Deepest vertex   |
+| ------------------------- | ------------- | ------------------- | --------------------- | ---------------------------- | ---------------- |
+| ankle-only (as `1de7283`) | 0.830, -1.677 | 152.0 mm            | 121.6 mm              | 222.0 mm                     | 47.9 mm inside   |
+| whole sole (`a4903b0`)    | 0.830, -1.677 | 250.5 mm            | 121.6 mm              | 222.0 mm                     | clear by 50.6 mm |
+
+The first line is the review's own numbers (ankle place, 152 mm, 121.6 mm, 47.9 mm), found again
+independently: the ankle is clear, the toe is in the root.
+
+- Negative control, ankle clear and shoe edge inside (`s11/neg-ankle-only.log`, exit 1): the new
+  check run on a scratch worktree of `a4903b0` whose walk asks the ground under the ankle only. It
+  fails pages 2, 5, 9 and 12 (the review's candidates): Mila 48.1 mm inside at 0.9 s on page 2,
+  96.9 mm on page 5, 49.7 mm on page 9, 103.0 mm on page 12; Man Ninon 153.4 mm on page 12. The
+  worktree is removed.
+- Results on `a4903b0` (`s11/final-a4903b0/`): whole-shoe sweep at every instant of every page,
+  0.05 s steps (finer than before), desktop and phone: 24 of 24 lines, exit 0. No vertex of a shoe
+  inside a solid on any page. Where a shoe passes over the root, the closest it comes: 5.1 mm clear
+  on page 2, 4.3 mm on page 5, 3.2 mm on page 9, 4.4 mm (Mila) and 7.0 mm (Man Ninon) on page 12;
+  on the other pages no shoe is ever over a solid. Shoes never under the ground (lowest 0.8 mm
+  above it); arms unchanged (worst 16.2 mm, limit 18); one hero calabash throughout; flat-foot
+  slide 0.0 to 0.1 mm except pages 6 (2.0 mm) and 8 (4.0 mm, the turn already noted). Reduced motion
+  shows the reading frames, where every shoe is on open ground or on a stone. Non-regression on the
+  same build: edges and rendered visibility 84 of 84 on seven screens; real app `framing` 37 of 37
+  (390x844 Français, normal motion), 37 of 37 (360x640 Français, reduced), 13 of 13 (1440x900);
+  `journey` 32 of 32, `rapid` 19 of 19, `touch` 13 of 13, `reduced` 13 of 13, `escape` 17 of 17,
+  `shots` 6 of 6. Run by the executor, one browser at a time; no subagent in this cycle.
+- One more commit, `fa914ca`, QA only: at 0.05 s steps the sweep's rule "no foot up in the dress
+  on open ground" failed on page 12, because Man Ninon's foot is already raised (330 mm) while it
+  is still beside the root and no vertex of the shoe is over it yet. The probe now also gives the
+  highest solid under the sole or within 6 cm of it (`near`) and that rule uses it. The walk is
+  byte-for-byte the one of `a4903b0`; `journey` 32 of 32 and `reduced` 13 of 13 were run again on
+  the build of `fa914ca` (`s11/final-fa914ca/`); the sweep numbers above are from this final rule.
+- Before and after at 10.6 and 10.8 s, desktop: `evidence/s11-page12-shoe-root-before-after.jpg`.
+  From this lens Man Ninon walks away and the lifted shoe is mostly behind her dress; the numbers
+  above are the proof, the picture only shows that nothing else moved.
+- What changed besides: feet now also stand on the stepping stones of the path (2.5 cm slabs, which
+  the ankle reading with its 3 cm threshold ignored) instead of in them; on page 11 Man Ninon
+  stands on the low end of a root, 26 mm above the grass. Route, timelines, composition, shoes,
+  silhouettes, transitions and every other file are untouched.
+- Limits, unchanged: the measure is on the shoes; legs, dress and carried props are not tested
+  against the solids, and bodies against walls, trunk and furniture stay on the ground plan in the
+  unit tests. The height field holds the highest surface over a place, so a foot under an
+  overhang lower than 0.4 m would read as inside (there is none on the figures' ways). Moving set
+  pieces (shutters, gate leaf) are taken where they stand at mount.
+
 ### Owner feedback 2 and its additions (2026-11-24, `owner-feedback-2.md`, done in `ff11440`, `a3716b3` and `1de7283`)
 
 Evidence of this cycle: `~/.local/share/contes-creole-qa/mila-calebassier/s10/` and the sheets
@@ -756,9 +833,10 @@ Not verified:
   `875fb5d` review 1 (framing, first Escape, new QA modes), `486c002` page 10 lens, `a6e1062`
   review 2 (page 10 foreground, page 1 gate, rendered visibility check), `ff11440` owner feedback 2
   (planted walk, first shoes, feet check), `a3716b3` its additions (light closed shoes, silhouettes,
-  wash between pages), `1de7283` addenda 2 and 3 (straight back, feet over the roots: the product
-  commit this report describes), then this report with `owner-feedback-2.md`.
-- Local checks on `1de7283`: `format:check`, `lint`, `typecheck`, `test` (57 files, 468 tests),
+  wash between pages), `1de7283` addenda 2 and 3 (straight back, feet over the roots), `a4903b0`
+  review 4 F5 (whole shoe clear of solids), `fa914ca` its QA rule (the product commit this report
+  describes), then this report.
+- Local checks on `fa914ca`: `format:check`, `lint`, `typecheck`, `test` (58 files, 471 tests),
   `build` (the usual large-chunk warning): all exit 0.
 - Local servers and browsers of this cycle are stopped.
 - Mutating operations outside the worktree: evidence under `~/.local/share/contes-creole-qa/`, one
@@ -776,11 +854,8 @@ Not verified:
 
 ## H. Recommended next action
 
-Pilot: `1de7283` differs from `a6e1062` by the walk of both figures and their feet on the ground
-(`world/puppet.ts`), their shoes and shapes (`world/ninon.ts`, `world/mila.ts`, the optional `shoes`
-and `limbs` of `src/shared/mila/figure.ts`), the page change (`world/finish.ts`, `world/index.ts`),
-three routes and one lens (`world/pages.ts`, `staging.ts`), the probe and
-`qa/calebassier-sweep.mjs`. Fold in review 3's findings on `a6e1062`, then route review 4 on the new
-SHA; a rerun of the underwater stills on a quiet machine would settle the one open proof. The owner
-can look at the walks on pages 4, 10 and 12, the shoes, the outlines, Man Ninon's back, the roots
-of page 12 and a few page changes on the dev server or the Deploy Preview. Merge stays the owner's.
+Pilot: `fa914ca` differs from the reviewed `1de7283` by `world/terrain.ts` (new) and its test, the
+ground query in `world/puppet.ts`, the sole of each figure (`world/ninon.ts`, `world/mila.ts`), the
+feet measure in `world/index.ts` and `qa/calebassier-sweep.mjs`. Route Codex review 5 on F5 and
+non-regression. The owner can watch page 12 from 9.5 to 12 s, and pages 2, 5 and 9 where Mila
+crosses the root. Merge stays the owner's.

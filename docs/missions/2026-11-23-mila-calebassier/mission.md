@@ -74,3 +74,5 @@ Not authorized: merge into `main`, production deploy, publication, marking the P
 - 2026-11-24T18:58Z owner addendum to feedback 2: improve both figures' silhouettes incrementally (`owner-feedback-2.md` Addendum), same cycle 4, executor's own model (Fable 5.2).
 - 2026-11-24T19:02Z owner precision: light closed shoes for both figures, in harmony with the tale (`owner-feedback-2.md` Footwear precision).
 - 2026-11-24T19:06Z owner addition: page transitions that keep the narration (`owner-feedback-2.md` Page transitions), calebassier book only, same cycle 4.
+- 2026-11-24T22:12:18Z owner, D-GIFT: « on laisse comme ça » (asked whether to carry the page 12 gift on the visible side) = keep the current ending; the gift hidden at the reading frame is an accepted owner reservation, not a finding.
+- 2026-11-24T23:12:50Z owner: « ok pour un cycle 5 court » = approval of ONE extra correction cycle 5 limited to review-4 F5 (whole-shoe clearance from roots/solids on every page + whole-shoe check with an ankle-clear/toe-inside negative control), then Codex review 5 focused on F5 and non-regression. Nothing else in scope.

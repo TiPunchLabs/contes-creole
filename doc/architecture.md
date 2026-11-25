@@ -168,7 +168,8 @@ the validated navigation (keys, wheel, buttons, one page per horizontal swipe on
 - **Walk** (`world/puppet.ts`, `plantedWalk`): both figures walk on planted feet. The step phase
   comes from the distance walked, a foot stays where it lands while the body passes over it, each
   leg is solved to reach it, a move is cut into whole steps, and a foot follows what stands on
-  the ground under it (a ray down against the set's solids: it lands on a root or steps over it). Each figure has her own `Step`
+  the ground under its whole sole (`world/terrain.ts`: a height field of the set's solids; it
+  lands on a root or steps over it). Each figure has her own `Step`
   (an older woman's, a child's). Mila's shoes are an option of the shared figure, off by default.
 - **Cameras** (`staging.ts`): per page, a landscape and a portrait shot, each with an entry and a
   reading lens; the text is cleared by a view offset (`textShift`: the middle of what the text
