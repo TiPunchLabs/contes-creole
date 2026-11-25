@@ -19,7 +19,7 @@ import LAYOUT from "./layout.json";
 import { createMila, MILA_DIMS } from "./mila";
 import { createNinon, NINON_DIMS } from "./ninon";
 import { createWash, softRamp } from "./paint";
-import { createTerrain } from "./terrain";
+import { createTerrain, highestUnderSole } from "./terrain";
 import { createFrame, PAGES, resetFrame, type Anchor, type Carry, type Places } from "./pages";
 import { applyPose, armDepth, type Dims, type Figure, type Grip, type Pose } from "./puppet";
 
@@ -141,7 +141,8 @@ export interface Probe {
      * against the set's solids, measured on every vertex of the shoe's own meshes (heel, toe, sides,
      * sole and upper): `over` is the highest root, step or other solid under any of them, `sunk`
      * how far the deepest of them is below the solid's surface over it (0 or less: the whole shoe is
-     * clear of every solid). `ankle` is what a single reading under the ankle alone gives.
+     * clear of every solid). `ankle` is what a single reading under the ankle alone gives. `near` is the highest
+     * solid under the sole or within 6 cm of it: what a foot in the air is being lifted over.
      */
     feet: Record<
       string,
@@ -155,6 +156,7 @@ export interface Probe {
         over: number;
         sunk: number;
         ankle: number;
+        near: number;
       }[]
     >;
     /** The fruit, faces, hands and lantern as the lens frames them this instant. */
@@ -629,13 +631,14 @@ export default defineWorld({
             over: number;
             sunk: number;
             ankle: number;
+            near: number;
           }[]
         > = {};
         const figures = [
-          ["mila", mila as Figure, frameState.mila],
-          ["ninon", ninon, frameState.ninon],
+          ["mila", mila as Figure, frameState.mila, MILA_DIMS],
+          ["ninon", ninon, frameState.ninon, NINON_DIMS],
         ] as const;
-        for (const [name, figure, pose] of figures) {
+        for (const [name, figure, pose, dims] of figures) {
           if (!pose.visible) continue;
           out[name] = figure.legs.map((leg) => {
             footBox.makeEmpty();
@@ -666,6 +669,19 @@ export default defineWorld({
               over,
               sunk: over > 0 ? sunk : 0,
               ankle: terrain.heightAt(scratch.x, scratch.z, pose.y, STEP_REACH),
+              near: dims.sole
+                ? highestUnderSole(
+                    terrain,
+                    dims.sole,
+                    scratch.x,
+                    scratch.z,
+                    Math.sin(pose.yaw),
+                    Math.cos(pose.yaw),
+                    pose.y,
+                    0.06,
+                    STEP_REACH,
+                  )
+                : 0,
             };
           });
         }

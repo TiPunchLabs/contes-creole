@@ -101,9 +101,11 @@ try {
                 // world on the shoe's own meshes, heel, toe and sides included.
                 const sunk = (foot.over ?? 0) > 0.03 ? foot.sunk : -1;
                 if (sunk > f.sunk[0]) f.sunk = [sunk, t, foot.over, foot.ankle ?? 0, foot.low];
-                // A foot lifted over a root or onto a step is under the skirt, as it should be: the
-                // dress check is for open ground, where nothing calls for a foot that high.
-                if (!((foot.over ?? 0) > 0.03) && foot.top > f.top[0]) f.top = [foot.top, t];
+                // A foot lifted over a root or onto a step, or still beside the one it is stepping
+                // over (`near`), is under the skirt, as it should be: the dress check is for open
+                // ground, where nothing calls for a foot that high.
+                if (!((foot.near ?? foot.over ?? 0) > 0.03) && foot.top > f.top[0])
+                  f.top = [foot.top, t];
                 const was = before?.[who]?.[k];
                 const flat = (g) => g.low < 0.005 && Math.abs(g.pitch) < 0.03;
                 if (was && flat(foot) && flat(was) && Math.abs(foot.yaw - was.yaw) < 0.002) {
