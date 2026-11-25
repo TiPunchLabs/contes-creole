@@ -93,6 +93,7 @@ describe("ti-kannot", () => {
 
   it("keeps its archived language notes quoted verbatim from the tale", async () => {
     const notes = parseNotes(tiKannotNotes, "docs/explanations/ti-kannot/langue/fr.md");
+    expect(notes.draft).toBe(false);
     expect(notes.notes.length).toBeGreaterThan(0);
     expectQuoted(await registry.loadStories("ti-kannot"), notes);
   });
@@ -146,10 +147,11 @@ describe("mila-calebassier", () => {
     expect(stories.en).toBeUndefined();
   });
 
-  it("marks its Kréyòl as an unvalidated draft, in the file and on every page", async () => {
+  it("carries no draft marker, in the file or on any page", async () => {
     const stories = await registry.loadStories("mila-calebassier");
-    expect(calebassierGcf).toMatch(/^draft: true$/m);
+    expect(calebassierGcf).not.toMatch(/^draft:/m);
+    expect(calebassierGcf).not.toMatch(/bwouyon|à valider/i);
     expect(stories.gcf.pages).toHaveLength(12);
-    for (const page of stories.gcf.pages) expect(page.label).toBe("Bwouyon — à valider");
+    for (const page of stories.gcf.pages) expect(page.label).toBe(stories.gcf.title);
   });
 });

@@ -64,7 +64,6 @@ page and still checked against the tale by `books.test.ts`. The format:
 ---
 lang: fr
 title: Lang kréyòl
-draft: true
 ---
 
 ## « té ka » : ce qui durait {#te-ka}
@@ -81,7 +80,8 @@ Optional detail, collapsed.
 
 An example is two `>` lines: the Kréyòl sentence ending with the `{page-id}` it comes from, then its
 translation. `pnpm test` fails if the sentence is not found verbatim on that page of `story/gcf.md`.
-Remove `draft: true` only after a Creole speaker has reviewed the notes.
+Notes carry no `draft` marker (owner decision 2026-11-25: Kréyòl is published without one, the owner
+corrects it over time). The front matter still accepts `draft: true`, which shows a badge in the panel.
 
 ## Troubleshooting
 

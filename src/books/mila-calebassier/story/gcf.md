@@ -1,12 +1,11 @@
 ---
 lang: gcf
 title: Mila é pyé kalbas majik-la
-draft: true
 ---
 
 ## Chimen a aswè-la {#p01}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 Yé krik ! — Yé krak !
 
@@ -18,7 +17,7 @@ Douvan jaden-la, vyé madanm-la té ka ézité. Kaz a-y té toupré, mé sé wò
 
 ## Sé ti lalin-la {#p02}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 Anba fon a jaden-la, on biten té ka kléré anmitan sé fèy-la.
 
@@ -30,7 +29,7 @@ Asi sé branch a-y la, té ni kalbas won ka kléré, konsi lalin-la té konfyé 
 
 ## Pwomès-la {#p03}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 On branch koubé jous an men a-y.
 
@@ -44,7 +43,7 @@ On branch koubé jous an men a-y.
 
 ## On limyè pou dé moun {#p04}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 Mila woutrouvé Man Ninon bò pòtay-la.
 
@@ -58,7 +57,7 @@ Yo vansé dousman, an pa a ti pa a vyé madanm-la.
 
 ## Anni pou lannuit-lasa {#p05}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 Asi chimen a rètou-la, Mila gadé kalbas-la.
 
@@ -72,7 +71,7 @@ Asi po lis a-y, ti zétensèl té ka dansé.
 
 ## Lalin-la adan chanm-la {#p06}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 Mila pozé kalbas-la bò kabann a-y.
 
@@ -86,7 +85,7 @@ Dèwò, on prèmyé zétwal étenn.
 
 ## Lannuit san chimen {#p07}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 On dòt zétwal étenn. Épi twa. Épi dis.
 
@@ -100,7 +99,7 @@ Adan chanm a-y, Mila vwè ti lalin a-y ka tranblé.
 
 ## Sa Mila té gadé {#p08}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 Mila wouvè sé volé-la.
 
@@ -116,7 +115,7 @@ I séré kalbas-la tou dous.
 
 ## On pa apré lòt {#p09}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 Jaden-la i té konnèt la té ka sanm gran toubònman.
 
@@ -132,7 +131,7 @@ Jis asé pou pozé on pyé.
 
 ## Limyè-la yo rann {#p10}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 On klèté parèt bò pòtay-la.
 
@@ -148,7 +147,7 @@ Sé té Man Ninon, évè vyé lanp a-y.
 
 ## Avan kòk-la chanté {#p11}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 Dèyè lantouraj-la, on kòk bougé asi jouk a-y.
 
@@ -164,7 +163,7 @@ Sé alòs tousèl kòk-la chanté.
 
 ## Sa ki ka rété an men {#p12}
 
-<!-- label: Bwouyon — à valider -->
+<!-- label: Mila é pyé kalbas majik-la -->
 
 O douvanjou, sé kalbas-la té woutrouvé koulè vèt a yo.
 

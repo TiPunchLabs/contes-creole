@@ -44,7 +44,7 @@ src/
     mila/                      # immersive book (own reading UI, shell's language switch): book.ts, cover.ts,
                                # assets/cover.webp, story/{gcf,fr}.md, world/ (port of the owner's prototype)
     mila-calebassier/          # 2.5D watercolour garden: book.ts, cover.ts, staging.ts (camera presets), theme.css,
-                               # story/{gcf,fr}.md (gcf = unvalidated draft), assets/{glb,tex}, world/ (layout.json,
+                               # story/{gcf,fr}.md (gcf = owner-corrected over time), assets/{glb,tex}, world/ (layout.json,
                                # pages.ts timelines, garden.ts, paint.ts, finish.ts)
     zanba/, konpe-lapen/       # manifest only (book.ts), ready: false — kept, not shown in the tree
 contes-des-classes/index.html  # that page's HTML (second Vite entry, served at /contes-des-classes/)
@@ -65,8 +65,8 @@ doc/                           # architecture.md, development.md
 - Language notes live in `src/books/<id>/langue/fr.md` (optional; none in a tale since TKP-EDU, Ti Kannot's
   are kept in `docs/explanations/ti-kannot/langue/fr.md`), format in
   `docs/superpowers/specs/2026-10-04-kreyol-language-notes-design.md` §2. Every Kréyòl example is
-  quoted verbatim from `story/gcf.md` (enforced by `books.test.ts`); `draft: true` until a Creole
-  speaker validates it. The panel never changes the tale's mechanics.
+  quoted verbatim from `story/gcf.md` (enforced by `books.test.ts`); no `draft: true` (owner decision
+  2026-11-25: Kréyòl is published without a draft marker, the owner corrects it over time). The panel never changes the tale's mechanics.
 - Any Kréyòl you write or edit (tale, notes, UI strings, `index.html`) follows
   `docs/kreyol/AGENT_RULES.md` (gcf, GEREC conventions, source hierarchy, no mixing with other
   creoles; uncertain cases go to `docs/kreyol/variants.md`, never into the text).

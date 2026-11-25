@@ -1,7 +1,7 @@
 # 🌴 Kréyòl — référentiel linguistique du projet
 
 > **Langue** : créole guadeloupéen, code `gcf` (Glottolog `guad1242`). Locale : Guadeloupe.
-> **Statut** : brouillon — les points marqués **À VALIDER** attendent un locuteur / réviseur créolophone.
+> **Statut** : les textes sont publiés sans marqueur de brouillon (décision du propriétaire, 2026-11-25) ; il les corrige au fil de l'eau. Les points marqués **À VALIDER** restent consignés ici, hors du texte visible.
 > **Objectif** : un kréyòl cohérent, documenté, traçable et révisable, sans mélange avec d'autres créoles.
 
 ---
@@ -41,4 +41,4 @@
 1. Une correction proposée est classée (catégorie, source A–E, confiance) dans [correction-report.md](correction-report.md).
 2. Seules les corrections à **confiance haute** sont appliquées ; les autres vont dans [variants.md](variants.md) § 3.
 3. Un changement du texte du conte s'ajoute à `CORRECTIONS` dans `src/books/v13-conversion.test.ts`, et l'exemple correspondant de `langue/fr.md` est mis à jour (le test exige une citation mot pour mot).
-4. Après relecture par un locuteur, on tranche les cas de [variants.md](variants.md) § 3, on met à jour le glossaire, puis on retire `draft: true` de `langue/fr.md`.
+4. Après relecture par un locuteur, on tranche les cas de [variants.md](variants.md) § 3, on met à jour le glossaire, sans marqueur `draft` dans les textes publiés.
